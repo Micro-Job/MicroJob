@@ -14,7 +14,7 @@ namespace Job.DAL.Configurations
                    .OnDelete(DeleteBehavior.Cascade);
 
             builder.Property(p => p.PhoneNumber)
-                .HasMaxLength(20)
+                .HasMaxLength(32)
                 .IsRequired();
         }
     }

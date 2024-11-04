@@ -16,7 +16,7 @@ namespace Job.DAL.Configurations
                    .HasMaxLength(255);
 
             builder.Property(p => p.Adress)
-                   .HasMaxLength(100);
+                   .HasMaxLength(128);
 
             builder.Property(p => p.BirthDay)
                    .IsRequired();
