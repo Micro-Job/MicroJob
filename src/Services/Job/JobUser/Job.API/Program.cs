@@ -1,4 +1,8 @@
 
+using FluentValidation.AspNetCore;
+using Job.Business;
+using Job.Business.Profiles;
+using Job.Business.Services.Person;
 using Job.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -28,7 +32,16 @@ namespace Job.API
                 opt.UseSqlServer(builder.Configuration["ConnectionStrings:Default"]);
             });
 
+            builder.Services.AddFluentValidation(opt =>
+            {
+                opt.RegisterValidatorsFromAssemblyContaining<PersonService>();
+            });
+
+            builder.Services.AddAutoMapper(typeof(PersonMappingProfile).Assembly);
+            builder.Services.AddServices();
+
             var app = builder.Build();
+            app.UseStaticFiles();
 
             // Configure the HTTP request pipeline.
 
@@ -42,6 +55,7 @@ namespace Job.API
                 });
             }
 
+            app.UseHttpsRedirection();
             app.UseAuthorization();
 
             app.MapControllers();
