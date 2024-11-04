@@ -8,11 +8,11 @@ namespace Job.DAL.Configurations
     {
         public void Configure(EntityTypeBuilder<User> builder)
         {
-            builder.Property(u => u.UserFirstName)
+            builder.Property(u => u.FirstName)
                    .HasMaxLength(32)
                    .IsRequired();
 
-            builder.Property(u => u.UserLastName)
+            builder.Property(u => u.LastName)
                    .HasMaxLength(32)
                    .IsRequired();
 
