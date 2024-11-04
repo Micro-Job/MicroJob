@@ -10,7 +10,7 @@ namespace Job.Business.ExternalServices
     public interface IFileService
     {
         Task<List<FileDto>> UploadAllAsync(string path, ICollection<IFormFile> files);
-        Task<FileDto> UploadAsync(string path, IFormFile file, bool isVoiceMessage = false);
+        Task<FileDto> UploadAsync(string path, IFormFile file);
         Task<FileDto> ImageUploadLowQualityAsync(string path, IFormFile file);
         Task VideoUploadLowQualityAsync(string path, IFormFile file);
         string RenameFile(string fileName);
