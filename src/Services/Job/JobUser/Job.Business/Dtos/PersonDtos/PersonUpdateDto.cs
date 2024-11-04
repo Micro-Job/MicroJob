@@ -8,7 +8,6 @@ namespace Job.Business.Dtos.PersonDtos
 {
     public record PersonUpdateDto
     {
-        public string UserId { get; set; }
         public string Id { get; set; }
         public string? FatherName { get; set; }
         public IFormFile? UserPhoto { get; set; }

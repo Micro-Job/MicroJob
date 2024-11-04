@@ -19,39 +19,32 @@ namespace Job.API.Controllers
             _service = service;
         }
 
-        [HttpPost("[action]")]
+        [HttpPost("PersonCreate")]
         public async Task<IActionResult> Post([FromForm] PersonCreateDto dto)
         {
             await _service.CreateAsync(dto);
             return StatusCode(StatusCodes.Status201Created);
         }
 
-        [HttpPut("[action]/{id}")]
+        [HttpPut("PersonUpdate/{id}")]
         public async Task<IActionResult> Put([FromForm] PersonUpdateDto dto)
         { 
             await _service.UpdateAsync(dto);
             return NoContent();
         }
         
-        [HttpGet("[action]")]
+        [HttpGet("PersonGetAll")]
         public async Task<IActionResult> Get()
         {
             var result = await _service.GetAllAsync();
             return Ok(result);
         }
 
-        [HttpGet("[action]/{id}")]
+        [HttpGet("PersonGetById/{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
             var result = await _service.GetByIdAsync(id);
             return Ok(result);
-        }
-
-        [HttpDelete("[action]/{id}")]
-        public async Task<IActionResult> Delete(Guid id)
-        { 
-            await _service.DeleteAsync(id);
-            return NoContent();
         }
     }
 }

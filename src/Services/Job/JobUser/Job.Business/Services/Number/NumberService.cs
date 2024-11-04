@@ -40,5 +40,63 @@ namespace Job.Business.Services.Number
 
             await _context.Numbers.AddAsync(newNumber);
         }
+
+        public async Task<IEnumerable<NumberListDto>> GetAllAsync()
+        {
+            var numbers = await _context.Numbers.ToListAsync();
+
+            var numberList = numbers.Select(n => new NumberListDto
+            {
+                Id = n.Id,
+                PersonId = n.PersonId,
+                PhoneNumber = n.PhoneNumber
+            });
+
+            return numberList;
+        }
+
+        public async Task<NumberDetailItemDto> GetByIdAsync(Guid id)
+        {
+            var number = await _context.Numbers
+                .FirstOrDefaultAsync(n => n.Id == id)
+                ?? throw new NotFoundException<Core.Entities.Number>();
+
+            var numberDetail = new NumberDetailItemDto
+            {
+                Id = number.Id,
+                PersonId = number.PersonId,
+                PhoneNumber = number.PhoneNumber
+            };
+
+            return numberDetail;
+        }
+
+        public async Task UpdateAsync(NumberUpdateDto dto)
+        {
+            var numberId = Guid.Parse(dto.Id);
+            var userId = Guid.Parse(dto.PersonId);
+
+            var person = await _context.Persons
+                .Include(p => p.PhoneNumbers)
+                .FirstOrDefaultAsync(x => x.Id == userId)
+                ?? throw new NotFoundException<Core.Entities.Person>();
+
+            var existingNumber = person.PhoneNumbers.FirstOrDefault(n => n.Id == numberId);
+            if (existingNumber == null)
+            {
+                throw new NotFoundException<Core.Entities.Number>();
+            }
+
+            var isDuplicateNumber = person.PhoneNumbers
+                .Where(n => n.PhoneNumber == dto.PhoneNumber && n.Id != numberId);
+            if (isDuplicateNumber != null)
+            {
+                throw new IsAlreadyExistException<Core.Entities.Number>();
+            }
+
+            existingNumber.PhoneNumber = dto.PhoneNumber;
+
+            await _context.SaveChangesAsync();
+        }
     }
 }
