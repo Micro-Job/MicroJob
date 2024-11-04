@@ -9,6 +9,5 @@ namespace AuthService.Business.Services.UserServices
 {
     public interface IUserService
     {
-        Task<UserInformationDto> GetUserInformationAsync(string userId);
     }
 }

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Job.Business.ExternalServices;
 using Job.Business.Services.Person;
 using Microsoft.Extensions.DependencyInjection;
+using MassTransit;
 
 namespace Job.Business
 {
@@ -14,6 +15,21 @@ namespace Job.Business
         {
             services.AddScoped<IPersonService, PersonService>();
             services.AddScoped<IFileService, FileService>();
+        }
+
+        public static IServiceCollection AddMassTransit(this IServiceCollection services, string cString)
+        {
+            services.AddMassTransit(x =>
+            {
+                x.SetKebabCaseEndpointNameFormatter();
+                x.UsingRabbitMq((con, cfg) =>
+                {
+                    cfg.Host(cString);
+                    cfg.ConfigureEndpoints(con);
+                });
+            });
+            //services.AddMassTransitHostedService();   
+            return services;
         }
     }
 }

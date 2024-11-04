@@ -4,6 +4,7 @@ using Job.Business;
 using Job.Business.Profiles;
 using Job.Business.Services.Person;
 using Job.DAL.Contexts;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
@@ -36,6 +37,8 @@ namespace Job.API
             {
                 opt.RegisterValidatorsFromAssemblyContaining<PersonService>();
             });
+
+            builder.Services.AddMassTransit(builder.Configuration["RabbitMQ"]!);
 
             builder.Services.AddAutoMapper(typeof(PersonMappingProfile).Assembly);
             builder.Services.AddServices();
