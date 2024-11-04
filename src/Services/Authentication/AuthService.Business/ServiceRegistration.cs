@@ -2,6 +2,7 @@
 using AuthService.Business.HelperServices.TokenHandler;
 using AuthService.Business.Publishers;
 using AuthService.Business.Services.Auth;
+using AuthService.Business.Services.CurrentUser;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -14,6 +15,7 @@ namespace AuthService.Business
             services.AddScoped<ITokenHandler, TokenHandler>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IAuthService, Services.Auth.AuthService>();
+            services.AddScoped<ICurrentUser, CurrentUser>();
             services.AddScoped<EmailPublisher>();
         }
         public static IServiceCollection AddMassTransit(this IServiceCollection services, string cString)

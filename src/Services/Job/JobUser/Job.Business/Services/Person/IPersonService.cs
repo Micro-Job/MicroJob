@@ -12,6 +12,5 @@ namespace Job.Business.Services.Person
         Task UpdateAsync(PersonUpdateDto dto);
         Task<IEnumerable<PersonListDto>> GetAllAsync();
         Task<PersonDetailItemDto> GetByIdAsync(Guid id);
-        Task DeleteAsync(Guid id);
     }
 }

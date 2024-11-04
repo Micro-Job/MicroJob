@@ -33,8 +33,6 @@ namespace Job.Business.Services.Person
         public async Task CreateAsync(PersonCreateDto dto)
         {
             var userId = Guid.Parse(dto.UserId);
-            if (userId == null) throw new NotFoundUserException();
-
             try
             {
                 var person = _map.Map<Core.Entities.Person>(dto);
@@ -53,22 +51,6 @@ namespace Job.Business.Services.Person
             {
                 throw new CreateException<Core.Entities.Person>(ex.Message);
             }
-        }
-
-        public async Task DeleteAsync(Guid id)
-        {
-            var person = await _context.Persons.FindAsync(id);
-            if (person == null)
-            {
-                throw new NotFoundException<Core.Entities.Person>();
-            }
-
-            _context.Persons.Remove(person);
-            if (person.UserPhoto != null)
-            {
-                _fileService.DeleteFile(person.UserPhoto);
-            }
-            await _context.SaveChangesAsync();
         }
 
         public async Task<IEnumerable<PersonListDto>> GetAllAsync()
