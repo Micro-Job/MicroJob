@@ -4,16 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Job.Core.Entities
+namespace AuthService.Business.Dtos
 {
-    public class User : BaseEntity
+    public class UserInformationDto
     {
+        public Guid UserId { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public string Email { get; set; }
         public string MainPhoneNumber { get; set; }
-        public DateTime UserRegistrationDate { get; set; }
-        public string UserPassword { get; set; }
-        public DateTime? UserTokenExpireDate { get; set; }
+        public string Email { get; set; }
     }
 }

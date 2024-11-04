@@ -1,7 +1,7 @@
 ﻿namespace AuthService.Core.Entities.Base
 {
-    public class BaseEntity<T>
+    public class BaseEntity
     {
-        public T Id { get; set; }
+        public Guid Id { get; set; }
     }
 }

@@ -2,7 +2,7 @@
 
 namespace AuthService.Core.Entities
 {
-    public class LoginLog : BaseEntity<Guid>
+    public class LoginLog : BaseEntity
     {
         public DateTime Date { get; set; }
 

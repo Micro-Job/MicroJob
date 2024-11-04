@@ -10,9 +10,9 @@ namespace AuthService.DAL.Configurations
         {
             modelBuilder.HasKey(e => e.Id);
 
-            modelBuilder.Property(e => e.UserName)
-                .IsRequired()
-                .HasMaxLength(50);
+            //modelBuilder.Property(e => e.UserName)
+            //    .IsRequired()
+            //    .HasMaxLength(50);
 
             modelBuilder.Property(e => e.FirstName)
                 .IsRequired()
