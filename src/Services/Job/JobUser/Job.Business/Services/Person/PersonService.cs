@@ -79,7 +79,9 @@ namespace Job.Business.Services.Person
 
         public async Task UpdateAsync(PersonUpdateDto dto)
         {
-            var person = await _context.Persons.FindAsync(dto.Id);
+            var userId = Guid.Parse(dto.UserId);
+            var personId = Guid.Parse(dto.Id);
+            var person = await _context.Persons.FindAsync(personId);
             if (person == null)
             {
                 throw new NotFoundException<Core.Entities.Person>();
