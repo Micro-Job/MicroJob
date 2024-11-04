@@ -45,7 +45,7 @@ namespace AuthService.DAL.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("LoginLogs", (string)null);
+                    b.ToTable("LoginLogs");
                 });
 
             modelBuilder.Entity("AuthService.Core.Entities.PasswordToken", b =>
@@ -69,7 +69,7 @@ namespace AuthService.DAL.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("PasswordTokens", (string)null);
+                    b.ToTable("PasswordTokens");
                 });
 
             modelBuilder.Entity("AuthService.Core.Entities.User", b =>
@@ -95,6 +95,10 @@ namespace AuthService.DAL.Migrations
                     b.Property<DateTime?>("LockDownDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("MainPhoneNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -110,11 +114,6 @@ namespace AuthService.DAL.Migrations
                     b.Property<DateTime>("RegistrationDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("UserName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
                     b.Property<Guid?>("UserStatusId")
                         .HasColumnType("uniqueidentifier");
 
@@ -122,7 +121,7 @@ namespace AuthService.DAL.Migrations
 
                     b.HasIndex("UserStatusId");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("AuthService.Core.Entities.UserStatus", b =>
@@ -138,7 +137,7 @@ namespace AuthService.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("UserStatuses", (string)null);
+                    b.ToTable("UserStatuses");
                 });
 
             modelBuilder.Entity("AuthService.Core.Entities.LoginLog", b =>

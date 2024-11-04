@@ -22,7 +22,7 @@ builder.Services.AddMassTransit(builder.Configuration["RabbitMQ"]!);
 
 builder.Services.AddDbContext<AppDbContext>(opt =>
 {
-    opt.UseSqlServer(builder.Configuration.GetConnectionString("MSSql"));
+    opt.UseSqlServer(builder.Configuration.GetConnectionString("MSSQL"));
 });
 
 builder.Services.AddCorsPolicy();

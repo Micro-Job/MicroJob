@@ -2,7 +2,7 @@
 
 namespace AuthService.Core.Entities
 {
-    public class PasswordToken : BaseEntity<Guid>
+    public class PasswordToken : BaseEntity
     {
         public string Token { get; set; }
 

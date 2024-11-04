@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AuthService.DAL.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240828132758_Initial")]
+    [Migration("20241104075039_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -98,6 +98,10 @@ namespace AuthService.DAL.Migrations
                     b.Property<DateTime?>("LockDownDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("MainPhoneNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -112,11 +116,6 @@ namespace AuthService.DAL.Migrations
 
                     b.Property<DateTime>("RegistrationDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("UserName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
 
                     b.Property<Guid?>("UserStatusId")
                         .HasColumnType("uniqueidentifier");
