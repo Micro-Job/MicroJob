@@ -29,7 +29,7 @@ namespace AuthService.Business.HelperServices.Email
                 .Where(pt => pt.Token == token && pt.ExpireTime > DateTime.Now)
                 .Select(pt => new
                 {
-                    pt.User.UserName,
+                    //pt.User.UserName,
                     pt.User.Email
                 })
                 .SingleOrDefaultAsync();

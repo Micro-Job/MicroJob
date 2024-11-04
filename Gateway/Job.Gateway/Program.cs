@@ -21,7 +21,6 @@ namespace Job.Gateway
 
             app.UseAuthorization();
 
-
             app.MapControllers();
             await app.UseOcelot();
             app.Run();

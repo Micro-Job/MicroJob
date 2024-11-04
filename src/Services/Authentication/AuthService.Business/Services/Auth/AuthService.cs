@@ -15,8 +15,8 @@ namespace AuthService.Business.Services.Auth
 {
     public class AuthService(AppDbContext _context,
                              ITokenHandler _tokenHandler,
-                             IHttpContextAccessor _httpContext,
-                             IEmailService _emailService,
+                             IHttpContextAccessor _httpContext
+                             /*IEmailService _emailService*/,
                              EmailPublisher _publisher) : IAuthService
 
     {
@@ -26,17 +26,17 @@ namespace AuthService.Business.Services.Auth
 
         public async Task RegisterAsync(RegisterDto dto)
         {
-            var userCheck = await _context.Users.FirstOrDefaultAsync(x => x.Email == dto.Email || x.UserName == dto.UserName);
+            var userCheck = await _context.Users.FirstOrDefaultAsync(x => x.Email == dto.Email);
 
             // email veya istifadeci adı tekrarlanmasını yoxla
             if (userCheck != null) throw new UserExistException();
 
             var user = new User
             {
-                UserName = dto.UserName,
                 Email = dto.Email,
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
+                MainPhoneNumber = dto.MainPhoneNumber,
                 RegistrationDate = DateTime.Now,
                 Password = _tokenHandler.GeneratePasswordHash(dto.Password),
             };
@@ -57,10 +57,8 @@ namespace AuthService.Business.Services.Auth
         {
             // useri email ve ya userName ile tapmaq
             var user = await _context.Users
-                         .Include(u => u.UserStatus)
                          .Include(u => u.LoginLogs)
-                         .FirstOrDefaultAsync(x =>
-                         (x.UserName == dto.UserNameOrEmail || x.Email == dto.UserNameOrEmail));
+                         .FirstOrDefaultAsync(x => x.Email == dto.UserNameOrEmail);
             if (user == null) throw new LoginFailedException();
 
             // hesabin hal hazirda bloklanmadigini yoxla
@@ -96,7 +94,6 @@ namespace AuthService.Business.Services.Auth
                 if (failedAttempts >= 3)
                 {
                     user.LockDownDate = DateTime.Now.AddHours(1);
-                    //user.LockDownDate = DateTime.Now.AddMinutes(2);
                 }
 
                 await _context.SaveChangesAsync();
@@ -187,7 +184,7 @@ namespace AuthService.Business.Services.Auth
             await _context.PasswordTokens.AddAsync(passwordToken);
             await _context.SaveChangesAsync();
 
-            Console.WriteLine($" Email : {email} /n UserName : {user.UserName} /n Token : {token}");
+            //Console.WriteLine($" Email : {email} /n UserName : {user.UserName} /n Token : {token}");
             //await _emailService.SendChangePassword(email, user.UserName, token);
         }
 

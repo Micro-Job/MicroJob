@@ -2,7 +2,7 @@
 
 namespace AuthService.Core.Entities
 {
-    public class UserStatus : BaseEntity<Guid>
+    public class UserStatus : BaseEntity
     {
         public string StatusName { get; set; } = null!;
 
