@@ -26,8 +26,11 @@ namespace Job.Business.Services.Number
                 .FirstOrDefaultAsync(x => x.Id == userId)
                 ?? throw new NotFoundException<Core.Entities.Person>();
 
-            var existingNumber = person.PhoneNumbers.FirstOrDefault(n => n.PhoneNumber == dto.PhoneNumber);
-            if (existingNumber != null) throw new IsAlreadyExistException<Core.Entities.Number>();
+            var existingNumbers = person.PhoneNumbers.Where(n => n.PhoneNumber == dto.PhoneNumber).ToList();
+            if (existingNumbers != null)
+            {
+                throw new IsAlreadyExistException<Core.Entities.Number>();
+            }
 
             var newNumber = new Core.Entities.Number
             {
@@ -36,7 +39,6 @@ namespace Job.Business.Services.Number
             };
 
             await _context.Numbers.AddAsync(newNumber);
-            await _context.SaveChangesAsync();
         }
     }
 }
