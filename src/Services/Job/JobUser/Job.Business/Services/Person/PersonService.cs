@@ -46,7 +46,7 @@ namespace Job.Business.Services.Person
             }
             catch (Exception ex)
             {
-                throw new CreateException<Core.Entities.Person>();
+                throw new CreateException<Core.Entities.Person>(ex.Message);
             }
         }
 

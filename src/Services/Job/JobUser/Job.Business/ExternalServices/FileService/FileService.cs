@@ -56,7 +56,7 @@ namespace Job.Business.ExternalServices
             }
             return filesList;
         }
-        public async Task<FileDto> UploadAsync(string path, IFormFile file, bool isVoiceMessage = false)
+        public async Task<FileDto> UploadAsync(string path, IFormFile file)
         {
             if (string.IsNullOrEmpty(path))
                 throw new ArgumentException("The provided path cannot be null or empty.", nameof(path));
@@ -71,20 +71,7 @@ namespace Job.Business.ExternalServices
                 Directory.CreateDirectory(path);
 
             FileDto dto = new();
-
-            if (isVoiceMessage)
-            {
-                dto = new FileDto { FileName = RenameFile(Path.GetRandomFileName() + ".wav"), FilePath = oldPath };
-            }
-            else if (file.ContentType.Contains("audio") && !isVoiceMessage)
-            {
-                var extension = Path.GetExtension(file.FileName);
-                dto = new FileDto { FileName = RenameFile(Path.GetRandomFileName() + extension), FilePath = oldPath };
-            }
-            else
-            {
-                dto = new FileDto { FileName = RenameFile(file.FileName), FilePath = oldPath };
-            }
+            dto = new FileDto { FileName = RenameFile(file.FileName), FilePath = oldPath };
 
             await CopyAsync(Path.Combine(path, dto.FileName), file);
 
