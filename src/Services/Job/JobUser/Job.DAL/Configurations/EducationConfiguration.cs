@@ -14,11 +14,11 @@ namespace Job.DAL.Configurations
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.Property(x => x.InstitutionName)
-                .HasMaxLength(100)
+                .HasMaxLength(128)
                 .IsRequired();
 
             builder.Property(x => x.Profession)
-                .HasMaxLength(100)
+                .HasMaxLength(128)
                 .IsRequired();
 
             builder.Property(x => x.StartDate)

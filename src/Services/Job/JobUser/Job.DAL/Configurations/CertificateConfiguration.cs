@@ -9,11 +9,11 @@ namespace Job.DAL.Configurations
         public void Configure(EntityTypeBuilder<Certificate> builder)
         {
             builder.Property(c => c.CertificateName)
-                   .HasMaxLength(100)
+                   .HasMaxLength(128)
                    .IsRequired();
 
             builder.Property(c => c.GivenOrganization)
-                   .HasMaxLength(100)
+                   .HasMaxLength(128)
                    .IsRequired();
 
             builder.Property(c => c.CertificateFile)
