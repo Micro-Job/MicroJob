@@ -11,6 +11,7 @@ namespace Job.Business.Dtos.PersonDtos
 {
     public record PersonCreateDto
     {
+        public string UserId { get; set; }
         public string FatherName { get; set; }
         public IFormFile? UserPhoto { get; set; }
         public bool IsDriver { get; set; }
@@ -25,6 +26,8 @@ namespace Job.Business.Dtos.PersonDtos
     {
         public PersonCreateDtoValidator()
         {
+            RuleFor(x => x.UserId)
+                .NotEmpty().WithMessage("UserId is required.");
             RuleFor(x => x.FatherName)
                 .NotEmpty().WithMessage("Father name is required.");
 

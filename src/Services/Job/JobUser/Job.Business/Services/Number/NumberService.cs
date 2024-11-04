@@ -4,6 +4,7 @@ using Job.Business.Dtos.NumberDtos;
 using Job.Business.Exceptions.Common;
 using Job.Core.Entities;
 using Job.DAL.Contexts;
+using Microsoft.EntityFrameworkCore;
 
 namespace Job.Business.Services.Number
 {
@@ -18,22 +19,19 @@ namespace Job.Business.Services.Number
 
         public async Task CreateAsync(NumberCreateDto dto)
         {
-            var person = await _context.Persons.FindAsync(dto.PersonId);
-            if (person == null)
-            {
-                throw new NotFoundException<Core.Entities.Person>();
-            }
+            var userId = Guid.Parse(dto.PersonId);
 
-            var isExistNumber = _context.Numbers.Any(n => n.PhoneNumber == dto.PhoneNumber);
+            var person = await _context.Persons
+                .Include(p => p.PhoneNumbers)
+                .FirstOrDefaultAsync(x => x.Id == userId)
+                ?? throw new NotFoundException<Core.Entities.Person>();
 
-            if (isExistNumber)
-            {
-                throw new IsAlreadyExistException<Core.Entities.Number>();
-            }
+            var existingNumber = person.PhoneNumbers.FirstOrDefault(n => n.PhoneNumber == dto.PhoneNumber);
+            if (existingNumber != null) throw new IsAlreadyExistException<Core.Entities.Number>();
 
             var newNumber = new Core.Entities.Number
             {
-                PersonId = dto.PersonId,
+                PersonId = userId,
                 PhoneNumber = dto.PhoneNumber
             };
 

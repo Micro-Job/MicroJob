@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Job.Business.Dtos.PersonDtos;
 using Job.Business.Exceptions.Common;
+using Job.Business.Exceptions.UserExceptions;
 using Job.Business.ExternalServices;
 using Job.Business.Statics;
 using Job.Core.Entities;
@@ -31,9 +32,13 @@ namespace Job.Business.Services.Person
 
         public async Task CreateAsync(PersonCreateDto dto)
         {
+            var userId = Guid.Parse(dto.UserId);
+            if (userId == null) throw new NotFoundUserException();
+
             try
             {
                 var person = _map.Map<Core.Entities.Person>(dto);
+                person.UserId = userId;
 
                 if (dto.UserPhoto != null)
                 {
@@ -59,7 +64,7 @@ namespace Job.Business.Services.Person
             }
 
             _context.Persons.Remove(person);
-            if (person.UserPhoto!= null)
+            if (person.UserPhoto != null)
             {
                 _fileService.DeleteFile(person.UserPhoto);
             }

@@ -5,7 +5,7 @@ namespace Job.Business.Dtos.NumberDtos
 {
     public record NumberCreateDto
     {
-        public Guid PersonId { get; set; }
+        public string PersonId { get; set; }
         public string PhoneNumber { get; set; }
     }
 
