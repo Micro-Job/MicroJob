@@ -11,7 +11,7 @@ namespace Job.Core.Entities
         public ExtraInformation ExtraInformation { get; set; }
         public Guid ExtraInformationId { get; set; }
         public string CertificateName { get; set; }
-        public string Certificates { get; set; }
+        public string GivenOrganization { get; set; }
         public string CertificateFile { get; set; }
     }
 }
