@@ -31,7 +31,6 @@ namespace Job.Business.Services.Education
             };
 
             await _context.Educations.AddAsync(education);
-            await _context.SaveChangesAsync();
         }
     }
 }
