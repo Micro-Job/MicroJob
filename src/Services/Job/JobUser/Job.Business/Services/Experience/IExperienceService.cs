@@ -8,7 +8,7 @@ namespace Job.Business.Services.Experience
 {
     public interface IExperienceService
     {
-        Task CreateAsync(ExperienceCreateDto dto);
-        Task UpdateAsync(string id,ExperienceUpdateDto dto);
+        Task CreateExperienceAsync(ExperienceCreateDto dto);
+        Task UpdateExperienceAsync(string id,ExperienceUpdateDto dto);
     }
 }

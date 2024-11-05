@@ -19,30 +19,30 @@ namespace Job.API.Controllers
             _service = service;
         }
 
-        [HttpPost("ResumeCreate")]
-        public async Task<IActionResult> Post([FromForm] ResumeCreateDto resumeCreateDto)
+        [HttpPost("[action]")]
+        public async Task<IActionResult> CreateResume([FromForm] ResumeCreateDto resumeCreateDto)
         {
-            await _service.CreateAsync(resumeCreateDto);
+            await _service.CreateResumeAsync(resumeCreateDto);
             return Ok();
         }
 
-        [HttpPost("ResumeUpdate")]
-        public async Task<IActionResult> Put([FromForm] ResumeUpdateDto resumeUpdateDto)
+        [HttpPost("[action]")]
+        public async Task<IActionResult> UpdateResume([FromForm] ResumeUpdateDto resumeUpdateDto)
         {
-            await _service.UpdateAsync(resumeUpdateDto);
+            await _service.UpdateResumeAsync(resumeUpdateDto);
             return Ok();
         }
 
-        [HttpGet("ResumeGetAll")]
-        public async Task<IActionResult> GetAll()
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetAllResume()
         {
-            return Ok(await _service.GetAllAsync());
+            return Ok(await _service.GetAllResumeAsync());
         }
 
-        [HttpGet("ResumeGetById/{id}")]
-        public async Task<IActionResult> GetById(string id)
+        [HttpGet("[action]/{id}")]
+        public async Task<IActionResult> GetByIdResume(string id)
         {
-            return Ok(await _service.GetByIdAsync(id));
+            return Ok(await _service.GetByIdResumeAsync(id));
         }
     }
 }

@@ -19,17 +19,17 @@ namespace Job.API.Controllers
             _service = service;
         }
 
-        [HttpPost("CreateNumber")]
-        public async Task<IActionResult> Post([FromForm] NumberCreateDto numberCreateDto)
+        [HttpPost("[action]")]
+        public async Task<IActionResult> CreateNumber([FromForm] NumberCreateDto numberCreateDto)
         {
-            await _service.CreateAsync(numberCreateDto);
+            await _service.CreateNumberAsync(numberCreateDto);
             return Ok();
         }
 
-        [HttpPut("UpdateNumber")]
-        public async Task<IActionResult> Put(string id, [FromForm] NumberUpdateDto numberUpdateDto)
+        [HttpPut("[action]/{id}")]
+        public async Task<IActionResult> UpdateNumber(string id, [FromForm] NumberUpdateDto numberUpdateDto)
         {
-            await _service.UpdateAsync(id, numberUpdateDto);
+            await _service.UpdateNumberAsync(id, numberUpdateDto);
             return Ok();
         }
     }

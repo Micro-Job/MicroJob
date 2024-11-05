@@ -34,7 +34,7 @@ namespace Job.Business.Services.Education
             await _context.Educations.AddAsync(education);
         }
 
-        public async Task UpdateAsync(string id, EducationUpdateDto dto)
+        public async Task UpdateEducationAsync(string id, EducationUpdateDto dto)
         {
             var educationId = Guid.Parse(id);
             var education = await _context.Educations.FindAsync(educationId);

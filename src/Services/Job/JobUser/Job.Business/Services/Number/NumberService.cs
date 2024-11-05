@@ -18,7 +18,7 @@ namespace Job.Business.Services.Number
             _context = context;
         }
 
-        public async Task CreateAsync(NumberCreateDto numberCreateDto)
+        public async Task CreateNumberAsync(NumberCreateDto numberCreateDto)
         {
             var resumeId = Guid.Parse(numberCreateDto.ResumeId);
             var resume = await _context.Resumes.FindAsync(resumeId);
@@ -32,7 +32,7 @@ namespace Job.Business.Services.Number
             await _context.Numbers.AddAsync(number);
         }
 
-        public async Task UpdateAsync(string id, NumberUpdateDto numberUpdateDto)
+        public async Task UpdateNumberAsync(string id, NumberUpdateDto numberUpdateDto)
         {
             var numberId = Guid.Parse(id);
             var number = await _context.Numbers.FindAsync(numberId);
