@@ -54,7 +54,9 @@ namespace Job.Business.Services.Resume
                 Gender = resumeCreateDto.Gender,
                 Adress = resumeCreateDto.Adress,
                 BirthDay = resumeCreateDto.BirthDay,
-                UserPhoto = $"{fileResult.FilePath}/{fileResult.FileName}"
+                UserPhoto = resumeCreateDto.UserPhoto != null 
+                    ? $"{fileResult.FilePath}/{fileResult.FileName}"
+                    : null
             };
 
             await _context.Resumes.AddAsync(resume);
