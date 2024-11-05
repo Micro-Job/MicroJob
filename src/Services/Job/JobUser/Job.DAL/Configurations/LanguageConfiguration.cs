@@ -8,9 +8,9 @@ namespace Job.DAL.Configurations
     {
         public void Configure(EntityTypeBuilder<Language> builder)
         {
-            builder.HasOne(x => x.ExtraInformation)
+            builder.HasOne(x => x.Resume)
                 .WithMany(x => x.Languages)
-                .HasForeignKey(x => x.ExtraInformationId)
+                .HasForeignKey(x => x.ResumeId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

@@ -8,7 +8,7 @@ namespace Job.Business.Services.Education
 {
     public interface IEducationService
     {
-        Task CreateAsync(EducationCreateDto dto);
+        Task CreateEducationAsync(EducationCreateDto dto);
         Task UpdateAsync(string id, EducationUpdateDto dto);
     }
 }

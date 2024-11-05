@@ -20,9 +20,9 @@ namespace Job.DAL.Configurations
                    .HasMaxLength(255)
                    .IsRequired();
 
-            builder.HasOne(c => c.ExtraInformation)
+            builder.HasOne(c => c.Resume)
                    .WithMany(e => e.Certificates)
-                   .HasForeignKey(c => c.ExtraInformationId)
+                   .HasForeignKey(c => c.ResumeId)
                    .OnDelete(DeleteBehavior.Cascade);
         }
     }

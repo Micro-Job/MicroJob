@@ -19,10 +19,10 @@ namespace Job.API.Controllers
             _service = service;
         }
 
-        [HttpPost("EducationCreate")]
-        public async Task<IActionResult> Post([FromForm] EducationCreateDto dto)
+        [HttpPost("[action]")]
+        public async Task<IActionResult> CreateEducation([FromForm] EducationCreateDto dto)
         {
-            await _service.CreateAsync(dto);
+            await _service.CreateEducationAsync(dto);
             return Ok();
         }
 

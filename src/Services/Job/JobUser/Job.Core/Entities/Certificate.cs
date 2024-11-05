@@ -2,8 +2,8 @@
 {
     public class Certificate : BaseEntity
     {
-        public ExtraInformation ExtraInformation { get; set; }
-        public Guid ExtraInformationId { get; set; }
+        public Resume Resume { get; set; }
+        public Guid ResumeId { get; set; }
         public string CertificateName { get; set; }
         public string GivenOrganization { get; set; }
         public string CertificateFile { get; set; }

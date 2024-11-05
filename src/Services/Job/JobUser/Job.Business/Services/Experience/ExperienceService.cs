@@ -12,9 +12,9 @@ namespace Job.Business.Services.Experience
 {
     public class ExperienceService : IExperienceService
     {
-        private readonly AppDbContext _context;
+        private readonly JobDbContext _context;
 
-        public ExperienceService(AppDbContext context)
+        public ExperienceService(JobDbContext context)
         {
             _context = context;
         }
