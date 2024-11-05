@@ -26,9 +26,6 @@ namespace Job.Business.Dtos.ResumeDtos
     {
         public ResumeUpdateDtoValidator()
         {
-            RuleFor(x => x.UserId)
-                .NotEmpty().WithMessage("User ID is required.");
-
             RuleFor(x => x.FatherName)
                 .NotEmpty().WithMessage("Father's name is required.")
                 .MaximumLength(50).WithMessage("Father's name cannot exceed 50 characters.");
