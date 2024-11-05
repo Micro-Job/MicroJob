@@ -25,7 +25,7 @@ namespace AuthService.API.Controllers
         }
 
         [HttpPut("[action]")]
-        public async Task<IActionResult> UpdateUserProfileImageAsync(UserProfileImageUpdateDto dto)
+        public async Task<IActionResult> UpdateUserProfileImageAsync([FromForm] UserProfileImageUpdateDto dto)
         {
             await _userService.UpdateUserProfileImageAsync(dto);
             return Ok();

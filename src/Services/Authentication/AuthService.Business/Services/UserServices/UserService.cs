@@ -3,6 +3,7 @@ using AuthService.Business.Exceptions.UserException;
 using AuthService.Business.Services.CurrentUser;
 using AuthService.Core.Entities;
 using AuthService.DAL.Contexts;
+using Job.Business.Dtos.FileDtos;
 using Job.Business.ExternalServices;
 using MassTransit.Initializers;
 using Microsoft.EntityFrameworkCore;
@@ -90,8 +91,8 @@ namespace AuthService.Business.Services.UserServices
                 Image = x.Image,
                 Id = x.Id
             }) ?? throw new UserNotFoundException();
-
-            var image = await _fileService.UploadAsync("wwwroot/images", dto.Image);
+            if (user.Image is not null) _fileService.DeleteFile(user.Image);
+            FileDto image = await _fileService.UploadAsync("wwwroot/images", dto.Image);
             var imageUrl = image.FilePath;
             user.Image = imageUrl;
 
