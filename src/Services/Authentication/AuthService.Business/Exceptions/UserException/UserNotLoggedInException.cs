@@ -1,12 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace AuthService.Business.Exceptions.UserException
+﻿namespace AuthService.Business.Exceptions.UserException
 {
-    internal class UserNotLoggedInException
+    public class UserNotLoggedInException : Exception
     {
+        public UserNotLoggedInException()
+            : base("Istifadəçi giriş etməyib!")
+        {
+        }
+
+        public UserNotLoggedInException(string message)
+            : base(message)
+        {
+        }
+
+        public UserNotLoggedInException(string message, Exception innerException)
+            : base(message, innerException)
+        {
+        }
     }
 }
