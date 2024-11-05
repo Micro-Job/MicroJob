@@ -1,15 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Reflection;
-using Job.Core.Entities;
+﻿using Job.Core.Entities;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Job.DAL.Contexts
 {
-    public class AppDbContext : DbContext
+    internal class JobDbContext : DbContext
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
+        public JobDbContext(DbContextOptions<JobDbContext> options) : base(options) { }
 
         public DbSet<Certificate> Certificates { get; set; }
         public DbSet<Education> Educations { get; set; }
@@ -28,4 +30,3 @@ namespace Job.DAL.Contexts
         }
     }
 }
-
