@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using MassTransit;
 using Job.Business.Services.Resume;
 using Job.Core.Entities;
+using Job.Business.Services.Education;
 
 namespace Job.Business
 {
@@ -16,6 +17,7 @@ namespace Job.Business
         {
             services.AddScoped<IFileService, FileService>();
             services.AddScoped<IResumeService, ResumeService>();
+            services.AddScoped<IEducationService, EducationService>();
         }
 
         public static IServiceCollection AddMassTransit(this IServiceCollection services, string cString)

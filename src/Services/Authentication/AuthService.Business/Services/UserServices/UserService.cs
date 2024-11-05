@@ -15,6 +15,7 @@ namespace AuthService.Business.Services.UserServices
         private readonly IFileService _fileService;
         private readonly ICurrentUser _currentUser;
         private readonly string _currentUserId;
+        private readonly Guid _currentUserGuid;
 
         public UserService(AppDbContext context, IFileService fileService, ICurrentUser currentUser)
         {
@@ -22,14 +23,13 @@ namespace AuthService.Business.Services.UserServices
             _fileService = fileService;
             _currentUser = currentUser;
             _currentUserId = _currentUser.UserId ?? throw new UserNotLoggedInException();
+            _currentUserGuid = Guid.Parse(_currentUserId);
         }
 
         public async Task<UserInformationDto> GetUserInformationAsync()
         {
-            var userGuid = Guid.Parse(_currentUserId);
-
             var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.Id == userGuid).Select(x=> new UserInformationDto
+                .FirstOrDefaultAsync(u => u.Id == _currentUserGuid).Select(x => new UserInformationDto
                 {
                     Id = x.Id,
                     FirstName = x.FirstName,
@@ -43,16 +43,33 @@ namespace AuthService.Business.Services.UserServices
             return user;
         }
 
-        public async Task<UserUpdateResponseDto> UpdateUserInformation(UserUpdateDto dto)
+        public async Task<UserUpdateResponseDto> UpdateUserInformationAsync(UserUpdateDto dto)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == Guid.Parse(_currentUserId))
-                ?? throw new UserNotFoundException();
+            var userQuery = _context.Users.AsQueryable();
+            var user = await userQuery
+                       .FirstOrDefaultAsync(u => u.Id == _currentUserGuid)
+                        ?? throw new UserNotFoundException();
+            var isEmailTaken = await userQuery
+                .FirstOrDefaultAsync(u => u.Id != user.Id &&
+                                     u.Email == dto.Email.Trim());
+
+            if (isEmailTaken is not null)
+            {
+                throw new UserExistException("Email mövcuddur!");
+            }
+
+            var isPhoneTaken = await userQuery
+                .FirstOrDefaultAsync(u => u.Id != user.Id && u.MainPhoneNumber == dto.MainPhoneNumber.Trim());
+
+            if (isPhoneTaken is not null)
+            {
+                throw new UserExistException("Bu nömrə sistemdə artıq mövcuddur!");
+            }
 
             user.FirstName = dto.FirstName.Trim();
             user.LastName = dto.LastName.Trim();
             user.Email = dto.Email.Trim();
             user.MainPhoneNumber = dto.MainPhoneNumber.Trim();
-
             await _context.SaveChangesAsync();
 
             return new UserUpdateResponseDto
@@ -66,15 +83,15 @@ namespace AuthService.Business.Services.UserServices
             };
         }
 
-        public async Task<UserProfileImageUpdateResponseDto> UpdateUserProfileImage(UserProfileImageUpdateDto dto)
+        public async Task<UserProfileImageUpdateResponseDto> UpdateUserProfileImageAsync(UserProfileImageUpdateDto dto)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == Guid.Parse(_currentUserId)).Select(x=> new User
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == _currentUserGuid).Select(x => new User
             {
                 Image = x.Image,
                 Id = x.Id
             }) ?? throw new UserNotFoundException();
 
-            var image = await _fileService.UploadAsync("/image", dto.Image);
+            var image = await _fileService.UploadAsync("wwwroot/images", dto.Image);
             var imageUrl = image.FilePath;
             user.Image = imageUrl;
 
