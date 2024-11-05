@@ -25,5 +25,12 @@ namespace Job.API.Controllers
             await _service.CreateAsync(dto);
             return Ok();
         }
+
+        [HttpPut("EducationUpdate")]
+        public async Task<IActionResult> Put(string id, [FromForm] EducationUpdateDto dto)
+        {
+            await _service.UpdateAsync(id, dto);
+            return Ok();
+        }
     }
 }
