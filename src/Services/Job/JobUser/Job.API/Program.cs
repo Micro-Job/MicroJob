@@ -1,8 +1,7 @@
 
 using FluentValidation.AspNetCore;
 using Job.Business;
-using Job.Business.Profiles;
-using Job.Business.Services.Person;
+using Job.Business.Services.Number;
 using Job.DAL.Contexts;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
@@ -35,12 +34,11 @@ namespace Job.API
 
             builder.Services.AddFluentValidation(opt =>
             {
-                opt.RegisterValidatorsFromAssemblyContaining<PersonService>();
+                opt.RegisterValidatorsFromAssemblyContaining<NumberService>();
             });
 
             builder.Services.AddMassTransit(builder.Configuration["RabbitMQ"]!);
 
-            builder.Services.AddAutoMapper(typeof(PersonMappingProfile).Assembly);
             builder.Services.AddServices();
 
             var app = builder.Build();
