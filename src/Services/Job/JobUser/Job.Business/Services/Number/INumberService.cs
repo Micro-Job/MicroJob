@@ -9,5 +9,8 @@ namespace Job.Business.Services.Number
     public interface INumberService
     {
         Task CreateAsync(NumberCreateDto dto);
+        Task UpdateAsync(NumberUpdateDto dto);
+        Task<IEnumerable<NumberListDto>> GetAllAsync();
+        Task<NumberDetailItemDto> GetByIdAsync(Guid id);
     }
 }
