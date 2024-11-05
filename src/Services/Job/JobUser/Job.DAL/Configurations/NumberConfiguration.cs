@@ -8,9 +8,9 @@ namespace Job.DAL.Configurations
     {
         public void Configure(EntityTypeBuilder<Number> builder)
         {
-            builder.HasOne(n => n.Person)
+            builder.HasOne(n => n.Resume)
                    .WithMany(p => p.PhoneNumbers)
-                   .HasForeignKey(n => n.PersonId)
+                   .HasForeignKey(n => n.ResumeId)
                    .OnDelete(DeleteBehavior.Cascade);
 
             builder.Property(p => p.PhoneNumber)

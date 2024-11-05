@@ -8,10 +8,9 @@ namespace Job.DAL.Configurations
     {
         public void Configure(EntityTypeBuilder<Resume> builder)
         {
-            builder.HasOne(r => r.Person)
-                   .WithOne()
-                   .HasForeignKey<Resume>(r => r.PersonId)
-                   .IsRequired();
+            builder.Property(r => r.FatherName).HasMaxLength(32).IsRequired();
+            builder.Property(r => r.UserPhoto).HasMaxLength(255);
+            builder.Property(r => r.Adress).HasMaxLength(128);
 
             builder.HasMany(r => r.Educations)
                    .WithOne(e => e.Resume)
@@ -27,6 +26,11 @@ namespace Job.DAL.Configurations
                    .WithOne(ei => ei.Resume)
                    .HasForeignKey(ei => ei.ResumeId)
                    .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasMany(r => r.PhoneNumbers)
+                    .WithOne(ei => ei.Resume)
+                    .HasForeignKey(ei => ei.ResumeId)
+                    .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
