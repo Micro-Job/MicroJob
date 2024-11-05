@@ -77,7 +77,7 @@ if (app.Environment.IsDevelopment())
 app.UseAuthentication();
 app.UseAuthorization();
 
-//app.UseCustomExceptionHandler();
+app.UseCustomExceptionHandler();
 
 app.MapControllers();
 

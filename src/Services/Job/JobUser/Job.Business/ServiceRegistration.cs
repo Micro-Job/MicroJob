@@ -8,6 +8,7 @@ using MassTransit;
 using Job.Business.Services.Resume;
 using Job.Core.Entities;
 using Job.Business.Services.Education;
+using Job.Business.Services.Experience;
 
 namespace Job.Business
 {
@@ -18,6 +19,7 @@ namespace Job.Business
             services.AddScoped<IFileService, FileService>();
             services.AddScoped<IResumeService, ResumeService>();
             services.AddScoped<IEducationService, EducationService>();
+            services.AddScoped<IExperienceService, ExperienceService>();
         }
 
         public static IServiceCollection AddMassTransit(this IServiceCollection services, string cString)
