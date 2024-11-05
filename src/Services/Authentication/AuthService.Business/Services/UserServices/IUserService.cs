@@ -5,7 +5,7 @@ namespace AuthService.Business.Services.UserServices
     public interface IUserService
     {
         Task<UserInformationDto> GetUserInformationAsync();
-        Task<UserUpdateResponseDto> UpdateUserInformation(UserUpdateDto dto);
-        Task<UserProfileImageUpdateResponseDto> UpdateUserProfileImage(UserProfileImageUpdateDto dto);
+        Task<UserUpdateResponseDto> UpdateUserInformationAsync(UserUpdateDto dto);
+        Task<UserProfileImageUpdateResponseDto> UpdateUserProfileImageAsync(UserProfileImageUpdateDto dto);
     }
 }
