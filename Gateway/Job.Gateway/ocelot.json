@@ -11,6 +11,18 @@
       ],
       "UpstreamPathTemplate": "/auth/{everything}",
       "UpstreamHttpMethod": [ "POST", "GET", "PUT", "DELETE" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/job/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5002
+        }
+      ],
+      "UpstreamPathTemplate": "/job/{everything}",
+      "UpstreamHttpMethod": [ "POST", "GET", "PUT", "DELETE" ]
     }
   ],
   "GlobalConfiguration": {
