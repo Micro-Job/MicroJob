@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using Job.Business.ExternalServices;
 using Microsoft.Extensions.DependencyInjection;
 using MassTransit;
+using Job.Business.Services.Resume;
+using Job.Core.Entities;
 
 namespace Job.Business
 {
@@ -13,6 +15,7 @@ namespace Job.Business
         public static void AddServices(this IServiceCollection services)
         {
             services.AddScoped<IFileService, FileService>();
+            services.AddScoped<IResumeService, ResumeService>();
         }
 
         public static IServiceCollection AddMassTransit(this IServiceCollection services, string cString)
