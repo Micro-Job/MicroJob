@@ -18,6 +18,9 @@ namespace Job.Business.Dtos.ResumeDtos
         public bool IsDriver { get; set; }
         public bool IsMarried { get; set; }
         public bool IsCitizen { get; set; }
+        public bool IsMainNumber { get; set; }
+        public bool IsMainEmail { get; set; }
+        public string? ResumeEmail { get; set; }
         public Gender Gender { get; set; }
         public string? Adress { get; set; }
         public DateTime BirthDay { get; set; }
