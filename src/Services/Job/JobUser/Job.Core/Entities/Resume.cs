@@ -15,9 +15,7 @@ namespace Job.Core.Entities
         public Gender Gender { get; set; }
         public string? Adress { get; set; }
         public DateTime BirthDay { get; set; }
-        public decimal Percent { get; set; }
-        public bool IsMainNumber { get; set; }
-        public bool IsMainEmail { get; set; }
+        public sbyte Percent { get; set; }
         public string? ResumeEmail { get; set; }
         public ICollection<Number> PhoneNumbers { get; set; }
         public ICollection<Education> Educations { get; set; }
