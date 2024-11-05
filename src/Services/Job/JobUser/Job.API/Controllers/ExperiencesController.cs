@@ -19,17 +19,17 @@ namespace Job.API.Controllers
             _service = service;
         }
 
-        [HttpPost("ExperienceCreate")]
-        public async Task<IActionResult> Post([FromForm] ExperienceCreateDto experienceCreateDto)
+        [HttpPost("[action]")]
+        public async Task<IActionResult> CreateExperience([FromForm] ExperienceCreateDto experienceCreateDto)
         {
-            await _service.CreateAsync(experienceCreateDto);
+            await _service.CreateExperienceAsync(experienceCreateDto);
             return Ok();
         }
 
-        [HttpPut("ExperienceUpdate")]
-        public async Task<IActionResult> Put(string id, [FromForm] ExperienceUpdateDto experienceUpdateDto)
+        [HttpPut("[action]")]
+        public async Task<IActionResult> UpdateExperience(string id, [FromForm] ExperienceUpdateDto experienceUpdateDto)
         {
-            await _service.UpdateAsync(id, experienceUpdateDto);
+            await _service.UpdateExperienceAsync(id, experienceUpdateDto);
             return Ok();
         }
     }

@@ -8,7 +8,7 @@ namespace Job.Business.Services.Number
 {
     public interface INumberService
     {
-        Task CreateAsync(NumberCreateDto numberCreateDto);
-        Task UpdateAsync(string id,NumberUpdateDto numberUpdateDto);
+        Task CreateNumberAsync(NumberCreateDto numberCreateDto);
+        Task UpdateNumberAsync(string id,NumberUpdateDto numberUpdateDto);
     }
 }
