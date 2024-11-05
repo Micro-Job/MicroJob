@@ -20,10 +20,29 @@ namespace Job.API.Controllers
         }
 
         [HttpPost("ResumeCreate")]
-        public async Task<IActionResult> CreateResume([FromForm] ResumeCreateDto resumeCreateDto)
+        public async Task<IActionResult> Post([FromForm] ResumeCreateDto resumeCreateDto)
         {
             await _service.CreateAsync(resumeCreateDto);
             return Ok();
+        }
+
+        [HttpPost("ResumeUpdate")]
+        public async Task<IActionResult> Put([FromForm] ResumeUpdateDto resumeUpdateDto)
+        {
+            await _service.UpdateAsync(resumeUpdateDto);
+            return Ok();
+        }
+
+        [HttpGet("ResumeGetAll")]
+        public async Task<IActionResult> GetAll()
+        {
+            return Ok(await _service.GetAllAsync());
+        }
+
+        [HttpGet("ResumeGetById/{id}")]
+        public async Task<IActionResult> GetById(string id)
+        {
+            return Ok(await _service.GetByIdAsync(id));
         }
     }
 }

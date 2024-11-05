@@ -15,6 +15,7 @@ namespace Job.Core.Entities
         public Gender Gender { get; set; }
         public string? Adress { get; set; }
         public DateTime BirthDay { get; set; }
+        public decimal Percent { get; set; }
         public ICollection<Number> PhoneNumbers { get; set; }
         public ICollection<Education> Educations { get; set; }
         public ICollection<Experience>? Experiences { get; set; }

@@ -10,5 +10,9 @@ namespace Job.Business.Services.Resume
     public interface IResumeService
     {
         Task CreateAsync(ResumeCreateDto resumeCreateDto);
+        Task UpdateAsync(ResumeUpdateDto resumeUpdateDto);
+        Task<IEnumerable<ResumeListDto>> GetAllAsync();
+        Task<ResumeDetailItemDto> GetByIdAsync(string id);
     }
 }
+
