@@ -32,4 +32,4 @@ namespace AuthService.Core.Entities
 
         public virtual UserStatus? UserStatus { get; set; }
     }
-}
+} 
