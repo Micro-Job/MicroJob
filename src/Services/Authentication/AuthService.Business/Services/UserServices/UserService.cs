@@ -1,8 +1,10 @@
 ﻿using AuthService.Business.Dtos;
 using AuthService.Business.Exceptions.UserException;
 using AuthService.Business.Services.CurrentUser;
+using AuthService.Core.Entities;
 using AuthService.DAL.Contexts;
 using Job.Business.ExternalServices;
+using MassTransit.Initializers;
 using Microsoft.EntityFrameworkCore;
 
 namespace AuthService.Business.Services.UserServices
@@ -24,32 +26,33 @@ namespace AuthService.Business.Services.UserServices
 
         public async Task<UserInformationDto> GetUserInformationAsync()
         {
-            var user = await _context.Users.Include(r => r.UserStatus)
-                .Where(u => u.Id == Guid.Parse(_currentUserId))
-                .AsNoTracking()
-                .FirstOrDefaultAsync()
+            var userGuid = Guid.Parse(_currentUserId);
+
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.Id == userGuid).Select(x=> new UserInformationDto
+                {
+                    Id = x.Id,
+                    FirstName = x.FirstName,
+                    LastName = x.LastName,
+                    Email = x.Email,
+                    MainPhoneNumber = x.MainPhoneNumber,
+                    Image = $"{_currentUser.BaseUrl}/{x.Image}",
+                })
                 ?? throw new UserNotFoundException();
 
-            return new UserInformationDto
-            {
-                Id = user.Id,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Email = user.Email,
-                MainPhoneNumber = user.MainPhoneNumber,
-                Image = user.Image,
-            };
+            return user;
         }
 
         public async Task<UserUpdateResponseDto> UpdateUserInformation(UserUpdateDto dto)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == Guid.Parse(_currentUserId))
                 ?? throw new UserNotFoundException();
-            user.FirstName = dto.FirstName;
-            user.LastName = dto.LastName;
-            user.Email = dto.Email;
-            user.MainPhoneNumber = dto.MainPhoneNumber;
-            _context.Users.Update(user);
+
+            user.FirstName = dto.FirstName.Trim();
+            user.LastName = dto.LastName.Trim();
+            user.Email = dto.Email.Trim();
+            user.MainPhoneNumber = dto.MainPhoneNumber.Trim();
+
             await _context.SaveChangesAsync();
 
             return new UserUpdateResponseDto
@@ -65,12 +68,16 @@ namespace AuthService.Business.Services.UserServices
 
         public async Task<UserProfileImageUpdateResponseDto> UpdateUserProfileImage(UserProfileImageUpdateDto dto)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == Guid.Parse(_currentUserId))
-                ?? throw new UserNotFoundException();
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == Guid.Parse(_currentUserId)).Select(x=> new User
+            {
+                Image = x.Image,
+                Id = x.Id
+            }) ?? throw new UserNotFoundException();
+
             var image = await _fileService.UploadAsync("/image", dto.Image);
             var imageUrl = image.FilePath;
             user.Image = imageUrl;
-            _context.Users.Update(user);
+
             await _context.SaveChangesAsync();
 
             return new UserProfileImageUpdateResponseDto
