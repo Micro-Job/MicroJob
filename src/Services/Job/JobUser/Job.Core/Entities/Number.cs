@@ -2,8 +2,8 @@
 {
     public class Number : BaseEntity
     {
-        public User User { get; set; }
-        public Guid UserId { get; set; }
+        public Resume Resume { get; set; }
+        public Guid ResumeId { get; set; }
         public string PhoneNumber { get; set; }
     }
 }
