@@ -3,6 +3,7 @@ using AuthService.Business.HelperServices.TokenHandler;
 using AuthService.Business.Publishers;
 using AuthService.Business.Services.Auth;
 using AuthService.Business.Services.CurrentUser;
+using AuthService.Business.Services.UserServices;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -13,6 +14,7 @@ namespace AuthService.Business
         public static void AddServices(this IServiceCollection services)
         {
             services.AddScoped<ITokenHandler, TokenHandler>();
+            //services.AddScoped<IUserService, UserService>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IAuthService, Services.Auth.AuthService>();
             services.AddScoped<ICurrentUser, CurrentUser>();
@@ -31,5 +33,6 @@ namespace AuthService.Business
             });
             return services;
         }
+
     }
 }
