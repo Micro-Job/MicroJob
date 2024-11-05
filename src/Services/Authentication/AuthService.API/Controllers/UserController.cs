@@ -18,14 +18,14 @@ namespace AuthService.API.Controllers
         }
 
         [HttpPut("[action]")]
-        public async Task<IActionResult> UpdateUserInformation(UserUpdateDto dto)
+        public async Task<IActionResult> UpdateUserInformationAsync(UserUpdateDto dto)
         {
             await _userService.UpdateUserInformationAsync(dto);
             return Ok();
         }
 
         [HttpPut("[action]")]
-        public async Task<IActionResult> UpdateUserProfileImage(UserProfileImageUpdateDto dto)
+        public async Task<IActionResult> UpdateUserProfileImageAsync(UserProfileImageUpdateDto dto)
         {
             await _userService.UpdateUserProfileImageAsync(dto);
             return Ok();

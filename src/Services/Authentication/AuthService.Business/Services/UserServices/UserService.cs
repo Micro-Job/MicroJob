@@ -43,7 +43,7 @@ namespace AuthService.Business.Services.UserServices
             return user;
         }
 
-        public async Task<UserUpdateResponseDto> UpdateUserInformation(UserUpdateDto dto)
+        public async Task<UserUpdateResponseDto> UpdateUserInformationAsync(UserUpdateDto dto)
         {
             var userQuery = _context.Users.AsQueryable();
             var user = await userQuery
@@ -83,7 +83,7 @@ namespace AuthService.Business.Services.UserServices
             };
         }
 
-        public async Task<UserProfileImageUpdateResponseDto> UpdateUserProfileImage(UserProfileImageUpdateDto dto)
+        public async Task<UserProfileImageUpdateResponseDto> UpdateUserProfileImageAsync(UserProfileImageUpdateDto dto)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == _currentUserGuid).Select(x => new User
             {
