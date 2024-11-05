@@ -6,6 +6,8 @@ using Job.DAL.Contexts;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using SharedLibrary.Middlewares;
+using SharedLibrary.ServiceRegistration;
 
 namespace Job.API
 {
@@ -27,7 +29,7 @@ namespace Job.API
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Job.API", Version = "v1" });
             });
 
-            builder.Services.AddDbContext<AppDbContext>(opt =>
+            builder.Services.AddDbContext<JobDbContext>(opt =>
             {
                 opt.UseSqlServer(builder.Configuration["ConnectionStrings:Default"]);
             });
@@ -58,6 +60,8 @@ namespace Job.API
 
             app.UseHttpsRedirection();
             app.UseAuthorization();
+
+            app.UseCustomExceptionHandler();
 
             app.MapControllers();
 

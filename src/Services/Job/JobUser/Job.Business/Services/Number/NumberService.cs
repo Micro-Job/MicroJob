@@ -11,9 +11,9 @@ namespace Job.Business.Services.Number
 {
     public class NumberService : INumberService
     {
-        readonly AppDbContext _context;
+        readonly JobDbContext _context;
 
-        public NumberService(AppDbContext context)
+        public NumberService(JobDbContext context)
         {
             _context = context;
         }

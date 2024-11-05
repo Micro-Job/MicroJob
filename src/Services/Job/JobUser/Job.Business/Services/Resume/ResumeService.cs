@@ -20,12 +20,12 @@ namespace Job.Business.Services.Resume
 {
     public class ResumeService : IResumeService
     {
-        readonly AppDbContext _context;
+        readonly JobDbContext _context;
         readonly IFileService _fileService;
         readonly IHttpContextAccessor _httpContextAccessor;
         readonly Guid _userId;
 
-        public ResumeService(AppDbContext context, IFileService fileService, IHttpContextAccessor httpContextAccessor)
+        public ResumeService(JobDbContext context, IFileService fileService, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
             _fileService = fileService;
@@ -54,7 +54,9 @@ namespace Job.Business.Services.Resume
                 Gender = resumeCreateDto.Gender,
                 Adress = resumeCreateDto.Adress,
                 BirthDay = resumeCreateDto.BirthDay,
-                UserPhoto = $"{fileResult.FilePath}/{fileResult.FileName}"
+                UserPhoto = resumeCreateDto.UserPhoto != null 
+                    ? $"{fileResult.FilePath}/{fileResult.FileName}"
+                    : null
             };
 
             await _context.Resumes.AddAsync(resume);

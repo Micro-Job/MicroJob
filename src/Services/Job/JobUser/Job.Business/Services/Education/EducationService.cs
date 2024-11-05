@@ -11,13 +11,13 @@ namespace Job.Business.Services.Education
 {
     public class EducationService : IEducationService
     {
-        private readonly AppDbContext _context;
+        private readonly JobDbContext _context;
 
-        public EducationService(AppDbContext context)
+        public EducationService(JobDbContext context)
         {
             _context = context;
         }
-        public async Task CreateAsync(EducationCreateDto dto)
+        public async Task CreateEducationAsync(EducationCreateDto dto)
         {
             var resumeId = Guid.Parse(dto.ResumeId);
             var education = new Core.Entities.Education

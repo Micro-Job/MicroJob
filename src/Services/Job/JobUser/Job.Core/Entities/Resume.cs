@@ -22,6 +22,7 @@ namespace Job.Core.Entities
         public ICollection<Number> PhoneNumbers { get; set; }
         public ICollection<Education> Educations { get; set; }
         public ICollection<Experience>? Experiences { get; set; }
-        public ICollection<ExtraInformation>? ExtraInformations { get; set; }
+        public ICollection<Language>? Languages { get; set; }
+        public ICollection<Certificate>? Certificates { get; set; }
     }
 }
