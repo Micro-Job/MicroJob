@@ -7,6 +7,7 @@ namespace Job.Core.Entities
         public User User { get; set; }
         public Guid UserId { get; set; }
         public string FatherName { get; set; }
+        public string Position { get; set; }
         public string? UserPhoto { get; set; }
         public bool IsDriver { get; set; }
         public bool IsMarried { get; set; }
