@@ -1,10 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Job.Business.Dtos.EducationDtos;
 using Job.Business.Exceptions.Common;
-using Job.Core.Entities;
 using Job.DAL.Contexts;
 
 namespace Job.Business.Services.Education
@@ -17,6 +12,22 @@ namespace Job.Business.Services.Education
         {
             _context = context;
         }
+            public async Task<ICollection<Core.Entities.Education>> CreateBulkEducationAsync(ICollection<EducationCreateDto> dtos)
+            {
+                var educationsToAdd = dtos.Select(dto => new Core.Entities.Education
+                {
+                    InstitutionName = dto.InstitutionName,
+                    Profession = dto.Profession,
+                    StartDate = dto.StartDate,
+                    EndDate = dto.IsCurrentEducation ? null : dto.EndDate,
+                    IsCurrentEducation = dto.IsCurrentEducation,
+                    ProfessionDegree = dto.ProfessionDegree
+                }).ToList();
+
+                await _context.Educations.AddRangeAsync(educationsToAdd);
+                return educationsToAdd;
+            }
+
         public async Task CreateEducationAsync(EducationCreateDto dto)
         {
             var resumeId = Guid.Parse(dto.ResumeId);
@@ -30,7 +41,6 @@ namespace Job.Business.Services.Education
                 IsCurrentEducation = dto.IsCurrentEducation,
                 ProfessionDegree = dto.ProfessionDegree
             };
-
             await _context.Educations.AddAsync(education);
         }
 
@@ -39,7 +49,7 @@ namespace Job.Business.Services.Education
             var educationId = Guid.Parse(id);
             var education = await _context.Educations.FindAsync(educationId);
 
-            if (education is null) throw new NotFoundException<Core.Entities.Education>(); 
+            if (education is null) throw new NotFoundException<Core.Entities.Education>();
 
             education.InstitutionName = dto.InstitutionName;
             education.Profession = dto.Profession;
@@ -47,8 +57,6 @@ namespace Job.Business.Services.Education
             education.EndDate = dto.EndDate;
             education.IsCurrentEducation = dto.IsCurrentEducation;
             education.ProfessionDegree = dto.ProfessionDegree;
-
-            await _context.SaveChangesAsync();
         }
     }
 }

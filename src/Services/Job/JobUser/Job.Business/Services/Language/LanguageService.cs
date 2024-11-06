@@ -1,10 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Job.Business.Dtos.LanguageDtos;
 using Job.Business.Exceptions.Common;
-using Job.Core.Entities;
 using Job.DAL.Contexts;
 
 namespace Job.Business.Services.Language
@@ -16,6 +11,20 @@ namespace Job.Business.Services.Language
         public LanguageService(JobDbContext context)
         {
             _context = context;
+        }
+
+        public async Task<ICollection<Core.Entities.Language>> CreateBulkLanguageAsync(ICollection<LanguageCreateDto> dtos)
+        {
+            var languagesToAdd = dtos.Select(dto => new Core.Entities.Language
+            {
+                ResumeId = Guid.Parse(dto.ResumeId),
+                LanguageName = dto.LanguageName,
+                LanguageLevel = dto.LanguageLevel
+            }).ToList();
+
+            await _context.Languages.AddRangeAsync(languagesToAdd);
+
+            return languagesToAdd;
         }
 
         public async Task CreateLanguageAsync(LanguageCreateDto dto)
@@ -30,7 +39,6 @@ namespace Job.Business.Services.Language
                 LanguageName = dto.LanguageName,
                 LanguageLevel = dto.LanguageLevel
             };
-
             await _context.Languages.AddAsync(language);
         }
 
@@ -42,8 +50,6 @@ namespace Job.Business.Services.Language
 
             language.LanguageName = dto.LanguageName;
             language.LanguageLevel = dto.LanguageLevel;
-
-            await _context.SaveChangesAsync();
         }
     }
 }

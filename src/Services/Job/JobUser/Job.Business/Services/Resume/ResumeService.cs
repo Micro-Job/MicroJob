@@ -1,20 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
-using Job.Business.Dtos.FileDtos;
+﻿using Job.Business.Dtos.FileDtos;
 using Job.Business.Dtos.ResumeDtos;
 using Job.Business.Exceptions.Common;
 using Job.Business.Exceptions.UserExceptions;
 using Job.Business.ExternalServices;
+using Job.Business.Services.Certificate;
+using Job.Business.Services.Education;
+using Job.Business.Services.Experience;
+using Job.Business.Services.Language;
+using Job.Business.Services.Number;
 using Job.Business.Statics;
-using Job.Core.Entities;
 using Job.DAL.Contexts;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
 
 namespace Job.Business.Services.Resume
 {
@@ -24,12 +22,23 @@ namespace Job.Business.Services.Resume
         readonly IFileService _fileService;
         readonly IHttpContextAccessor _httpContextAccessor;
         readonly Guid _userId;
+        readonly INumberService _numberService;
+        readonly IEducationService _educationService;
+        readonly IExperienceService _experienceService;
+        readonly ILanguageService _languageService;
+        readonly ICertificateService _certificateService;
 
-        public ResumeService(JobDbContext context, IFileService fileService, IHttpContextAccessor httpContextAccessor)
+        public ResumeService(JobDbContext context, IFileService fileService, IHttpContextAccessor httpContextAccessor, INumberService numberService,
+            IEducationService educationService, IExperienceService experienceService, ILanguageService languageService, ICertificateService certificateService)
         {
             _context = context;
             _fileService = fileService;
             _httpContextAccessor = httpContextAccessor;
+            _numberService = numberService;
+            _educationService = educationService;
+            _experienceService = experienceService;
+            _languageService = languageService;
+            _certificateService = certificateService;
 
             var userId = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier);
             if (userId == null) throw new UserIsNotLoggedInException();
@@ -38,13 +47,23 @@ namespace Job.Business.Services.Resume
 
         public async Task CreateResumeAsync(ResumeCreateDto resumeCreateDto)
         {
-            FileDto fileResult = new FileDto();
+            FileDto fileResult = new();
+            var resumeGuid = Guid.NewGuid();
 
             if (resumeCreateDto.UserPhoto != null)
                 fileResult = await _fileService.UploadAsync(FilePaths.image, resumeCreateDto.UserPhoto);
 
+            if (!resumeCreateDto.IsMainNumber)
+            {
+                var numbers = await _numberService.CreateBulkNumberAsync(resumeCreateDto.PhoneNumbers);
+            }
+            var educations = await _educationService.CreateBulkEducationAsync(resumeCreateDto.Educations);
+            var experiences = await _experienceService.CreateBulkExperienceAsync(resumeCreateDto.Experiences);
+            var languages = await _languageService.CreateBulkLanguageAsync(resumeCreateDto.Languages);
+            var certificates = await _certificateService.CreateBulkCertificateAsync(resumeCreateDto.Certificates);
             var resume = new Core.Entities.Resume
             {
+                Id = resumeGuid,
                 UserId = _userId,
                 FatherName = resumeCreateDto.FatherName,
                 Position = resumeCreateDto.Position,
@@ -56,9 +75,13 @@ namespace Job.Business.Services.Resume
                 BirthDay = resumeCreateDto.BirthDay,
                 UserPhoto = resumeCreateDto.UserPhoto != null
                     ? $"{fileResult.FilePath}/{fileResult.FileName}"
-                    : null
+                    : null,
+                Educations = educations,
+                //PhoneNumbers = numbers,
+                Experiences = experiences,
+                Languages = languages,
+                Certificates = certificates
             };
-
             await _context.Resumes.AddAsync(resume);
             await _context.SaveChangesAsync();
         }

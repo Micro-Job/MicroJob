@@ -1,10 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Job.Business.Dtos.NumberDtos;
 using Job.Business.Exceptions.Common;
-using Job.Core.Entities;
 using Job.DAL.Contexts;
 
 namespace Job.Business.Services.Number
@@ -32,6 +27,32 @@ namespace Job.Business.Services.Number
             await _context.Numbers.AddAsync(number);
         }
 
+        public async Task<ICollection<Core.Entities.Number>> CreateBulkNumberAsync(ICollection<NumberCreateDto> numberCreateDtos)
+        {
+            var numbersToAdd = new List<Core.Entities.Number>();
+
+            foreach (var numberCreateDto in numberCreateDtos)
+            {
+                var resumeId = Guid.Parse(numberCreateDto.ResumeId);
+                var resume = await _context.Resumes.FindAsync(resumeId);
+
+                if (resume is null)
+                    throw new NotFoundException<Core.Entities.Resume>();
+
+                var number = new Core.Entities.Number
+                {
+                    ResumeId = resumeId,
+                    PhoneNumber = numberCreateDto.PhoneNumber,
+                };
+
+                numbersToAdd.Add(number);
+            }
+
+            await _context.Numbers.AddRangeAsync(numbersToAdd);
+            return numbersToAdd;
+        }
+
+
         public async Task UpdateNumberAsync(string id, NumberUpdateDto numberUpdateDto)
         {
             var numberId = Guid.Parse(id);
@@ -39,7 +60,6 @@ namespace Job.Business.Services.Number
             if (number is null) throw new NotFoundException<Core.Entities.Number>();
 
             number.PhoneNumber = numberUpdateDto.PhoneNumber;
-            await _context.SaveChangesAsync();
         }
     }
 }

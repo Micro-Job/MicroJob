@@ -1,8 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using FluentValidation;
+using Job.Business.Dtos.CertificateDtos;
+using Job.Business.Dtos.EducationDtos;
+using Job.Business.Dtos.ExperienceDtos;
+using Job.Business.Dtos.LanguageDtos;
 using Job.Business.Dtos.NumberDtos;
 using Job.Business.Validators;
 using Job.Core.Enums;
@@ -25,6 +25,11 @@ namespace Job.Business.Dtos.ResumeDtos
         public Gender Gender { get; set; }
         public string? Adress { get; set; }
         public DateTime BirthDay { get; set; }
+        public ICollection<NumberCreateDto>? PhoneNumbers { get; set; }
+        public ICollection<EducationCreateDto> Educations {  get; set; } 
+        public ICollection<ExperienceCreateDto> Experiences {  get; set; } 
+        public ICollection<LanguageCreateDto> Languages {  get; set; } 
+        public ICollection<CertificateCreateDto> Certificates {  get; set; } 
     }
 
     public class ResumeCreateDtoValidator : AbstractValidator<ResumeCreateDto>

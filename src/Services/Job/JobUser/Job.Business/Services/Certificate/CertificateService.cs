@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Job.Business.Dtos.CertificateDtos;
 using Job.Business.Exceptions.Common;
 using Job.DAL.Contexts;
@@ -17,6 +13,21 @@ namespace Job.Business.Services.Certificate
             _context = context;
         }
 
+        public async Task<ICollection<Core.Entities.Certificate>> CreateBulkCertificateAsync(ICollection<CertificateCreateDto> dtos)
+        {
+            var certificatesToAdd = dtos.Select(dto => new Core.Entities.Certificate
+            {
+                ResumeId = Guid.Parse(dto.ResumeId),
+                CertificateName = dto.CertificateName,
+                CertificateFile = dto.CertificateFile,
+                GivenOrganization = dto.GivenOrganization
+            }).ToList();
+
+            await _context.Certificates.AddRangeAsync(certificatesToAdd);
+
+            return certificatesToAdd;
+        }
+
         public async Task CreateCertificateAsync(CertificateCreateDto dto)
         {
             var resumeId = Guid.Parse(dto.ResumeId);
@@ -30,7 +41,6 @@ namespace Job.Business.Services.Certificate
                 CertificateFile = dto.CertificateFile,
                 GivenOrganization = dto.GivenOrganization
             };
-
             _context.Certificates.Add(certificate);
         }
 
@@ -42,7 +52,6 @@ namespace Job.Business.Services.Certificate
 
             certificate.CertificateName = dto.CertificateName;
             certificate.GivenOrganization = dto.GivenOrganization;
-            await _context.SaveChangesAsync();
         }
     }
 }
