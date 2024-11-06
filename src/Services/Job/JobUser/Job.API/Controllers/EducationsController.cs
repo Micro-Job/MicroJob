@@ -26,7 +26,7 @@ namespace Job.API.Controllers
             return Ok();
         }
 
-        [HttpPut("[action]")]
+        [HttpPut("[action]/{id}")]
         public async Task<IActionResult> UpdateEducation(string id, [FromForm] EducationUpdateDto dto)
         {
             await _service.UpdateEducationAsync(id, dto);

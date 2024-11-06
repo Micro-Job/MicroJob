@@ -26,7 +26,7 @@ namespace Job.API.Controllers
             return Ok();
         }
 
-        [HttpPut("[action]")]
+        [HttpPut("[action]/{id}")]
         public async Task<IActionResult> UpdateCertificate(string id, [FromForm] CertificateUpdateDto dto)
         {
             await _service.UpdateCertificateAsync(id, dto);

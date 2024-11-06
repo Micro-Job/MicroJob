@@ -54,7 +54,7 @@ namespace Job.Business.Services.Resume
                 Gender = resumeCreateDto.Gender,
                 Adress = resumeCreateDto.Adress,
                 BirthDay = resumeCreateDto.BirthDay,
-                UserPhoto = resumeCreateDto.UserPhoto != null 
+                UserPhoto = resumeCreateDto.UserPhoto != null
                     ? $"{fileResult.FilePath}/{fileResult.FileName}"
                     : null
             };

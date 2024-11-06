@@ -26,7 +26,7 @@ namespace Job.API.Controllers
             return Ok();
         }
 
-        [HttpPut("[action]")]
+        [HttpPut("[action]/{id}")]
         public async Task<IActionResult> UpdateExperience(string id, [FromForm] ExperienceUpdateDto experienceUpdateDto)
         {
             await _service.UpdateExperienceAsync(id, experienceUpdateDto);
