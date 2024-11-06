@@ -1,20 +1,21 @@
-﻿namespace AuthService.Business.Exceptions.UserException
+﻿using Job.Business.Exceptions.Common;
+using Microsoft.AspNetCore.Http;
+
+namespace AuthService.Business.Exceptions.UserException
 {
-    public class UserNotLoggedInException : Exception
+    public class UserNotLoggedInException : Exception, IBaseException
     {
-        public UserNotLoggedInException()
-            : base("Istifadəçi giriş etməyib!")
+        public string ErrorMessage { get; }
+        public int StatusCode => StatusCodes.Status401Unauthorized;
+
+        public UserNotLoggedInException() : base()
         {
+            ErrorMessage = "Istifadəçi giriş etməyib!";
         }
 
-        public UserNotLoggedInException(string message)
-            : base(message)
+        public UserNotLoggedInException(string? message): base(message)
         {
-        }
-
-        public UserNotLoggedInException(string message, Exception innerException)
-            : base(message, innerException)
-        {
+            ErrorMessage = message;
         }
     }
 }

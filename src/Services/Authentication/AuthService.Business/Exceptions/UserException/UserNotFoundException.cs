@@ -1,9 +1,4 @@
 ﻿using SharedLibrary.Exceptions.Common;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AuthService.Business.Exceptions.UserException
 {
@@ -18,9 +13,9 @@ namespace AuthService.Business.Exceptions.UserException
             ErrorMessage = "İstifadəçi mövcud deyil";
         }
 
-        public UserNotFoundException(string? message) :base(message)
+        public UserNotFoundException(string? message) : base(message)
         {
-            ErrorMessage = message;   
+            ErrorMessage = message;
         }
     }
 }
