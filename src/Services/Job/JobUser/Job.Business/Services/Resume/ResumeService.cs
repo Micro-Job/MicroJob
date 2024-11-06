@@ -58,9 +58,13 @@ namespace Job.Business.Services.Resume
                 var numbers = await _numberService.CreateBulkNumberAsync(resumeCreateDto.PhoneNumbers);
             }
             var educations = await _educationService.CreateBulkEducationAsync(resumeCreateDto.Educations);
+
             var experiences = await _experienceService.CreateBulkExperienceAsync(resumeCreateDto.Experiences);
+
             var languages = await _languageService.CreateBulkLanguageAsync(resumeCreateDto.Languages);
+
             var certificates = await _certificateService.CreateBulkCertificateAsync(resumeCreateDto.Certificates);
+
             var resume = new Core.Entities.Resume
             {
                 Id = resumeGuid,
@@ -80,7 +84,8 @@ namespace Job.Business.Services.Resume
                 //PhoneNumbers = numbers,
                 Experiences = experiences,
                 Languages = languages,
-                Certificates = certificates
+                Certificates = certificates,
+                //ResumeEmail = resumeCreateDto.IsMainEmail == false ? resumeCreateDto.ResumeEmail : existEmail,
             };
             await _context.Resumes.AddAsync(resume);
             await _context.SaveChangesAsync();

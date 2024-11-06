@@ -12,21 +12,21 @@ namespace Job.Business.Services.Education
         {
             _context = context;
         }
-            public async Task<ICollection<Core.Entities.Education>> CreateBulkEducationAsync(ICollection<EducationCreateDto> dtos)
+        public async Task<ICollection<Core.Entities.Education>> CreateBulkEducationAsync(ICollection<EducationCreateDto> dtos)
+        {
+            var educationsToAdd = dtos.Select(dto => new Core.Entities.Education
             {
-                var educationsToAdd = dtos.Select(dto => new Core.Entities.Education
-                {
-                    InstitutionName = dto.InstitutionName,
-                    Profession = dto.Profession,
-                    StartDate = dto.StartDate,
-                    EndDate = dto.IsCurrentEducation ? null : dto.EndDate,
-                    IsCurrentEducation = dto.IsCurrentEducation,
-                    ProfessionDegree = dto.ProfessionDegree
-                }).ToList();
+                InstitutionName = dto.InstitutionName,
+                Profession = dto.Profession,
+                StartDate = dto.StartDate,
+                EndDate = dto.IsCurrentEducation ? null : dto.EndDate,
+                IsCurrentEducation = dto.IsCurrentEducation,
+                ProfessionDegree = dto.ProfessionDegree
+            }).ToList();
 
-                await _context.Educations.AddRangeAsync(educationsToAdd);
-                return educationsToAdd;
-            }
+            await _context.Educations.AddRangeAsync(educationsToAdd);
+            return educationsToAdd;
+        }
 
         public async Task CreateEducationAsync(EducationCreateDto dto)
         {
