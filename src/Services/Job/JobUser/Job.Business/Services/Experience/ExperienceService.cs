@@ -19,7 +19,7 @@ namespace Job.Business.Services.Experience
             _context = context;
         }
 
-        public async Task CreateAsync(ExperienceCreateDto dto)
+        public async Task CreateExperienceAsync(ExperienceCreateDto dto)
         {
             var resumeId = Guid.Parse(dto.ResumeId);
             var resume = await _context.Resumes.FindAsync(resumeId);
@@ -39,7 +39,7 @@ namespace Job.Business.Services.Experience
             await _context.Experiences.AddAsync(experience);
         }
 
-        public async Task UpdateAsync(string id, ExperienceUpdateDto dto)
+        public async Task UpdateExperienceAsync(string id, ExperienceUpdateDto dto)
         {
             var resumeId = Guid.Parse(id);
             var experience = await _context.Experiences.FindAsync(resumeId);

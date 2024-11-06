@@ -26,10 +26,10 @@ namespace Job.API.Controllers
             return Ok();
         }
 
-        [HttpPut("EducationUpdate")]
-        public async Task<IActionResult> Put(string id, [FromForm] EducationUpdateDto dto)
+        [HttpPut("[action]")]
+        public async Task<IActionResult> UpdateEducation(string id, [FromForm] EducationUpdateDto dto)
         {
-            await _service.UpdateAsync(id, dto);
+            await _service.UpdateEducationAsync(id, dto);
             return Ok();
         }
     }

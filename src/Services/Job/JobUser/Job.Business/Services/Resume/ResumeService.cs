@@ -36,7 +36,7 @@ namespace Job.Business.Services.Resume
             _userId = Guid.Parse(userId.Value);
         }
 
-        public async Task CreateAsync(ResumeCreateDto resumeCreateDto)
+        public async Task CreateResumeAsync(ResumeCreateDto resumeCreateDto)
         {
             FileDto fileResult = new FileDto();
 
@@ -63,7 +63,7 @@ namespace Job.Business.Services.Resume
             await _context.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<ResumeListDto>> GetAllAsync()
+        public async Task<IEnumerable<ResumeListDto>> GetAllResumeAsync()
         {
             var resumes = await _context.Resumes.ToListAsync();
             var resumeList = resumes.Select(r => new ResumeListDto
@@ -83,7 +83,7 @@ namespace Job.Business.Services.Resume
             return resumeList;
         }
 
-        public async Task<ResumeDetailItemDto> GetByIdAsync(string id)
+        public async Task<ResumeDetailItemDto> GetByIdResumeAsync(string id)
         {
             var resume = await _context.Resumes.FindAsync(Guid.Parse(id));
             if (resume is null) throw new NotFoundException<Core.Entities.Resume>();
@@ -103,7 +103,7 @@ namespace Job.Business.Services.Resume
             return resumeDetail;
         }
 
-        public async Task UpdateAsync(ResumeUpdateDto resumeUpdateDto)
+        public async Task UpdateResumeAsync(ResumeUpdateDto resumeUpdateDto)
         {
             var resume = await _context.Resumes.FirstOrDefaultAsync(r => r.UserId == _userId)
                             ?? throw new NotFoundException<Core.Entities.Resume>();
