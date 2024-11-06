@@ -11,7 +11,7 @@ namespace AuthService.Business.Exceptions.UserException
 
         public UserExistException() : base()
         {
-            ErrorMessage = "İstifadəçi adı və ya email mövcuddur.";
+            ErrorMessage = "İstifadəçi nömrəsi və ya email mövcuddur.";
         }
 
         public UserExistException(string? message) : base(message)

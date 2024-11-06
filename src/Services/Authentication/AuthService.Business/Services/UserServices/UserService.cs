@@ -5,8 +5,11 @@ using AuthService.Core.Entities;
 using AuthService.DAL.Contexts;
 using Job.Business.Dtos.FileDtos;
 using Job.Business.ExternalServices;
+using MassTransit;
 using MassTransit.Initializers;
 using Microsoft.EntityFrameworkCore;
+using SharedLibrary.Requests;
+using SharedLibrary.Responses;
 
 namespace AuthService.Business.Services.UserServices
 {

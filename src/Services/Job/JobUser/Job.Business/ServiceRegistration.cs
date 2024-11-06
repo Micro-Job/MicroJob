@@ -10,6 +10,7 @@ using Job.Core.Entities;
 using Job.Business.Services.Education;
 using Job.Business.Services.Experience;
 using Job.Business.Consumers;
+using Job.Business.Services.User;
 
 namespace Job.Business
 {
@@ -20,6 +21,7 @@ namespace Job.Business
             services.AddScoped<IFileService, FileService>();
             services.AddScoped<IResumeService, ResumeService>();
             services.AddScoped<IEducationService, EducationService>();
+            services.AddScoped<IUserInformationService, UserInformationService>();
             services.AddScoped<IExperienceService, ExperienceService>();
         }
 

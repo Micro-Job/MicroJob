@@ -20,7 +20,7 @@ namespace Job.Business.Consumers
                 Id = context.Message.UserId
             };
 
-            _context.Users.Add(newUser);
+            await _context.Users.AddAsync(newUser);
             await _context.SaveChangesAsync();
         }
     }

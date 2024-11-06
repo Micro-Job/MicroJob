@@ -1,4 +1,5 @@
-﻿using AuthService.Business.HelperServices.Email;
+﻿using AuthService.Business.Consumers;
+using AuthService.Business.HelperServices.Email;
 using AuthService.Business.HelperServices.TokenHandler;
 using AuthService.Business.Publishers;
 using AuthService.Business.Services.Auth;
@@ -26,6 +27,8 @@ namespace AuthService.Business
         {
             services.AddMassTransit(x=>
             {
+                x.AddConsumer<GetUserDataConsumer>();
+
                 x.SetKebabCaseEndpointNameFormatter();
                 x.UsingRabbitMq((con, cfg) =>
                 {

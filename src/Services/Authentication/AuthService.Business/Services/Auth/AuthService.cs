@@ -27,13 +27,14 @@ namespace AuthService.Business.Services.Auth
 
         public async Task RegisterAsync(RegisterDto dto)
         {
-            var userCheck = await _context.Users.FirstOrDefaultAsync(x => x.Email == dto.Email);
+            var userCheck = await _context.Users.FirstOrDefaultAsync(x => x.Email == dto.Email || x.MainPhoneNumber == dto.MainPhoneNumber);
 
             // email veya istifadeci adı tekrarlanmasını yoxla
             if (userCheck != null) throw new UserExistException();
 
             var user = new User
             {
+                Id = Guid.NewGuid(),
                 Email = dto.Email,
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
@@ -43,7 +44,7 @@ namespace AuthService.Business.Services.Auth
             };
 
             await _context.Users.AddAsync(user);
-            await _context.SaveChangesAsync();
+            //await _context.SaveChangesAsync();
             await _publisher.SendEmail(new EmailMessage
             {
                 Email = dto.Email,
