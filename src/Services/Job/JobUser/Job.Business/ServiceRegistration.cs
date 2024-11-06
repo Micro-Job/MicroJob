@@ -9,6 +9,7 @@ using Job.Business.Services.Resume;
 using Job.Core.Entities;
 using Job.Business.Services.Education;
 using Job.Business.Services.Experience;
+using Job.Business.Consumers;
 
 namespace Job.Business
 {
@@ -26,6 +27,7 @@ namespace Job.Business
         {
             services.AddMassTransit(x =>
             {
+                x.AddConsumer<UserRegisteredConsumer>();
                 x.SetKebabCaseEndpointNameFormatter();
                 x.UsingRabbitMq((con, cfg) =>
                 {

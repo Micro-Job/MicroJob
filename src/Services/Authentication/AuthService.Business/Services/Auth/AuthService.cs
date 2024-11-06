@@ -5,9 +5,11 @@ using AuthService.Business.HelperServices.TokenHandler;
 using AuthService.Business.Publishers;
 using AuthService.Core.Entities;
 using AuthService.DAL.Contexts;
+using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Dtos.EmailDtos;
+using SharedLibrary.Events;
 using SharedLibrary.Exceptions;
 using System.Security.Claims;
 
@@ -15,8 +17,7 @@ namespace AuthService.Business.Services.Auth
 {
     public class AuthService(AppDbContext _context,
                              ITokenHandler _tokenHandler,
-                             IHttpContextAccessor _httpContext
-                             /*IEmailService _emailService*/,
+                             IHttpContextAccessor _httpContext,IPublishEndpoint _publishEndpoint,
                              EmailPublisher _publisher) : IAuthService
 
     {
@@ -48,6 +49,10 @@ namespace AuthService.Business.Services.Auth
                 Email = dto.Email,
                 Subject = "Xoş gəldiniz",
                 Content = "Qeydiyyat uğurla başa çatdı"
+            });
+            await _publishEndpoint.Publish(new UserRegisteredEvent
+            {
+                UserId = user.Id
             });
             // sifre yaratmaq ucun mail gondermek
             //await _emailService.SendSetPassword(dto.Email, await GeneratePasswordResetTokenAsync(user));
