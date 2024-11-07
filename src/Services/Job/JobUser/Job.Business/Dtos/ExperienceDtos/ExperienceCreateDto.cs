@@ -1,14 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using FluentValidation;
 
 namespace Job.Business.Dtos.ExperienceDtos
 {
     public record ExperienceCreateDto
     {
-        public string ResumeId { get; set; }
         public string OrganizationName { get; set; }
         public string PositionName { get; set; }
         public string? PositionDescription { get; set; }
@@ -21,9 +16,6 @@ namespace Job.Business.Dtos.ExperienceDtos
     {
         public ExperienceCreateDtoValidator()
         {
-            RuleFor(dto => dto.ResumeId)
-                .NotEmpty().WithMessage("Resume ID cannot be empty.");
-
             RuleFor(dto => dto.OrganizationName)
                 .NotEmpty().WithMessage("Organization Name cannot be empty.")
                 .Length(2, 100).WithMessage("Organization Name must be between 2 and 100 characters.");

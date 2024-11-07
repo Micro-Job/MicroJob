@@ -29,7 +29,7 @@ namespace Job.API
              
             builder.Services.AddDbContext<JobDbContext>(opt =>
             {
-                opt.UseSqlServer(builder.Configuration.GetConnectionString("Default"));
+                opt.UseSqlServer(builder.Configuration.GetConnectionString("MSSql"));
             });
 
             builder.Services.AddFluentValidation(opt =>
@@ -59,7 +59,7 @@ namespace Job.API
             app.UseHttpsRedirection();
             app.UseAuthorization();
 
-            app.UseCustomExceptionHandler();
+            //app.UseCustomExceptionHandler();
 
             app.MapControllers();
 

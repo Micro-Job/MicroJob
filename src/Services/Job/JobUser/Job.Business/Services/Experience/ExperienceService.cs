@@ -17,7 +17,6 @@ namespace Job.Business.Services.Experience
         {
             var experiencesToAdd = dtos.Select(dto => new Core.Entities.Experience
             {
-                ResumeId = Guid.Parse(dto.ResumeId),
                 OrganizationName = dto.OrganizationName,
                 PositionName = dto.PositionName,
                 PositionDescription = dto.PositionDescription,
@@ -27,19 +26,13 @@ namespace Job.Business.Services.Experience
             }).ToList();
 
             await _context.Experiences.AddRangeAsync(experiencesToAdd);
-
             return experiencesToAdd;
         }
 
         public async Task CreateExperienceAsync(ExperienceCreateDto dto)
         {
-            var resumeId = Guid.Parse(dto.ResumeId);
-            var resume = await _context.Resumes.FindAsync(resumeId);
-            if (resume == null) throw new NotFoundException<Core.Entities.Experience>();
-
             var experience = new Core.Entities.Experience
             {
-                ResumeId = resume.Id,
                 OrganizationName = dto.OrganizationName,
                 PositionName = dto.PositionName,
                 PositionDescription = dto.PositionDescription,

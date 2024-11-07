@@ -15,13 +15,8 @@ namespace Job.Business.Services.Number
 
         public async Task CreateNumberAsync(NumberCreateDto numberCreateDto)
         {
-            var resumeId = Guid.Parse(numberCreateDto.ResumeId);
-            var resume = await _context.Resumes.FindAsync(resumeId);
-            if (resume is null) throw new NotFoundException<Core.Entities.Resume>();
-
             var number = new Core.Entities.Number
             {
-                ResumeId = resumeId,
                 PhoneNumber = numberCreateDto.PhoneNumber,
             };
             await _context.Numbers.AddAsync(number);
@@ -33,21 +28,13 @@ namespace Job.Business.Services.Number
 
             foreach (var numberCreateDto in numberCreateDtos)
             {
-                var resumeId = Guid.Parse(numberCreateDto.ResumeId);
-                var resume = await _context.Resumes.FindAsync(resumeId);
-
-                if (resume is null)
-                    throw new NotFoundException<Core.Entities.Resume>();
-
                 var number = new Core.Entities.Number
                 {
-                    ResumeId = resumeId,
                     PhoneNumber = numberCreateDto.PhoneNumber,
                 };
 
                 numbersToAdd.Add(number);
             }
-
             await _context.Numbers.AddRangeAsync(numbersToAdd);
             return numbersToAdd;
         }

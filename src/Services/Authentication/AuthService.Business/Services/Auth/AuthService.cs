@@ -5,8 +5,11 @@ using AuthService.Business.HelperServices.TokenHandler;
 using AuthService.Business.Publishers;
 using AuthService.Core.Entities;
 using AuthService.DAL.Contexts;
+using Job.Business.Dtos.FileDtos;
+using Job.Business.Dtos.ResumeDtos;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Dtos.EmailDtos;
 using SharedLibrary.Events;
@@ -28,7 +31,7 @@ namespace AuthService.Business.Services.Auth
         public async Task RegisterAsync(RegisterDto dto)
         {
             var userCheck = await _context.Users.FirstOrDefaultAsync(x => x.Email == dto.Email || x.MainPhoneNumber == dto.MainPhoneNumber);
-
+            FileDto fileResult = new();
             // email veya istifadeci adı tekrarlanmasını yoxla
             if (userCheck != null) throw new UserExistException();
 
@@ -41,10 +44,13 @@ namespace AuthService.Business.Services.Auth
                 MainPhoneNumber = dto.MainPhoneNumber,
                 RegistrationDate = DateTime.Now,
                 Password = _tokenHandler.GeneratePasswordHash(dto.Password),
+                Image = dto.Image != null
+                ? $"{fileResult.FilePath}/{fileResult.FileName}"
+                    : null,
             };
 
             await _context.Users.AddAsync(user);
-            //await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             await _publisher.SendEmail(new EmailMessage
             {
                 Email = dto.Email,
