@@ -30,10 +30,8 @@ namespace Job.Business.Services.Education
 
         public async Task CreateEducationAsync(EducationCreateDto dto)
         {
-            var resumeId = Guid.Parse(dto.ResumeId);
             var education = new Core.Entities.Education
             {
-                ResumeId = resumeId,
                 InstitutionName = dto.InstitutionName,
                 Profession = dto.Profession,
                 StartDate = dto.StartDate,

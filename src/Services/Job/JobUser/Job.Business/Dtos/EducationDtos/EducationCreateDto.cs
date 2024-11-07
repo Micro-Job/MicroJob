@@ -5,7 +5,6 @@ namespace Job.Business.Dtos.EducationDtos
 {
     public record EducationCreateDto
     {
-        public string ResumeId { get; set; }
         public string InstitutionName { get; set; }
         public string Profession { get; set; }
         public DateTime StartDate { get; set; }
@@ -18,8 +17,6 @@ namespace Job.Business.Dtos.EducationDtos
     {
         public EducationCreateDtoValidator()
         {
-            RuleFor(dto => dto.ResumeId)
-                .NotEmpty().WithMessage("Resume ID cannot be empty.");
             RuleFor(dto => dto.InstitutionName)
                 .NotEmpty().WithMessage("Institution Name cannot be empty.")
                 .Length(2, 100).WithMessage("Institution Name must be between 2 and 100 characters.");

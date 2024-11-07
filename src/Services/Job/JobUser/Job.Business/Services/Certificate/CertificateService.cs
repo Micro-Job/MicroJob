@@ -17,7 +17,6 @@ namespace Job.Business.Services.Certificate
         {
             var certificatesToAdd = dtos.Select(dto => new Core.Entities.Certificate
             {
-                ResumeId = Guid.Parse(dto.ResumeId),
                 CertificateName = dto.CertificateName,
                 CertificateFile = dto.CertificateFile,
                 GivenOrganization = dto.GivenOrganization
@@ -30,18 +29,13 @@ namespace Job.Business.Services.Certificate
 
         public async Task CreateCertificateAsync(CertificateCreateDto dto)
         {
-            var resumeId = Guid.Parse(dto.ResumeId);
-            var resume = await _context.Resumes.FindAsync(resumeId);
-            if (resume is null) throw new NotFoundException<Core.Entities.Resume>();
-
             var certificate = new Core.Entities.Certificate
             {
-                ResumeId = resumeId,
                 CertificateName = dto.CertificateName,
                 CertificateFile = dto.CertificateFile,
                 GivenOrganization = dto.GivenOrganization
             };
-            _context.Certificates.Add(certificate);
+            await _context.Certificates.AddAsync(certificate);
         }
 
         public async Task UpdateCertificateAsync(string id, CertificateUpdateDto dto)

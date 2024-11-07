@@ -24,7 +24,7 @@ namespace AuthService.Core.Entities
 
         public DateTime? LockDownDate { get; set; }
 
-        public string? Image {  get; set; }
+        public string? Image { get; set; }
 
         public virtual ICollection<LoginLog> LoginLogs { get; set; } = new List<LoginLog>();
 
@@ -32,4 +32,4 @@ namespace AuthService.Core.Entities
 
         public virtual UserStatus? UserStatus { get; set; }
     }
-} 
+}
