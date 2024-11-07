@@ -4,14 +4,9 @@ using Job.DAL.Contexts;
 
 namespace Job.Business.Services.Experience
 {
-    public class ExperienceService : IExperienceService
+    public class ExperienceService(JobDbContext context) : IExperienceService
     {
-        private readonly JobDbContext _context;
-
-        public ExperienceService(JobDbContext context)
-        {
-            _context = context;
-        }
+        private readonly JobDbContext _context = context;
 
         public async Task<ICollection<Core.Entities.Experience>> CreateBulkExperienceAsync(ICollection<ExperienceCreateDto> dtos)
         {
@@ -40,16 +35,14 @@ namespace Job.Business.Services.Experience
                 EndDate = dto.IsCurrentOrganization ? null : dto.EndDate,
                 IsCurrentOrganization = dto.IsCurrentOrganization
             };
-
             await _context.Experiences.AddAsync(experience);
         }
 
         public async Task UpdateExperienceAsync(string id, ExperienceUpdateDto dto)
         {
             var resumeId = Guid.Parse(id);
-            var experience = await _context.Experiences.FindAsync(resumeId);
-            if (experience is null) throw new NotFoundException<Core.Entities.Experience>();
-
+            var experience = await _context.Experiences.FindAsync(resumeId)
+                ?? throw new NotFoundException<Core.Entities.Experience>();
             experience.OrganizationName = dto.OrganizationName;
             experience.PositionName = dto.PositionName;
             experience.PositionDescription = dto.PositionDescription;

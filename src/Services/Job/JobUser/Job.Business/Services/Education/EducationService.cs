@@ -4,14 +4,10 @@ using Job.DAL.Contexts;
 
 namespace Job.Business.Services.Education
 {
-    public class EducationService : IEducationService
+    public class EducationService(JobDbContext context) : IEducationService
     {
-        private readonly JobDbContext _context;
+        private readonly JobDbContext _context = context;
 
-        public EducationService(JobDbContext context)
-        {
-            _context = context;
-        }
         public async Task<ICollection<Core.Entities.Education>> CreateBulkEducationAsync(ICollection<EducationCreateDto> dtos)
         {
             var educationsToAdd = dtos.Select(dto => new Core.Entities.Education
