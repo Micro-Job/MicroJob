@@ -7,7 +7,6 @@ using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using SharedLibrary.Middlewares;
-using SharedLibrary.ServiceRegistration;
 
 namespace Job.API
 {
@@ -31,7 +30,7 @@ namespace Job.API
 
             builder.Services.AddDbContext<JobDbContext>(opt =>
             {
-                opt.UseSqlServer(builder.Configuration["ConnectionStrings:Default"]);
+                opt.UseSqlServer(builder.Configuration.GetConnectionString("Default"));
             });
 
             builder.Services.AddFluentValidation(opt =>
