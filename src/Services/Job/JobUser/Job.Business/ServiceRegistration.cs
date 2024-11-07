@@ -11,6 +11,9 @@ using Job.Business.Services.Education;
 using Job.Business.Services.Experience;
 using Job.Business.Consumers;
 using Job.Business.Services.User;
+using Job.Business.Services.Number;
+using Job.Business.Services.Language;
+using Job.Business.Services.Certificate;
 
 namespace Job.Business
 {
@@ -23,6 +26,9 @@ namespace Job.Business
             services.AddScoped<IEducationService, EducationService>();
             services.AddScoped<IUserInformationService, UserInformationService>();
             services.AddScoped<IExperienceService, ExperienceService>();
+            services.AddScoped<INumberService, NumberService>();
+            services.AddScoped<ILanguageService, LanguageService>();
+            services.AddScoped<ICertificateService, CertificateService>();
         }
 
         public static IServiceCollection AddMassTransit(this IServiceCollection services, string cString)
