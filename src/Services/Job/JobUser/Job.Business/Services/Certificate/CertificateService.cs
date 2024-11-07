@@ -1,5 +1,8 @@
 using Job.Business.Dtos.CertificateDtos;
+using Job.Business.Dtos.FileDtos;
 using Job.Business.Exceptions.Common;
+using Job.Business.ExternalServices;
+using Job.Business.Statics;
 using Job.DAL.Contexts;
 
 namespace Job.Business.Services.Certificate
@@ -7,6 +10,7 @@ namespace Job.Business.Services.Certificate
     public class CertificateService : ICertificateService
     {
         readonly JobDbContext _context;
+        readonly IFileService _fileService;
 
         public CertificateService(JobDbContext context)
         {
@@ -18,7 +22,6 @@ namespace Job.Business.Services.Certificate
             var certificatesToAdd = dtos.Select(dto => new Core.Entities.Certificate
             {
                 CertificateName = dto.CertificateName,
-                CertificateFile = dto.CertificateFile,
                 GivenOrganization = dto.GivenOrganization
             }).ToList();
 
@@ -29,10 +32,14 @@ namespace Job.Business.Services.Certificate
 
         public async Task CreateCertificateAsync(CertificateCreateDto dto)
         {
+            FileDto fileResult = new();
+
+            fileResult = await _fileService.UploadAsync(FilePaths.document, dto.CertificateFile);
+
             var certificate = new Core.Entities.Certificate
             {
                 CertificateName = dto.CertificateName,
-                CertificateFile = dto.CertificateFile,
+                CertificateFile = $"{fileResult.FilePath}/{fileResult.FileName}",
                 GivenOrganization = dto.GivenOrganization
             };
             await _context.Certificates.AddAsync(certificate);
