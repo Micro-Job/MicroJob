@@ -1,4 +1,3 @@
-
 using FluentValidation.AspNetCore;
 using Job.Business;
 using Job.Business.Services.Resume;
@@ -27,7 +26,7 @@ namespace Job.API
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Job.API", Version = "v1" });
             });
-
+             
             builder.Services.AddDbContext<JobDbContext>(opt =>
             {
                 opt.UseSqlServer(builder.Configuration.GetConnectionString("Default"));
