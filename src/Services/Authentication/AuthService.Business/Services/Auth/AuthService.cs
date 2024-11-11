@@ -14,6 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Dtos.EmailDtos;
 using SharedLibrary.Events;
 using SharedLibrary.Exceptions;
+using SharedLibrary.Middlewares;
 using System.Security.Claims;
 
 namespace AuthService.Business.Services.Auth
@@ -34,6 +35,7 @@ namespace AuthService.Business.Services.Auth
             FileDto fileResult = new();
             // email veya istifadeci adı tekrarlanmasını yoxla
             if (userCheck != null) throw new UserExistException();
+            if (dto.Password != dto.ConfirmPassword)  throw new WrongPasswordException();
 
             var user = new User
             {

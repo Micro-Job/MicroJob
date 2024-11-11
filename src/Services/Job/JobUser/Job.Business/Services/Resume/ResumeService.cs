@@ -8,8 +8,11 @@ using Job.Business.Services.Education;
 using Job.Business.Services.Experience;
 using Job.Business.Services.Language;
 using Job.Business.Services.Number;
+using Job.Business.Services.User;
 using Job.Business.Statics;
+using Job.Core.Entities;
 using Job.DAL.Contexts;
+using MassTransit.Initializers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
@@ -27,9 +30,10 @@ namespace Job.Business.Services.Resume
         readonly IExperienceService _experienceService;
         readonly ILanguageService _languageService;
         readonly ICertificateService _certificateService;
+        readonly IUserInformationService _userInformationService;
 
         public ResumeService(JobDbContext context, IFileService fileService, IHttpContextAccessor httpContextAccessor, INumberService numberService,
-            IEducationService educationService, IExperienceService experienceService, ILanguageService languageService, ICertificateService certificateService)
+            IEducationService educationService, IExperienceService experienceService, ILanguageService languageService, ICertificateService certificateService,IUserInformationService userInformationService)
         {
             _context = context;
             _fileService = fileService;
@@ -39,10 +43,8 @@ namespace Job.Business.Services.Resume
             _experienceService = experienceService;
             _languageService = languageService;
             _certificateService = certificateService;
-
-            var userId = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier);
-            if (userId == null) throw new UserIsNotLoggedInException();
-            _userId = Guid.Parse(userId.Value);
+            _userInformationService = userInformationService;
+            _userId = Guid.Parse(_httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier).Value);
         }
 
         public async Task CreateResumeAsync(ResumeCreateDto resumeCreateDto)
@@ -57,6 +59,22 @@ namespace Job.Business.Services.Resume
             {
                 var numbers = await _numberService.CreateBulkNumberAsync(resumeCreateDto.PhoneNumbers);
             }
+            else
+            {
+                var mainNumber  = await _userInformationService.GetUserDataAsync(_userId).Select(x=> new Core.Entities.Number
+                {
+                    PhoneNumber = x.MainPhoneNumber
+                });
+            }
+
+            string email = string.Empty;
+
+            if (!resumeCreateDto.IsMainEmail)
+                email = resumeCreateDto.ResumeEmail;
+            else
+                email = await _userInformationService.GetUserDataAsync(_userId).Select(x => x.Email);
+
+
             var educations = await _educationService.CreateBulkEducationAsync(resumeCreateDto.Educations);
 
             var experiences = await _experienceService.CreateBulkExperienceAsync(resumeCreateDto.Experiences);
@@ -85,7 +103,7 @@ namespace Job.Business.Services.Resume
                 Experiences = experiences,
                 Languages = languages,
                 Certificates = certificates,
-                //ResumeEmail = resumeCreateDto.IsMainEmail == false ? resumeCreateDto.ResumeEmail : existEmail,
+                ResumeEmail = email,
             };
             await _context.Resumes.AddAsync(resume);
             await _context.SaveChangesAsync();
@@ -135,6 +153,7 @@ namespace Job.Business.Services.Resume
         {
             var resume = await _context.Resumes.FirstOrDefaultAsync(r => r.UserId == _userId)
                             ?? throw new NotFoundException<Core.Entities.Resume>();
+
             resume.FatherName = resumeUpdateDto.FatherName;
             resume.Position = resumeUpdateDto.Position;
             resume.IsDriver = resumeUpdateDto.IsDriver;
