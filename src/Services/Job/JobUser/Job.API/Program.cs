@@ -6,6 +6,8 @@ using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using SharedLibrary.Middlewares;
+using SharedLibrary.ServiceRegistration;
+
 
 namespace Job.API
 {
@@ -40,6 +42,7 @@ namespace Job.API
             builder.Services.AddMassTransit(builder.Configuration["RabbitMQ"]!);
 
             builder.Services.AddServices();
+            builder.Services.AddCorsPolicy();
 
             var app = builder.Build();
             app.UseStaticFiles();
