@@ -41,5 +41,10 @@ namespace Job.Business.Services.Number
                 ?? throw new NotFoundException<Core.Entities.Number>();
             number.PhoneNumber = numberUpdateDto.PhoneNumber;
         }
+
+        public Task UpdateNumberAsync(ICollection<NumberUpdateDto> dtos)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
