@@ -33,7 +33,7 @@ namespace Job.Business.Services.Resume
         readonly IUserInformationService _userInformationService;
 
         public ResumeService(JobDbContext context, IFileService fileService, IHttpContextAccessor httpContextAccessor, INumberService numberService,
-            IEducationService educationService, IExperienceService experienceService, ILanguageService languageService, ICertificateService certificateService,IUserInformationService userInformationService)
+            IEducationService educationService, IExperienceService experienceService, ILanguageService languageService, ICertificateService certificateService, IUserInformationService userInformationService)
         {
             _context = context;
             _fileService = fileService;
@@ -49,11 +49,11 @@ namespace Job.Business.Services.Resume
 
         public async Task CreateResumeAsync(ResumeCreateDto resumeCreateDto)
         {
-            FileDto fileResult = new();
             var resumeGuid = Guid.NewGuid();
 
-            if (resumeCreateDto.UserPhoto != null)
-                fileResult = await _fileService.UploadAsync(FilePaths.image, resumeCreateDto.UserPhoto);
+            FileDto fileResult = resumeCreateDto.UserPhoto != null
+         ? await _fileService.UploadAsync(FilePaths.document, resumeCreateDto.UserPhoto)
+         : new FileDto();
 
             if (!resumeCreateDto.IsMainNumber)
             {
@@ -61,7 +61,7 @@ namespace Job.Business.Services.Resume
             }
             else
             {
-                var mainNumber  = await _userInformationService.GetUserDataAsync(_userId).Select(x=> new Core.Entities.Number
+                var mainNumber = await _userInformationService.GetUserDataAsync(_userId).Select(x => new Core.Entities.Number
                 {
                     PhoneNumber = x.MainPhoneNumber
                 });
