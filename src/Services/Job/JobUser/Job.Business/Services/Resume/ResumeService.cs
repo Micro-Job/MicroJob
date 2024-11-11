@@ -154,34 +154,82 @@ namespace Job.Business.Services.Resume
                 resume.UserPhoto = $"{fileResult.FilePath}/{fileResult.FileName}";
             }
 
-            if (resumeUpdateDto.UpdatePhoneNumbers != null)
+            if (resumeUpdateDto.PhoneNumbers != null)
             {
-                foreach (var phoneNumberDto in resumeUpdateDto.UpdatePhoneNumbers)
+                foreach (var phoneNumberDto in resumeUpdateDto.PhoneNumbers)
                 {
-                    var phoneNumber = resume.PhoneNumbers.FirstOrDefault(p => p.PhoneNumber == phoneNumberDto.PhoneNumber);
-                    if (phoneNumber != null)
+                    var phoneNumberGuid = Guid.Parse(phoneNumberDto.Id);
+                    var phoneNumber = resume.PhoneNumbers.FirstOrDefault(p => p.Id == phoneNumberGuid);
+                    if (phoneNumber != null && phoneNumber.PhoneNumber != phoneNumberDto.PhoneNumber)
                     {
                         phoneNumber.PhoneNumber = phoneNumberDto.PhoneNumber;
-                        // Set other properties as needed
                     }
                 }
             }
-            if (resumeUpdateDto.DeletePhoneNumbers != null)
+
+            if (resumeUpdateDto.Educations != null)
             {
-                var phoneNumbersToDelete = resume.PhoneNumbers
-                                        .Where(p => resumeUpdateDto.DeletePhoneNumbers.Contains(p.Id))
-                                        .ToList();
-                _context.Numbers.RemoveRange(phoneNumbersToDelete);
-            }
-            if (resumeUpdateDto.AddPhoneNumbers != null)
-            {
-                foreach (var phoneNumberDto in resumeUpdateDto.AddPhoneNumbers)
+                foreach (var educationDto in resumeUpdateDto.Educations)
                 {
-                    resume.PhoneNumbers.Add(new Core.Entities.Number
+                    var educationGuid = Guid.Parse(educationDto.Id);
+                    var education = resume.Educations.FirstOrDefault(e => e.Id == educationGuid);
+                    if (education != null)
                     {
-                        PhoneNumber = phoneNumberDto.PhoneNumber,
-                        // Set other properties as needed
-                    });
+                        education.InstitutionName = educationDto.InstitutionName;
+                        education.Profession = educationDto.Profession;
+                        education.StartDate = educationDto.StartDate;
+                        education.EndDate = educationDto.EndDate;
+                    }
+                }
+            }
+
+            if (resumeUpdateDto.Experiences != null)
+            {
+                foreach (var experienceDto in resumeUpdateDto.Experiences)
+                {
+                    var experienceGuid = Guid.Parse(experienceDto.Id);
+                    var experience = resume.Experiences.FirstOrDefault(e => e.Id == experienceGuid);
+                    if (experience != null)
+                    {
+                        experience.OrganizationName = experienceDto.OrganizationName;
+                        experience.PositionName = experienceDto.PositionName;
+                        experience.PositionDescription = experienceDto.PositionDescription;
+                        experience.StartDate = experienceDto.StartDate;
+                        experience.EndDate = experienceDto.EndDate;
+                    }
+                }
+            }
+
+            if (resumeUpdateDto.Languages != null)
+            {
+                foreach (var languageDto in resumeUpdateDto.Languages)
+                {
+                    var languageGuid = Guid.Parse(languageDto.Id);
+                    var language = resume.Languages.FirstOrDefault(l => l.Id == languageGuid);
+                    if (language != null && language.LanguageName != languageDto.LanguageName)
+                    {
+                        language.LanguageName = languageDto.LanguageName;
+                    }
+                }
+            }
+
+            if (resumeUpdateDto.Certificates != null)
+            {
+                foreach (var certificateDto in resumeUpdateDto.Certificates)
+                {
+                    var certificateGuid = Guid.Parse(certificateDto.Id);
+                    var certificate = resume.Certificates.FirstOrDefault(c => c.Id == certificateGuid);
+                    if (certificate != null && certificate.CertificateName != certificateDto.CertificateName)
+                    {
+                        certificate.CertificateName = certificateDto.CertificateName;
+                        certificate.GivenOrganization = certificateDto.GivenOrganization;
+                        if (certificate.CertificateFile != null)
+                        {
+                            _fileService.DeleteFile(certificate.CertificateFile);
+                        }
+                        var fileResult = await _fileService.UploadAsync(FilePaths.document, certificateDto.CertificateFile);
+                        certificate.CertificateFile = $"{fileResult.FilePath}/{fileResult.FileName}";
+                    }
                 }
             }
             _context.Resumes.Update(resume);

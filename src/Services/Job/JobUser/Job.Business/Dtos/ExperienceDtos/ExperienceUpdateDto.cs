@@ -4,6 +4,7 @@ namespace Job.Business.Dtos.ExperienceDtos
 {
     public record ExperienceUpdateDto
     {
+        public string Id { get; set; }
         public string OrganizationName { get; set; }
         public string PositionName { get; set; }
         public string? PositionDescription { get; set; }

@@ -6,6 +6,6 @@ namespace Job.Business.Services.Number
     {
         Task<ICollection<Core.Entities.Number>> CreateBulkNumberAsync(ICollection<NumberCreateDto> numberCreateDtos);
         Task CreateNumberAsync(NumberCreateDto numberCreateDto);
-        Task UpdateNumberAsync(string id, NumberUpdateDto numberUpdateDto);
+        Task UpdateNumberAsync(ICollection<NumberUpdateDto> dtos);
     }
 }

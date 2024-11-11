@@ -1,18 +1,16 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using FluentValidation;
+using Job.Core.Enums;
 
 namespace Job.Business.Dtos.LanguageDtos
 {
     public record LanguageUpdateDto
     {
-        public Core.Enums.Language LanguageName { get; set; }
-        public Core.Enums.LanguageLevel LanguageLevel { get; set; }
+        public string Id { get; set; }
+        public Language LanguageName { get; set; }
+        public LanguageLevel LanguageLevel { get; set; }
     }
 
-        public class LanguageUpdateDtoValidator : AbstractValidator<LanguageUpdateDto>
+    public class LanguageUpdateDtoValidator : AbstractValidator<LanguageUpdateDto>
     {
         public LanguageUpdateDtoValidator()
         {
@@ -21,5 +19,5 @@ namespace Job.Business.Dtos.LanguageDtos
             RuleFor(x => x.LanguageLevel)
                 .IsInEnum().WithMessage("Invalid language level.");
         }
-    } 
+    }
 }

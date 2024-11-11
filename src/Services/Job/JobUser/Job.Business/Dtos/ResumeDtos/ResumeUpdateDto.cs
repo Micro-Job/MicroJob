@@ -1,6 +1,11 @@
 using FluentValidation;
+using Job.Business.Dtos.CertificateDtos;
+using Job.Business.Dtos.EducationDtos;
+using Job.Business.Dtos.ExperienceDtos;
+using Job.Business.Dtos.LanguageDtos;
 using Job.Business.Dtos.NumberDtos;
 using Job.Business.Validators;
+using Job.Core.Entities;
 using Job.Core.Enums;
 using Microsoft.AspNetCore.Http;
 
@@ -17,13 +22,11 @@ namespace Job.Business.Dtos.ResumeDtos
         public Gender Gender { get; set; }
         public string? Adress { get; set; }
         public DateTime BirthDay { get; set; }
-        public ICollection<Guid> EducationIds { get; set; }
-        public ICollection<Guid> LanguageIds { get; set; }
-        public ICollection<Guid> ExperienceIds { get; set; }
-        public ICollection<Guid> CertificateIds { get; set; }
-        public ICollection<NumberUpdateDto>? UpdatePhoneNumbers { get; set; }
-        public ICollection<Guid>? DeletePhoneNumbers { get; set; }
-        public ICollection<NumberCreateDto>? AddPhoneNumbers { get; set; }
+        public ICollection<EducationUpdateDto>? Educations { get; set; }
+        public ICollection<LanguageUpdateDto>? Languages { get; set; }
+        public ICollection<ExperienceUpdateDto>? Experiences { get; set; }
+        public ICollection<CertificateUpdateDto>? Certificates { get; set; }
+        public ICollection<NumberUpdateDto>? PhoneNumbers { get; set; }
     }
 
     public class ResumeUpdateDtoValidator : AbstractValidator<ResumeUpdateDto>
