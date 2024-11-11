@@ -70,13 +70,9 @@ namespace Job.Business.Services.Resume
             string email = string.Empty;
 
             if (!resumeCreateDto.IsMainEmail)
-            {
                 email = resumeCreateDto.ResumeEmail;
-            }
             else
-            {
                 email = await _userInformationService.GetUserDataAsync(_userId).Select(x => x.Email);
-            }
 
 
             var educations = await _educationService.CreateBulkEducationAsync(resumeCreateDto.Educations);
@@ -157,6 +153,7 @@ namespace Job.Business.Services.Resume
         {
             var resume = await _context.Resumes.FirstOrDefaultAsync(r => r.UserId == _userId)
                             ?? throw new NotFoundException<Core.Entities.Resume>();
+
             resume.FatherName = resumeUpdateDto.FatherName;
             resume.Position = resumeUpdateDto.Position;
             resume.IsDriver = resumeUpdateDto.IsDriver;

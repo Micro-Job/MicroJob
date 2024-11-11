@@ -31,7 +31,7 @@ namespace Job.API
              
             builder.Services.AddDbContext<JobDbContext>(opt =>
             {
-                opt.UseSqlServer(builder.Configuration.GetConnectionString("MSSql"));
+                opt.UseSqlServer(builder.Configuration.GetConnectionString("MSSQL"));
             });
 
             builder.Services.AddFluentValidation(opt =>
