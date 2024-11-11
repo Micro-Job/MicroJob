@@ -4,14 +4,10 @@ using Job.DAL.Contexts;
 
 namespace Job.Business.Services.Education
 {
-    public class EducationService : IEducationService
+    public class EducationService(JobDbContext context) : IEducationService
     {
-        private readonly JobDbContext _context;
+        private readonly JobDbContext _context = context;
 
-        public EducationService(JobDbContext context)
-        {
-            _context = context;
-        }
         public async Task<ICollection<Core.Entities.Education>> CreateBulkEducationAsync(ICollection<EducationCreateDto> dtos)
         {
             var educationsToAdd = dtos.Select(dto => new Core.Entities.Education
@@ -45,10 +41,8 @@ namespace Job.Business.Services.Education
         public async Task UpdateEducationAsync(string id, EducationUpdateDto dto)
         {
             var educationId = Guid.Parse(id);
-            var education = await _context.Educations.FindAsync(educationId);
-
-            if (education is null) throw new NotFoundException<Core.Entities.Education>();
-
+            var education = await _context.Educations.FindAsync(educationId)
+                ?? throw new NotFoundException<Core.Entities.Education>();
             education.InstitutionName = dto.InstitutionName;
             education.Profession = dto.Profession;
             education.StartDate = dto.StartDate;

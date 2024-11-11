@@ -9,7 +9,6 @@ namespace AuthService.Business.Dtos
         public string LastName { get; set; }
         public string Email { get; set; }
         public string MainPhoneNumber { get; set; }
-
     }
 
     public class UserUpdateDtoValidator : AbstractValidator<UserUpdateDto>

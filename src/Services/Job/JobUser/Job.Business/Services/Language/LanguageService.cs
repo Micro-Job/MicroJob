@@ -4,14 +4,9 @@ using Job.DAL.Contexts;
 
 namespace Job.Business.Services.Language
 {
-    public class LanguageService : ILanguageService
+    public class LanguageService(JobDbContext context) : ILanguageService
     {
-        readonly JobDbContext _context;
-
-        public LanguageService(JobDbContext context)
-        {
-            _context = context;
-        }
+        readonly JobDbContext _context = context;
 
         public async Task<ICollection<Core.Entities.Language>> CreateBulkLanguageAsync(ICollection<LanguageCreateDto> dtos)
         {
@@ -22,7 +17,6 @@ namespace Job.Business.Services.Language
             }).ToList();
 
             await _context.Languages.AddRangeAsync(languagesToAdd);
-
             return languagesToAdd;
         }
 
@@ -39,7 +33,8 @@ namespace Job.Business.Services.Language
         public async Task UpdateLanguageAsync(string id, LanguageUpdateDto dto)
         {
             var languageId = Guid.Parse(id);
-            var language = await _context.Languages.FindAsync(languageId) ?? throw new NotFoundException<Core.Entities.Language>();
+            var language = await _context.Languages.FindAsync(languageId) 
+                ?? throw new NotFoundException<Core.Entities.Language>();
             language.LanguageName = dto.LanguageName;
             language.LanguageLevel = dto.LanguageLevel;
         }
