@@ -52,11 +52,11 @@ namespace Job.Business.Services.Resume
 
         public async Task CreateResumeAsync(ResumeCreateDto resumeCreateDto)
         {
-            FileDto fileResult = new();
             var resumeGuid = Guid.NewGuid();
 
-            if (resumeCreateDto.UserPhoto != null)
-                fileResult = await _fileService.UploadAsync(FilePaths.image, resumeCreateDto.UserPhoto);
+            FileDto fileResult = resumeCreateDto.UserPhoto != null
+         ? await _fileService.UploadAsync(FilePaths.document, resumeCreateDto.UserPhoto)
+         : new FileDto();
 
             if (!resumeCreateDto.IsMainNumber)
             {

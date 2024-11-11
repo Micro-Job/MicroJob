@@ -16,13 +16,16 @@ using SharedLibrary.Events;
 using SharedLibrary.Exceptions;
 using SharedLibrary.Middlewares;
 using System.Security.Claims;
+using Job.Business.ExternalServices;
+using Job.Business.Statics;
 
 namespace AuthService.Business.Services.Auth
 {
     public class AuthService(AppDbContext _context,
                              ITokenHandler _tokenHandler,
-                             IHttpContextAccessor _httpContext,IPublishEndpoint _publishEndpoint,
-                             EmailPublisher _publisher) : IAuthService
+                             IHttpContextAccessor _httpContext, IPublishEndpoint _publishEndpoint,
+                             EmailPublisher _publisher,
+                             IFileService _fileService) : IAuthService
 
     {
         private string _ipAddress = _httpContext.HttpContext.Connection.RemoteIpAddress?.ToString();
@@ -32,10 +35,12 @@ namespace AuthService.Business.Services.Auth
         public async Task RegisterAsync(RegisterDto dto)
         {
             var userCheck = await _context.Users.FirstOrDefaultAsync(x => x.Email == dto.Email || x.MainPhoneNumber == dto.MainPhoneNumber);
-            FileDto fileResult = new();
+            FileDto fileResult = dto.Image != null
+          ? await _fileService.UploadAsync(FilePaths.document, dto.Image)
+          : new FileDto();
             // email veya istifadeci adı tekrarlanmasını yoxla
             if (userCheck != null) throw new UserExistException();
-            if (dto.Password != dto.ConfirmPassword)  throw new WrongPasswordException();
+            if (dto.Password != dto.ConfirmPassword) throw new WrongPasswordException();
 
             var user = new User
             {
