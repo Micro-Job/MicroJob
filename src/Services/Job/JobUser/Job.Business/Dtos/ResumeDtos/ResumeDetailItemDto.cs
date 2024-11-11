@@ -1,7 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Job.Business.Dtos.CertificateDtos;
+using Job.Business.Dtos.EducationDtos;
+using Job.Business.Dtos.ExperienceDtos;
+using Job.Business.Dtos.LanguageDtos;
+using Job.Business.Dtos.NumberDtos;
 using Job.Core.Enums;
 
 namespace Job.Business.Dtos.ResumeDtos
@@ -18,5 +19,13 @@ namespace Job.Business.Dtos.ResumeDtos
         public Gender Gender { get; set; }
         public string? Adress { get; set; }
         public DateTime BirthDay { get; set; }
+
+        //public UserInformationDto User { get; set; }
+        public string? ResumeEmail { get; set; }
+        public ICollection<NumberGetByIdDto> PhoneNumbers { get; set; }
+        public ICollection<EducationGetByIdDto> Educations { get; set; }
+        public ICollection<ExperienceGetByIdDto>? Experiences { get; set; }
+        public ICollection<LanguageGetByIdDto>? Languages { get; set; }
+        public ICollection<CertificateGetByIdDto>? Certificates { get; set; }
     }
 }

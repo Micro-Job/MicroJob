@@ -1,7 +1,11 @@
-﻿using Job.Business.Dtos.FileDtos;
+﻿using Job.Business.Dtos.CertificateDtos;
+using Job.Business.Dtos.EducationDtos;
+using Job.Business.Dtos.ExperienceDtos;
+using Job.Business.Dtos.FileDtos;
+using Job.Business.Dtos.LanguageDtos;
+using Job.Business.Dtos.NumberDtos;
 using Job.Business.Dtos.ResumeDtos;
 using Job.Business.Exceptions.Common;
-using Job.Business.Exceptions.UserExceptions;
 using Job.Business.ExternalServices;
 using Job.Business.Services.Certificate;
 using Job.Business.Services.Education;
@@ -10,7 +14,6 @@ using Job.Business.Services.Language;
 using Job.Business.Services.Number;
 using Job.Business.Services.User;
 using Job.Business.Statics;
-using Job.Core.Entities;
 using Job.DAL.Contexts;
 using MassTransit.Initializers;
 using Microsoft.AspNetCore.Http;
@@ -33,7 +36,7 @@ namespace Job.Business.Services.Resume
         readonly IUserInformationService _userInformationService;
 
         public ResumeService(JobDbContext context, IFileService fileService, IHttpContextAccessor httpContextAccessor, INumberService numberService,
-            IEducationService educationService, IExperienceService experienceService, ILanguageService languageService, ICertificateService certificateService,IUserInformationService userInformationService)
+            IEducationService educationService, IExperienceService experienceService, ILanguageService languageService, ICertificateService certificateService, IUserInformationService userInformationService)
         {
             _context = context;
             _fileService = fileService;
@@ -61,7 +64,7 @@ namespace Job.Business.Services.Resume
             }
             else
             {
-                var mainNumber  = await _userInformationService.GetUserDataAsync(_userId).Select(x=> new Core.Entities.Number
+                var mainNumber = await _userInformationService.GetUserDataAsync(_userId).Select(x => new Core.Entities.Number
                 {
                     PhoneNumber = x.MainPhoneNumber
                 });
@@ -109,30 +112,30 @@ namespace Job.Business.Services.Resume
             await _context.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<ResumeListDto>> GetAllResumeAsync()
-        {
-            var resumes = await _context.Resumes.ToListAsync();
-            var resumeList = resumes.Select(r => new ResumeListDto
-            {
-                UserId = r.UserId,
-                FatherName = r.FatherName,
-                Position = r.Position,
-                UserPhoto = r.UserPhoto,
-                IsDriver = r.IsDriver,
-                IsMarried = r.IsMarried,
-                IsCitizen = r.IsCitizen,
-                Gender = r.Gender,
-                Adress = r.Adress,
-                BirthDay = r.BirthDay
-            });
+        //public async Task<IEnumerable<ResumeListDto>> GetAllResumeAsync()
+        //{
+        //    var resumes = await _context.Resumes.ToListAsync();
+        //    var resumeList = resumes.Select(r => new ResumeListDto
+        //    {
+        //        UserId = r.UserId,
+        //        FatherName = r.FatherName,
+        //        Position = r.Position,
+        //        UserPhoto = r.UserPhoto,
+        //        IsDriver = r.IsDriver,
+        //        IsMarried = r.IsMarried,
+        //        IsCitizen = r.IsCitizen,
+        //        Gender = r.Gender,
+        //        Adress = r.Adress,
+        //        BirthDay = r.BirthDay
+        //    });
 
-            return resumeList;
-        }
+        //    return resumeList;
+        //}
 
         public async Task<ResumeDetailItemDto> GetByIdResumeAsync(string id)
         {
-            var resume = await _context.Resumes.FindAsync(Guid.Parse(id));
-            if (resume is null) throw new NotFoundException<Core.Entities.Resume>();
+            var resumeGuid = Guid.Parse(id);
+            var resume = await _context.Resumes.FindAsync(resumeGuid) ?? throw new NotFoundException<Core.Entities.Resume>();
             var resumeDetail = new ResumeDetailItemDto
             {
                 UserId = resume.UserId,
@@ -145,13 +148,62 @@ namespace Job.Business.Services.Resume
                 Gender = resume.Gender,
                 Adress = resume.Adress,
                 BirthDay = resume.BirthDay,
+                ResumeEmail = resume.ResumeEmail,
+
+                PhoneNumbers = resume.PhoneNumbers.Select(p => new NumberGetByIdDto
+                {
+                    Id = p.Id,
+                    PhoneNumber = p.PhoneNumber
+                }).ToList(),
+
+                Educations = resume.Educations.Select(e => new EducationGetByIdDto
+                {
+                    Id = e.Id,
+                    InstitutionName = e.InstitutionName,
+                    Profession = e.Profession,
+                    StartDate = e.StartDate,
+                    EndDate = e.EndDate,
+                    IsCurrentEducation = e.IsCurrentEducation,
+                    ProfessionDegree = e.ProfessionDegree
+                }).ToList(),
+
+                Experiences = resume.Experiences.Select(ex => new ExperienceGetByIdDto
+                {
+                    Id = ex.Id,
+                    OrganizationName = ex.OrganizationName,
+                    PositionName = ex.PositionName,
+                    PositionDescription = ex.PositionDescription,
+                    StartDate = ex.StartDate,
+                    EndDate = ex.EndDate,
+                    IsCurrentOrganization = ex.IsCurrentOrganization
+                }).ToList(),
+
+                Languages = resume.Languages.Select(l => new LanguageGetByIdDto
+                {
+                    Id = l.Id,
+                    LanguageName = l.LanguageName,
+                    LanguageLevel = l.LanguageLevel
+                }).ToList(),
+
+                Certificates = resume.Certificates.Select(c => new CertificateGetByIdDto
+                {
+                    Id = c.Id,
+                    CertificateName = c.CertificateName,
+                    GivenOrganization = c.GivenOrganization,
+                    CertificateFile = c.CertificateFile
+                }).ToList()
             };
             return resumeDetail;
         }
 
         public async Task UpdateResumeAsync(ResumeUpdateDto resumeUpdateDto)
         {
-            var resume = await _context.Resumes.FirstOrDefaultAsync(r => r.UserId == _userId)
+            var resume = await _context.Resumes
+                    .Include(r => r.PhoneNumbers)
+                    .Include(r => r.Educations)
+                    .Include(r => r.Experiences)
+                    .Include(r => r.Languages)
+                    .Include(r => r.Certificates).FirstOrDefaultAsync(r => r.UserId == _userId)
                             ?? throw new NotFoundException<Core.Entities.Resume>();
 
             resume.FatherName = resumeUpdateDto.FatherName;
