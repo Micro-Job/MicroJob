@@ -41,10 +41,8 @@ namespace Job.Business.Services.Education
         public async Task UpdateEducationAsync(string id, EducationUpdateDto dto)
         {
             var educationId = Guid.Parse(id);
-            var education = await _context.Educations.FindAsync(educationId);
-
-            if (education is null) throw new NotFoundException<Core.Entities.Education>();
-
+            var education = await _context.Educations.FindAsync(educationId)
+                ?? throw new NotFoundException<Core.Entities.Education>();
             education.InstitutionName = dto.InstitutionName;
             education.Profession = dto.Profession;
             education.StartDate = dto.StartDate;

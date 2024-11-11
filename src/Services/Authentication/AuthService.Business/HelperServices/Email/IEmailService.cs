@@ -1,6 +1,4 @@
-﻿using SharedLibrary.Dtos.EmailDtos;
-
-namespace AuthService.Business.HelperServices.Email
+﻿namespace AuthService.Business.HelperServices.Email
 {
     public interface IEmailService
     {

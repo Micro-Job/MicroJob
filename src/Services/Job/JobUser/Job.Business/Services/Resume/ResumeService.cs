@@ -135,7 +135,6 @@ namespace Job.Business.Services.Resume
         {
             var resume = await _context.Resumes.FirstOrDefaultAsync(r => r.UserId == _userId)
                             ?? throw new NotFoundException<Core.Entities.Resume>();
-
             resume.FatherName = resumeUpdateDto.FatherName;
             resume.Position = resumeUpdateDto.Position;
             resume.IsDriver = resumeUpdateDto.IsDriver;
@@ -155,6 +154,36 @@ namespace Job.Business.Services.Resume
                 resume.UserPhoto = $"{fileResult.FilePath}/{fileResult.FileName}";
             }
 
+            if (resumeUpdateDto.UpdatePhoneNumbers != null)
+            {
+                foreach (var phoneNumberDto in resumeUpdateDto.UpdatePhoneNumbers)
+                {
+                    var phoneNumber = resume.PhoneNumbers.FirstOrDefault(p => p.PhoneNumber == phoneNumberDto.PhoneNumber);
+                    if (phoneNumber != null)
+                    {
+                        phoneNumber.PhoneNumber = phoneNumberDto.PhoneNumber;
+                        // Set other properties as needed
+                    }
+                }
+            }
+            if (resumeUpdateDto.DeletePhoneNumbers != null)
+            {
+                var phoneNumbersToDelete = resume.PhoneNumbers
+                                        .Where(p => resumeUpdateDto.DeletePhoneNumbers.Contains(p.Id))
+                                        .ToList();
+                _context.Numbers.RemoveRange(phoneNumbersToDelete);
+            }
+            if (resumeUpdateDto.AddPhoneNumbers != null)
+            {
+                foreach (var phoneNumberDto in resumeUpdateDto.AddPhoneNumbers)
+                {
+                    resume.PhoneNumbers.Add(new Core.Entities.Number
+                    {
+                        PhoneNumber = phoneNumberDto.PhoneNumber,
+                        // Set other properties as needed
+                    });
+                }
+            }
             _context.Resumes.Update(resume);
             await _context.SaveChangesAsync();
         }

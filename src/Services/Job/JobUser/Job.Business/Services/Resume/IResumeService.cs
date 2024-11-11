@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Job.Business.Dtos.ResumeDtos;
+﻿using Job.Business.Dtos.ResumeDtos;
 
 namespace Job.Business.Services.Resume
 {
@@ -15,4 +10,3 @@ namespace Job.Business.Services.Resume
         Task<ResumeDetailItemDto> GetByIdResumeAsync(string id);
     }
 }
-
