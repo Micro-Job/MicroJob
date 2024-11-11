@@ -136,9 +136,16 @@ namespace Job.Business.Services.Resume
         {
             var resumeGuid = Guid.Parse(id);
             var resume = await _context.Resumes.FindAsync(resumeGuid) ?? throw new NotFoundException<Core.Entities.Resume>();
+            var userFullName = await _userInformationService.GetUserDataAsync(_userId).Select(x=> new
+            {
+                FirstName = x.FirstName,
+                LastName = x.LastName,
+            });
             var resumeDetail = new ResumeDetailItemDto
             {
                 UserId = resume.UserId,
+                FirstName = userFullName.FirstName, 
+                LastName = userFullName.LastName,
                 FatherName = resume.FatherName,
                 Position = resume.Position,
                 UserPhoto = resume.UserPhoto,
@@ -152,13 +159,13 @@ namespace Job.Business.Services.Resume
 
                 PhoneNumbers = resume.PhoneNumbers.Select(p => new NumberGetByIdDto
                 {
-                    Id = p.Id,
+                    //Id = p.Id,
                     PhoneNumber = p.PhoneNumber
                 }).ToList(),
 
                 Educations = resume.Educations.Select(e => new EducationGetByIdDto
                 {
-                    Id = e.Id,
+                    //Id = e.Id,
                     InstitutionName = e.InstitutionName,
                     Profession = e.Profession,
                     StartDate = e.StartDate,
@@ -169,7 +176,7 @@ namespace Job.Business.Services.Resume
 
                 Experiences = resume.Experiences.Select(ex => new ExperienceGetByIdDto
                 {
-                    Id = ex.Id,
+                    //Id = ex.Id,
                     OrganizationName = ex.OrganizationName,
                     PositionName = ex.PositionName,
                     PositionDescription = ex.PositionDescription,
@@ -180,14 +187,14 @@ namespace Job.Business.Services.Resume
 
                 Languages = resume.Languages.Select(l => new LanguageGetByIdDto
                 {
-                    Id = l.Id,
+                    //Id = l.Id,
                     LanguageName = l.LanguageName,
                     LanguageLevel = l.LanguageLevel
                 }).ToList(),
 
                 Certificates = resume.Certificates.Select(c => new CertificateGetByIdDto
                 {
-                    Id = c.Id,
+                    //Id = c.Id,
                     CertificateName = c.CertificateName,
                     GivenOrganization = c.GivenOrganization,
                     CertificateFile = c.CertificateFile
@@ -215,15 +222,15 @@ namespace Job.Business.Services.Resume
             resume.Adress = resumeUpdateDto.Adress;
             resume.BirthDay = resumeUpdateDto.BirthDay;
 
-            if (resumeUpdateDto.UserPhoto != null)
-            {
-                if (resume.UserPhoto != null)
-                {
-                    _fileService.DeleteFile(resume.UserPhoto);
-                };
-                var fileResult = await _fileService.UploadAsync(FilePaths.image, resumeUpdateDto.UserPhoto);
-                resume.UserPhoto = $"{fileResult.FilePath}/{fileResult.FileName}";
-            }
+            //if (resumeUpdateDto.UserPhoto != null)
+            //{
+            //    if (resume.UserPhoto != null)
+            //    {
+            //        _fileService.DeleteFile(resume.UserPhoto);
+            //    };
+            //    var fileResult = await _fileService.UploadAsync(FilePaths.image, resumeUpdateDto.UserPhoto);
+            //    resume.UserPhoto = $"{fileResult.FilePath}/{fileResult.FileName}";
+            //}
 
             if (resumeUpdateDto.PhoneNumbers != null)
             {

@@ -24,11 +24,11 @@ namespace Job.API.Controllers
             return Ok();
         }
 
-        [HttpGet("[action]")]
-        public async Task<IActionResult> GetAllResume()
-        {
-            return Ok(await _service.GetAllResumeAsync());
-        }
+        //[HttpGet("[action]")]
+        //public async Task<IActionResult> GetAllResume()
+        //{
+        //    return Ok(await _service.GetAllResumeAsync());
+        //}
 
         [HttpGet("[action]/{id}")]
         public async Task<IActionResult> GetByIdResume(string id)
