@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Job.Business.ExternalServices;
 using Microsoft.Extensions.DependencyInjection;
 using MassTransit;
 using Job.Business.Services.Resume;
@@ -16,6 +15,7 @@ using Job.Business.Services.Language;
 using Job.Business.Services.Certificate;
 using Job.Business.Services.Vacancy;
 using AuthService.Business.Services.CurrentUser;
+using SharedLibrary.ExternalServices.FileService;
 
 namespace Job.Business
 {

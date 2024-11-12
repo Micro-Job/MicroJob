@@ -5,26 +5,21 @@ namespace AuthService.Business.Dtos
 {
     public class RegisterDto
     {
-        public string UserName { get; set; }
+        //public string UserName { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string MainPhoneNumber { get; set; }
         public string Email { get; set; }
         public string? Password { get; set; }
         public string? ConfirmPassword { get; set; }
-        public IFormFile Image { get; set; }
+        public IFormFile? Image { get; set; }
     }
 
     public class RegisterDtoValidator : AbstractValidator<RegisterDto>
     {
         public RegisterDtoValidator()
         {
-            RuleFor(x => x.UserName)
-                .NotNull()
-                .NotEmpty()
-                .WithMessage("Boş ola bilməz")
-                .Length(1, 32)
-                .WithMessage("Uzunluq 1-50 arasında olmalıdır");
+           
             RuleFor(x => x.FirstName)
                 .NotNull()
                 .NotEmpty()

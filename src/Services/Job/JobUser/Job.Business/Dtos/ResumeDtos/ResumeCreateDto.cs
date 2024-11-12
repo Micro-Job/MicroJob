@@ -12,7 +12,6 @@ namespace Job.Business.Dtos.ResumeDtos
 {
     public record ResumeCreateDto
     {
-        public string UserId { get; set; }
         public string FatherName { get; set; }
         public string Position { get; set; }
         public IFormFile? UserPhoto { get; set; }
@@ -36,9 +35,6 @@ namespace Job.Business.Dtos.ResumeDtos
     {
         public ResumeCreateDtoValidator()
         {
-            RuleFor(x => x.UserId)
-                .NotEmpty().WithMessage("User ID is required.");
-
             RuleFor(x => x.FatherName)
                 .NotEmpty().WithMessage("Father's name is required.")
                 .MaximumLength(50).WithMessage("Father's name cannot exceed 50 characters.");
@@ -47,12 +43,6 @@ namespace Job.Business.Dtos.ResumeDtos
                 .NotEmpty().WithMessage("Position is required.")
                 .MaximumLength(100).WithMessage("Position cannot exceed 100 characters.");
 
-            When(x => x.UserPhoto != null, () =>
-            {
-                RuleFor(x => x.UserPhoto)
-                    .SetValidator(new FileValidator())
-                    .WithMessage("User Photo must be a valid image file.");
-            });
             RuleFor(x => x.Adress)
                 .MaximumLength(200).WithMessage("Address cannot exceed 200 characters.");
 
