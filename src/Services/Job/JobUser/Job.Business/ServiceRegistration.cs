@@ -1,15 +1,6 @@
 using AuthService.Business.Services.CurrentUser;
 using Job.Business.Consumers;
-using Job.Business.ExternalServices;
 using Job.Business.Services.Certificate;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using MassTransit;
-using Job.Business.Services.Resume;
-using Job.Core.Entities;
 using Job.Business.Services.Education;
 using Job.Business.Services.Experience;
 using Job.Business.Services.Language;
@@ -20,7 +11,6 @@ using Job.Business.Services.User;
 using Job.Business.Services.Vacancy;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
-using AuthService.Business.Services.CurrentUser;
 using SharedLibrary.ExternalServices.FileService;
 
 namespace Job.Business
