@@ -4,6 +4,7 @@ using Job.Business.Dtos.EducationDtos;
 using Job.Business.Dtos.ExperienceDtos;
 using Job.Business.Dtos.LanguageDtos;
 using Job.Business.Dtos.NumberDtos;
+using Job.Business.Dtos.SkillDtos;
 using Job.Business.Validators;
 using Job.Core.Enums;
 using Microsoft.AspNetCore.Http;
@@ -29,7 +30,8 @@ namespace Job.Business.Dtos.ResumeDtos
         public ICollection<EducationCreateDto> Educations {  get; set; } 
         public ICollection<ExperienceCreateDto> Experiences {  get; set; } 
         public ICollection<LanguageCreateDto> Languages {  get; set; } 
-        public ICollection<CertificateCreateDto> Certificates {  get; set; } 
+        public ICollection<CertificateCreateDto> Certificates {  get; set; }
+        public ICollection<Guid> SkillIds { get; set; }
     }
 
     public class ResumeCreateDtoValidator : AbstractValidator<ResumeCreateDto>

@@ -14,6 +14,7 @@ using Job.Business.Services.Language;
 using Job.Business.Services.Number;
 using Job.Business.Services.User;
 using Job.Business.Statics;
+using Job.Core.Entities;
 using Job.DAL.Contexts;
 using MassTransit.Initializers;
 using Microsoft.AspNetCore.Http;
@@ -86,6 +87,14 @@ namespace Job.Business.Services.Resume
 
             var certificates = await _certificateService.CreateBulkCertificateAsync(resumeCreateDto.Certificates);
 
+            var resumeSkills = resumeCreateDto.SkillIds
+                    .Select(skillId => new ResumeSkill
+                    {
+                        SkillId = skillId,
+                        ResumeId = resumeGuid
+                    }).ToList();
+            await _context.ResumeSkills.AddRangeAsync(resumeSkills);
+
             var resume = new Core.Entities.Resume
             {
                 Id = resumeGuid,
@@ -107,7 +116,7 @@ namespace Job.Business.Services.Resume
                 Languages = languages,
                 Certificates = certificates,
                 ResumeEmail = email,
-                
+                ResumeSkills = resumeSkills
             };
             await _context.Resumes.AddAsync(resume);
             await _context.SaveChangesAsync();
@@ -138,7 +147,7 @@ namespace Job.Business.Services.Resume
             var resumeGuid = Guid.Parse(id);
 
             var resume = await _context.Resumes.FindAsync(resumeGuid) ?? throw new NotFoundException<Core.Entities.Resume>();
-            var userFullName = await _userInformationService.GetUserDataAsync(_userId).Select(x=> new
+            var userFullName = await _userInformationService.GetUserDataAsync(_userId).Select(x => new
             {
                 FirstName = x.FirstName,
                 LastName = x.LastName,
@@ -147,7 +156,7 @@ namespace Job.Business.Services.Resume
             var resumeDetail = new ResumeDetailItemDto
             {
                 UserId = resume.UserId,
-                FirstName = userFullName.FirstName, 
+                FirstName = userFullName.FirstName,
                 LastName = userFullName.LastName,
                 FatherName = resume.FatherName,
                 Position = resume.Position,

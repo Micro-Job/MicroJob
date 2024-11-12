@@ -36,6 +36,11 @@ namespace Job.DAL.Configurations
                     .WithOne(ei => ei.Resume)
                     .HasForeignKey(ei => ei.ResumeId)
                     .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasMany(r => r.ResumeSkills)
+                    .WithOne(rs => rs.Resume)
+                    .HasForeignKey(rs => rs.ResumeId)
+                    .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
