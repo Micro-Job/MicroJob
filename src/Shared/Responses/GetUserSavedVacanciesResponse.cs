@@ -2,13 +2,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Job.Core.Entities
+namespace SharedLibrary.Responses
 {
-    public class Vacancy : BaseEntity
+    public class GetUserSavedVacanciesResponse
     {
         public string Title { get; set; }
         public string CompanyName { get; set; }

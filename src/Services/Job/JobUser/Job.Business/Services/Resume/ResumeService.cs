@@ -107,6 +107,7 @@ namespace Job.Business.Services.Resume
                 Languages = languages,
                 Certificates = certificates,
                 ResumeEmail = email,
+                
             };
             await _context.Resumes.AddAsync(resume);
             await _context.SaveChangesAsync();
@@ -135,12 +136,14 @@ namespace Job.Business.Services.Resume
         public async Task<ResumeDetailItemDto> GetByIdResumeAsync(string id)
         {
             var resumeGuid = Guid.Parse(id);
+
             var resume = await _context.Resumes.FindAsync(resumeGuid) ?? throw new NotFoundException<Core.Entities.Resume>();
             var userFullName = await _userInformationService.GetUserDataAsync(_userId).Select(x=> new
             {
                 FirstName = x.FirstName,
                 LastName = x.LastName,
             });
+
             var resumeDetail = new ResumeDetailItemDto
             {
                 UserId = resume.UserId,

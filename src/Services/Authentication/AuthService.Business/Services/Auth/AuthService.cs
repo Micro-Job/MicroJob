@@ -5,19 +5,18 @@ using AuthService.Business.HelperServices.TokenHandler;
 using AuthService.Business.Publishers;
 using AuthService.Core.Entities;
 using AuthService.DAL.Contexts;
-using Job.Business.Dtos.FileDtos;
-using Job.Business.Dtos.ResumeDtos;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Dtos.EmailDtos;
+using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.Events;
 using SharedLibrary.Exceptions;
+using SharedLibrary.ExternalServices.FileService;
 using SharedLibrary.Middlewares;
+using SharedLibrary.Statics;
 using System.Security.Claims;
-using Job.Business.ExternalServices;
-using Job.Business.Statics;
 
 namespace AuthService.Business.Services.Auth
 {

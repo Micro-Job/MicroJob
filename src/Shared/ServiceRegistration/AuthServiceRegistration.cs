@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using SharedLibrary.ExternalServices.FileService;
 using System.Text;
 
 namespace SharedLibrary.ServiceRegistration
@@ -30,6 +31,11 @@ namespace SharedLibrary.ServiceRegistration
             });
             services.AddAuthorization();
         }
+
+        public static void AddServices(this IServiceCollection services)
+        {
+            services.AddScoped<IFileService, FileService>();
+        }
+        //builder.Services.AddAuth(builder.Configuration["Jwt:Issuer"], builder.Configuration["Jwt:Audience"], builder.Configuration["Jwt:SigningKey"]);
     }
-    //builder.Services.AddAuth(builder.Configuration["Jwt:Issuer"], builder.Configuration["Jwt:Audience"], builder.Configuration["Jwt:SigningKey"]);
 }

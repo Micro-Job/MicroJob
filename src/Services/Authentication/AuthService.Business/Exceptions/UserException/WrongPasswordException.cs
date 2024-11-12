@@ -1,5 +1,5 @@
-﻿using Job.Business.Exceptions.Common;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
+using SharedLibrary.Exceptions.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;

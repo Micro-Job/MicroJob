@@ -41,7 +41,7 @@ namespace Job.API
 
             builder.Services.AddMassTransit(builder.Configuration["RabbitMQ"]!);
 
-            builder.Services.AddServices();
+            builder.Services.AddJobServices();
             builder.Services.AddCorsPolicy();
 
             var app = builder.Build();

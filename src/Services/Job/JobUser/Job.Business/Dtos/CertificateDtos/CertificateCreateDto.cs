@@ -7,7 +7,7 @@ namespace Job.Business.Dtos.CertificateDtos
     {
         public string CertificateName { get; set; }
         public string GivenOrganization { get; set; }
-        public IFormFile CertificateFile { get; set; }
+        public IFormFile? CertificateFile { get; set; }
     }
 
     public class CertificateCreateDtoValidator : AbstractValidator<CertificateCreateDto>

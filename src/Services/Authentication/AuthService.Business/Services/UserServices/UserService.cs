@@ -3,11 +3,11 @@ using AuthService.Business.Exceptions.UserException;
 using AuthService.Business.Services.CurrentUser;
 using AuthService.Core.Entities;
 using AuthService.DAL.Contexts;
-using Job.Business.Dtos.FileDtos;
-using Job.Business.ExternalServices;
 using MassTransit;
 using MassTransit.Initializers;
 using Microsoft.EntityFrameworkCore;
+using SharedLibrary.Dtos.FileDtos;
+using SharedLibrary.ExternalServices.FileService;
 using SharedLibrary.Requests;
 using SharedLibrary.Responses;
 

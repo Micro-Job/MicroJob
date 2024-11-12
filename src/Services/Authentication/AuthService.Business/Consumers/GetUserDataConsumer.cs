@@ -1,6 +1,5 @@
 ﻿using AuthService.Business.Services.CurrentUser;
 using AuthService.DAL.Contexts;
-using Job.DAL.Contexts;
 using MassTransit;
 using MassTransit.Initializers;
 using Microsoft.EntityFrameworkCore;
