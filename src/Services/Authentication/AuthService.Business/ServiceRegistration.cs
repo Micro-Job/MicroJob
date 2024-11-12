@@ -7,6 +7,7 @@ using AuthService.Business.Services.CurrentUser;
 using AuthService.Business.Services.UserServices;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
+using SharedLibrary.ExternalServices.FileService;
 
 namespace AuthService.Business
 {
@@ -21,7 +22,7 @@ namespace AuthService.Business
             services.AddScoped<ICurrentUser, CurrentUser>();
             services.AddScoped<EmailPublisher>();
             services.AddScoped<IUserService, UserService>();
-            //services.AddScoped<IFileService, FileService>();
+            services.AddScoped<IFileService, FileService>();
         }
         public static IServiceCollection AddMassTransit(this IServiceCollection services, string cString)
         {

@@ -15,6 +15,7 @@ using Job.Business.Services.Number;
 using Job.Business.Services.Language;
 using Job.Business.Services.Certificate;
 using Job.Business.Services.Vacancy;
+using AuthService.Business.Services.CurrentUser;
 
 namespace Job.Business
 {
@@ -31,6 +32,7 @@ namespace Job.Business
             services.AddScoped<ILanguageService, LanguageService>();
             services.AddScoped<ICertificateService, CertificateService>();
             services.AddScoped<IVacancyService, VacancyService>();
+            services.AddScoped<ICurrentUser,CurrentUser>();
         }
 
         public static IServiceCollection AddMassTransit(this IServiceCollection services, string cString)
