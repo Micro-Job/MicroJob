@@ -19,6 +19,8 @@ using MassTransit.Initializers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using AuthService.Business.Services;
+using AuthService.Business.Services.CurrentUser;
 
 namespace Job.Business.Services.Resume
 {
@@ -27,16 +29,16 @@ namespace Job.Business.Services.Resume
         readonly JobDbContext _context;
         readonly IFileService _fileService;
         readonly IHttpContextAccessor _httpContextAccessor;
-        readonly Guid _userId;
         readonly INumberService _numberService;
         readonly IEducationService _educationService;
         readonly IExperienceService _experienceService;
         readonly ILanguageService _languageService;
         readonly ICertificateService _certificateService;
         readonly IUserInformationService _userInformationService;
+        readonly CurrentUser _currentUser;
 
         public ResumeService(JobDbContext context, IFileService fileService, IHttpContextAccessor httpContextAccessor, INumberService numberService,
-            IEducationService educationService, IExperienceService experienceService, ILanguageService languageService, ICertificateService certificateService, IUserInformationService userInformationService)
+            IEducationService educationService, IExperienceService experienceService, ILanguageService languageService, ICertificateService certificateService, IUserInformationService userInformationService, CurrentUser currentUser)
         {
             _context = context;
             _fileService = fileService;
@@ -47,12 +49,13 @@ namespace Job.Business.Services.Resume
             _languageService = languageService;
             _certificateService = certificateService;
             _userInformationService = userInformationService;
-            _userId = Guid.Parse(_httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier).Value);
+            _currentUser = currentUser;
         }
 
         public async Task CreateResumeAsync(ResumeCreateDto resumeCreateDto)
         {
             var resumeGuid = Guid.NewGuid();
+            var userId = Guid.Parse(_currentUser.UserId);
 
             FileDto fileResult = resumeCreateDto.UserPhoto != null
          ? await _fileService.UploadAsync(FilePaths.document, resumeCreateDto.UserPhoto)
@@ -64,7 +67,7 @@ namespace Job.Business.Services.Resume
             }
             else
             {
-                var mainNumber = await _userInformationService.GetUserDataAsync(_userId).Select(x => new Core.Entities.Number
+                var mainNumber = await _userInformationService.GetUserDataAsync(userId).Select(x => new Core.Entities.Number
                 {
                     PhoneNumber = x.MainPhoneNumber
                 });
@@ -75,7 +78,7 @@ namespace Job.Business.Services.Resume
             if (!resumeCreateDto.IsMainEmail)
                 email = resumeCreateDto.ResumeEmail;
             else
-                email = await _userInformationService.GetUserDataAsync(_userId).Select(x => x.Email);
+                email = await _userInformationService.GetUserDataAsync(userId).Select(x => x.Email);
 
 
             var educations = await _educationService.CreateBulkEducationAsync(resumeCreateDto.Educations);
@@ -89,7 +92,7 @@ namespace Job.Business.Services.Resume
             var resume = new Core.Entities.Resume
             {
                 Id = resumeGuid,
-                UserId = _userId,
+                UserId = userId,
                 FatherName = resumeCreateDto.FatherName,
                 Position = resumeCreateDto.Position,
                 IsDriver = resumeCreateDto.IsDriver,
@@ -136,9 +139,10 @@ namespace Job.Business.Services.Resume
         public async Task<ResumeDetailItemDto> GetByIdResumeAsync(string id)
         {
             var resumeGuid = Guid.Parse(id);
+            var userId = Guid.Parse(_currentUser.UserId);
 
             var resume = await _context.Resumes.FindAsync(resumeGuid) ?? throw new NotFoundException<Core.Entities.Resume>();
-            var userFullName = await _userInformationService.GetUserDataAsync(_userId).Select(x=> new
+            var userFullName = await _userInformationService.GetUserDataAsync(userId).Select(x=> new
             {
                 FirstName = x.FirstName,
                 LastName = x.LastName,
@@ -208,12 +212,13 @@ namespace Job.Business.Services.Resume
 
         public async Task UpdateResumeAsync(ResumeUpdateDto resumeUpdateDto)
         {
+            var userId = Guid.Parse(_currentUser.UserId);
             var resume = await _context.Resumes
                     .Include(r => r.PhoneNumbers)
                     .Include(r => r.Educations)
                     .Include(r => r.Experiences)
                     .Include(r => r.Languages)
-                    .Include(r => r.Certificates).FirstOrDefaultAsync(r => r.UserId == _userId)
+                    .Include(r => r.Certificates).FirstOrDefaultAsync(r => r.UserId == userId)
                             ?? throw new NotFoundException<Core.Entities.Resume>();
 
             resume.FatherName = resumeUpdateDto.FatherName;
