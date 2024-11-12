@@ -9,7 +9,7 @@ namespace AuthService.API.Controllers
     public class AuthController(IAuthService _authService) : ControllerBase
     {
         [HttpPost("[action]")]
-        public async Task<IActionResult> Register([FromForm] RegisterDto dto)
+        public async Task<IActionResult> Register(RegisterDto dto)
         {
             await _authService.RegisterAsync(dto);
             return Ok();

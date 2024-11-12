@@ -1,9 +1,9 @@
 using Job.Business.Dtos.CertificateDtos;
-using Job.Business.Dtos.FileDtos;
 using Job.Business.Exceptions.Common;
-using Job.Business.ExternalServices;
-using Job.Business.Statics;
 using Job.DAL.Contexts;
+using SharedLibrary.Dtos.FileDtos;
+using SharedLibrary.ExternalServices.FileService;
+using SharedLibrary.Statics;
 
 namespace Job.Business.Services.Certificate
 {
