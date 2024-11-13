@@ -2,7 +2,7 @@
 
 namespace Job.Business.Dtos.EducationDtos
 {
-    public class EducationGetByIdDto
+    public record EducationGetByIdDto
     {
         public Guid Id { get; set; }
         public string InstitutionName { get; set; }

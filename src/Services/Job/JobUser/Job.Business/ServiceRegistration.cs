@@ -1,20 +1,16 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using MassTransit;
-using Job.Business.Services.Resume;
-using Job.Core.Entities;
+using AuthService.Business.Services.CurrentUser;
+using Job.Business.Consumers;
+using Job.Business.Services.Certificate;
 using Job.Business.Services.Education;
 using Job.Business.Services.Experience;
-using Job.Business.Consumers;
-using Job.Business.Services.User;
-using Job.Business.Services.Number;
 using Job.Business.Services.Language;
-using Job.Business.Services.Certificate;
+using Job.Business.Services.Number;
+using Job.Business.Services.Resume;
+using Job.Business.Services.Skill;
+using Job.Business.Services.User;
 using Job.Business.Services.Vacancy;
-using AuthService.Business.Services.CurrentUser;
+using MassTransit;
+using Microsoft.Extensions.DependencyInjection;
 using SharedLibrary.ExternalServices.FileService;
 
 namespace Job.Business
@@ -32,7 +28,8 @@ namespace Job.Business
             services.AddScoped<ILanguageService, LanguageService>();
             services.AddScoped<ICertificateService, CertificateService>();
             services.AddScoped<IVacancyService, VacancyService>();
-            services.AddScoped<ICurrentUser,CurrentUser>();
+            services.AddScoped<ICurrentUser, CurrentUser>();
+            services.AddScoped<ISkillService, SkillService>();
         }
 
         public static IServiceCollection AddMassTransit(this IServiceCollection services, string cString)

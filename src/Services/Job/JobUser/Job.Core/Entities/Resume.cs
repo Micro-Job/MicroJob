@@ -21,5 +21,6 @@ namespace Job.Core.Entities
         public ICollection<Experience>? Experiences { get; set; }
         public ICollection<Language>? Languages { get; set; }
         public ICollection<Certificate>? Certificates { get; set; }
+        public ICollection<ResumeSkill> ResumeSkills { get; set; }
     }
 }

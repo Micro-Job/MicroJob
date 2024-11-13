@@ -1,4 +1,5 @@
-﻿using Job.Business.Dtos.CertificateDtos;
+﻿using AuthService.Business.Services.CurrentUser;
+using Job.Business.Dtos.CertificateDtos;
 using Job.Business.Dtos.EducationDtos;
 using Job.Business.Dtos.ExperienceDtos;
 using Job.Business.Dtos.LanguageDtos;
@@ -11,15 +12,13 @@ using Job.Business.Services.Experience;
 using Job.Business.Services.Language;
 using Job.Business.Services.Number;
 using Job.Business.Services.User;
+using Job.Core.Entities;
 using Job.DAL.Contexts;
 using MassTransit.Initializers;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using AuthService.Business.Services.CurrentUser;
-using SharedLibrary.ExternalServices.FileService;
 using SharedLibrary.Dtos.FileDtos;
+using SharedLibrary.ExternalServices.FileService;
 using SharedLibrary.Statics;
-using Job.Core.Entities;
 
 namespace Job.Business.Services.Resume
 {
@@ -36,14 +35,14 @@ namespace Job.Business.Services.Resume
         readonly ICurrentUser _currentUser;
         private readonly Guid userGuid;
 
-        public ResumeService(JobDbContext context, 
-            IFileService fileService, 
+        public ResumeService(JobDbContext context,
+            IFileService fileService,
             INumberService numberService,
-            IEducationService educationService, 
+            IEducationService educationService,
             IExperienceService experienceService,
-            ILanguageService languageService, 
-            ICertificateService certificateService, 
-            IUserInformationService userInformationService, 
+            ILanguageService languageService,
+            ICertificateService certificateService,
+            IUserInformationService userInformationService,
             ICurrentUser currentUser)
         {
             _context = context;
@@ -93,6 +92,14 @@ namespace Job.Business.Services.Resume
 
             var certificates = await _certificateService.CreateBulkCertificateAsync(resumeCreateDto.Certificates);
 
+            var resumeSkills = resumeCreateDto.SkillIds
+                    .Select(skillId => new ResumeSkill
+                    {
+                        SkillId = skillId,
+                        //ResumeId = 
+                    }).ToList();
+            await _context.ResumeSkills.AddRangeAsync(resumeSkills);
+
             var resume = new Core.Entities.Resume
             {
                 Id = Guid.NewGuid(),
@@ -114,11 +121,31 @@ namespace Job.Business.Services.Resume
                 Languages = languages,
                 Certificates = certificates,
                 ResumeEmail = email,
-                
+                ResumeSkills = resumeSkills
             };
             await _context.Resumes.AddAsync(resume);
             await _context.SaveChangesAsync();
         }
+
+        //public async Task<IEnumerable<ResumeListDto>> GetAllResumeAsync()
+        //{
+        //    var resumes = await _context.Resumes.ToListAsync();
+        //    var resumeList = resumes.Select(r => new ResumeListDto
+        //    {
+        //        UserId = r.UserId,
+        //        FatherName = r.FatherName,
+        //        Position = r.Position,
+        //        UserPhoto = r.UserPhoto,
+        //        IsDriver = r.IsDriver,
+        //        IsMarried = r.IsMarried,
+        //        IsCitizen = r.IsCitizen,
+        //        Gender = r.Gender,
+        //        Adress = r.Adress,
+        //        BirthDay = r.BirthDay
+        //    });
+
+        //    return resumeList;
+        //}
 
         public async Task UpdateResumeAsync(ResumeUpdateDto resumeUpdateDto)
         {
@@ -244,7 +271,7 @@ namespace Job.Business.Services.Resume
                                             .FirstOrDefaultAsync(x => x.Id == resumeGuid) ??
                                             throw new NotFoundException<Core.Entities.Resume>();
 
-            var userFullName = await _userInformationService.GetUserDataAsync(userGuid).Select(x=> new
+            var userFullName = await _userInformationService.GetUserDataAsync(userGuid).Select(x => new
             {
                 FirstName = x.FirstName,
                 LastName = x.LastName,
@@ -253,7 +280,7 @@ namespace Job.Business.Services.Resume
             var resumeDetail = new ResumeDetailItemDto
             {
                 UserId = resume.UserId,
-                FirstName = userFullName.FirstName, 
+                FirstName = userFullName.FirstName,
                 LastName = userFullName.LastName,
                 FatherName = resume.FatherName,
                 Position = resume.Position,
@@ -326,7 +353,7 @@ namespace Job.Business.Services.Resume
 
         //    return resumeList;
         //}
-        
+
 
 
         //public async Task<ResumeDetailItemDto> GetByIdResumeAsyncNew(string id)
@@ -396,4 +423,3 @@ namespace Job.Business.Services.Resume
         //}
     }
 }
-        
