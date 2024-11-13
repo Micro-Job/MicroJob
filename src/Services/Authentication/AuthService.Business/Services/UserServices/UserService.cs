@@ -40,7 +40,7 @@ namespace AuthService.Business.Services.UserServices
                     LastName = x.LastName,
                     Email = x.Email,
                     MainPhoneNumber = x.MainPhoneNumber,
-                    Image = $"{_currentUser.BaseUrl}/{x.Image}",
+                    Image = x.Image != null ? $"{_currentUser.BaseUrl}/{x.Image}" : null,
                 })
                 ?? throw new UserNotFoundException();
 

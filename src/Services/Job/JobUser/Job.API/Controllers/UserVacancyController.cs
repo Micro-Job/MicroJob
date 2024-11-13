@@ -8,7 +8,7 @@ namespace Job.API.Controllers
     [ApiController]
     public class UserVacancyController(IVacancyService _vacancyService) : ControllerBase
     {
-        [HttpPost]
+        [HttpPost("[action]")]
         public async Task<IActionResult> ToggleSaveVacancy(string vacancyId)
         {
             await _vacancyService.ToggleSaveVacancyAsync(vacancyId);

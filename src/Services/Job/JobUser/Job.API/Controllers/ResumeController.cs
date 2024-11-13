@@ -11,7 +11,7 @@ namespace Job.API.Controllers
         readonly IResumeService _service = service;
 
         [HttpPost("[action]")]
-        public async Task<IActionResult> CreateResume([FromForm] ResumeCreateDto resumeCreateDto)
+        public async Task<IActionResult> CreateResume(ResumeCreateDto resumeCreateDto)
         {
             await _service.CreateResumeAsync(resumeCreateDto);
             return Ok();
@@ -23,12 +23,6 @@ namespace Job.API.Controllers
             await _service.UpdateResumeAsync(resumeUpdateDto);
             return Ok();
         }
-
-        //[HttpGet("[action]")]
-        //public async Task<IActionResult> GetAllResume()
-        //{
-        //    return Ok(await _service.GetAllResumeAsync());
-        //}
 
         [HttpGet("[action]/{id}")]
         public async Task<IActionResult> GetByIdResume(string id)
