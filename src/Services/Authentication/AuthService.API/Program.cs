@@ -58,8 +58,6 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
 builder.Services.AddCorsPolicy();
 builder.Services.AddAuth(builder.Configuration["Jwt:Issuer"]!, builder.Configuration["Jwt:Audience"]!, builder.Configuration["Jwt:SigningKey"]!);
 
-builder.Services.AddHttpContextAccessor();
-
 var app = builder.Build();
 
 
