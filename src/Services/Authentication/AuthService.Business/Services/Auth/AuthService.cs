@@ -54,19 +54,18 @@ namespace AuthService.Business.Services.Auth
                 ? $"{fileResult.FilePath}/{fileResult.FileName}"
                     : null,
             };
-            if (dto.UserStatus == 2)
-            {
-
-            }
-
+            
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
-            await _publisher.SendEmail(new EmailMessage
+
+            if (dto.UserStatus == 2)
             {
-                Email = dto.Email,
-                Subject = "Xoş gəldiniz",
-                Content = "Qeydiyyat uğurla başa çatdı"
-            });
+                await _publishEndpoint.Publish(new CompanyRegisteredEvent
+                {
+                    CompanyId = user.Id,
+                    CompanyInformation = dto.CompanyInformation
+                });
+            }
             if (dto.UserStatus == 1)
             {
                 await _publishEndpoint.Publish(new UserRegisteredEvent
@@ -74,6 +73,14 @@ namespace AuthService.Business.Services.Auth
                     UserId = user.Id
                 });
             }
+
+            await _publisher.SendEmail(new EmailMessage
+            {
+                Email = dto.Email,
+                Subject = "Xoş gəldiniz",
+                Content = "Qeydiyyat uğurla başa çatdı"
+            });
+           
             // sifre yaratmaq ucun mail gondermek
             //await _emailService.SendSetPassword(dto.Email, await GeneratePasswordResetTokenAsync(user));
         }

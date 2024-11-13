@@ -19,6 +19,9 @@ namespace JobCompany.Business.Consumers
                 Id = context.Message.CompanyId,
                 CompanyInformation = context.Message.CompanyInformation,
             };
+
+            await _context.Companies.AddAsync(newCompany);
+            await _context.SaveChangesAsync();
         }
     }
 }

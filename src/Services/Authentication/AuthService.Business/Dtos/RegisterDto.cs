@@ -14,6 +14,7 @@ namespace AuthService.Business.Dtos
         public string? ConfirmPassword { get; set; }
         public IFormFile? Image { get; set; }
         public byte? UserStatus { get; set; }
+        public string? CompanyInformation { get; set; }
     }
 
     public class RegisterDtoValidator : AbstractValidator<RegisterDto>
