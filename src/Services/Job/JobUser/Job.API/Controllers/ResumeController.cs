@@ -24,10 +24,10 @@ namespace Job.API.Controllers
             return Ok();
         }
 
-        [HttpGet("[action]/{id}")]
-        public async Task<IActionResult> GetByIdResume(string id)
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetByIdResume()
         {
-            return Ok(await _service.GetByIdResumeAsync(id));
+            return Ok(await _service.GetByIdResumeAsync());
         }
     }
 }

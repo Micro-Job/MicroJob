@@ -17,6 +17,7 @@ namespace Job.Business.Services.Language
             }).ToList();
 
             await _context.Languages.AddRangeAsync(languagesToAdd);
+            await _context.SaveChangesAsync();
             return languagesToAdd;
         }
 

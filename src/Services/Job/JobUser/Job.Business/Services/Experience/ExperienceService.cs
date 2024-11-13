@@ -21,6 +21,8 @@ namespace Job.Business.Services.Experience
             }).ToList();
 
             await _context.Experiences.AddRangeAsync(experiencesToAdd);
+            await _context.SaveChangesAsync();
+
             return experiencesToAdd;
         }
 
