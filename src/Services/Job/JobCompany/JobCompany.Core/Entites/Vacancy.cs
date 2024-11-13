@@ -1,16 +1,10 @@
 ﻿using JobCompany.Core.Entites.Base;
 using JobCompany.Core.Enums;
 using SharedLibrary.Enums;
-using System;
-using System.Collections.Generic;
-using System.IO.Pipelines;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace JobCompany.Core.Entites
 {
-    internal class Vacancy : BaseEntity
+    public class Vacancy : BaseEntity
     {
         public string CompanyName { get; set; }
         public string Title { get; set; }
