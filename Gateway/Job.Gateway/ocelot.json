@@ -23,6 +23,18 @@
       ],
       "UpstreamPathTemplate": "/job/{everything}",
       "UpstreamHttpMethod": [ "POST", "GET", "PUT", "DELETE" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/jobcompany/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5082
+        }
+      ],
+      "UpstreamPathTemplate": "/jobcompany/{everything}",
+      "UpstreamHttpMethod": [ "POST", "GET", "PUT", "DELETE" ]
     }
   ],
   "GlobalConfiguration": {

@@ -73,14 +73,11 @@ namespace Job.API
             var app = builder.Build();
             app.UseStaticFiles();
 
-            // Configure the HTTP request pipeline.
-
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI(c =>
                 {
-                    // Swagger Authorization Integration
                     c.ConfigObject.AdditionalItems.Add("persistAuthorization", "true");
                 });
             }
@@ -88,7 +85,6 @@ namespace Job.API
             app.UseHttpsRedirection();
             app.UseAuthorization();
 
-            //app.UseCustomExceptionHandler();
 
             app.MapControllers();
 
