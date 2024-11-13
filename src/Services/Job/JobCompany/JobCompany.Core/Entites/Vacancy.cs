@@ -18,6 +18,7 @@ namespace JobCompany.Core.Entites
         public DateTime StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public string? Location { get; set; }
+        public int? ViewCount { get; set; }
         public Guid CountryId { get; set; }
         public Country Country { get; set; }
         public Guid CityId { get; set; }

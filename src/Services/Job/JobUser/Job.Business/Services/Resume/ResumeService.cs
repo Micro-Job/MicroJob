@@ -79,6 +79,7 @@ namespace Job.Business.Services.Resume
             }
 
             string email = string.Empty;
+
             if (!resumeCreateDto.IsMainEmail)
                 email = resumeCreateDto.ResumeEmail;
             else
