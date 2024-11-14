@@ -8,7 +8,7 @@ namespace JobCompany.DAL.Configurations
     {
         public void Configure(EntityTypeBuilder<CompanyNumber> builder)
         {
-            builder.HasKey(p=>p.Id);
+            builder.HasKey(p => p.Id);
 
             builder.Property(cn => cn.Number)
                    .HasMaxLength(32);
@@ -16,6 +16,11 @@ namespace JobCompany.DAL.Configurations
             builder.HasOne(cn => cn.Vacancy)
                    .WithMany(v => v.CompanyNumbers)
                    .HasForeignKey(cn => cn.VacancyId)
+                   .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne(cn => cn.Company)
+                   .WithMany(v => v.CompanyNumbers)
+                   .HasForeignKey(cn => cn.CompanyId)
                    .OnDelete(DeleteBehavior.Cascade);
         }
     }

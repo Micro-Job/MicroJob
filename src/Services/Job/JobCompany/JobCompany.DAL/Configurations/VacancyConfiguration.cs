@@ -50,6 +50,11 @@ namespace JobCompany.DAL.Configurations
                    .IsRequired()
                    .HasMaxLength(1024);
 
+            builder.HasOne(v => v.Company)
+                   .WithMany(c => c.Vacancies)
+                   .HasForeignKey(v => v.CompanyId)
+                   .OnDelete(DeleteBehavior.Cascade);
+
             builder.HasOne(v => v.Country)
                    .WithMany(c => c.Vacancies)
                    .HasForeignKey(v => v.CountryId)

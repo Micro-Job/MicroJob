@@ -6,7 +6,7 @@ namespace AuthService.Core.Entities
     {
         public DateTime Date { get; set; }
 
-        public Guid UserId { get; set; }    
+        public Guid UserId { get; set; }
 
         public bool IsSucceed { get; set; }
 
