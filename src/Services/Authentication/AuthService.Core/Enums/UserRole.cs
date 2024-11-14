@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AuthService.Core.Enums
 {
-    public enum UserStatus : byte
+    public enum UserRole : byte
     {
         SimpleUser = 1,
         EmployeUser = 2,

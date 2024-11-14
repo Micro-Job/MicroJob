@@ -4,6 +4,7 @@ using AuthService.Business.HelperServices.Email;
 using AuthService.Business.HelperServices.TokenHandler;
 using AuthService.Business.Publishers;
 using AuthService.Core.Entities;
+using AuthService.Core.Enums;
 using AuthService.DAL.Contexts;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
@@ -36,7 +37,6 @@ namespace AuthService.Business.Services.Auth
             var userCheck = await _context.Users
                 .FirstOrDefaultAsync(x => x.Email == dto.Email || x.MainPhoneNumber == dto.MainPhoneNumber);
 
-            // email veya istifadeci adı tekrarlanmasını yoxla
             if (userCheck != null) throw new UserExistException();
             if (dto.Password != dto.ConfirmPassword) throw new WrongPasswordException();
 
@@ -56,6 +56,7 @@ namespace AuthService.Business.Services.Auth
                 Image = dto.Image != null
                 ? $"{fileResult.FilePath}/{fileResult.FileName}"
                     : null,
+                UserRole = UserRole.SimpleUser,
             };
             
             await _context.Users.AddAsync(user);
@@ -100,6 +101,7 @@ namespace AuthService.Business.Services.Auth
                 Image = dto.Image != null
                 ? $"{fileResult.FilePath}/{fileResult.FileName}"
                     : null,
+                UserRole = UserRole.CompanyUser,
             };
 
             var company = new Company
@@ -203,7 +205,7 @@ namespace AuthService.Business.Services.Auth
                 FullName = user.FirstName + " " + user.LastName,
                 AccessToken = accessToken,
                 RefreshToken = refreshToken.Token,
-                UserStatusId = user.UserStatusId,
+                UserStatusId = (byte)user.UserRole,
                 Expires = refreshToken.Expires
             };
         }
@@ -233,7 +235,7 @@ namespace AuthService.Business.Services.Auth
                 FullName = user.FirstName + " " + user.LastName,
                 AccessToken = newToken,
                 RefreshToken = newRefreshToken.Token,
-                UserStatusId = user.UserStatusId,
+                UserStatusId = (byte)user.UserRole,
                 Expires = newRefreshToken.Expires,
             };
         }
