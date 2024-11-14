@@ -2,6 +2,6 @@
 {
     public interface ICompanyService
     {
-        Task UpdateCompanyAsync();
+        //Task UpdateCompanyAsync();
     }
 }
