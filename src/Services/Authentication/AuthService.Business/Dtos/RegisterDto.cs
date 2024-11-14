@@ -5,7 +5,6 @@ namespace AuthService.Business.Dtos
 {
     public class RegisterDto
     {
-        //public string UserName { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string MainPhoneNumber { get; set; }
@@ -13,8 +12,7 @@ namespace AuthService.Business.Dtos
         public string? Password { get; set; }
         public string? ConfirmPassword { get; set; }
         public IFormFile? Image { get; set; }
-        public byte? UserStatus { get; set; }
-        public string? CompanyInformation { get; set; }
+        //public byte? UserStatus { get; set; }
     }
 
     public class RegisterDtoValidator : AbstractValidator<RegisterDto>

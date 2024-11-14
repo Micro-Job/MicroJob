@@ -1,4 +1,5 @@
 ﻿using JobCompany.Business.Consumers;
+using JobCompany.Business.Services.Vacancy;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using SharedLibrary.ExternalServices.FileService;
@@ -16,6 +17,7 @@ namespace JobCompany.Business
         {
             services.AddHttpContextAccessor();
             services.AddScoped<IFileService,FileService>();
+            services.AddScoped<IVacancyService,VacancyService>();
         }
 
         public static IServiceCollection AddMassTransitCompany(this IServiceCollection services, string cString)

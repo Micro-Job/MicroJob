@@ -14,8 +14,6 @@ namespace AuthService.Core.Entities
 
         public string Email { get; set; }
 
-        public Guid? UserStatusId { get; set; }
-
         public DateTime? RefreshTokenExpireDate { get; set; }
 
         public string? RefreshToken { get; set; }
@@ -30,6 +28,7 @@ namespace AuthService.Core.Entities
 
         public PasswordToken? PasswordToken { get; set; } 
 
-        public virtual UserStatus? UserStatus { get; set; }
+        //public Guid? UserStatusId { get; set; }
+        //public virtual UserStatus? UserStatus { get; set; }
     }
 }
