@@ -1,8 +1,4 @@
-﻿using AuthService.Core.Entities;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Microsoft.EntityFrameworkCore;
-
-namespace AuthService.DAL.Configurations
+﻿namespace AuthService.DAL.Configurations
 {
     //public class UserStatusConfiguration : IEntityTypeConfiguration<UserStatus>
     //{

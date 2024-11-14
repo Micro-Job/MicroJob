@@ -42,7 +42,7 @@ namespace AuthService.DAL.Configurations
                 .HasForeignKey(log => log.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.HasOne(e => e.PasswordToken) 
+            modelBuilder.HasOne(e => e.PasswordToken)
                 .WithOne(pt => pt.User)
                 .HasForeignKey<PasswordToken>(pt => pt.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
