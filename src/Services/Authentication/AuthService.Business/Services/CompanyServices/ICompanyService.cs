@@ -1,7 +1,9 @@
-﻿namespace AuthService.Business.Services.CompanyServices
+﻿using AuthService.Business.Dtos;
+
+namespace AuthService.Business.Services.CompanyServices
 {
     public interface ICompanyService
     {
-        Task UpdateCompanyAsync();
+        Task UpdateCompanyAsync(CompanyUpdateDto dto);
     }
 }

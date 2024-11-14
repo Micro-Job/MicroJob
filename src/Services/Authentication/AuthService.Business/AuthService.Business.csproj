@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\Shared\SharedLibrary.csproj" />
+    <ProjectReference Include="..\..\Job\JobCompany\JobCompany.DAL\JobCompany.DAL.csproj" />
     <ProjectReference Include="..\AuthService.DAL\AuthService.DAL.csproj" />
   </ItemGroup>
 
