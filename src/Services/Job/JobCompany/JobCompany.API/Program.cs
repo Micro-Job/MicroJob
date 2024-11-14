@@ -1,3 +1,5 @@
+using JobCompany.Business;
+using MassTransit;
 using SharedLibrary.ServiceRegistration;
 
 namespace JobCompany.API
@@ -14,7 +16,8 @@ namespace JobCompany.API
             builder.Services.AddSwaggerGen();
 
             builder.Services.AddAuth(builder.Configuration["Jwt:Issuer"]!, builder.Configuration["Jwt:Audience"]!, builder.Configuration["Jwt:SigningKey"]!);
-
+            builder.Services.AddJobCompanyServices();
+            builder.Services.AddMassTransitCompany(builder.Configuration["RabbitMQ"]!);
 
             var app = builder.Build();
 

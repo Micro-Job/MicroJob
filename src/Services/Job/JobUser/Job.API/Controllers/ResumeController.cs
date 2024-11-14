@@ -1,11 +1,13 @@
 using Job.Business.Dtos.ResumeDtos;
 using Job.Business.Services.Resume;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Job.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class ResumeController(IResumeService service) : ControllerBase
     {
         readonly IResumeService _service = service;
