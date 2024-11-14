@@ -12,7 +12,7 @@ namespace JobCompany.DAL.Configurations
 
             builder.Property(v => v.CompanyName)
                    .IsRequired()
-                   .HasMaxLength(32);
+                   .HasMaxLength(64);
 
             builder.Property(v => v.Title)
                    .IsRequired()
@@ -38,6 +38,9 @@ namespace JobCompany.DAL.Configurations
 
             builder.Property(v => v.MaxSalary)
                    .HasColumnType("decimal(18,2)");
+
+            builder.Property(x => x.Location)
+                   .HasMaxLength(128);
 
             builder.Property(v => v.Description)
                    .HasMaxLength(1024)
@@ -66,6 +69,7 @@ namespace JobCompany.DAL.Configurations
                    .WithMany()
                    .HasForeignKey(v => v.VacancyTestId)
                    .OnDelete(DeleteBehavior.SetNull);
+
         }
     }
 }

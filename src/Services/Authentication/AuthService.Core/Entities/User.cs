@@ -1,4 +1,5 @@
 ﻿using AuthService.Core.Entities.Base;
+using AuthService.Core.Enums;
 
 namespace AuthService.Core.Entities
 {
@@ -14,8 +15,6 @@ namespace AuthService.Core.Entities
 
         public string Email { get; set; }
 
-        public Guid? UserStatusId { get; set; }
-
         public DateTime? RefreshTokenExpireDate { get; set; }
 
         public string? RefreshToken { get; set; }
@@ -28,8 +27,9 @@ namespace AuthService.Core.Entities
 
         public virtual ICollection<LoginLog> LoginLogs { get; set; } = new List<LoginLog>();
 
-        public PasswordToken? PasswordToken { get; set; } 
-
-        public virtual UserStatus? UserStatus { get; set; }
+        public PasswordToken? PasswordToken { get; set; }
+        public UserRole UserRole { get; set; }
+        //public Guid? UserStatusId { get; set; }
+        //public virtual UserStatus? UserStatus { get; set; }
     }
 }

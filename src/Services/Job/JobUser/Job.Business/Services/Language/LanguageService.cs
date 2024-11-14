@@ -8,10 +8,11 @@ namespace Job.Business.Services.Language
     {
         readonly JobDbContext _context = context;
 
-        public async Task<ICollection<Core.Entities.Language>> CreateBulkLanguageAsync(ICollection<LanguageCreateDto> dtos)
+        public async Task<ICollection<Core.Entities.Language>> CreateBulkLanguageAsync(ICollection<LanguageCreateDto>  dtos,Guid resumeId)
         {
             var languagesToAdd = dtos.Select(dto => new Core.Entities.Language
             {
+                ResumeId = resumeId,
                 LanguageName = dto.LanguageName,
                 LanguageLevel = dto.LanguageLevel
             }).ToList();

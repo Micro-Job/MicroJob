@@ -1,5 +1,8 @@
+using FluentValidation.AspNetCore;
 using JobCompany.Business;
+using JobCompany.Business.Dtos.VacancyDtos;
 using MassTransit;
+using SharedLibrary.Middlewares;
 using SharedLibrary.ServiceRegistration;
 
 namespace JobCompany.API
@@ -15,6 +18,11 @@ namespace JobCompany.API
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            builder.Services.AddFluentValidation(opt =>
+            {
+                opt.RegisterValidatorsFromAssemblyContaining<CreateVacancyDto>();
+            });
+
             builder.Services.AddAuth(builder.Configuration["Jwt:Issuer"]!, builder.Configuration["Jwt:Audience"]!, builder.Configuration["Jwt:SigningKey"]!);
             builder.Services.AddJobCompanyServices();
             builder.Services.AddMassTransitCompany(builder.Configuration["RabbitMQ"]!);
@@ -28,10 +36,11 @@ namespace JobCompany.API
             }
 
             app.UseHttpsRedirection();
+            app.UseCustomExceptionHandler();
+            app.UseStaticFiles();
 
             app.UseAuthentication();
             app.UseAuthorization();
-
 
             app.MapControllers();
 

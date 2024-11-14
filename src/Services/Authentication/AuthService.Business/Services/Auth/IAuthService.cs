@@ -5,6 +5,7 @@ namespace AuthService.Business.Services.Auth
     public interface IAuthService
     {
         Task RegisterAsync(RegisterDto dto);
+        Task CompanyRegisterAsync(RegisterCompanyDto dto);
 
         Task<TokenResponseDto> LoginAsync(LoginDto dto);
 
