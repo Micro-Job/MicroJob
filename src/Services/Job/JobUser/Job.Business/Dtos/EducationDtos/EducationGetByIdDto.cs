@@ -4,7 +4,6 @@ namespace Job.Business.Dtos.EducationDtos
 {
     public record EducationGetByIdDto
     {
-        public Guid Id { get; set; }
         public string InstitutionName { get; set; }
         public string Profession { get; set; }
         public DateTime StartDate { get; set; }
