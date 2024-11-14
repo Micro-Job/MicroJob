@@ -17,7 +17,7 @@ namespace Job.Business.Services.Number
             await _context.Numbers.AddAsync(number);
         }
 
-        public async Task<List<Core.Entities.Number>> CreateBulkNumberAsync(ICollection<NumberCreateDto> numberCreateDtos)
+        public async Task<List<Core.Entities.Number>> CreateBulkNumberAsync(ICollection<NumberCreateDto> numberCreateDtos,Guid resumeId)
         {
             var numbersToAdd = new List<Core.Entities.Number>();
 
@@ -25,6 +25,7 @@ namespace Job.Business.Services.Number
             {
                 var number = new Core.Entities.Number
                 {
+                    ResumeId = resumeId,
                     PhoneNumber = numberCreateDto.PhoneNumber,
                 };
 

@@ -8,10 +8,11 @@ namespace Job.Business.Services.Education
     {
         private readonly JobDbContext _context = context;
 
-        public async Task<ICollection<Core.Entities.Education>> CreateBulkEducationAsync(ICollection<EducationCreateDto> dtos)
+        public async Task<ICollection<Core.Entities.Education>> CreateBulkEducationAsync(ICollection<EducationCreateDto> dtos,Guid resumeId)
         {
             var educationsToAdd = dtos.Select(dto => new Core.Entities.Education
             {
+                ResumeId = resumeId,
                 InstitutionName = dto.InstitutionName,
                 Profession = dto.Profession,
                 StartDate = dto.StartDate,
