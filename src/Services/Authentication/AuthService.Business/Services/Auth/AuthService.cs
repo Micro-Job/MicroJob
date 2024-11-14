@@ -33,13 +33,16 @@ namespace AuthService.Business.Services.Auth
 
         public async Task RegisterAsync(RegisterDto dto)
         {
-            var userCheck = await _context.Users.FirstOrDefaultAsync(x => x.Email == dto.Email || x.MainPhoneNumber == dto.MainPhoneNumber);
-            FileDto fileResult = dto.Image != null
-          ? await _fileService.UploadAsync(FilePaths.document, dto.Image)
-          : new FileDto();
+            var userCheck = await _context.Users
+                .FirstOrDefaultAsync(x => x.Email == dto.Email || x.MainPhoneNumber == dto.MainPhoneNumber);
+
             // email veya istifadeci adı tekrarlanmasını yoxla
             if (userCheck != null) throw new UserExistException();
             if (dto.Password != dto.ConfirmPassword) throw new WrongPasswordException();
+
+            FileDto fileResult = dto.Image != null
+              ? await _fileService.UploadAsync(FilePaths.document, dto.Image)
+              : new FileDto();
 
             var user = new User
             {
@@ -58,21 +61,10 @@ namespace AuthService.Business.Services.Auth
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
 
-            if (dto.UserStatus == 2)
+            await _publishEndpoint.Publish(new UserRegisteredEvent
             {
-                await _publishEndpoint.Publish(new CompanyRegisteredEvent
-                {
-                    CompanyId = user.Id,
-                    CompanyInformation = dto.CompanyInformation
-                });
-            }
-            if (dto.UserStatus == 1)
-            {
-                await _publishEndpoint.Publish(new UserRegisteredEvent
-                {
-                    UserId = user.Id
-                });
-            }
+                UserId = user.Id
+            });
 
             await _publisher.SendEmail(new EmailMessage
             {
@@ -83,6 +75,60 @@ namespace AuthService.Business.Services.Auth
            
             // sifre yaratmaq ucun mail gondermek
             //await _emailService.SendSetPassword(dto.Email, await GeneratePasswordResetTokenAsync(user));
+        }
+
+        public async Task CompanyRegisterAsync(RegisterCompanyDto dto)
+        {
+            var userCheck = await _context.Users
+                .FirstOrDefaultAsync(x => x.Email == dto.Email || x.MainPhoneNumber == dto.MainPhoneNumber);
+
+            // email veya istifadeci adı tekrarlanmasını yoxla
+            if (userCheck != null) throw new UserExistException();
+            if (dto.Password != dto.ConfirmPassword) throw new WrongPasswordException();
+
+            FileDto fileResult = dto.Image != null
+              ? await _fileService.UploadAsync(FilePaths.document, dto.Image)
+              : new FileDto();
+
+            var user = new User
+            {
+                Id = Guid.NewGuid(),
+                Email = dto.Email,
+                MainPhoneNumber = dto.MainPhoneNumber,
+                RegistrationDate = DateTime.Now,
+                Password = _tokenHandler.GeneratePasswordHash(dto.Password),
+                Image = dto.Image != null
+                ? $"{fileResult.FilePath}/{fileResult.FileName}"
+                    : null,
+            };
+
+            var company = new Company
+            {
+                Id = Guid.NewGuid(),
+                UserId = user.Id,
+            };
+
+            await _context.Users.AddAsync(user);
+            await _context.Companies.AddAsync(company);
+            await _context.SaveChangesAsync();
+
+            await _publishEndpoint.Publish(new CompanyRegisteredEvent
+            {
+                CompanyId = company.Id,
+                UserId = user.Id,
+            });
+
+            await _publishEndpoint.Publish(new UserRegisteredEvent
+            {
+                UserId = user.Id
+            });
+
+            await _publisher.SendEmail(new EmailMessage
+            {
+                Email = dto.Email,
+                Subject = "Xoş gəldiniz",
+                Content = "Qeydiyyat uğurla başa çatdı"
+            });
         }
 
         public async Task<TokenResponseDto> LoginAsync(LoginDto dto)
@@ -244,6 +290,8 @@ namespace AuthService.Business.Services.Auth
             _context.PasswordTokens.Remove(passwordToken);
             await _context.SaveChangesAsync();
         }
+
+       
     }
 }
 

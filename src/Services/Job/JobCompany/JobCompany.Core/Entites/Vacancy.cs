@@ -6,6 +6,8 @@ namespace JobCompany.Core.Entites
 {
     public class Vacancy : BaseEntity
     {
+        public Guid CompanyId { get; set; }
+        public Company Company { get; set; }
         public string CompanyName { get; set; }
         public string Title { get; set; }
         public string? CompanyLogo { get; set; }

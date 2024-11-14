@@ -7,15 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Authentication\AuthService.Business\AuthService.Business.csproj" />
     <ProjectReference Include="..\JobCompany.DAL\JobCompany.DAL.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Dtos\" />
-    <Folder Include="Services\" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
     <PackageReference Include="MassTransit.RabbitMQ" Version="8.3.1" />
   </ItemGroup>
 
