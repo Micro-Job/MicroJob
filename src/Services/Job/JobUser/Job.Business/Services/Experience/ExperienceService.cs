@@ -8,10 +8,11 @@ namespace Job.Business.Services.Experience
     {
         private readonly JobDbContext _context = context;
 
-        public async Task<ICollection<Core.Entities.Experience>> CreateBulkExperienceAsync(ICollection<ExperienceCreateDto> dtos)
+        public async Task<ICollection<Core.Entities.Experience>> CreateBulkExperienceAsync(ICollection<ExperienceCreateDto> dtos,Guid resumeId)
         {
             var experiencesToAdd = dtos.Select(dto => new Core.Entities.Experience
             {
+                ResumeId = resumeId,
                 OrganizationName = dto.OrganizationName,
                 PositionName = dto.PositionName,
                 PositionDescription = dto.PositionDescription,
