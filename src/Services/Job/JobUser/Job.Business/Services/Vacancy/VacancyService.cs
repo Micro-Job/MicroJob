@@ -48,8 +48,6 @@ namespace Job.Business.Services.Vacancy
             {
                 Id = x.Id,
             }).ToListAsync();
-
-
         }
     }
 }
