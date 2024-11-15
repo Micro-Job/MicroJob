@@ -11,6 +11,7 @@ namespace JobCompany.Business.Dtos.CompanyDtos
         public string? CompanyName { get; set; }
         public string? CompanyInformation { get; set; }
         public string? CompanyLocation { get; set; }
+        public DateTime? CreatedDate { get; set; }
         public string? WebLink { get; set; }
         public int? EmployeeCount { get; set; }
         public Guid? CategoryId { get; set; }
@@ -33,6 +34,11 @@ namespace JobCompany.Business.Dtos.CompanyDtos
             RuleFor(x => x.CompanyLocation)
                 .MaximumLength(200).WithMessage("Company location must not exceed 200 characters.")
                 .When(x => x.CompanyLocation != null);
+
+            RuleFor(x => x.CreatedDate)
+                .NotEmpty().WithMessage("CreatedDate is required.")
+                .LessThanOrEqualTo(DateTime.Now).WithMessage("CreatedDate cannot be in the future.")
+                .When(x => x.CreatedDate.HasValue);
 
             RuleFor(x => x.WebLink)
                 .Matches(@"^(http|https)://[^\s/$.?#].[^\s]*$")

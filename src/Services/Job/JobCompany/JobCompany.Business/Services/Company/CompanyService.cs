@@ -32,44 +32,29 @@ namespace JobCompany.Business.Services.Company
             var company = await _context.Companies.FindAsync(userGuid) 
             ?? throw new NotFoundException<Core.Entites.Company>();
 
-            var existingCompany = await _context.Companies.FirstOrDefaultAsync(x=>x.CompanyName == dto.CompanyName && x.UserId != userGuid);
+            var companyName = dto.CompanyName.Trim();
+
+            var existingCompany = await _context.Companies.FirstOrDefaultAsync(x=>x.CompanyName == companyName && x.UserId != userGuid);
             if (existingCompany != null) throw new MustBeUniqueException<Core.Entites.Company>();
 
-            if (dto.CompanyName != null)
-                company.CompanyName = dto.CompanyName;
+            company.CompanyName = dto.CompanyName;
+            company.CompanyInformation = dto.CompanyInformation;
+            company.CompanyLocation = dto.CompanyLocation;
+            company.WebLink = dto.WebLink;
+            company.EmployeeCount = dto.EmployeeCount.Value;
+            company.CreatedDate = dto.CreatedDate;
 
-            if (dto.CompanyInformation != null)
-                company.CompanyInformation = dto.CompanyInformation;
+            var category = await _context.Categories.FindAsync(dto.CategoryId) 
+            ?? throw new NotFoundException<Category>();
+            company.CategoryId = category.Id;
 
-            if (dto.CompanyLocation != null)
-                company.CompanyLocation = dto.CompanyLocation;
+            var country = await _context.Countries.FindAsync(dto.CountryId) 
+            ?? throw new NotFoundException<Country>();
+            company.CountryId = country.Id;
 
-            if (dto.WebLink != null)
-                company.WebLink = dto.WebLink;
-
-            if (dto.EmployeeCount.HasValue)
-                company.EmployeeCount = dto.EmployeeCount.Value;
-
-            if (dto.CategoryId.HasValue)
-            {
-                var category = await _context.Categories.FindAsync(dto.CategoryId) 
-                ?? throw new NotFoundException<Category>();
-                company.CategoryId = category.Id;
-            }
-
-            if (dto.CountryId.HasValue)
-            {
-                var country = await _context.Countries.FindAsync(dto.CountryId) 
-                ?? throw new NotFoundException<Country>();
-                company.CountryId = country.Id;
-            }
-
-            if (dto.CityId.HasValue)
-            {
-                var city = await _context.Cities.FindAsync(dto.CityId) 
-                ?? throw new NotFoundException<City>();
-                company.CityId = city.Id;
-            }
+            var city = await _context.Cities.FindAsync(dto.CityId) 
+            ?? throw new NotFoundException<City>();
+            company.CityId = city.Id;
 
             await _context.SaveChangesAsync();
         }
