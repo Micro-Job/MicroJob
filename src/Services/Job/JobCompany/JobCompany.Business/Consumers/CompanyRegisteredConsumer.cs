@@ -18,6 +18,7 @@ namespace JobCompany.Business.Consumers
             {
                 Id = context.Message.CompanyId,
                 UserId = context.Message.UserId,
+                CompanyName = context.Message.CompanyName,
             };
 
             await _context.Companies.AddAsync(newCompany);

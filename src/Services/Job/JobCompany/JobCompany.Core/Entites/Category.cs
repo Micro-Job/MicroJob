@@ -6,5 +6,6 @@ namespace JobCompany.Core.Entites
     {
         public string CategoryName { get; set; }
         public ICollection<Vacancy> Vacancies { get; set; }
+        public ICollection<Company> Companies { get; set; }
     }
 }

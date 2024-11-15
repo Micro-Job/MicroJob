@@ -10,5 +10,6 @@ namespace SharedLibrary.Events
     {
         public Guid CompanyId { get; set; }
         public Guid UserId { get; set; }
+        public string CompanyName { get; set; }
     }
 }

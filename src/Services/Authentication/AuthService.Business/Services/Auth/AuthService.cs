@@ -118,6 +118,7 @@ namespace AuthService.Business.Services.Auth
             {
                 CompanyId = company.Id,
                 UserId = user.Id,
+                CompanyName = dto.CompanyName.Trim()
             });
 
             await _publishEndpoint.Publish(new UserRegisteredEvent
@@ -203,6 +204,7 @@ namespace AuthService.Business.Services.Auth
             {
                 UserId = user.Id.ToString(),
                 FullName = user.FirstName + " " + user.LastName,
+                UserRole = user.UserRole,
                 AccessToken = accessToken,
                 RefreshToken = refreshToken.Token,
                 UserStatusId = (byte)user.UserRole,

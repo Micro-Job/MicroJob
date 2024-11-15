@@ -28,6 +28,21 @@ namespace JobCompany.DAL.Configurations
                 .WithOne()
                 .HasForeignKey(v => v.CompanyId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne(x=>x.Country)
+                .WithMany(x=>x.Companies)
+                .HasForeignKey(x=>x.CountryId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            builder.HasOne(x => x.City)
+               .WithMany(x => x.Companies)
+               .HasForeignKey(x => x.CityId)
+               .OnDelete(DeleteBehavior.SetNull);
+
+            builder.HasOne(x=>x.Category)
+                .WithMany(x=>x.Companies)
+                .HasForeignKey(x=>x.CategoryId)
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

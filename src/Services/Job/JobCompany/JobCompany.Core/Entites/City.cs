@@ -8,6 +8,8 @@ namespace JobCompany.Core.Entites
         public Guid CountryId { get; set; }
         public Country Country { get; set; }
         public ICollection<Vacancy> Vacancies { get; set; }
+        public ICollection<Company> Companies { get; set; }
+
 
     }
 }

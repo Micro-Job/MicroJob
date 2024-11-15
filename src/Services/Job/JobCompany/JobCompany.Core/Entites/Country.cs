@@ -7,5 +7,6 @@ namespace JobCompany.Core.Entites
         public string CountryName { get; set; }
         public ICollection<City> Cities { get; set; }
         public ICollection<Vacancy> Vacancies { get; set; }
+        public ICollection<Company> Companies { get; set; }
     }
 }

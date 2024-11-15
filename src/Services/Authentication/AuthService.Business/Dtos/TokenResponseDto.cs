@@ -1,4 +1,6 @@
-﻿using System;
+﻿using AuthService.Core.Entities;
+using AuthService.Core.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,5 +16,6 @@ namespace AuthService.Business.Dtos
         public string AccessToken { get; set; }
         public DateTime Expires { get; set; }
         public string RefreshToken { get; set; }
+        public UserRole UserRole { get; set; }
     }
 }
