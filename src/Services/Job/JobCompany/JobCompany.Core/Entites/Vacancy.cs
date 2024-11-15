@@ -25,7 +25,7 @@ namespace JobCompany.Core.Entites
         public decimal? MainSalary { get; set; }
         public decimal? MaxSalary { get; set; }
         public string Requirement { get; set; }
-        public string Description { get; set; }
+        public string? Description { get; set; }
         public Gender Gender { get; set; }
         public Military Military { get; set; }
         public Driver Driver { get; set; }

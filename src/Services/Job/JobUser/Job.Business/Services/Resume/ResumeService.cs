@@ -19,6 +19,7 @@ using MassTransit.Initializers;
 using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.ExternalServices.FileService;
+using SharedLibrary.Middlewares;
 using SharedLibrary.Statics;
 
 namespace Job.Business.Services.Resume
@@ -58,90 +59,79 @@ namespace Job.Business.Services.Resume
             userGuid = Guid.Parse(_currentUser.UserId);
         }
 
-        public async Task CreateResumeAsync(
-            ResumeCreateDto resumeCreateDto,
-            ResumeCreateListsDto resumeCreateListsDto)
+        public async Task CreateResumeAsync(ResumeCreateDto resumeCreateDto,ResumeCreateListsDto resumeCreateListsDto)
         {
-            using var transaction = await _context.Database.BeginTransactionAsync();
+            if (await _context.Resumes.AnyAsync(x => x.UserId == userGuid))
+                throw new IsAlreadyExistException<Core.Entities.Resume>();
 
-            try
+            FileDto fileResult = resumeCreateDto.UserPhoto != null
+                ? await _fileService.UploadAsync(FilePaths.document, resumeCreateDto.UserPhoto)
+                : new FileDto();
+
+            string email = resumeCreateDto.IsMainEmail
+                ? await _userInformationService.GetUserDataAsync(userGuid).Select(x => x.Email)
+                : resumeCreateDto.ResumeEmail;
+
+            var resume = new Core.Entities.Resume
             {
-                FileDto fileResult = resumeCreateDto.UserPhoto != null
-                    ? await _fileService.UploadAsync(FilePaths.document, resumeCreateDto.UserPhoto)
-                    : new FileDto();
+                Id = Guid.NewGuid(),
+                UserId = userGuid,
+                FatherName = resumeCreateDto.FatherName,
+                Position = resumeCreateDto.Position,
+                IsDriver = resumeCreateDto.IsDriver,
+                IsMarried = resumeCreateDto.IsMarried,
+                IsCitizen = resumeCreateDto.IsCitizen,
+                Gender = resumeCreateDto.Gender,
+                Adress = resumeCreateDto.Adress,
+                BirthDay = resumeCreateDto.BirthDay,
+                UserPhoto = resumeCreateDto.UserPhoto != null
+                    ? $"{fileResult.FilePath}/{fileResult.FileName}"
+                    : null,
+                ResumeEmail = email
+            };
 
-                string email = resumeCreateDto.IsMainEmail
-                    ? await _userInformationService.GetUserDataAsync(userGuid).Select(x => x.Email)
-                    : resumeCreateDto.ResumeEmail;
+            await _context.Resumes.AddAsync(resume);
+            await _context.SaveChangesAsync();
 
-                var resume = new Core.Entities.Resume
-                {
-                    Id = Guid.NewGuid(),
-                    UserId = userGuid,
-                    FatherName = resumeCreateDto.FatherName,
-                    Position = resumeCreateDto.Position,
-                    IsDriver = resumeCreateDto.IsDriver,
-                    IsMarried = resumeCreateDto.IsMarried,
-                    IsCitizen = resumeCreateDto.IsCitizen,
-                    Gender = resumeCreateDto.Gender,
-                    Adress = resumeCreateDto.Adress,
-                    BirthDay = resumeCreateDto.BirthDay,
-                    UserPhoto = resumeCreateDto.UserPhoto != null
-                        ? $"{fileResult.FilePath}/{fileResult.FileName}"
-                        : null,
-                    ResumeEmail = email
-                };
-
-                await _context.Resumes.AddAsync(resume);
-                await _context.SaveChangesAsync();
-
-                var numbers = new List<Core.Entities.Number>();
-                if (!resumeCreateDto.IsMainNumber)
-                {
-                    numbers = await _numberService.CreateBulkNumberAsync(resumeCreateListsDto.NumberCreateDtos.PhoneNumbers,resume.Id);
-                }
-                else
-                {
-                    var mainNumber = await _userInformationService.GetUserDataAsync(userGuid).Select(x => new Core.Entities.Number
-                    {
-                        PhoneNumber = x.MainPhoneNumber,
-                        ResumeId = resume.Id 
-                    });
-                    numbers.Add(mainNumber);
-                }
-
-                var educations = await _educationService.CreateBulkEducationAsync(resumeCreateListsDto.EducationCreateDtos.Educations, resume.Id);
-                var experiences = await _experienceService.CreateBulkExperienceAsync(resumeCreateListsDto.ExperienceCreateDtos.Experiences, resume.Id);
-                var languages = await _languageService.CreateBulkLanguageAsync(resumeCreateListsDto.LanguageCreateDtos.Languages,resume.Id);
-
-                var certificates = resumeCreateDto.Certificates != null
-                    ? await _certificateService.CreateBulkCertificateAsync(resumeCreateDto.Certificates)
-                    : new List<Core.Entities.Certificate>();
-
-                var resumeSkills = resumeCreateDto.SkillIds != null
-                    ? resumeCreateDto.SkillIds.Select(skillId => new ResumeSkill
-                    {
-                        SkillId = skillId,
-                        ResumeId = resume.Id
-                    }).ToList()
-                    : new List<ResumeSkill>();
-
-                resume.PhoneNumbers = numbers;
-                resume.Educations = educations;
-                resume.Experiences = experiences;
-                resume.Languages = languages;
-                resume.Certificates = certificates;
-                resume.ResumeSkills = resumeSkills;
-
-                await _context.SaveChangesAsync();
-                
-                await transaction.CommitAsync();
-            }
-            catch (Exception)
+            var numbers = new List<Core.Entities.Number>();
+            if (!resumeCreateDto.IsMainNumber)
             {
-                await transaction.RollbackAsync();
-                throw;
+                numbers = await _numberService.CreateBulkNumberAsync(resumeCreateListsDto.NumberCreateDtos.PhoneNumbers, resume.Id);
             }
+            else
+            {
+                var mainNumber = await _userInformationService.GetUserDataAsync(userGuid).Select(x => new Core.Entities.Number
+                {
+                    PhoneNumber = x.MainPhoneNumber,
+                    ResumeId = resume.Id
+                });
+                numbers.Add(mainNumber);
+            }
+
+            var educations = await _educationService.CreateBulkEducationAsync(resumeCreateListsDto.EducationCreateDtos.Educations, resume.Id);
+            var experiences = await _experienceService.CreateBulkExperienceAsync(resumeCreateListsDto.ExperienceCreateDtos.Experiences, resume.Id);
+            var languages = await _languageService.CreateBulkLanguageAsync(resumeCreateListsDto.LanguageCreateDtos.Languages, resume.Id);
+
+            var certificates = resumeCreateDto.Certificates != null
+                ? await _certificateService.CreateBulkCertificateAsync(resumeCreateDto.Certificates)
+                : new List<Core.Entities.Certificate>();
+
+            var resumeSkills = resumeCreateDto.SkillIds != null
+                ? resumeCreateDto.SkillIds.Select(skillId => new ResumeSkill
+                {
+                    SkillId = skillId,
+                    ResumeId = resume.Id
+                }).ToList()
+                : new List<ResumeSkill>();
+
+            resume.PhoneNumbers = numbers;
+            resume.Educations = educations;
+            resume.Experiences = experiences;
+            resume.Languages = languages;
+            resume.Certificates = certificates;
+            resume.ResumeSkills = resumeSkills;
+
+            await _context.SaveChangesAsync();
         }
 
         public async Task UpdateResumeAsync(ResumeUpdateDto resumeUpdateDto)
