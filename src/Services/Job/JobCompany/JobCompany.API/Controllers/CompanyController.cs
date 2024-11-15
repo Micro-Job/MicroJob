@@ -1,9 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using JobCompany.Business.Dtos.CompanyDtos;
-using JobCompany.Business.Services.Company;
+using JobCompany.Business.Services.CompanyServices;
 using Microsoft.AspNetCore.Mvc;
 
 namespace JobCompany.API.Controllers

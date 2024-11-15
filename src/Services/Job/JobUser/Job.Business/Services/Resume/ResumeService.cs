@@ -116,7 +116,7 @@ namespace Job.Business.Services.Resume
 
                 var certificates = resumeCreateDto.Certificates != null
                     ? await _certificateService.CreateBulkCertificateAsync(resumeCreateDto.Certificates)
-                    : new List<Core.Entities.Certificate>();
+                    : [];
 
                 var resumeSkills = resumeCreateDto.SkillIds != null
                     ? resumeCreateDto.SkillIds.Select(skillId => new ResumeSkill
@@ -124,7 +124,7 @@ namespace Job.Business.Services.Resume
                         SkillId = skillId,
                         ResumeId = resume.Id
                     }).ToList()
-                    : new List<ResumeSkill>();
+                    : new();
 
                 resume.PhoneNumbers = numbers;
                 resume.Educations = educations;
