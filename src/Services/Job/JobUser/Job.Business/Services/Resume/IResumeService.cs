@@ -1,9 +1,4 @@
-﻿using Job.Business.Dtos.CertificateDtos;
-using Job.Business.Dtos.EducationDtos;
-using Job.Business.Dtos.ExperienceDtos;
-using Job.Business.Dtos.LanguageDtos;
-using Job.Business.Dtos.NumberDtos;
-using Job.Business.Dtos.ResumeDtos;
+﻿using Job.Business.Dtos.ResumeDtos;
 
 namespace Job.Business.Services.Resume
 {

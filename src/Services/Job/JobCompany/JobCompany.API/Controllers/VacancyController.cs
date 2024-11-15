@@ -12,28 +12,35 @@ namespace JobCompany.API.Controllers
         private readonly IVacancyService _vacancyService = vacancyService;
 
         [HttpPost("[action]")]
-        public async Task<IActionResult> CreateVacancyAsync(CreateVacancyDto vacancyDto, ICollection<CreateNumberDto>? numberDtos)
+        public async Task<IActionResult> CreateVacancy(CreateVacancyDto vacancyDto, ICollection<CreateNumberDto>? numberDtos)
         {
             await _vacancyService.CreateVacancyAsync(vacancyDto, numberDtos);
             return Ok();
         }
 
         [HttpPut("[action]")]
-        public async Task<IActionResult> UpdateVacancyAsync(UpdateVacancyDto vacancyDto, ICollection<UpdateNumberDto>? numberDtos)
+        public async Task<IActionResult> UpdateVacancy(UpdateVacancyDto vacancyDto, ICollection<UpdateNumberDto>? numberDtos)
         {
             await _vacancyService.UpdateVacancyAsync(vacancyDto, numberDtos);
             return Ok();
         }
 
+        [HttpDelete("[action]")]
+        public async Task<IActionResult> Delete(string id)
+        {
+            await _vacancyService.DeleteAsync(id);
+            return Ok();
+        }
+
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetAllVacanciesAsync()
+        public async Task<IActionResult> GetAllVacancies()
         {
             var data = await _vacancyService.GetAllVacanciesAsync();
             return Ok(data);
         }
 
         [HttpGet("[action]/{id}")]
-        public async Task<IActionResult> GetByIdVacancyAsync(Guid id)
+        public async Task<IActionResult> GetByIdVacancy(string id)
         {
             var data = await _vacancyService.GetByIdVacancyAsync(id);
             return Ok(data);

@@ -40,10 +40,6 @@ namespace JobCompany.Business.Services.VacancyServices
                 {
                     Id = Guid.NewGuid(),
                     CompanyId = vacancyDto.CompanyId,
-                    Company = new Core.Entites.Company
-                    {
-                        UserId = _userGuid
-                    },
                     CompanyName = vacancyDto.CompanyName,
                     Title = vacancyDto.Title,
                     CompanyLogo = vacancyDto.CompanyLogo != null
@@ -94,10 +90,13 @@ namespace JobCompany.Business.Services.VacancyServices
             }
         }
 
-        public async Task DeleteAsync(Guid id)
+        public async Task DeleteAsync(string id)
         {
-            var vacancy = await _context.Vacancies.FirstOrDefaultAsync(x => x.Id == id && x.Company.UserId==_userGuid)
-                ?? throw new NotFoundException<Vacancy>();
+            var vacancyGuid = Guid.Parse(id);
+            var vacancy = await _context.Vacancies.FirstOrDefaultAsync(x => x.Id == vacancyGuid && x.Company.UserId == _userGuid).Select(x => new Vacancy
+            {
+              IsActive =  x.IsActive
+            });
             vacancy.IsActive = false;
         }
 
@@ -118,9 +117,10 @@ namespace JobCompany.Business.Services.VacancyServices
             return vacancies;
         }
 
-        public async Task<VacancyGetByIdDto> GetByIdVacancyAsync(Guid id)
+        public async Task<VacancyGetByIdDto> GetByIdVacancyAsync(string id)
         {
-            var vacancy = await _context.Vacancies.FirstOrDefaultAsync(x => x.Id == id && x.Company.UserId == _userGuid).Select(x => new VacancyGetByIdDto
+            var vacancyGuid = Guid.Parse(id);
+            var vacancy = await _context.Vacancies.FirstOrDefaultAsync(x => x.Id == vacancyGuid && x.Company.UserId == _userGuid).Select(x => new VacancyGetByIdDto
             {
                 Id = x.Id,
                 Title = x.Title,
