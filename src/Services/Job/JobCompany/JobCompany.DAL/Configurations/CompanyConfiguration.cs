@@ -43,6 +43,7 @@ namespace JobCompany.DAL.Configurations
                 .WithMany(x=>x.Companies)
                 .HasForeignKey(x=>x.CategoryId)
                 .OnDelete(DeleteBehavior.SetNull);
+
         }
     }
 }

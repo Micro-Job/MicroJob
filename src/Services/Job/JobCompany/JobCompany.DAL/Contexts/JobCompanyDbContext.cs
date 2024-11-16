@@ -10,11 +10,13 @@ namespace JobCompany.DAL.Contexts
         {
         }
 
+        public DbSet<Application> Applications { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<City> Cities { get; set; }
         public DbSet<Company> Companies { get; set; }
         public DbSet<CompanyNumber> CompanyNumbers { get; set; }
         public DbSet<Country> Countries { get; set; }
+        public DbSet<Status> Statuses { get; set; }
         public DbSet<Vacancy> Vacancies { get; set; }
         public DbSet<VacancyTest> VacancyTests { get; set; }
 
