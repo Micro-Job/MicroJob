@@ -30,74 +30,75 @@ namespace JobCompany.Business.Services.VacancyServices
 
         public async Task CreateVacancyAsync(CreateVacancyDto vacancyDto, ICollection<CreateNumberDto>? numberDto)
         {
-            using var transaction = await _context.Database.BeginTransactionAsync();
-            try
+            string? companyLogoPath = null;
+            var company = await _context.Companies.FindAsync(vacancyDto.CompanyId);
+
+            if (company != null && !string.IsNullOrEmpty(company.CompanyLogo))
             {
-                FileDto fileResult = vacancyDto.CompanyLogo != null
-                    ? await _fileService.UploadAsync(FilePaths.image, vacancyDto.CompanyLogo) : new();
+                companyLogoPath = company.CompanyLogo;
+            }
+            else if (vacancyDto.CompanyLogo != null)
+            {
+                FileDto fileResult = await _fileService.UploadAsync(FilePaths.image, vacancyDto.CompanyLogo);
+                companyLogoPath = $"{fileResult.FilePath}/{fileResult.FileName}";
+            }
+            var vacancy = new Vacancy
+            {
+                Id = Guid.NewGuid(),
+                CompanyId = vacancyDto.CompanyId,
+                CompanyName = vacancyDto.CompanyName,
+                Title = vacancyDto.Title,
+                CompanyLogo = companyLogoPath,
+                StartDate = vacancyDto.StartDate,
+                EndDate = vacancyDto.EndDate,
+                Location = vacancyDto.Location,
+                CountryId = vacancyDto.CountryId,
+                CityId = vacancyDto.CityId,
+                Email = vacancyDto.Email,
+                WorkType = vacancyDto.WorkType,
+                MainSalary = vacancyDto.MainSalary,
+                MaxSalary = vacancyDto.MaxSalary,
+                Requirement = vacancyDto.Requirement,
+                Description = vacancyDto.Description,
+                Gender = vacancyDto.Gender,
+                Military = vacancyDto.Military,
+                Driver = vacancyDto.Driver,
+                Family = vacancyDto.Family,
+                Citizenship = vacancyDto.Citizenship,
+                CategoryId = vacancyDto.CategoryId
+            };
+            await _context.Vacancies.AddAsync(vacancy);
 
-                var vacancy = new Vacancy
+            var numbers = new List<CompanyNumber>();
+            if (numberDto is not null)
+            {
+                foreach (var numberCreateDto in numberDto)
                 {
-                    Id = Guid.NewGuid(),
-                    CompanyId = vacancyDto.CompanyId,
-                    CompanyName = vacancyDto.CompanyName,
-                    Title = vacancyDto.Title,
-                    CompanyLogo = vacancyDto.CompanyLogo != null
-                        ? $"{fileResult.FilePath}/{fileResult.FileName}" : null,
-                    StartDate = vacancyDto.StartDate,
-                    EndDate = vacancyDto.EndDate,
-                    Location = vacancyDto.Location,
-                    CountryId = vacancyDto.CountryId,
-                    CityId = vacancyDto.CityId,
-                    Email = vacancyDto.Email,
-                    WorkType = vacancyDto.WorkType,
-                    MainSalary = vacancyDto.MainSalary,
-                    MaxSalary = vacancyDto.MaxSalary,
-                    Requirement = vacancyDto.Requirement,
-                    Description = vacancyDto.Description,
-                    Gender = vacancyDto.Gender,
-                    Military = vacancyDto.Military,
-                    Driver = vacancyDto.Driver,
-                    Family = vacancyDto.Family,
-                    Citizenship = vacancyDto.Citizenship,
-                    CategoryId = vacancyDto.CategoryId
-                };
-                await _context.Vacancies.AddAsync(vacancy);
-
-                var numbers = new List<CompanyNumber>();
-                if (numberDto is not null)
-                {
-                    foreach (var numberCreateDto in numberDto)
+                    var number = new Core.Entites.CompanyNumber
                     {
-                        var number = new Core.Entites.CompanyNumber
-                        {
-                            Number = numberCreateDto.PhoneNumber,
-                        };
-                        numbers.Add(number);
-                    }
+                        Number = numberCreateDto.PhoneNumber,
+                    };
+                    numbers.Add(number);
                 }
-                await _context.CompanyNumbers.AddRangeAsync(numbers);
-
-                vacancy.CompanyNumbers = numbers;
-
-                await _context.SaveChangesAsync();
-                await transaction.CommitAsync();
             }
-            catch (Exception)
-            {
-                await transaction.RollbackAsync();
-                throw;
-            }
+            await _context.CompanyNumbers.AddRangeAsync(numbers);
+
+            vacancy.CompanyNumbers = numbers;
+
+            await _context.SaveChangesAsync();
         }
 
         public async Task DeleteAsync(string id)
         {
             var vacancyGuid = Guid.Parse(id);
-            var vacancy = await _context.Vacancies.FirstOrDefaultAsync(x => x.Id == vacancyGuid && x.Company.UserId == _userGuid).Select(x => new Vacancy
-            {
-              IsActive =  x.IsActive
-            });
-            vacancy.IsActive = false;
+            var vacancy = await _context.Vacancies
+                                        .Where(x => x.Id == vacancyGuid && x.Company.UserId == _userGuid)
+                                        .Select(x => new { x.Id, x.IsActive })
+                                        .FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>();
+
+            var vacancyToUpdate = new Vacancy { Id = vacancyGuid, IsActive = false };
+            _context.Vacancies.Attach(vacancyToUpdate);
+            _context.Entry(vacancyToUpdate).Property(x => x.IsActive).IsModified = true;
         }
 
         public async Task<List<VacancyGetAllDto>> GetAllVacanciesAsync()
