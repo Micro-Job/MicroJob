@@ -22,5 +22,6 @@
 
         public ICollection<CompanyNumber>? CompanyNumbers { get; set; }
         public ICollection<Vacancy>? Vacancies { get; set; }
+        public ICollection<Status> Statuses { get; set; }
     }
 }
