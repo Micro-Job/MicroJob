@@ -1,4 +1,7 @@
-﻿using JobCompany.Business.Consumers;
+﻿using AuthService.Business.Services.CurrentUser;
+using JobCompany.Business.Consumers;
+using JobCompany.Business.Services.ApplicationServices;
+using JobCompany.Business.Services.StatusServices;
 using JobCompany.Business.Services.VacancyServices;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,6 +16,9 @@ namespace JobCompany.Business
             services.AddHttpContextAccessor();
             services.AddScoped<IFileService, FileService>();
             services.AddScoped<IVacancyService, VacancyService>();
+            services.AddScoped<ICurrentUser, CurrentUser>();
+            services.AddScoped<IStatusService, StatusService>();
+            services.AddScoped<IApplicationService, ApplicationService>();
         }
 
         public static IServiceCollection AddMassTransitCompany(this IServiceCollection services, string cString)
