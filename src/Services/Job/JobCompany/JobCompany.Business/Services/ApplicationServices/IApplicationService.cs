@@ -10,5 +10,6 @@ namespace JobCompany.Business.Services.ApplicationServices
     public interface IApplicationService
     {
         Task CreateApplicationAsync(ApplicationCreateDto dto);
+        Task UpdateApplicationAsync(string id,ApplicationUpdateDto dto);
     }
 }

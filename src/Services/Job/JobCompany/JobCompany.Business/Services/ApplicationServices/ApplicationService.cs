@@ -40,5 +40,16 @@ namespace JobCompany.Business.Services.ApplicationServices
             _context.Applications.Add(application);
             await _context.SaveChangesAsync();
         }
+
+        public async Task UpdateApplicationAsync(string id,ApplicationUpdateDto dto)
+        {
+            var applicationId = Guid.Parse(id);
+            var statusId = Guid.Parse(dto.StatusId);
+            var existApplication = await _context.Applications.FindAsync(applicationId) 
+            ?? throw new NotFoundException<Application>();
+
+            existApplication.StatusId = statusId;
+            await _context.SaveChangesAsync();
+        }
     }
 }
