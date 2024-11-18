@@ -31,7 +31,7 @@ namespace JobCompany.Business.Services.VacancyServices
         public async Task CreateVacancyAsync(CreateVacancyDto vacancyDto, ICollection<CreateNumberDto>? numberDto)
         {
             string? companyLogoPath = null;
-            var company = await _context.Companies.FindAsync(vacancyDto.CompanyId);
+            var company = await _context.Companies.FirstOrDefaultAsync(x => x.UserId == _userGuid);
 
             if (company != null && !string.IsNullOrEmpty(company.CompanyLogo))
             {
@@ -45,9 +45,8 @@ namespace JobCompany.Business.Services.VacancyServices
             var vacancy = new Vacancy
             {
                 Id = Guid.NewGuid(),
-                CompanyId = vacancyDto.CompanyId,
-                CompanyName = vacancyDto.CompanyName,
-                Title = vacancyDto.Title,
+                CompanyName = vacancyDto.CompanyName.Trim(),
+                Title = vacancyDto.Title.Trim(),
                 CompanyLogo = companyLogoPath,
                 StartDate = vacancyDto.StartDate,
                 EndDate = vacancyDto.EndDate,
@@ -67,14 +66,13 @@ namespace JobCompany.Business.Services.VacancyServices
                 Citizenship = vacancyDto.Citizenship,
                 CategoryId = vacancyDto.CategoryId
             };
-            await _context.Vacancies.AddAsync(vacancy);
 
             var numbers = new List<CompanyNumber>();
             if (numberDto is not null)
             {
                 foreach (var numberCreateDto in numberDto)
                 {
-                    var number = new Core.Entites.CompanyNumber
+                    var number = new CompanyNumber
                     {
                         Number = numberCreateDto.PhoneNumber,
                     };
@@ -84,21 +82,27 @@ namespace JobCompany.Business.Services.VacancyServices
             await _context.CompanyNumbers.AddRangeAsync(numbers);
 
             vacancy.CompanyNumbers = numbers;
-
+            await _context.Vacancies.AddAsync(vacancy);
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(string id)
+        public async Task DeleteAsync(List<string> ids)
         {
-            var vacancyGuid = Guid.Parse(id);
-            var vacancy = await _context.Vacancies
-                                        .Where(x => x.Id == vacancyGuid && x.Company.UserId == _userGuid)
-                                        .Select(x => new { x.Id, x.IsActive })
-                                        .FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>();
+            if (ids == null || ids.Count == 0)
+                throw new ArgumentException("ID list does not empty.");
+            var vacancyGuids = ids.Select(id =>
+            {
+                if (Guid.TryParse(id, out var guid))
+                    return guid;
+                throw new FormatException($"Invalid ID format: {id}");
+            }).ToList();
 
-            var vacancyToUpdate = new Vacancy { Id = vacancyGuid, IsActive = false };
-            _context.Vacancies.Attach(vacancyToUpdate);
-            _context.Entry(vacancyToUpdate).Property(x => x.IsActive).IsModified = true;
+            var deletedCount = await _context.Vacancies
+        .Where(x => vacancyGuids.Contains(x.Id) && x.Company.UserId == _userGuid)
+        .ExecuteUpdateAsync(x => x.SetProperty(v => v.IsActive, false));
+
+            if (deletedCount == 0)
+                throw new NotFoundException<Vacancy>();
         }
 
         public async Task<List<VacancyGetAllDto>> GetAllVacanciesAsync()
@@ -121,7 +125,7 @@ namespace JobCompany.Business.Services.VacancyServices
         public async Task<VacancyGetByIdDto> GetByIdVacancyAsync(string id)
         {
             var vacancyGuid = Guid.Parse(id);
-            var vacancy = await _context.Vacancies.FirstOrDefaultAsync(x => x.Id == vacancyGuid && x.Company.UserId == _userGuid).Select(x => new VacancyGetByIdDto
+            var vacancy = await _context.Vacancies.FirstOrDefaultAsync(x => x.Id == vacancyGuid).Select(x => new VacancyGetByIdDto
             {
                 Id = x.Id,
                 Title = x.Title,
