@@ -15,11 +15,11 @@ namespace Job.API.Controllers
             return Ok();
         }
 
-        //[HttpGet]
-        //public async Task<IActionResult> GetAllSavedVacancy()
-        //{
-        //    await _vacancyService.GetAllSavedVacancyAsync()
-        //    return Ok();
-        //}
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetAllSavedVacancy()
+        {
+           await _vacancyService.GetAllSavedVacancyAsync();
+           return Ok();
+        }
     }
 }
