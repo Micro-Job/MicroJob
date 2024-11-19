@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SharedLibrary.Responses;
 
 namespace Job.Business.Services.Vacancy
 {
@@ -44,10 +45,10 @@ namespace Job.Business.Services.Vacancy
 
         public async Task GetAllSavedVacancyAsync()
         {
-            var existSavedVacancy = await _context.SavedVacancies.Where(x => x.UserId == userGuid).Select(x => new 
-            {
-                Id = x.Id,
-            }).ToListAsync();
+            var savedVacancies = await _context.SavedVacancies
+                .Where(x => x.UserId == userGuid)
+                .Select(x => x.VacancyId) 
+                .ToListAsync();
         }
     }
 }
