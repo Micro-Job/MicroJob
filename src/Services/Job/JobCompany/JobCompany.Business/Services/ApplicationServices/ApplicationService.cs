@@ -105,9 +105,26 @@ namespace JobCompany.Business.Services.ApplicationServices
             .ToListAsync();
         }
 
-        public async Task<List<ApplicationUserListDto>> GetUserApplicationAsync(int? skip = 1, int take = 9)
+        public async Task<List<ApplicationUserListDto>> GetUserApplicationAsync(int skip = 1, int take = 9)
         {
-            var userApps = await _context.Applications.Where(x=>x.UserId == userGuid).Select().Skip(Math.Max(0,(skip - 1)* take)).Take(take).ToListAsync();   
+            var userApps = await _context.Applications.Where(x=>x.UserId == userGuid).Select(x=> new ApplicationUserListDto
+            {
+                CompanyName = x.Vacancy.Company.CompanyName,
+                CreatedDate = x.CreatedDate,
+                MainSalary = x.Vacancy.MainSalary,
+                MaxSalary = x.Vacancy.MaxSalary,
+                StatusColor = x.Status.StatusColor,
+                StatusName = x.Status.StatusName,
+                VacancyId = x.VacancyId,
+                VacancyImage = $"{_currentUser.BaseUrl}/{x.Vacancy.CompanyLogo}",
+                VacancyTitle = x.Vacancy.Title,
+                ViewCount = x.Vacancy.ViewCount
+            })
+            .Skip(Math.Max(0, (skip - 1) * take))
+            .Take(take)
+            .ToListAsync();  
+            
+            return userApps;
         }
     }
 }

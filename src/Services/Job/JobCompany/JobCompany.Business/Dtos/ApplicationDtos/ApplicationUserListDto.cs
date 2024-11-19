@@ -14,7 +14,7 @@ namespace JobCompany.Business.Dtos.ApplicationDtos
         public string VacancyTitle { get; set; }
         public string CompanyName { get; set; }
         public DateTime CreatedDate { get; set; }
-        public decimal MainSalary { get; set; }
+        public decimal? MainSalary { get; set; }
         public decimal? MaxSalary { get; set; }
         public int? ViewCount { get; set; }
         public string StatusName { get; set; }
