@@ -26,9 +26,9 @@ namespace JobCompany.API.Controllers
         }
 
         [HttpDelete("[action]")]
-        public async Task<IActionResult> Delete(string id)
+        public async Task<IActionResult> Delete(List<string> ids)
         {
-            await _vacancyService.DeleteAsync(id);
+            await _vacancyService.DeleteAsync(ids);
             return Ok();
         }
 
