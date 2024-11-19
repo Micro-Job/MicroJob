@@ -41,6 +41,7 @@ namespace AuthService.Business.Services.UserServices
                     Email = x.Email,
                     MainPhoneNumber = x.MainPhoneNumber,
                     Image = x.Image != null ? $"{_currentUser.BaseUrl}/{x.Image}" : null,
+                    UserRole = x.UserRole
                 })
                 ?? throw new UserNotFoundException();
 

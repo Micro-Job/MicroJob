@@ -16,7 +16,7 @@ namespace JobCompany.Business.Exceptions.StatusExceptions
 
         public StatusPermissionException()
         {
-            ErrorMessage = "Statusu silməyə icazəniz yoxdur";
+            ErrorMessage = "Statusu dəyişməyə icazəniz yoxdur";
         }
 
         public StatusPermissionException(string message) : base(message)

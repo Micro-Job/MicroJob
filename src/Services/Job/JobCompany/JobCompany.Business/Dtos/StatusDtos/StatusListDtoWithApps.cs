@@ -1,21 +1,18 @@
-﻿using JobCompany.Core.Entites.Base;
+﻿using JobCompany.Business.Dtos.ApplicationDtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace JobCompany.Core.Entites
+namespace JobCompany.Business.Dtos.StatusDtos
 {
-    public class Status : BaseEntity
+    public record StatusListDtoWithApps
     {
+        public Guid StatusId { get; set; }
         public string StatusName { get; set; }
         public string? StatusColor { get; set; }
         public bool IsDefault { get; set; }
-
-        public Guid CompanyId { get; set; }
-        public Company Company { get; set; }
-
-        public ICollection<Application>? Applications { get; set; }
+        public List<ApplicationListDto> Applications { get; set; } = new();
     }
 }

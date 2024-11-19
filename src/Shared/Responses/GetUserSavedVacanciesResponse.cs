@@ -9,6 +9,11 @@ namespace SharedLibrary.Responses
 {
     public class GetUserSavedVacanciesResponse
     {
+        public List<VacancyResponse> Vacancies { get; set; } = new List<VacancyResponse>();
+    }
+
+    public class VacancyResponse
+    {
         public string Title { get; set; }
         public string CompanyName { get; set; }
         public string? CompanyLocation { get; set; }
