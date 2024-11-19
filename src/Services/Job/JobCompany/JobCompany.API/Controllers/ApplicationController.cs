@@ -20,9 +20,22 @@ namespace JobCompany.API.Controllers
         }
 
         [HttpPost("[action]")]
-        public async Task<IActionResult> CreateApplicationAsync(ApplicationCreateDto dto)
+        public async Task<IActionResult> CreateApplication(ApplicationCreateDto dto)
         {
             await _service.CreateApplicationAsync(dto);
+            return Ok();
+        }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetAllApplication(string vacancyId)
+        {
+            return Ok(await _service.GetAllApplicationAsync(vacancyId));
+        }
+
+        [HttpPut("[action]")]
+        public async Task<IActionResult> ChangeApplicationStatus(string applicationId, string statusId)
+        {
+            await _service.ChangeApplicationStatusAsync(applicationId, statusId);
             return Ok();
         }
     }

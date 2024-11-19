@@ -9,6 +9,7 @@ namespace JobCompany.Business.Services.VacancyServices
         Task UpdateVacancyAsync(UpdateVacancyDto vacancyDto, ICollection<UpdateNumberDto>? numberDtos);
         Task DeleteAsync(string id);
         Task<List<VacancyGetAllDto>> GetAllVacanciesAsync();
+        Task<List<VacancyListDtoForAppDto>> GetAllVacanciesForAppAsync();
         Task<VacancyGetByIdDto> GetByIdVacancyAsync(string id);
     }
 }

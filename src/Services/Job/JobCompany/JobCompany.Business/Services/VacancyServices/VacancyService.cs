@@ -118,6 +118,17 @@ namespace JobCompany.Business.Services.VacancyServices
             return vacancies;
         }
 
+        public async Task<List<VacancyListDtoForAppDto>> GetAllVacanciesForAppAsync()
+        {
+            var vacancies = await _context.Vacancies.Where(x=>x.Company.UserId == _userGuid && x.IsActive == true).Select(x=> new VacancyListDtoForAppDto
+            {
+                VacancyId = x.Id,
+                VacancyName = x.Title
+            }).ToListAsync();
+
+            return vacancies;
+        }
+
         public async Task<VacancyGetByIdDto> GetByIdVacancyAsync(string id)
         {
             var vacancyGuid = Guid.Parse(id);

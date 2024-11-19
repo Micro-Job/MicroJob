@@ -15,5 +15,6 @@ namespace JobCompany.Core.Entites
         public Guid StatusId { get; set; }
         public Status Status { get; set; }
         public bool IsActive { get; set; }
+        public DateTime CreatedDate { get; set; }
     }
 }
