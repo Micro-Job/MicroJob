@@ -38,5 +38,12 @@ namespace JobCompany.API.Controllers
             await _service.ChangeApplicationStatusAsync(applicationId, statusId);
             return Ok();
         }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetApplicationById(string applicationId)
+        {
+            var data = await _service.GetApplicationByIdAsync(applicationId);
+            return Ok(data);
+        }
     }
 }

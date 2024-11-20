@@ -15,7 +15,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IEmailService, EmailService.API.Services.EmailService>();
 builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
-builder.Services.AddCorsPolicy();
+builder.Services.AddCorsPolicy("http://localhost:3000");
 
 builder.Services.AddMassTransit(x =>
 {
@@ -58,7 +58,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseCors("_myAllowSpecificOrigins");
 app.UseAuthorization();
 
 app.MapControllers();

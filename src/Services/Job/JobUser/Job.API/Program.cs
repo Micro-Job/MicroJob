@@ -67,7 +67,7 @@ namespace Job.API
             builder.Services.AddMassTransit(builder.Configuration["RabbitMQ"]!);
 
             builder.Services.AddJobServices();
-            builder.Services.AddCorsPolicy();
+            builder.Services.AddCorsPolicy("http://localhost:3000");
 
             var app = builder.Build();
             app.UseStaticFiles();
@@ -83,7 +83,7 @@ namespace Job.API
 
             app.UseHttpsRedirection();
             app.UseAuthorization();
-
+            app.UseCors("_myAllowSpecificOrigins");
 
             app.MapControllers();
 

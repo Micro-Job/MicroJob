@@ -1,7 +1,6 @@
 using FluentValidation.AspNetCore;
 using JobCompany.Business;
 using JobCompany.Business.Dtos.VacancyDtos;
-using MassTransit;
 using SharedLibrary.Middlewares;
 using SharedLibrary.ServiceRegistration;
 
@@ -26,7 +25,7 @@ namespace JobCompany.API
             builder.Services.AddAuth(builder.Configuration["Jwt:Issuer"]!, builder.Configuration["Jwt:Audience"]!, builder.Configuration["Jwt:SigningKey"]!);
             builder.Services.AddJobCompanyServices();
             builder.Services.AddMassTransitCompany(builder.Configuration["RabbitMQ"]!);
-            builder.Services.AddCorsPolicy();
+            builder.Services.AddCorsPolicy("http://localhost:3000");
 
             var app = builder.Build();
 
@@ -42,6 +41,8 @@ namespace JobCompany.API
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.UseCors("_myAllowSpecificOrigins");
 
             app.MapControllers();
 

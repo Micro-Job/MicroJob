@@ -16,14 +16,14 @@ namespace Job.Gateway
 
             builder.Services.AddControllers();
 
-            builder.Services.AddCorsPolicy();
+            builder.Services.AddCorsPolicy("http://localhost:3000");
 
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
 
             app.UseAuthorization();
-
+            app.UseCors("_myAllowSpecificOrigins");
             app.MapControllers();
             await app.UseOcelot();
             app.Run();

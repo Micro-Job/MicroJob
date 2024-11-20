@@ -1,29 +1,24 @@
-﻿using AuthService.Business.Services.CurrentUser;
+﻿using AuthService.Business.Exceptions.UserException;
+using AuthService.Business.Services.CurrentUser;
 using JobCompany.Business.Dtos.StatusDtos;
 using JobCompany.Business.Exceptions.StatusExceptions;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace JobCompany.Business.Services.StatusServices
 {
-    internal class StatusService : IStatusService
+    public class StatusService : IStatusService
     {
         private readonly JobCompanyDbContext _context;
         private readonly ICurrentUser _currentUser;
         private readonly Guid userGuid;
 
-        public StatusService(JobCompanyDbContext context,ICurrentUser currentUser)
+        public StatusService(JobCompanyDbContext context, ICurrentUser currentUser)
         {
             _context = context;
             _currentUser = currentUser;
-            userGuid = Guid.Parse(_currentUser.UserId);
+            userGuid = Guid.Parse(_currentUser.UserId ?? throw new UserNotLoggedInException());
         }
 
         public async Task CreateStatusAsync(CreateStatusDto dto)
@@ -61,7 +56,7 @@ namespace JobCompany.Business.Services.StatusServices
             var companyId = _context.Companies.FirstOrDefaultAsync(x => x.UserId == userGuid).Result.Id;
 
             var allStatus = await _context.Statuses.Where(x => x.IsDefault == true && x.CompanyId == companyId)
-            .Select(x=> new StatusListDto
+            .Select(x => new StatusListDto
             {
                 StatusId = x.Id,
                 StatusName = x.StatusName,
