@@ -5,7 +5,6 @@ using Job.DAL.Contexts;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using SharedLibrary.Middlewares;
 using SharedLibrary.ServiceRegistration;
 
 namespace Job.API

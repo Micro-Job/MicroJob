@@ -26,6 +26,7 @@ namespace JobCompany.API
             builder.Services.AddAuth(builder.Configuration["Jwt:Issuer"]!, builder.Configuration["Jwt:Audience"]!, builder.Configuration["Jwt:SigningKey"]!);
             builder.Services.AddJobCompanyServices();
             builder.Services.AddMassTransitCompany(builder.Configuration["RabbitMQ"]!);
+            builder.Services.AddCorsPolicy();
 
             var app = builder.Build();
 

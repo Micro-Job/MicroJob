@@ -1,5 +1,6 @@
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
+using SharedLibrary.ServiceRegistration;
 
 namespace Job.Gateway
 {
@@ -14,6 +15,8 @@ namespace Job.Gateway
             builder.Configuration.AddJsonFile("ocelot.json");
 
             builder.Services.AddControllers();
+
+            builder.Services.AddCorsPolicy();
 
             var app = builder.Build();
 

@@ -26,7 +26,7 @@ namespace AuthService.Business
         }
         public static IServiceCollection AddMassTransit(this IServiceCollection services, string cString)
         {
-            services.AddMassTransit(x=>
+            services.AddMassTransit(x =>
             {
                 x.AddConsumer<GetUserDataConsumer>();
 
@@ -39,6 +39,5 @@ namespace AuthService.Business
             });
             return services;
         }
-
     }
 }
