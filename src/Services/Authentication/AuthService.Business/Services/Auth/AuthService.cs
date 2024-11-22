@@ -1,6 +1,5 @@
 ﻿using AuthService.Business.Dtos;
 using AuthService.Business.Exceptions.UserException;
-using AuthService.Business.HelperServices.Email;
 using AuthService.Business.HelperServices.TokenHandler;
 using AuthService.Business.Publishers;
 using AuthService.Core.Entities;
@@ -8,14 +7,12 @@ using AuthService.Core.Enums;
 using AuthService.DAL.Contexts;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Dtos.EmailDtos;
 using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.Events;
 using SharedLibrary.Exceptions;
 using SharedLibrary.ExternalServices.FileService;
-using SharedLibrary.Middlewares;
 using SharedLibrary.Statics;
 using System.Security.Claims;
 
@@ -54,11 +51,16 @@ namespace AuthService.Business.Services.Auth
                 RegistrationDate = DateTime.Now,
                 Password = _tokenHandler.GeneratePasswordHash(dto.Password),
                 Image = dto.Image != null
-                ? $"{fileResult.FilePath}/{fileResult.FileName}"
-                    : null,
-                UserRole = UserRole.SimpleUser,
+            ? $"{fileResult.FilePath}/{fileResult.FileName}"
+                : null,
+                UserRole = dto.UserStatus == 1
+            ? UserRole.SimpleUser
+            : dto.UserStatus == 2
+                ? UserRole.EmployeeUser
+                : throw new InvalidUserStatusException()
             };
-            
+
+
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
 
@@ -73,7 +75,7 @@ namespace AuthService.Business.Services.Auth
                 Subject = "Xoş gəldiniz",
                 Content = "Qeydiyyat uğurla başa çatdı"
             });
-           
+
             // sifre yaratmaq ucun mail gondermek
             //await _emailService.SendSetPassword(dto.Email, await GeneratePasswordResetTokenAsync(user));
         }
@@ -295,7 +297,7 @@ namespace AuthService.Business.Services.Auth
             await _context.SaveChangesAsync();
         }
 
-       
+
     }
 }
 
