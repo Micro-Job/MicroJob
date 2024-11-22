@@ -1,10 +1,8 @@
 using EmailService.API.Consumers;
 using EmailService.API.Services;
-using Hangfire;
-using Hangfire.SqlServer;
 using MassTransit;
-using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Dtos.EmailDtos;
+using SharedLibrary.ServiceRegistration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,9 +15,9 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IEmailService, EmailService.API.Services.EmailService>();
 builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
+builder.Services.AddCorsPolicy("http://localhost:3000");
 
-
-builder.Services.AddMassTransit(x=>
+builder.Services.AddMassTransit(x =>
 {
     x.AddConsumer<SendEmailConsumer>();
     x.SetKebabCaseEndpointNameFormatter();
@@ -43,7 +41,7 @@ builder.Services.AddMassTransit(x=>
 //        UsePageLocksOnDequeue = true,
 //        DisableGlobalLocks = true
 //    };
-    
+
 //    x.UseSqlServerStorage(builder.Configuration.GetConnectionString("MSSql"), option)
 //    .WithJobExpirationTimeout(TimeSpan.FromMinutes(5));
 //});
@@ -60,7 +58,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseCors("_myAllowSpecificOrigins");
 app.UseAuthorization();
 
 app.MapControllers();

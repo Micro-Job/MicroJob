@@ -55,7 +55,7 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
     opt.UseSqlServer(builder.Configuration.GetConnectionString("MSSQL"));
 });
 
-builder.Services.AddCorsPolicy();
+builder.Services.AddCorsPolicy("http://localhost:3000");
 builder.Services.AddAuth(builder.Configuration["Jwt:Issuer"]!, builder.Configuration["Jwt:Audience"]!, builder.Configuration["Jwt:SigningKey"]!);
 
 var app = builder.Build();
@@ -74,6 +74,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseCors("_myAllowSpecificOrigins");
 
 app.UseCustomExceptionHandler();
 

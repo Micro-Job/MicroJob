@@ -1,9 +1,4 @@
 ﻿using JobCompany.Core.Entites.Base;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace JobCompany.Core.Entites
 {
@@ -12,7 +7,7 @@ namespace JobCompany.Core.Entites
         public string StatusName { get; set; }
         public string? StatusColor { get; set; }
         public bool IsDefault { get; set; }
-
+        public int Order { get; set; }
         public Guid CompanyId { get; set; }
         public Company Company { get; set; }
 
