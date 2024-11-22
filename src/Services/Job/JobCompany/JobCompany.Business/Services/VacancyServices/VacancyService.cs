@@ -133,6 +133,24 @@ namespace JobCompany.Business.Services.VacancyServices
             return vacancies;
         }
 
+        public async Task<ICollection<VacancyGetByCompanyIdDto>> GetVacancyByCompanyIdAsync(string companyId)
+        {
+            var companyGuid = Guid.Parse(companyId);
+            var vacancies = await _context.Vacancies.Where(x => x.Company.UserId == _userGuid && x.IsActive == true).Select(x => new VacancyGetByCompanyIdDto
+            {
+                CompanyName = x.CompanyName,
+                Title = x.Title,
+                Location = x.Location,
+                WorkType = x.WorkType,
+                StartDate = x.StartDate,
+                ViewCount = x.ViewCount,
+                MainSalary = x.MainSalary,
+                MaxSalary = x.MaxSalary
+            }).ToListAsync();
+
+            return vacancies; 
+        }
+
         public async Task<VacancyGetByIdDto> GetByIdVacancyAsync(string id)
         {
             var vacancyGuid = Guid.Parse(id);

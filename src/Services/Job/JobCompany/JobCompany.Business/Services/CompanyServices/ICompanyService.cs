@@ -6,6 +6,7 @@ namespace JobCompany.Business.Services.CompanyServices
     {
         Task UpdateCompanyAsync(CompanyUpdateDto dto);
 
-        Task<CompanyListDto> GetAllCompanies();
+        Task<ICollection<CompanyListDto>> GetAllCompanies();
+        Task<CompanyDetailItemDto> GetCompanyDetailAsync(string id);
     }
 }

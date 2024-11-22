@@ -1,11 +1,15 @@
 using AuthService.Business.Exceptions.UserException;
 using AuthService.Business.Services.CurrentUser;
 using JobCompany.Business.Dtos.CompanyDtos;
+using JobCompany.Business.Dtos.NumberDtos;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
+using MassTransit.Initializers;
 using Microsoft.EntityFrameworkCore;
 using Shared.Exceptions;
+using Shared.Responses;
 using SharedLibrary.Exceptions;
+using SharedLibrary.Responses;
 
 namespace JobCompany.Business.Services.CompanyServices
 {
@@ -14,12 +18,15 @@ namespace JobCompany.Business.Services.CompanyServices
         private JobCompanyDbContext _context;
         readonly ICurrentUser _currentUser;
         private readonly Guid userGuid;
+        readonly GetAllCompaniesDataResponse _getAllCompanyData;
 
-        public CompanyService(JobCompanyDbContext context, ICurrentUser currentUser)
+
+        public CompanyService(JobCompanyDbContext context, ICurrentUser currentUser, GetAllCompaniesDataResponse getAllCompanyData)
         {
             _context = context;
             _currentUser = currentUser;
             userGuid = Guid.Parse(_currentUser.UserId ?? throw new UserNotLoggedInException());
+            _getAllCompanyData = getAllCompanyData;
         }
 
         public async Task UpdateCompanyAsync(CompanyUpdateDto dto)
@@ -54,9 +61,38 @@ namespace JobCompany.Business.Services.CompanyServices
             await _context.SaveChangesAsync();
         }
 
-        public Task<CompanyListDto> GetAllCompanies()
+        public async Task<ICollection<CompanyListDto>> GetAllCompanies()
         {
-            throw new NotImplementedException();
+            var companies = await _context.Companies.Include(x=>x.Vacancies).Select(c => new CompanyListDto
+                {
+                    CompanyId = c.Id,
+                    CompanyName = c.CompanyName,
+                    CompanyImage = c.CompanyLogo,
+                    CompanyVacancyCount = c.Vacancies.Count(v => v.IsActive)
+                })
+                .ToListAsync();
+
+            return companies;
+        }
+
+        public async Task<CompanyDetailItemDto> GetCompanyDetailAsync(string id)
+        {
+            var companyGuid = Guid.Parse(id);
+            var company = await  _context.Companies
+            .Where(c => c.Id == companyGuid)
+            .Include(x=>x.CompanyNumbers)
+            .Select(x => new CompanyDetailItemDto
+            {
+                CompanyInformation = x.CompanyInformation,
+                CompanyLocation = x.CompanyLocation,
+                WebLink = x.WebLink,
+                CompanyNumbers = x.CompanyNumbers.Select(cn => new CompanyNumberDto
+                {
+                    Number = cn.Number,
+                }).ToList()
+            }).FirstOrDefaultAsync() 
+            ?? throw new NotFoundException<Company>();
+            return company;
         }
     }
 }
