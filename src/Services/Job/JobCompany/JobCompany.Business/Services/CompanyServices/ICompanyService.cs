@@ -1,7 +1,11 @@
+using JobCompany.Business.Dtos.CompanyDtos;
+
 namespace JobCompany.Business.Services.CompanyServices
 {
     public interface ICompanyService
     {
-        Task UpdateCompanyAsync(Dtos.CompanyDtos.CompanyUpdateDto dto);
+        Task UpdateCompanyAsync(CompanyUpdateDto dto);
+
+        Task<CompanyListDto> GetAllCompanies();
     }
 }

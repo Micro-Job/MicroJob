@@ -9,6 +9,10 @@ using System.Text;
 using System.Threading.Tasks;
 using SharedLibrary.Responses;
 using Job.Business.Services.VacancyInformation;
+using SharedLibrary.Dtos.CompanyDtos;
+using MassTransit;
+using SharedLibrary.Requests;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Job.Business.Services.Vacancy
 {
@@ -18,12 +22,14 @@ namespace Job.Business.Services.Vacancy
         private readonly ICurrentUser _currentUser;
         private readonly Guid userGuid;
         private readonly IVacancyInformation _info;
-        public VacancyService(JobDbContext context,ICurrentUser currentUser,IVacancyInformation info)
+        private readonly IRequestClient<GetAllCompaniesRequest> _request;
+        public VacancyService(JobDbContext context,ICurrentUser currentUser,IVacancyInformation info,IRequestClient<GetAllCompaniesRequest> request)
         {
             _context = context;
             _currentUser = currentUser;
             userGuid = Guid.Parse(_currentUser.UserId);
             _info = info;
+            _request = request;
         }
 
         public async Task ToggleSaveVacancyAsync(string vacancyId)
@@ -56,6 +62,13 @@ namespace Job.Business.Services.Vacancy
             var salam = await _info.GetUserSavedVacancyDataAsync(savedVacanciesId);
 
             return salam;
+        }
+
+        public async Task<ICollection<CompanyDto>> GetAllCompaniesAsync()
+        {
+            var response = await _request.GetResponse<GetAllCompaniesResponse>(new GetAllCompaniesRequest());
+
+            return response.Message.Companies;
         }
     }
 }

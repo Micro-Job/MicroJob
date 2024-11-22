@@ -1,4 +1,5 @@
-﻿using SharedLibrary.Responses;
+﻿using SharedLibrary.Dtos.CompanyDtos;
+using SharedLibrary.Responses;
 
 namespace Job.Business.Services.Vacancy
 {
@@ -6,5 +7,7 @@ namespace Job.Business.Services.Vacancy
     {
         Task ToggleSaveVacancyAsync(string vacancyId);
         Task<GetUserSavedVacanciesResponse> GetAllSavedVacancyAsync();
+
+        Task<ICollection<CompanyDto>> GetAllCompaniesAsync();
     }
 }
