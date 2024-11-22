@@ -8,6 +8,6 @@ namespace Job.Business.Services.VacancyInformation
 {
     public interface IVacancyInformation
     {
-        Task<GetUserSavedVacanciesResponse> GetUserVacancyDataAsync(List<Guid> VacancyIds);
+        Task<GetUserSavedVacanciesResponse> GetUserSavedVacancyDataAsync(List<Guid> VacancyIds);
     }
 }

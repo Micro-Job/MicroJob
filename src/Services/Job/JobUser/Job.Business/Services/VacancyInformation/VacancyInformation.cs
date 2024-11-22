@@ -10,7 +10,7 @@ namespace Job.Business.Services.VacancyInformation
 {
     public class VacancyInformation(IRequestClient<GetUserSavedVacanciesRequest> _client) : IVacancyInformation
     {
-        public async Task<GetUserSavedVacanciesResponse> GetUserVacancyDataAsync(List<Guid> vacancyIds)
+        public async Task<GetUserSavedVacanciesResponse> GetUserSavedVacancyDataAsync(List<Guid> vacancyIds)
         {
             if (vacancyIds == null || !vacancyIds.Any())
             {

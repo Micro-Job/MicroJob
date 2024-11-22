@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using SharedLibrary.Responses;
+using Job.Business.Services.VacancyInformation;
 
 namespace Job.Business.Services.Vacancy
 {
@@ -16,11 +17,13 @@ namespace Job.Business.Services.Vacancy
         private readonly JobDbContext _context;
         private readonly ICurrentUser _currentUser;
         private readonly Guid userGuid;
-        public VacancyService(JobDbContext context,ICurrentUser currentUser)
+        private readonly IVacancyInformation _info;
+        public VacancyService(JobDbContext context,ICurrentUser currentUser,IVacancyInformation info)
         {
             _context = context;
             _currentUser = currentUser;
             userGuid = Guid.Parse(_currentUser.UserId);
+            _info = info;
         }
 
         public async Task ToggleSaveVacancyAsync(string vacancyId)
@@ -43,12 +46,16 @@ namespace Job.Business.Services.Vacancy
             await _context.SaveChangesAsync();
         }
 
-        public async Task GetAllSavedVacancyAsync()
+        public async Task<GetUserSavedVacanciesResponse> GetAllSavedVacancyAsync()
         {
-            var savedVacancies = await _context.SavedVacancies
+            var savedVacanciesId = await _context.SavedVacancies
                 .Where(x => x.UserId == userGuid)
                 .Select(x => x.VacancyId) 
                 .ToListAsync();
+
+            var salam = await _info.GetUserSavedVacancyDataAsync(savedVacanciesId);
+
+            return salam;
         }
     }
 }

@@ -18,8 +18,8 @@ namespace Job.API.Controllers
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllSavedVacancy()
         {
-           await _vacancyService.GetAllSavedVacancyAsync();
-           return Ok();
+           return Ok(await _vacancyService.GetAllSavedVacancyAsync());
         }
+
     }
 }

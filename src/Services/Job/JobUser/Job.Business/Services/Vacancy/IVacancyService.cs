@@ -1,8 +1,10 @@
-﻿namespace Job.Business.Services.Vacancy
+﻿using SharedLibrary.Responses;
+
+namespace Job.Business.Services.Vacancy
 {
     public interface IVacancyService
     {
         Task ToggleSaveVacancyAsync(string vacancyId);
-        Task GetAllSavedVacancyAsync();
+        Task<GetUserSavedVacanciesResponse> GetAllSavedVacancyAsync();
     }
 }
