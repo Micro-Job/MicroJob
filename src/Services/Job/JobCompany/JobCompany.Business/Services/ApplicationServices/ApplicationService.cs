@@ -21,7 +21,7 @@ namespace JobCompany.Business.Services.ApplicationServices
         private readonly ICurrentUser _currentUser;
         private readonly Guid userGuid;
 
-        public ApplicationService( ICurrentUser currentUser, JobCompanyDbContext context)
+        public ApplicationService(ICurrentUser currentUser, JobCompanyDbContext context)
         {
             _context = context;
             _currentUser = currentUser;
