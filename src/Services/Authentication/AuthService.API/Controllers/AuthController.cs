@@ -16,6 +16,13 @@ namespace AuthService.API.Controllers
         }
 
         [HttpPost("[action]")]
+        public async Task<IActionResult> CompanyRegister(RegisterCompanyDto dto)
+        {
+            await _authService.CompanyRegisterAsync(dto);
+            return Ok();
+        }
+
+        [HttpPost("[action]")]
         public async Task<IActionResult> Login([FromBody] LoginDto dto)
         {
             return Ok(await _authService.LoginAsync(dto));
