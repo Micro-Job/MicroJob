@@ -1,6 +1,8 @@
 using FluentValidation.AspNetCore;
 using JobCompany.Business;
 using JobCompany.Business.Dtos.VacancyDtos;
+using JobCompany.DAL.Contexts;
+using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Middlewares;
 using SharedLibrary.ServiceRegistration;
 
@@ -16,6 +18,10 @@ namespace JobCompany.API
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
+            builder.Services.AddDbContext<JobCompanyDbContext>(options =>
+            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 
             builder.Services.AddFluentValidation(opt =>
             {
