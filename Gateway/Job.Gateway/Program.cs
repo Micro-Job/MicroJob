@@ -2,6 +2,7 @@ using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
 using SharedLibrary.Middlewares;
 using SharedLibrary.ServiceRegistration;
+using SharedLibrary.Middlewares;
 
 namespace Job.Gateway
 {
@@ -26,6 +27,7 @@ namespace Job.Gateway
             app.UseAuthorization();
             app.UseCustomExceptionHandler();
             app.UseCors("_myAllowSpecificOrigins");
+            app.UseCustomExceptionHandler();
             app.MapControllers();
             await app.UseOcelot();
             app.Run();
