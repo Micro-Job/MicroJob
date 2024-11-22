@@ -5,6 +5,7 @@ using Job.DAL.Contexts;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using SharedLibrary.Middlewares;
 using SharedLibrary.ServiceRegistration;
 
 namespace Job.API
@@ -83,6 +84,7 @@ namespace Job.API
 
             app.UseHttpsRedirection();
             app.UseAuthorization();
+            app.UseCustomExceptionHandler();
             app.UseCors("_myAllowSpecificOrigins");
 
             app.MapControllers();

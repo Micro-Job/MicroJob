@@ -1,5 +1,6 @@
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
+using SharedLibrary.Middlewares;
 using SharedLibrary.ServiceRegistration;
 
 namespace Job.Gateway
@@ -23,6 +24,7 @@ namespace Job.Gateway
             // Configure the HTTP request pipeline.
 
             app.UseAuthorization();
+            app.UseCustomExceptionHandler();
             app.UseCors("_myAllowSpecificOrigins");
             app.MapControllers();
             await app.UseOcelot();
