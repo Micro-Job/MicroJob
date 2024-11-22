@@ -18,15 +18,13 @@ namespace JobCompany.Business.Services.CompanyServices
         private JobCompanyDbContext _context;
         readonly ICurrentUser _currentUser;
         private readonly Guid userGuid;
-        readonly GetAllCompaniesDataResponse _getAllCompanyData;
 
 
-        public CompanyService(JobCompanyDbContext context, ICurrentUser currentUser, GetAllCompaniesDataResponse getAllCompanyData)
+        public CompanyService(JobCompanyDbContext context, ICurrentUser currentUser)
         {
             _context = context;
             _currentUser = currentUser;
             userGuid = Guid.Parse(_currentUser.UserId ?? throw new UserNotLoggedInException());
-            _getAllCompanyData = getAllCompanyData;
         }
 
         public async Task UpdateCompanyAsync(CompanyUpdateDto dto)
@@ -80,7 +78,6 @@ namespace JobCompany.Business.Services.CompanyServices
             var companyGuid = Guid.Parse(id);
             var company = await  _context.Companies
             .Where(c => c.Id == companyGuid)
-            .Include(x=>x.CompanyNumbers)
             .Select(x => new CompanyDetailItemDto
             {
                 CompanyInformation = x.CompanyInformation,
@@ -92,6 +89,10 @@ namespace JobCompany.Business.Services.CompanyServices
                 }).ToList()
             }).FirstOrDefaultAsync() 
             ?? throw new NotFoundException<Company>();
+
+            // yazilacaq
+            // company.Email
+            // company.PhoneNumber
             return company;
         }
     }

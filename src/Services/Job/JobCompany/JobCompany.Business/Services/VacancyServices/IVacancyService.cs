@@ -12,6 +12,5 @@ namespace JobCompany.Business.Services.VacancyServices
         Task<List<VacancyListDtoForAppDto>> GetAllVacanciesForAppAsync();
         Task<VacancyGetByIdDto> GetByIdVacancyAsync(string id);
         Task<ICollection<VacancyGetByCompanyIdDto>> GetVacancyByCompanyIdAsync(string companyId);
-        
     }
 }
