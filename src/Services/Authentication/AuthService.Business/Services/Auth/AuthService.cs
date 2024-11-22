@@ -82,6 +82,8 @@ namespace AuthService.Business.Services.Auth
 
         public async Task CompanyRegisterAsync(RegisterCompanyDto dto)
         {
+            if (!dto.Policy) throw new PolicyException();
+
             var userCheck = await _context.Users
                 .FirstOrDefaultAsync(x => x.Email == dto.Email || x.MainPhoneNumber == dto.MainPhoneNumber);
 

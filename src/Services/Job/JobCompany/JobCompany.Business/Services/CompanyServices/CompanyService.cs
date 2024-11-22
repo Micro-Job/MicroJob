@@ -1,5 +1,6 @@
 using AuthService.Business.Exceptions.UserException;
 using AuthService.Business.Services.CurrentUser;
+using JobCompany.Business.Dtos.CompanyDtos;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
@@ -21,7 +22,7 @@ namespace JobCompany.Business.Services.CompanyServices
             userGuid = Guid.Parse(_currentUser.UserId ?? throw new UserNotLoggedInException());
         }
 
-        public async Task UpdateCompanyAsync(Dtos.CompanyDtos.CompanyUpdateDto dto)
+        public async Task UpdateCompanyAsync(CompanyUpdateDto dto)
         {
             var company = await _context.Companies.FindAsync(userGuid)
             ?? throw new NotFoundException<Company>();
@@ -53,5 +54,9 @@ namespace JobCompany.Business.Services.CompanyServices
             await _context.SaveChangesAsync();
         }
 
+        public Task<CompanyListDto> GetAllCompanies()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
