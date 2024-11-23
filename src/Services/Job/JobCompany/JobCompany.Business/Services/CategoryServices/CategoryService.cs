@@ -29,7 +29,6 @@ namespace JobCompany.Business.Services.CategoryServices
             };
 
             _context.Categories.Add(category);
-            await _context.SaveChangesAsync();
         }
 
         public async Task DeleteCategoryAsync(string id)
@@ -39,10 +38,9 @@ namespace JobCompany.Business.Services.CategoryServices
             throw new Exceptions.Common.NotFoundException<Category>();
 
             _context.Categories.Remove(category);
-            await _context.SaveChangesAsync();
         }
 
-        public async Task<List<CategoryListDto>> GetAllCategoriesAsync()
+        public async Task<ICollection<CategoryListDto>> GetAllCategoriesAsync()
         {
             var categories = await _context.Categories.Select(c => new CategoryListDto
             {
@@ -60,7 +58,6 @@ namespace JobCompany.Business.Services.CategoryServices
             var isExistCat = await _context.Categories.FirstOrDefaultAsync(c => c.CategoryName == dto.CategoryName && c.Id != categoryId);
             if (isExistCat != null) throw new Exceptions.Common.IsAlreadyExistException<Category>();
             category.CategoryName = dto.CategoryName;
-            await _context.SaveChangesAsync();
         }
     }
 }

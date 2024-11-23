@@ -10,7 +10,7 @@ namespace JobCompany.Business.Services.CategoryServices
     {
         Task CreateCategoryAsync(CreateCategoryDto dto);
         Task UpdateCategoryAsync(string id , UpdateCategoryDto dto);
-        Task<List<CategoryListDto>> GetAllCategoriesAsync();
+        Task<ICollection<CategoryListDto>> GetAllCategoriesAsync();
         Task DeleteCategoryAsync(string id);
     }
 }
