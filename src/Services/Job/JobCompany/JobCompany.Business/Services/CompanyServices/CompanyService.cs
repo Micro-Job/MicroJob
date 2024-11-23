@@ -98,7 +98,7 @@ namespace JobCompany.Business.Services.CompanyServices
                 {
                     Number = cn.Number,
                 }).ToList()
-            }).FirstOrDefaultAsync() 
+            }).FirstOrDefaultAsync()
             ?? throw new NotFoundException<Company>();
 
             var GuidUserId = Guid.Parse(company.UserId);

@@ -136,7 +136,9 @@ namespace JobCompany.Business.Services.VacancyServices
         public async Task<ICollection<VacancyGetByCompanyIdDto>> GetVacancyByCompanyIdAsync(string companyId)
         {
             var companyGuid = Guid.Parse(companyId);
-            var vacancies = await _context.Vacancies.Where(x => x.Company.UserId == _userGuid && x.IsActive == true).Select(x => new VacancyGetByCompanyIdDto
+            var vacancies = await _context.Vacancies
+            .Where(x => x.Company.Id == companyGuid && x.IsActive == true)
+            .Select(x => new VacancyGetByCompanyIdDto
             {
                 CompanyName = x.CompanyName,
                 Title = x.Title,
