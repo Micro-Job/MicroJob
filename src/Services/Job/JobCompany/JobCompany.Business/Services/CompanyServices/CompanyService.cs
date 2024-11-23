@@ -2,9 +2,9 @@ using AuthService.Business.Exceptions.UserException;
 using AuthService.Business.Services.CurrentUser;
 using JobCompany.Business.Dtos.CompanyDtos;
 using JobCompany.Business.Dtos.NumberDtos;
-using JobCompany.Business.Services.CompanyInfoServices;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
+using MassTransit;
 using MassTransit.Initializers;
 using Microsoft.EntityFrameworkCore;
 using Shared.Exceptions;
@@ -20,17 +20,15 @@ namespace JobCompany.Business.Services.CompanyServices
         private JobCompanyDbContext _context;
         readonly ICurrentUser _currentUser;
         private readonly Guid userGuid;
-        readonly GetAllCompaniesDataRequest _request;
-        readonly ICompanyInfoServices _companyInfoServices;
+        readonly IRequestClient<GetAllCompaniesDataRequest> _client;
 
 
-        public CompanyService(JobCompanyDbContext context, ICurrentUser currentUser, GetAllCompaniesDataRequest request, ICompanyInfoServices companyInfoServices)
+        public CompanyService(JobCompanyDbContext context, ICurrentUser currentUser, IRequestClient<GetAllCompaniesDataRequest> client)
         {
             _context = context;
             _currentUser = currentUser;
-            _request = request;
             userGuid = Guid.Parse(_currentUser.UserId ?? throw new UserNotLoggedInException());
-            _companyInfoServices = companyInfoServices;
+            _client = client;
         }
 
         public async Task UpdateCompanyAsync(CompanyUpdateDto dto)
@@ -79,6 +77,12 @@ namespace JobCompany.Business.Services.CompanyServices
             return companies;
         }
 
+        public async Task<GetAllCompaniesDataResponse> GetAllCompaniesDataResponseAsync (Guid UserId)
+        {
+            var response = await _client.GetResponse<GetAllCompaniesDataResponse>(new GetAllCompaniesDataRequest { UserId = UserId });
+            return response.Message;
+        }
+
         public async Task<CompanyDetailItemDto> GetCompanyDetailAsync(string id)
         {
             var companyGuid = Guid.Parse(id);
@@ -99,7 +103,7 @@ namespace JobCompany.Business.Services.CompanyServices
 
             var GuidUserId = Guid.Parse(company.UserId);
 
-            var response = await _companyInfoServices.GetAllCompaniesDataResponseAsync(GuidUserId);
+            var response = await GetAllCompaniesDataResponseAsync(GuidUserId);
             company.Email = response.Email;
 
             return company;
