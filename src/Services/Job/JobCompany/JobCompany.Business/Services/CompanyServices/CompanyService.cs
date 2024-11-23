@@ -65,14 +65,15 @@ namespace JobCompany.Business.Services.CompanyServices
 
         public async Task<ICollection<CompanyListDto>> GetAllCompanies()
         {
-            var companies = await _context.Companies.Include(x=>x.Vacancies).Select(c => new CompanyListDto
-                {
-                    CompanyId = c.Id,
-                    CompanyName = c.CompanyName,
-                    CompanyImage = c.CompanyLogo,
-                    CompanyVacancyCount = c.Vacancies.Count(v => v.IsActive)
-                })
-                .ToListAsync();
+            var companies = await _context.Companies
+            .Select(c => new CompanyListDto
+            {
+                CompanyId = c.Id,
+                CompanyName = c.CompanyName,
+                CompanyImage = c.CompanyLogo,
+                CompanyVacancyCount = c.Vacancies.Count(v => v.IsActive)
+            })
+            .ToListAsync();
 
             return companies;
         }
