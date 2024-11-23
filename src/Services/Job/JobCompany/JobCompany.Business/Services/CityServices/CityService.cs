@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using JobCompany.Business.Dtos.CityDtos;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
+using Microsoft.EntityFrameworkCore;
 
 namespace JobCompany.Business.Services.CityServices
 {
@@ -33,6 +34,19 @@ namespace JobCompany.Business.Services.CityServices
             };
 
             _context.Cities.Add(city);
+        }
+
+        public async Task<ICollection<CityListDto>> GetAllCitiesAsync()
+        {
+            var cities = await _context.Cities
+               .Select(c => new CityListDto
+               {
+                   CityName = c.CityName,
+                   CountryId = c.CountryId
+               })
+               .ToListAsync();
+
+            return cities;
         }
 
         public async Task UpdateCityAsync(string id, UpdateCityDto dto)

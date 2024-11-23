@@ -32,5 +32,12 @@ namespace JobCompany.API.Controllers
             await _service.UpdateCityAsync(id, dto);
             return Ok();
         }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetAllCitiesAsync()
+        {
+            await _service.GetAllCitiesAsync();
+            return Ok();
+        }
     }
 }

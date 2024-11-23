@@ -10,5 +10,6 @@ namespace JobCompany.Business.Services.CityServices
     {
         Task CreateCityAsync(CreateCityDto dto);
         Task UpdateCityAsync(string id, UpdateCityDto dto);
+        Task<ICollection<CityListDto>> GetAllCitiesAsync();
     }
 }
