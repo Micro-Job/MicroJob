@@ -2,11 +2,13 @@ using AuthService.Business.Exceptions.UserException;
 using AuthService.Business.Services.CurrentUser;
 using JobCompany.Business.Dtos.CompanyDtos;
 using JobCompany.Business.Dtos.NumberDtos;
+using JobCompany.Business.Services.CompanyInfoServices;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using MassTransit.Initializers;
 using Microsoft.EntityFrameworkCore;
 using Shared.Exceptions;
+using Shared.Requests;
 using Shared.Responses;
 using SharedLibrary.Exceptions;
 using SharedLibrary.Responses;
@@ -18,13 +20,17 @@ namespace JobCompany.Business.Services.CompanyServices
         private JobCompanyDbContext _context;
         readonly ICurrentUser _currentUser;
         private readonly Guid userGuid;
+        readonly GetAllCompaniesDataRequest _request;
+        readonly ICompanyInfoServices _companyInfoServices;
 
 
-        public CompanyService(JobCompanyDbContext context, ICurrentUser currentUser)
+        public CompanyService(JobCompanyDbContext context, ICurrentUser currentUser, GetAllCompaniesDataRequest request, ICompanyInfoServices companyInfoServices)
         {
             _context = context;
             _currentUser = currentUser;
+            _request = request;
             userGuid = Guid.Parse(_currentUser.UserId ?? throw new UserNotLoggedInException());
+            _companyInfoServices = companyInfoServices;
         }
 
         public async Task UpdateCompanyAsync(CompanyUpdateDto dto)
@@ -83,6 +89,7 @@ namespace JobCompany.Business.Services.CompanyServices
                 CompanyInformation = x.CompanyInformation,
                 CompanyLocation = x.CompanyLocation,
                 WebLink = x.WebLink,
+                UserId = x.UserId.ToString(),
                 CompanyNumbers = x.CompanyNumbers.Select(cn => new CompanyNumberDto
                 {
                     Number = cn.Number,
@@ -90,9 +97,11 @@ namespace JobCompany.Business.Services.CompanyServices
             }).FirstOrDefaultAsync() 
             ?? throw new NotFoundException<Company>();
 
-            // yazilacaq
-            // company.Email
-            // company.PhoneNumber
+            var GuidUserId = Guid.Parse(company.UserId);
+
+            var response = await _companyInfoServices.GetAllCompaniesDataResponseAsync(GuidUserId);
+            company.Email = response.Email;
+
             return company;
         }
     }

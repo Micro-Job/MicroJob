@@ -9,6 +9,7 @@ namespace JobCompany.Business.Dtos.CompanyDtos
 {
     public record CompanyDetailItemDto
     {
+        public string UserId { get; set; }
         public string? CompanyInformation { get; set; }
         public ICollection<CompanyNumberDto>? CompanyNumbers { get; set; }
         public string? CompanyLocation { get; set; }
