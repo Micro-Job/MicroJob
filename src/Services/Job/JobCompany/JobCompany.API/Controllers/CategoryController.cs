@@ -20,16 +20,16 @@ namespace JobCompany.API.Controllers
         }
 
         [HttpPost("[action]")]
-        public async Task<IActionResult> CreateCategoryAsync(CreateCategoryDto dto)
+        public async Task<IActionResult> CreateCategoryAsync(string categoryName)
         {
-            await _service.CreateCategoryAsync(dto);
+            await _service.CreateCategoryAsync(categoryName);
             return Ok();
         }
 
         [HttpPut("[action]/{id}")]
-        public async Task<IActionResult> UpdateCategoryAsync(string id, UpdateCategoryDto dto)
+        public async Task<IActionResult> UpdateCategoryAsync(string id, string? categoryName)
         {
-            await _service.UpdateCategoryAsync(id, dto);
+            await _service.UpdateCategoryAsync(id, categoryName);
             return Ok();
         }
 

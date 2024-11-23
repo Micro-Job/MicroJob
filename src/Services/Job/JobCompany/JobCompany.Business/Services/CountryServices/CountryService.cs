@@ -18,14 +18,14 @@ namespace JobCompany.Business.Services.CountryServices
             _context = context;
         }
 
-        public async Task CreateCountryAsync(CreateCountryDto dto)
+        public async Task CreateCountryAsync(string countryName)
         {
-            var existCountry = await _context.Categories.FindAsync(dto.CountryName);
+            var existCountry = await _context.Categories.FindAsync(countryName);
             if (existCountry != null) throw new Exceptions.Common.IsAlreadyExistException<Country>();
 
             var country = new Country
             {
-                CountryName = dto.CountryName,
+                CountryName = countryName,
             };
 
             _context.Countries.Add(country);
@@ -49,16 +49,16 @@ namespace JobCompany.Business.Services.CountryServices
             return countries;
         }
 
-        public async Task UpdateCountryAsync(string id, UpdateCountryDto dto)
+        public async Task UpdateCountryAsync(string id,string? countryName)
         {
             var countryId = Guid.Parse(id);
             var country = await _context.Countries.FindAsync(countryId)
             ?? throw new Exceptions.Common.NotFoundException<Country>();
 
-            var isExistCountry = await _context.Countries.FirstOrDefaultAsync(c => c.CountryName == dto.CountryName && c.Id != countryId);
+            var isExistCountry = await _context.Countries.FirstOrDefaultAsync(c => c.CountryName == countryName && c.Id != countryId);
             if (isExistCountry != null) throw new Exceptions.Common.IsAlreadyExistException<Country>();
 
-            country.CountryName = dto.CountryName;
+            country.CountryName = countryName;
         }
     }
 }

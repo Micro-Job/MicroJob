@@ -20,16 +20,16 @@ namespace JobCompany.API.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> CreateCountryAsync(CreateCountryDto dto)
+        public async Task<IActionResult> CreateCountryAsync(string countryName)
         {
-            await _service.CreateCountryAsync(dto);
+            await _service.CreateCountryAsync(countryName);
             return Ok();
         }
 
         [HttpGet("[action]/{id}")]
-        public async Task<IActionResult> UpdateCountryAsync(string id, UpdateCountryDto dto)
+        public async Task<IActionResult> UpdateCountryAsync(string id, string? countryName )
         {
-            await _service.UpdateCountryAsync(id, dto);
+            await _service.UpdateCountryAsync(id, countryName);
             return Ok();
         }
 

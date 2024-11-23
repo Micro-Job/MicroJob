@@ -18,14 +18,14 @@ namespace JobCompany.Business.Services.CategoryServices
             _context = context;
         }
 
-        public async Task CreateCategoryAsync(CreateCategoryDto dto)
+        public async Task CreateCategoryAsync(string categoryName)
         {
-            var existCategory = await _context.Categories.FindAsync(dto.CategoryName);
+            var existCategory = await _context.Categories.FindAsync(categoryName);
             if (existCategory != null) throw new Exceptions.Common.IsAlreadyExistException<Category>();
 
             var category = new Category
             {
-                CategoryName = dto.CategoryName,
+                CategoryName = categoryName,
             };
 
             _context.Categories.Add(category);
@@ -49,15 +49,15 @@ namespace JobCompany.Business.Services.CategoryServices
             return categories;
         }
 
-        public async Task UpdateCategoryAsync(string id, UpdateCategoryDto dto)
+        public async Task UpdateCategoryAsync(string id, string? categoryName)
         {
             var categoryId = Guid.Parse(id);
             var category = await _context.Categories.FindAsync(categoryId) ??
             throw new Exceptions.Common.NotFoundException<Category>();
 
-            var isExistCat = await _context.Categories.FirstOrDefaultAsync(c => c.CategoryName == dto.CategoryName && c.Id != categoryId);
+            var isExistCat = await _context.Categories.FirstOrDefaultAsync(c => c.CategoryName == categoryName && c.Id != categoryId);
             if (isExistCat != null) throw new Exceptions.Common.IsAlreadyExistException<Category>();
-            category.CategoryName = dto.CategoryName;
+            category.CategoryName = categoryName;
         }
     }
 }

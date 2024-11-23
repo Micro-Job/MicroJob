@@ -8,8 +8,8 @@ namespace JobCompany.Business.Services.CategoryServices
 {
     public interface ICategoryService
     {
-        Task CreateCategoryAsync(CreateCategoryDto dto);
-        Task UpdateCategoryAsync(string id , UpdateCategoryDto dto);
+        Task CreateCategoryAsync(string categoryName);
+        Task UpdateCategoryAsync(string id , string? categoryName);
         Task<ICollection<CategoryListDto>> GetAllCategoriesAsync();
         Task DeleteCategoryAsync(string id);
     }
