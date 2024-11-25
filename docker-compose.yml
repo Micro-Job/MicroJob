@@ -1,6 +1,6 @@
 version: '3.8'
 services:
-  reporto-draft:
+  micro-job:
     container_name: micro-job
     build:
       context: .
