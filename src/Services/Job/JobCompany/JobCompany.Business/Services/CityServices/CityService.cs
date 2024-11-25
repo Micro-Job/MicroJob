@@ -74,5 +74,13 @@ namespace JobCompany.Business.Services.CityServices
 
             return cities;
         }
+
+        public async Task DeleteCityAsync(string cityId)
+        {
+            var guidCityId = Guid.Parse(cityId);
+            var existCity = await _context.Cities.FindAsync(guidCityId) 
+                ?? throw new Exceptions.Common.NotFoundException<City>();
+            _context.Cities.Remove(existCity);
+        }
     }
 }

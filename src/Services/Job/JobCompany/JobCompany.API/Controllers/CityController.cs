@@ -39,5 +39,19 @@ namespace JobCompany.API.Controllers
             await _service.GetAllCitiesAsync();
             return Ok();
         }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetAllCitiesByCountryIdAsync(string countryId)
+        {
+            await _service.GetAllCitiesByCountryIdAsync(countryId);
+            return Ok();
+        }
+
+        [HttpDelete("[action]/{id}")]
+        public async Task<IActionResult> DeleteCityAsync(string cityId)
+        {
+            await _service.DeleteCityAsync(cityId);
+            return Ok();
+        }
     }
 }
