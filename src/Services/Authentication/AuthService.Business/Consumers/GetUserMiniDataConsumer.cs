@@ -15,9 +15,16 @@ namespace AuthService.Business.Consumers
     {
         public async Task Consume(ConsumeContext<GetAllCompaniesDataRequest> context)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == context.Message.UserId);
+            var user = await _context.Users
+                .Where(x => x.Id == context.Message.UserId)
+                .Select(x => new 
+                {
+                    x.Email,
+                    x.MainPhoneNumber
+                })
+                .FirstOrDefaultAsync();
 
-            if(user is null)
+            if (user is null)
             {
                 await context.RespondAsync<GetAllCompaniesDataResponse>(null);
                 return;
