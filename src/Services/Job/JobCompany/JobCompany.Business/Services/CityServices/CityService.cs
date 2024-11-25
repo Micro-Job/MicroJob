@@ -57,5 +57,22 @@ namespace JobCompany.Business.Services.CityServices
 
             city.CityName = dto.CityName;
         }
+
+        public async Task<ICollection<CityNameDto>> GetAllCitiesByCountryIdAsync(string countryId)
+        {
+            var guidCountryId = Guid.Parse(countryId);
+            var existCountry = await _context.Cities.FindAsync(guidCountryId) 
+            ?? throw new Exceptions.Common.NotFoundException<Country>();
+
+            var cities = await _context.Cities
+            .Where(city => city.CountryId == guidCountryId)
+            .Select(city => new CityNameDto
+            {
+                CityName = city.CityName,
+            })
+            .ToListAsync();
+
+            return cities;
+        }
     }
 }
