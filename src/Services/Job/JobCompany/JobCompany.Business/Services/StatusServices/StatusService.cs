@@ -52,14 +52,14 @@ namespace JobCompany.Business.Services.StatusServices
 
         public async Task<List<StatusListDto>> GetAllStatusesAsync()
         {
-            //deyisilmelidi
-            var companyId = _context.Companies.FirstOrDefaultAsync(x => x.UserId == userGuid).Result.Id;
+            var company = await _context.Companies.FirstOrDefaultAsync(x => x.UserId == userGuid);
 
-            var allStatus = await _context.Statuses.Where(x => x.IsDefault == true && x.CompanyId == companyId)
+            var allStatus = await _context.Statuses.Where(x => x.IsDefault == true && x.CompanyId == company.Id) 
             .Select(x => new StatusListDto
             {
-                StatusId = x.Id,
+                StatusId = x.Id, 
                 StatusName = x.StatusName,
+                StatusColor = x.StatusColor
             }).ToListAsync();
 
             return allStatus;
