@@ -20,7 +20,7 @@ namespace JobCompany.DAL.Configurations
             builder.HasOne(x => x.Status)
                .WithMany(x => x.Applications)
                .HasForeignKey(x => x.StatusId)
-               .OnDelete(DeleteBehavior.Cascade);
+               .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

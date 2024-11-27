@@ -52,8 +52,7 @@ namespace JobCompany.DAL.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CityName = table.Column<string>(type: "nvarchar(32)", maxLength: 32, nullable: false),
-                    CountryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CountryId1 = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    CountryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -63,13 +62,7 @@ namespace JobCompany.DAL.Migrations
                         column: x => x.CountryId,
                         principalTable: "Countries",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Cities_Countries_CountryId1",
-                        column: x => x.CountryId1,
-                        principalTable: "Countries",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -118,7 +111,7 @@ namespace JobCompany.DAL.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     StatusName = table.Column<string>(type: "nvarchar(32)", maxLength: 32, nullable: false),
-                    StatusColor = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    StatusColor = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     IsDefault = table.Column<bool>(type: "bit", nullable: false),
                     Order = table.Column<int>(type: "int", nullable: false),
                     CompanyId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
@@ -163,9 +156,7 @@ namespace JobCompany.DAL.Migrations
                     CountryId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CityId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     VacancyTestId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CategoryId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CategoryId1 = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CityId1 = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    CategoryId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -175,23 +166,13 @@ namespace JobCompany.DAL.Migrations
                         column: x => x.CategoryId,
                         principalTable: "Categories",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Vacancies_Categories_CategoryId1",
-                        column: x => x.CategoryId1,
-                        principalTable: "Categories",
-                        principalColumn: "Id");
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Vacancies_Cities_CityId",
                         column: x => x.CityId,
                         principalTable: "Cities",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Vacancies_Cities_CityId1",
-                        column: x => x.CityId1,
-                        principalTable: "Cities",
-                        principalColumn: "Id");
+                        onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
                         name: "FK_Vacancies_Companies_CompanyId",
                         column: x => x.CompanyId,
@@ -203,13 +184,13 @@ namespace JobCompany.DAL.Migrations
                         column: x => x.CountryId,
                         principalTable: "Countries",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
                         name: "FK_Vacancies_VacancyTests_VacancyTestId",
                         column: x => x.VacancyTestId,
                         principalTable: "VacancyTests",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -282,11 +263,6 @@ namespace JobCompany.DAL.Migrations
                 column: "CountryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Cities_CountryId1",
-                table: "Cities",
-                column: "CountryId1");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Companies_CategoryId",
                 table: "Companies",
                 column: "CategoryId");
@@ -322,19 +298,9 @@ namespace JobCompany.DAL.Migrations
                 column: "CategoryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Vacancies_CategoryId1",
-                table: "Vacancies",
-                column: "CategoryId1");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Vacancies_CityId",
                 table: "Vacancies",
                 column: "CityId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Vacancies_CityId1",
-                table: "Vacancies",
-                column: "CityId1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Vacancies_CompanyId",

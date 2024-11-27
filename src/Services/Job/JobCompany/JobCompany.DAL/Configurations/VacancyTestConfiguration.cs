@@ -14,7 +14,7 @@ namespace JobCompany.DAL.Configurations
             builder.HasMany(vt => vt.Vacancies)
                    .WithOne(v => v.VacancyTest)
                    .HasForeignKey(v => v.VacancyTestId)
-                   .OnDelete(DeleteBehavior.SetNull);
+                   .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

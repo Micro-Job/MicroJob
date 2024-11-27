@@ -16,7 +16,7 @@ namespace JobCompany.DAL.Configurations
             builder.HasOne(cn => cn.Vacancy)
                    .WithMany(v => v.CompanyNumbers)
                    .HasForeignKey(cn => cn.VacancyId)
-                   .OnDelete(DeleteBehavior.Cascade);
+                   .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasOne(cn => cn.Company)
                    .WithMany(v => v.CompanyNumbers)

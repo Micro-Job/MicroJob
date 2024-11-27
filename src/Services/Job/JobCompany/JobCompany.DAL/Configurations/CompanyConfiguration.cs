@@ -25,12 +25,12 @@ namespace JobCompany.DAL.Configurations
             builder.HasMany(c => c.CompanyNumbers)
                 .WithOne()
                 .HasForeignKey(cn => cn.CompanyId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasMany(c => c.Vacancies)
                 .WithOne()
                 .HasForeignKey(v => v.CompanyId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasOne(x=>x.Country)
                 .WithMany(x=>x.Companies)
@@ -50,7 +50,7 @@ namespace JobCompany.DAL.Configurations
             builder.HasMany(c => c.Statuses)
                 .WithOne()
                 .HasForeignKey(v => v.CompanyId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

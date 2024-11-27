@@ -58,22 +58,22 @@ namespace JobCompany.DAL.Configurations
             builder.HasOne(v => v.Country)
                    .WithMany(c => c.Vacancies)
                    .HasForeignKey(v => v.CountryId)
-                   .OnDelete(DeleteBehavior.Cascade);
+                   .OnDelete(DeleteBehavior.SetNull);
 
             builder.HasOne(v => v.City)
-                   .WithMany()
+                   .WithMany(c=>c.Vacancies)
                    .HasForeignKey(v => v.CityId)
-                   .OnDelete(DeleteBehavior.Cascade);
+                   .OnDelete(DeleteBehavior.SetNull);
 
             builder.HasOne(v => v.Category)
-                   .WithMany()
+                   .WithMany(c => c.Vacancies)
                    .HasForeignKey(v => v.CategoryId)
-                   .OnDelete(DeleteBehavior.Cascade);
+                   .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasOne(v => v.VacancyTest)
-                   .WithMany()
+                   .WithMany(c => c.Vacancies)
                    .HasForeignKey(v => v.VacancyTestId)
-                   .OnDelete(DeleteBehavior.SetNull);
+                   .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasMany(c => c.Applications)
                    .WithOne(v => v.Vacancy)

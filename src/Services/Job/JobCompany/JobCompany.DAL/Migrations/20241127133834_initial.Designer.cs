@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JobCompany.DAL.Migrations
 {
     [DbContext(typeof(JobCompanyDbContext))]
-    [Migration("20241127124038_initial")]
+    [Migration("20241127133834_initial")]
     partial class initial
     {
         /// <inheritdoc />
@@ -85,14 +85,9 @@ namespace JobCompany.DAL.Migrations
                     b.Property<Guid>("CountryId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CountryId1")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CountryId");
-
-                    b.HasIndex("CountryId1");
 
                     b.ToTable("Cities");
                 });
@@ -208,6 +203,7 @@ namespace JobCompany.DAL.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("StatusColor")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("StatusName")
@@ -231,16 +227,10 @@ namespace JobCompany.DAL.Migrations
                     b.Property<Guid?>("CategoryId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("CategoryId1")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<byte>("Citizenship")
                         .HasColumnType("tinyint");
 
                     b.Property<Guid?>("CityId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("CityId1")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("CompanyId")
@@ -324,11 +314,7 @@ namespace JobCompany.DAL.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.HasIndex("CategoryId1");
-
                     b.HasIndex("CityId");
-
-                    b.HasIndex("CityId1");
 
                     b.HasIndex("CompanyId");
 
@@ -371,16 +357,10 @@ namespace JobCompany.DAL.Migrations
 
             modelBuilder.Entity("JobCompany.Core.Entites.City", b =>
                 {
-                    b.HasOne("JobCompany.Core.Entites.Country", null)
+                    b.HasOne("JobCompany.Core.Entites.Country", "Country")
                         .WithMany("Cities")
                         .HasForeignKey("CountryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("JobCompany.Core.Entites.Country", "Country")
-                        .WithMany()
-                        .HasForeignKey("CountryId1")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Country");
@@ -441,22 +421,14 @@ namespace JobCompany.DAL.Migrations
             modelBuilder.Entity("JobCompany.Core.Entites.Vacancy", b =>
                 {
                     b.HasOne("JobCompany.Core.Entites.Category", "Category")
-                        .WithMany()
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("JobCompany.Core.Entites.Category", null)
                         .WithMany("Vacancies")
-                        .HasForeignKey("CategoryId1");
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("JobCompany.Core.Entites.City", "City")
-                        .WithMany()
-                        .HasForeignKey("CityId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("JobCompany.Core.Entites.City", null)
                         .WithMany("Vacancies")
-                        .HasForeignKey("CityId1");
+                        .HasForeignKey("CityId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("JobCompany.Core.Entites.Company", "Company")
                         .WithMany("Vacancies")
@@ -466,12 +438,12 @@ namespace JobCompany.DAL.Migrations
                     b.HasOne("JobCompany.Core.Entites.Country", "Country")
                         .WithMany("Vacancies")
                         .HasForeignKey("CountryId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("JobCompany.Core.Entites.VacancyTest", "VacancyTest")
                         .WithMany("Vacancies")
                         .HasForeignKey("VacancyTestId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Category");
 
