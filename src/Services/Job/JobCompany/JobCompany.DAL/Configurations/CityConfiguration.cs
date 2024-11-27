@@ -23,6 +23,11 @@ namespace JobCompany.DAL.Configurations
                    .WithOne(v => v.City)
                    .HasForeignKey(v => v.CityId)
                    .OnDelete(DeleteBehavior.Restrict);
+            
+            builder.HasMany(c => c.Companies)
+                   .WithOne(v => v.City)
+                   .HasForeignKey(v => v.CityId)
+                   .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

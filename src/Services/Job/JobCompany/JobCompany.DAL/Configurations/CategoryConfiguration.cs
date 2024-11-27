@@ -18,6 +18,11 @@ namespace JobCompany.DAL.Configurations
                    .WithOne(v => v.Category)
                    .HasForeignKey(v => v.CategoryId)
                    .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasMany(c => c.Companies)
+                   .WithOne(v => v.Category)
+                   .HasForeignKey(v => v.CategoryId)
+                   .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

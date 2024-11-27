@@ -75,6 +75,15 @@ namespace JobCompany.DAL.Configurations
                    .HasForeignKey(v => v.VacancyTestId)
                    .OnDelete(DeleteBehavior.SetNull);
 
+            builder.HasMany(c => c.Applications)
+                   .WithOne(v => v.Vacancy)
+                   .HasForeignKey(v => v.VacancyId)
+                   .OnDelete(DeleteBehavior.Restrict);
+            
+            builder.HasMany(c => c.CompanyNumbers)
+                   .WithOne(v => v.Vacancy)
+                   .HasForeignKey(v => v.VacancyId)
+                   .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

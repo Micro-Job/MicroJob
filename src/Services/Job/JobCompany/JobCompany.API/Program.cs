@@ -20,7 +20,7 @@ namespace JobCompany.API
             builder.Services.AddSwaggerGen();
 
             builder.Services.AddDbContext<JobCompanyDbContext>(options =>
-            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+            options.UseSqlServer(builder.Configuration.GetConnectionString("MSSQL")));
 
 
             builder.Services.AddFluentValidation(opt =>

@@ -1,11 +1,6 @@
 ﻿using JobCompany.Core.Entites;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace JobCompany.DAL.Configurations
 {
@@ -13,14 +8,23 @@ namespace JobCompany.DAL.Configurations
     {
         public void Configure(EntityTypeBuilder<Status> builder)
         {
+            builder.HasKey(x => x.Id);
+
             builder.Property(x => x.StatusName)
                 .IsRequired()
                 .HasMaxLength(32);
 
-            builder.HasOne(x=>x.Company)
-                .WithMany(x=>x.Statuses)
-                .HasForeignKey(x=>x.CompanyId)
+            builder.Property(x => x.Order);
+
+            builder.HasOne(x => x.Company)
+                .WithMany(x => x.Statuses)
+                .HasForeignKey(x => x.CompanyId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasMany(c => c.Applications)
+                .WithOne(v => v.Status)
+                .HasForeignKey(v => v.StatusId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
