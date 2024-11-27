@@ -239,5 +239,35 @@ namespace JobCompany.Business.Services.VacancyServices
             _context.Vacancies.Update(existingVacancy);
             await _context.SaveChangesAsync();
         }
+
+        /// <summary> Şirkət profilində vakansiya axtarışı vakansiya title'sinə görə </summary>
+
+        public async Task<ICollection<VacancyGetAllDto>> SearchVacancyAsync(string searchText)
+        {
+            var search = searchText.ToLower();
+            var vacancies = await _context.Vacancies
+                .Where(v => v.Title.ToLower().Contains(search) && v.IsActive)
+                .Select(v => new VacancyGetAllDto
+                {
+                    Id = v.Id,
+                    Title = v.Title,
+                    CompanyLogo = v.CompanyLogo,
+                    StartDate = v.StartDate,
+                    Location = v.Location,
+                    ViewCount = v.ViewCount,
+                    WorkType = v.WorkType,
+                    MainSalary = v.MainSalary,
+                    MaxSalary = v.MaxSalary,
+                })
+                .ToListAsync();
+
+            if (!vacancies.Any())
+            {
+                throw new NotFoundException<Vacancy>("Axtarış mətni ilə uyğun gələn vakansiyalar tapılmadı");
+            }
+
+            return vacancies;
+        }
+
     }
 }

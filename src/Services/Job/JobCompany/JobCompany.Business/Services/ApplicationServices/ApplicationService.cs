@@ -45,6 +45,8 @@ namespace JobCompany.Business.Services.ApplicationServices
             await _context.SaveChangesAsync();
         }
 
+
+        /// <summary> Yaradılan müraciətin geri alınması </summary>
         public async Task RemoveApplicationAsync(string applicationId)
         {
             var applicationGuid = Guid.Parse(applicationId);
