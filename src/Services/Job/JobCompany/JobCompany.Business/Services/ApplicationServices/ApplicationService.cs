@@ -50,6 +50,7 @@ namespace JobCompany.Business.Services.ApplicationServices
 
             var existApplication = await _context.Applications.FirstOrDefaultAsync(x => x.Id == applicationGuid && x.UserId == userGuid)
             ?? throw new NotFoundException<Application>();
+            if (existApplication.IsActive == false) throw new ApplicationStatusIsDeactiveException();
             existApplication.IsActive = false;
             await _context.SaveChangesAsync();
         }
