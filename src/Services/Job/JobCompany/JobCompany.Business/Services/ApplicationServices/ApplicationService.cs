@@ -3,6 +3,7 @@ using JobCompany.Business.Dtos.ApplicationDtos;
 using JobCompany.Business.Dtos.StatusDtos;
 using JobCompany.Business.Exceptions.ApplicationExceptions;
 using JobCompany.Business.Exceptions.StatusExceptions;
+using JobCompany.Business.Exceptions.VacancyExceptions;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
@@ -31,7 +32,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                 .FirstOrDefaultAsync() 
                 ?? throw new NotFoundException<Vacancy>();
 
-            if (vacancy.IsActive == false) throw new ApplicationStatusIsDeactiveException();
+            if (vacancy.IsActive == false) throw new VacancyStatusIsDeactiveException();
 
             var application = new Application
             {
