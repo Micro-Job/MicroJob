@@ -27,9 +27,9 @@ namespace JobCompany.API.Controllers
         }
 
         [HttpPost("[action]")]
-        public async Task<IActionResult> RemoveApplication(ApplicationRemoveDto dto)
+        public async Task<IActionResult> RemoveApplication(string applicationId)
         {
-            await _service.RemoveApplicationAsync(dto);
+            await _service.RemoveApplicationAsync(applicationId);
             return Ok();
         }
 

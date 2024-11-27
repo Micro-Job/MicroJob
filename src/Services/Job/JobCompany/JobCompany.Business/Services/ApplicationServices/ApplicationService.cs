@@ -45,9 +45,9 @@ namespace JobCompany.Business.Services.ApplicationServices
             await _context.SaveChangesAsync();
         }
 
-        public async Task RemoveApplicationAsync(ApplicationRemoveDto dto)
+        public async Task RemoveApplicationAsync(string applicationId)
         {
-            var applicationGuid = Guid.Parse(dto.ApplicationId);
+            var applicationGuid = Guid.Parse(applicationId);
 
             var existApplication = await _context.Applications.FirstOrDefaultAsync(x => x.Id == applicationGuid && x.UserId == userGuid)
             ?? throw new NotFoundException<Application>();

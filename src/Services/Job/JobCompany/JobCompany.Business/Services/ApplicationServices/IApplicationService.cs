@@ -6,7 +6,7 @@ namespace JobCompany.Business.Services.ApplicationServices
     public interface IApplicationService
     {
         Task CreateApplicationAsync(ApplicationCreateDto dto);
-        Task RemoveApplicationAsync(ApplicationRemoveDto dto);
+        Task RemoveApplicationAsync(string applicationId);
 
         Task ChangeApplicationStatusAsync(string applicationId, string statusId);
 
