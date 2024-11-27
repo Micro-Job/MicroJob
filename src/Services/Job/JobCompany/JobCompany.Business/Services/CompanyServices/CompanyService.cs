@@ -63,22 +63,24 @@ namespace JobCompany.Business.Services.CompanyServices
             await _context.SaveChangesAsync();
         }
 
-        public async Task<ICollection<CompanyListDto>> GetAllCompanies()
+        public async Task<ICollection<CompanyListDto>> GetAllCompanies(int skip = 1, int take = 12)
         {
             var companies = await _context.Companies
-            .Select(c => new CompanyListDto
-            {
-                CompanyId = c.Id,
-                CompanyName = c.CompanyName,
-                CompanyImage = c.CompanyLogo,
-                CompanyVacancyCount = c.Vacancies.Count(v => v.IsActive)
-            })
+                .Select(c => new CompanyListDto
+                {
+                    CompanyId = c.Id,
+                    CompanyName = c.CompanyName,
+                    CompanyImage = c.CompanyLogo,
+                    CompanyVacancyCount = c.Vacancies.Count(v => v.IsActive)
+                })
+            .Skip(Math.Max(0, (skip - 1) * take))
+            .Take(take)
             .ToListAsync();
 
             return companies;
         }
 
-        public async Task<GetAllCompaniesDataResponse> GetAllCompaniesDataResponseAsync (Guid UserId)
+        public async Task<GetAllCompaniesDataResponse> GetAllCompaniesDataResponseAsync(Guid UserId)
         {
             var response = await _client.GetResponse<GetAllCompaniesDataResponse>(new GetAllCompaniesDataRequest { UserId = UserId });
             return response.Message;
@@ -87,7 +89,7 @@ namespace JobCompany.Business.Services.CompanyServices
         public async Task<CompanyDetailItemDto> GetCompanyDetailAsync(string id)
         {
             var companyGuid = Guid.Parse(id);
-            var company = await  _context.Companies
+            var company = await _context.Companies
             .Where(c => c.Id == companyGuid)
             .Select(x => new CompanyDetailItemDto
             {

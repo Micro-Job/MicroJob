@@ -124,7 +124,7 @@ namespace JobCompany.Business.Services.VacancyServices
 
         public async Task<List<VacancyListDtoForAppDto>> GetAllVacanciesForAppAsync()
         {
-            var vacancies = await _context.Vacancies.Where(x=>x.Company.UserId == _userGuid && x.IsActive == true).Select(x=> new VacancyListDtoForAppDto
+            var vacancies = await _context.Vacancies.Where(x => x.Company.UserId == _userGuid && x.IsActive == true).Select(x => new VacancyListDtoForAppDto
             {
                 VacancyId = x.Id,
                 VacancyName = x.Title
@@ -133,7 +133,7 @@ namespace JobCompany.Business.Services.VacancyServices
             return vacancies;
         }
 
-        public async Task<ICollection<VacancyGetByCompanyIdDto>> GetVacancyByCompanyIdAsync(string companyId)
+        public async Task<ICollection<VacancyGetByCompanyIdDto>> GetVacancyByCompanyIdAsync(string companyId, int skip = 1, int take = 9)
         {
             var companyGuid = Guid.Parse(companyId);
             var vacancies = await _context.Vacancies
@@ -148,9 +148,12 @@ namespace JobCompany.Business.Services.VacancyServices
                 ViewCount = x.ViewCount,
                 MainSalary = x.MainSalary,
                 MaxSalary = x.MaxSalary
-            }).ToListAsync();
+            })
+            .Skip(Math.Max(0, (skip - 1) * take))
+            .Take(take)
+            .ToListAsync();
 
-            return vacancies; 
+            return vacancies;
         }
 
         public async Task<VacancyGetByIdDto> GetByIdVacancyAsync(string id)
