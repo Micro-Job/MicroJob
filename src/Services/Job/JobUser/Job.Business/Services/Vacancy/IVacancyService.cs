@@ -7,7 +7,7 @@ namespace Job.Business.Services.Vacancy
     {
         Task ToggleSaveVacancyAsync(string vacancyId);
         Task<GetUserSavedVacanciesResponse> GetAllSavedVacancyAsync();
-
+        Task<GetUserSavedVacanciesResponse> GetUserSavedVacancyDataAsync(List<Guid> VacancyIds);
         Task<ICollection<CompanyDto>> GetAllCompaniesAsync();
     }
 }

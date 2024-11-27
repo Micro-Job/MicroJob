@@ -29,7 +29,8 @@ namespace AuthService.Business
             services.AddMassTransit(x =>
             {
                 x.AddConsumer<GetUserDataConsumer>();
-
+                x.AddConsumer<GetUserMiniDataConsumer>();
+                
                 x.SetKebabCaseEndpointNameFormatter();
                 x.UsingRabbitMq((con, cfg) =>
                 {

@@ -51,5 +51,12 @@ namespace JobCompany.API.Controllers
         {
             return Ok(await _vacancyService.GetAllVacanciesForAppAsync());
         }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetVacancyByCompanyIdAsync(string companyId)
+        {
+            return Ok(await _vacancyService.GetVacancyByCompanyIdAsync(companyId));
+        }
+
     }
 }

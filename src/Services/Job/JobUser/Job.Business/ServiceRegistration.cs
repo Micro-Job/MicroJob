@@ -9,7 +9,6 @@ using Job.Business.Services.Resume;
 using Job.Business.Services.Skill;
 using Job.Business.Services.User;
 using Job.Business.Services.Vacancy;
-using Job.Business.Services.VacancyInformation;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using SharedLibrary.ExternalServices.FileService;
@@ -29,7 +28,6 @@ namespace Job.Business
             services.AddScoped<ILanguageService, LanguageService>();
             services.AddScoped<ICertificateService, CertificateService>();
             services.AddScoped<IVacancyService, VacancyService>();
-            services.AddScoped<IVacancyInformation, VacancyInformation>();
             services.AddScoped<ICurrentUser, CurrentUser>();
             services.AddScoped<ISkillService, SkillService>();
         }

@@ -8,7 +8,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using SharedLibrary.Responses;
-using Job.Business.Services.VacancyInformation;
 using SharedLibrary.Dtos.CompanyDtos;
 using MassTransit;
 using SharedLibrary.Requests;
@@ -21,15 +20,15 @@ namespace Job.Business.Services.Vacancy
         private readonly JobDbContext _context;
         private readonly ICurrentUser _currentUser;
         private readonly Guid userGuid;
-        private readonly IVacancyInformation _info;
         private readonly IRequestClient<GetAllCompaniesRequest> _request;
-        public VacancyService(JobDbContext context,ICurrentUser currentUser,IVacancyInformation info,IRequestClient<GetAllCompaniesRequest> request)
+        readonly IRequestClient<GetUserSavedVacanciesRequest> _client;
+        public VacancyService(JobDbContext context, ICurrentUser currentUser, IRequestClient<GetAllCompaniesRequest> request, IRequestClient<GetUserSavedVacanciesRequest> client)
         {
             _context = context;
             _currentUser = currentUser;
             userGuid = Guid.Parse(_currentUser.UserId);
-            _info = info;
             _request = request;
+            _client = client;
         }
 
         public async Task ToggleSaveVacancyAsync(string vacancyId)
@@ -59,9 +58,9 @@ namespace Job.Business.Services.Vacancy
                 .Select(x => x.VacancyId) 
                 .ToListAsync();
 
-            var salam = await _info.GetUserSavedVacancyDataAsync(savedVacanciesId);
+            var datas = await GetUserSavedVacancyDataAsync(savedVacanciesId);
 
-            return salam;
+            return datas;
         }
 
         public async Task<ICollection<CompanyDto>> GetAllCompaniesAsync()
@@ -69,6 +68,24 @@ namespace Job.Business.Services.Vacancy
             var response = await _request.GetResponse<GetAllCompaniesResponse>(new GetAllCompaniesRequest());
 
             return response.Message.Companies;
+        }
+
+
+        public async Task<GetUserSavedVacanciesResponse> GetUserSavedVacancyDataAsync(List<Guid> vacancyIds)
+        {
+            if (vacancyIds == null || !vacancyIds.Any())
+            {
+                return new GetUserSavedVacanciesResponse
+                {
+                    Vacancies = new List<VacancyResponse>()
+                };
+            }
+
+            var response = await _client.GetResponse<GetUserSavedVacanciesResponse>(
+                new GetUserSavedVacanciesRequest { VacancyIds = vacancyIds }
+            );
+
+            return response.Message;
         }
     }
 }

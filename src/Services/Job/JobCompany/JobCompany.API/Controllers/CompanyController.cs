@@ -21,5 +21,17 @@ namespace JobCompany.API.Controllers
             await _service.UpdateCompanyAsync(dto);
             return Ok();
         }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetAllCompanies()
+        {
+            return Ok(await _service.GetAllCompanies());
+        }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetCompanyDetailAsync(string companyId)
+        {
+            return Ok(await _service.GetCompanyDetailAsync(companyId));
+        }
     }
 }

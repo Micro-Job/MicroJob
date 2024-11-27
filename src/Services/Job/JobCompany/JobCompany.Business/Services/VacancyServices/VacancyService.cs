@@ -124,11 +124,34 @@ namespace JobCompany.Business.Services.VacancyServices
 
         public async Task<List<VacancyListDtoForAppDto>> GetAllVacanciesForAppAsync()
         {
-            var vacancies = await _context.Vacancies.Where(x=>x.Company.UserId == _userGuid && x.IsActive == true).Select(x=> new VacancyListDtoForAppDto
+            var vacancies = await _context.Vacancies.Where(x => x.Company.UserId == _userGuid && x.IsActive == true).Select(x => new VacancyListDtoForAppDto
             {
                 VacancyId = x.Id,
                 VacancyName = x.Title
             }).ToListAsync();
+
+            return vacancies;
+        }
+
+        public async Task<ICollection<VacancyGetByCompanyIdDto>> GetVacancyByCompanyIdAsync(string companyId, int skip = 1, int take = 9)
+        {
+            var companyGuid = Guid.Parse(companyId);
+            var vacancies = await _context.Vacancies
+            .Where(x => x.Company.Id == companyGuid && x.IsActive == true)
+            .Select(x => new VacancyGetByCompanyIdDto
+            {
+                CompanyName = x.CompanyName,
+                Title = x.Title,
+                Location = x.Location,
+                WorkType = x.WorkType,
+                StartDate = x.StartDate,
+                ViewCount = x.ViewCount,
+                MainSalary = x.MainSalary,
+                MaxSalary = x.MaxSalary
+            })
+            .Skip(Math.Max(0, (skip - 1) * take))
+            .Take(take)
+            .ToListAsync();
 
             return vacancies;
         }

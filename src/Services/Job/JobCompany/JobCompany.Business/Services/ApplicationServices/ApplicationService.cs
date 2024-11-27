@@ -1,7 +1,9 @@
 ﻿using AuthService.Business.Services.CurrentUser;
 using JobCompany.Business.Dtos.ApplicationDtos;
 using JobCompany.Business.Dtos.StatusDtos;
+using JobCompany.Business.Exceptions.ApplicationExceptions;
 using JobCompany.Business.Exceptions.StatusExceptions;
+using JobCompany.Business.Exceptions.VacancyExceptions;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
@@ -25,17 +27,32 @@ namespace JobCompany.Business.Services.ApplicationServices
         public async Task CreateApplicationAsync(ApplicationCreateDto dto)
         {
             var VacancyId = Guid.Parse(dto.VacancyId);
-            var vacancy = await _context.Vacancies.FindAsync(dto.VacancyId)
-            ?? throw new NotFoundException<Vacancy>();
+            var vacancy = await _context.Vacancies
+                .Where(v => v.Id == VacancyId)
+                .FirstOrDefaultAsync() 
+                ?? throw new NotFoundException<Vacancy>();
+
+            if (vacancy.IsActive == false) throw new VacancyStatusIsDeactiveException();
 
             var application = new Application
             {
                 UserId = userGuid,
-                VacancyId = VacancyId,
+                VacancyId = vacancy.Id,
                 IsActive = true
             };
 
             _context.Applications.Add(application);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task RemoveApplicationAsync(string applicationId)
+        {
+            var applicationGuid = Guid.Parse(applicationId);
+
+            var existApplication = await _context.Applications.FirstOrDefaultAsync(x => x.Id == applicationGuid && x.UserId == userGuid)
+            ?? throw new NotFoundException<Application>();
+            if (existApplication.IsActive == false) throw new ApplicationStatusIsDeactiveException();
+            existApplication.IsActive = false;
             await _context.SaveChangesAsync();
         }
 

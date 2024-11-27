@@ -6,7 +6,6 @@ namespace JobCompany.Business.Dtos.ApplicationDtos
     {
         public string UserId { get; set; }
         public string VacancyId { get; set; }
-        // public string StatusId { get; set; }
     }
 
     public class ApplicationCreateDtoValidator : AbstractValidator<ApplicationCreateDto>
@@ -18,9 +17,6 @@ namespace JobCompany.Business.Dtos.ApplicationDtos
 
             RuleFor(dto => dto.VacancyId)
                 .NotEmpty().WithMessage("VacancyId is required.");
-
-            // RuleFor(dto => dto.StatusId)
-            //     .NotEmpty().WithMessage("StatusId is required.");
         }
     }
 }
