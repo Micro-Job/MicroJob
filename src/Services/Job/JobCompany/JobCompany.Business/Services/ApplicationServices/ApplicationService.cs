@@ -44,6 +44,16 @@ namespace JobCompany.Business.Services.ApplicationServices
             await _context.SaveChangesAsync();
         }
 
+        public async Task RemoveApplicationAsync(ApplicationRemoveDto dto)
+        {
+            var applicationGuid = Guid.Parse(dto.ApplicationId);
+
+            var existApplication = await _context.Applications.FirstOrDefaultAsync(x => x.Id == applicationGuid && x.UserId == userGuid)
+            ?? throw new NotFoundException<Application>();
+            existApplication.IsActive = false;
+            await _context.SaveChangesAsync();
+        }
+
         public async Task ChangeApplicationStatusAsync(string applicationId, string statusId)
         {
             var statusGuid = Guid.Parse(statusId);

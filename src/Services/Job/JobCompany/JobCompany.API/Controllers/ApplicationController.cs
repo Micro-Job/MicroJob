@@ -26,6 +26,13 @@ namespace JobCompany.API.Controllers
             return Ok();
         }
 
+        [HttpPost("[action]")]
+        public async Task<IActionResult> RemoveApplication(ApplicationRemoveDto dto)
+        {
+            await _service.RemoveApplicationAsync(dto);
+            return Ok();
+        }
+
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllApplication(string vacancyId)
         {
