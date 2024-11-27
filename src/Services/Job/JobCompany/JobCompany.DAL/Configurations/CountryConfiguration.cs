@@ -15,14 +15,19 @@ namespace JobCompany.DAL.Configurations
                    .HasMaxLength(32);
 
             builder.HasMany(c => c.Cities)
-                   .WithOne()
+                   .WithOne(city => city.Country)
                    .HasForeignKey(city => city.CountryId)
-                   .OnDelete(DeleteBehavior.Cascade);
+                   .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasMany(c => c.Vacancies)
                    .WithOne(v => v.Country)
                    .HasForeignKey(v => v.CountryId)
-                   .OnDelete(DeleteBehavior.Restrict);
+                   .OnDelete(DeleteBehavior.SetNull);
+
+            builder.HasMany(c => c.Companies)
+                   .WithOne(v => v.Country)
+                   .HasForeignKey(v => v.CountryId)
+                   .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

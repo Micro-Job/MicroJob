@@ -58,23 +58,32 @@ namespace JobCompany.DAL.Configurations
             builder.HasOne(v => v.Country)
                    .WithMany(c => c.Vacancies)
                    .HasForeignKey(v => v.CountryId)
-                   .OnDelete(DeleteBehavior.Cascade);
-
-            builder.HasOne(v => v.City)
-                   .WithMany()
-                   .HasForeignKey(v => v.CityId)
-                   .OnDelete(DeleteBehavior.Cascade);
-
-            builder.HasOne(v => v.Category)
-                   .WithMany()
-                   .HasForeignKey(v => v.CategoryId)
-                   .OnDelete(DeleteBehavior.Cascade);
-
-            builder.HasOne(v => v.VacancyTest)
-                   .WithMany()
-                   .HasForeignKey(v => v.VacancyTestId)
                    .OnDelete(DeleteBehavior.SetNull);
 
+            builder.HasOne(v => v.City)
+                   .WithMany(c=>c.Vacancies)
+                   .HasForeignKey(v => v.CityId)
+                   .OnDelete(DeleteBehavior.SetNull);
+
+            builder.HasOne(v => v.Category)
+                   .WithMany(c => c.Vacancies)
+                   .HasForeignKey(v => v.CategoryId)
+                   .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne(v => v.VacancyTest)
+                   .WithMany(c => c.Vacancies)
+                   .HasForeignKey(v => v.VacancyTestId)
+                   .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasMany(c => c.Applications)
+                   .WithOne(v => v.Vacancy)
+                   .HasForeignKey(v => v.VacancyId)
+                   .OnDelete(DeleteBehavior.Restrict);
+            
+            builder.HasMany(c => c.CompanyNumbers)
+                   .WithOne(v => v.Vacancy)
+                   .HasForeignKey(v => v.VacancyId)
+                   .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

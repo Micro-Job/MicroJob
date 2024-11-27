@@ -14,7 +14,10 @@ namespace JobCompany.DAL.Configurations
                 .IsRequired();
 
             builder.Property(c => c.CompanyInformation)
-                .HasMaxLength(500);
+                .HasMaxLength(500); 
+            
+            builder.Property(c => c.CompanyLocation)
+                .HasMaxLength(128);
 
             builder.Property(c => c.WebLink)
                 .HasMaxLength(255);
@@ -22,12 +25,12 @@ namespace JobCompany.DAL.Configurations
             builder.HasMany(c => c.CompanyNumbers)
                 .WithOne()
                 .HasForeignKey(cn => cn.CompanyId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasMany(c => c.Vacancies)
                 .WithOne()
                 .HasForeignKey(v => v.CompanyId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasOne(x=>x.Country)
                 .WithMany(x=>x.Companies)
@@ -44,6 +47,10 @@ namespace JobCompany.DAL.Configurations
                 .HasForeignKey(x=>x.CategoryId)
                 .OnDelete(DeleteBehavior.SetNull);
 
+            builder.HasMany(c => c.Statuses)
+                .WithOne()
+                .HasForeignKey(v => v.CompanyId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
