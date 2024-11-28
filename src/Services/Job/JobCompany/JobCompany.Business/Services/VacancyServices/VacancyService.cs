@@ -10,6 +10,7 @@ using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.Exceptions;
 using SharedLibrary.ExternalServices.FileService;
 using SharedLibrary.Statics;
+using System.Linq;
 
 namespace JobCompany.Business.Services.VacancyServices
 {
@@ -105,22 +106,53 @@ namespace JobCompany.Business.Services.VacancyServices
                 throw new NotFoundException<Vacancy>();
         }
 
-        /// <summary> Şirkətin bütün vakansiyalarını gətirmək </summary>
-
-        public async Task<List<VacancyGetAllDto>> GetAllOwnVacanciesAsync()
+        /// <summary> Şirkətin profilində bütün vakansiyalarını gətirmək(Filterlerle birlikde) </summary>
+        public async Task<List<VacancyGetAllDto>> GetAllOwnVacanciesAsync(string? titleName,string? categoryId,string? countryId,string? cityId,bool? IsActive,decimal? minSalary,decimal? maxSalary,int skip = 1,int take = 6)
         {
-            var vacancies = await _context.Vacancies.Where(x => x.Company.UserId == _userGuid && x.IsActive).Select(x => new VacancyGetAllDto
+            var query = _context.Vacancies.Where(x=> x.Company.UserId == _userGuid).AsQueryable().AsNoTracking();
+
+            if (titleName != null)
+                query = query.Where(x=> x.Title.Contains(titleName));
+
+            if (IsActive != null)
+                query = query.Where(x => x.IsActive == IsActive);
+
+            if (minSalary != null && maxSalary != null)
+                query = query.Where(x=>x.MainSalary >= 0 && x.MaxSalary <= maxSalary);
+
+            if (categoryId != null)
+            {
+                var categoryGuid = Guid.Parse(categoryId);
+                query = query.Where(x => x.CategoryId == categoryGuid);
+            }
+            if (countryId != null)
+            {
+                var countryGuid = Guid.Parse(countryId);
+                query = query.Where(x => x.CountryId == countryGuid);
+            }
+            if (cityId != null)
+            {
+                var cityGuid = Guid.Parse(cityId);  
+                query = query.Where(x=> x.CityId == cityGuid);
+            }
+            
+
+            var vacancies = await query.Select(x => new VacancyGetAllDto
             {
                 Id = x.Id,
                 Title = x.Title,
-                CompanyLogo = x.CompanyLogo,
                 StartDate = x.StartDate,
                 Location = x.Location,
                 ViewCount = x.ViewCount,
                 WorkType = x.WorkType,
                 MainSalary = x.MainSalary,
                 MaxSalary = x.MaxSalary,
-            }).ToListAsync();
+                IsActive = x.IsActive,
+            })
+            .Skip(Math.Max(0, (skip - 1) * take))
+            .Take(take)
+            .ToListAsync();
+
             return vacancies;
         }
 
