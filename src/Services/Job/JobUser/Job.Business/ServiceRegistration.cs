@@ -37,6 +37,7 @@ namespace Job.Business
             services.AddMassTransit(x =>
             {
                 x.AddConsumer<UserRegisteredConsumer>();
+                x.AddConsumer<GetResumeDataConsumer>();
                 x.SetKebabCaseEndpointNameFormatter();
                 x.UsingRabbitMq((con, cfg) =>
                 {
