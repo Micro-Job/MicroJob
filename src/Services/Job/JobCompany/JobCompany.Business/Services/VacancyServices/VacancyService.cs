@@ -105,7 +105,9 @@ namespace JobCompany.Business.Services.VacancyServices
                 throw new NotFoundException<Vacancy>();
         }
 
-        public async Task<List<VacancyGetAllDto>> GetAllVacanciesAsync()
+        /// <summary> Şirkətin bütün vakansiyalarını gətirmək </summary>
+
+        public async Task<List<VacancyGetAllDto>> GetAllOwnVacanciesAsync()
         {
             var vacancies = await _context.Vacancies.Where(x => x.Company.UserId == _userGuid && x.IsActive).Select(x => new VacancyGetAllDto
             {
@@ -242,7 +244,7 @@ namespace JobCompany.Business.Services.VacancyServices
 
         /// <summary> Şirkət profilində vakansiya axtarışı vakansiya title'sinə görə </summary>
 
-        public async Task<ICollection<VacancyGetAllDto>> SearchVacancyAsync(string? searchText, int skip = 1, int take = 9)
+        public async Task<ICollection<VacancyGetAllDto>> GetAllVacanciesAsync(string? searchText, int skip = 1, int take = 9)
         {
             var query = _context.Vacancies.AsQueryable();
             if (!string.IsNullOrWhiteSpace(searchText))
