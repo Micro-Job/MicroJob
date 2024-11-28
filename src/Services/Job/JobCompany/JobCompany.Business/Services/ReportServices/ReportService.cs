@@ -1,4 +1,5 @@
 ﻿using JobCompany.Business.Dtos.ReportDtos;
+using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,7 +10,7 @@ namespace JobCompany.Business.Services.ReportServices
         private readonly JobCompanyDbContext _context = context;
 
         /// <summary>
-        /// Get a summary of the vacancies and applications.
+        /// admin/dashboard yuxaridaki 3-luk
         /// </summary>
         /// <returns>
         /// A summary object containing:
@@ -19,18 +20,20 @@ namespace JobCompany.Business.Services.ReportServices
         /// </returns>
         public async Task<SummaryDto> GetSummaryAsync()
         {
-            var activeVacancies = await _context.Vacancies.CountAsync(v => v.IsActive);
-            var totalApplications = await _context.Applications.CountAsync();
-            var acceptedStatusId = await _context.Statuses
-            .Where(s => s.StatusName == "Accepted")
-            .Select(s => s.Id)
-            .FirstOrDefaultAsync();
+            int activeVacancies = await _context.Vacancies.CountAsync(v => v.IsActive);
+            int totalApplications = await _context.Applications.CountAsync();
+            IQueryable<Guid> acceptedStatusIdQuery = _context.Statuses
+                 .Where(s => s.StatusName == "Accepted" && s.IsDefault)
+                 .Select(s => s.Id)
+                 .AsQueryable();
 
-            var acceptedApplications = acceptedStatusId == Guid.Empty
-                ? 0
-                : await _context.Applications.CountAsync(a => a.StatusId == acceptedStatusId);
+            IQueryable<Application> acceptedApplicationsQuery = _context.Applications
+                .Where(a => acceptedStatusIdQuery.Contains(a.StatusId))
+                .AsQueryable();
 
-            var summary = new SummaryDto()
+            int acceptedApplications = await acceptedApplicationsQuery.CountAsync();
+
+            SummaryDto summary = new()
             {
                 ActiveVacancies = activeVacancies,
                 TotalApplications = totalApplications,
