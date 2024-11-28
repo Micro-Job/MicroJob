@@ -33,9 +33,9 @@ namespace JobCompany.API.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetAllVacancies()
+        public async Task<IActionResult> GetAllOwnVacanciesAsync()
         {
-            var data = await _vacancyService.GetAllVacanciesAsync();
+            var data = await _vacancyService.GetAllOwnVacanciesAsync();
             return Ok(data);
         }
 
@@ -59,9 +59,9 @@ namespace JobCompany.API.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> SearchVacancyAsync(string searchText)
+        public async Task<IActionResult> GetAllVacanciesAsync(string searchText)
         {
-            return Ok(await _vacancyService.SearchVacancyAsync(searchText));
+            return Ok(await _vacancyService.GetAllVacanciesAsync(searchText));
         }
     }
 }
