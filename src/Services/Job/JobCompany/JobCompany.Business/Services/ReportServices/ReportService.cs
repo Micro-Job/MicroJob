@@ -1,5 +1,4 @@
 ﻿using JobCompany.Business.Dtos.ReportDtos;
-using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,20 +19,26 @@ namespace JobCompany.Business.Services.ReportServices
         /// </returns>
         public async Task<SummaryDto> GetSummaryAsync()
         {
-            int activeVacancies = await _context.Vacancies.CountAsync(v => v.IsActive);
-            int totalApplications = await _context.Applications.CountAsync();
-            IQueryable<Guid> acceptedStatusIdQuery = _context.Statuses
-                 .Where(s => s.StatusName == "Accepted" && s.IsDefault)
-                 .Select(s => s.Id)
-                 .AsQueryable();
+            var acceptedStatusId = await _context.Statuses
+                .Where(s => s.StatusName == "Accepted" && s.IsDefault)
+                .Select(s => s.Id)
+                .FirstOrDefaultAsync();
 
-            IQueryable<Application> acceptedApplicationsQuery = _context.Applications
-                .Where(a => acceptedStatusIdQuery.Contains(a.StatusId))
-                .AsQueryable();
+            var result = await _context.Applications
+                .GroupBy(a => new { a.Vacancy.IsActive, IsAccepted = a.StatusId == acceptedStatusId })
+                .Select(g => new
+                {
+                    g.Key.IsActive,
+                    g.Key.IsAccepted,
+                    Count = g.Count()
+                })
+                .ToListAsync();
 
-            int acceptedApplications = await acceptedApplicationsQuery.CountAsync();
+            var activeVacancies = result.Where(r => r.IsActive).Sum(r => r.Count);
+            var totalApplications = result.Sum(r => r.Count);
+            var acceptedApplications = result.Where(r => r.IsAccepted).Sum(r => r.Count);
 
-            SummaryDto summary = new()
+            var summary = new SummaryDto
             {
                 ActiveVacancies = activeVacancies,
                 TotalApplications = totalApplications,

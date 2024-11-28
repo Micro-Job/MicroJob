@@ -12,6 +12,7 @@ namespace Job.Core.Entities
         public bool IsDriver { get; set; }
         public bool IsMarried { get; set; }
         public bool IsCitizen { get; set; }
+        public bool IsPublic { get; set; }
         public Gender Gender { get; set; }
         public string? Adress { get; set; }
         public DateTime BirthDay { get; set; }
