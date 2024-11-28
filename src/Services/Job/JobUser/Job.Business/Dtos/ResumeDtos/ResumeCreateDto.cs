@@ -19,6 +19,7 @@ namespace Job.Business.Dtos.ResumeDtos
         public bool IsCitizen { get; set; }
         public bool IsMainNumber { get; set; }
         public bool IsMainEmail { get; set; }
+        public bool IsPublic { get; set; }
         public string? ResumeEmail { get; set; }
         public Gender Gender { get; set; }
         public string? Adress { get; set; }

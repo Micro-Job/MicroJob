@@ -79,6 +79,7 @@ namespace Job.Business.Services.Resume
                 IsDriver = resumeCreateDto.IsDriver,
                 IsMarried = resumeCreateDto.IsMarried,
                 IsCitizen = resumeCreateDto.IsCitizen,
+                IsPublic = resumeCreateDto.IsPublic,
                 Gender = resumeCreateDto.Gender,
                 Adress = resumeCreateDto.Adress,
                 BirthDay = resumeCreateDto.BirthDay,
