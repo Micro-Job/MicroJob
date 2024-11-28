@@ -105,7 +105,9 @@ namespace JobCompany.Business.Services.VacancyServices
                 throw new NotFoundException<Vacancy>();
         }
 
-        public async Task<List<VacancyGetAllDto>> GetAllVacanciesAsync()
+        /// <summary> Şirkətin bütün vakansiyalarını gətirmək </summary>
+
+        public async Task<List<VacancyGetAllDto>> GetAllOwnVacanciesAsync()
         {
             var vacancies = await _context.Vacancies.Where(x => x.Company.UserId == _userGuid && x.IsActive).Select(x => new VacancyGetAllDto
             {
@@ -242,11 +244,19 @@ namespace JobCompany.Business.Services.VacancyServices
 
         /// <summary> Şirkət profilində vakansiya axtarışı vakansiya title'sinə görə </summary>
 
-        public async Task<ICollection<VacancyGetAllDto>> SearchVacancyAsync(string searchText)
+        public async Task<ICollection<VacancyGetAllDto>> GetAllVacanciesAsync(string? searchText, int skip = 1, int take = 9)
         {
-            var search = searchText.ToLower();
-            var vacancies = await _context.Vacancies
-                .Where(v => v.Title.ToLower().Contains(search) && v.IsActive)
+            var query = _context.Vacancies.AsQueryable();
+            if (!string.IsNullOrWhiteSpace(searchText))
+            {
+                var search = searchText.ToLower();
+                query = query.Where(v => v.Title.ToLower().Contains(search) && v.IsActive);
+            }
+            else
+            {
+                query = query.Where(v => v.IsActive);
+            }
+            var vacancies = await query
                 .Select(v => new VacancyGetAllDto
                 {
                     Id = v.Id,
@@ -259,15 +269,15 @@ namespace JobCompany.Business.Services.VacancyServices
                     MainSalary = v.MainSalary,
                     MaxSalary = v.MaxSalary,
                 })
+                .Skip(Math.Max(0, (skip - 1) * take))
+                .Take(take)
                 .ToListAsync();
 
             if (!vacancies.Any())
             {
                 throw new NotFoundException<Vacancy>("Axtarış mətni ilə uyğun gələn vakansiyalar tapılmadı");
             }
-
             return vacancies;
         }
-
     }
 }
