@@ -1,4 +1,5 @@
-﻿using JobCompany.Business.Dtos.ApplicationDtos;
+﻿using AuthService.Business.Services.CurrentUser;
+using JobCompany.Business.Dtos.ApplicationDtos;
 using JobCompany.Business.Dtos.StatusDtos;
 using JobCompany.Business.Exceptions.ApplicationExceptions;
 using JobCompany.Business.Exceptions.StatusExceptions;
@@ -20,19 +21,21 @@ namespace JobCompany.Business.Services.ApplicationServices
     {
         private readonly JobCompanyDbContext _context;
         private readonly Guid userGuid;
+        private readonly ICurrentUser _currentUser;
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly string _baseUrl;
         readonly IRequestClient<GetUsersDataResponse> _client;
         readonly IRequestClient<GetResumeDataResponse> _requestClient;
 
-        public ApplicationService(JobCompanyDbContext context, IRequestClient<GetUsersDataResponse> client, IRequestClient<GetResumeDataResponse> requestClient, IHttpContextAccessor contextAccessor)
+        public ApplicationService(JobCompanyDbContext context, IRequestClient<GetUsersDataResponse> client, IRequestClient<GetResumeDataResponse> requestClient, IHttpContextAccessor contextAccessor, ICurrentUser currentUser)
         {
             _context = context;
             _contextAccessor = contextAccessor;
             _client = client;
             _requestClient = requestClient;
-            userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value);
             _baseUrl = $"{_contextAccessor.HttpContext.Request.Scheme}://{_contextAccessor.HttpContext.Request.Host.Value}{_contextAccessor.HttpContext.Request.PathBase.Value}";
+            userGuid = Guid.Parse(_currentUser.UserId);
+            _currentUser = currentUser;
         }
 
         public async Task CreateApplicationAsync(ApplicationCreateDto dto)
