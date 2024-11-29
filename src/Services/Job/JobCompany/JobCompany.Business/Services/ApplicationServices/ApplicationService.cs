@@ -164,5 +164,21 @@ namespace JobCompany.Business.Services.ApplicationServices
         .FirstOrDefaultAsync() ?? throw new NotFoundException<Application>();
             return application;
         }
+
+        public async Task<List<RecentApplicationDto>> GetRecentApplicationsAsync()
+        {
+            var recentApplications = await _context.Applications
+                    .Where(a => a.IsActive)
+                    .OrderByDescending(a => a.CreatedDate)
+                    .Take(7)
+                    .Select(a => new RecentApplicationDto
+                    {
+                        UserId = a.UserId.ToString(),
+                        VacancyId = a.VacancyId.ToString(),
+                        StatusId = a.StatusId.ToString()
+                    })
+                    .ToListAsync();
+            return recentApplications;
+        }
     }
 }

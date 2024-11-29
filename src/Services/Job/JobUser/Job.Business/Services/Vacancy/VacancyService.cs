@@ -1,17 +1,11 @@
 ﻿using AuthService.Business.Services.CurrentUser;
 using Job.Core.Entities;
 using Job.DAL.Contexts;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SharedLibrary.Responses;
-using SharedLibrary.Dtos.CompanyDtos;
 using MassTransit;
+using Microsoft.EntityFrameworkCore;
+using SharedLibrary.Dtos.CompanyDtos;
 using SharedLibrary.Requests;
-using Microsoft.AspNetCore.Http.HttpResults;
+using SharedLibrary.Responses;
 
 namespace Job.Business.Services.Vacancy
 {
@@ -34,9 +28,9 @@ namespace Job.Business.Services.Vacancy
         public async Task ToggleSaveVacancyAsync(string vacancyId)
         {
             Guid vacancyGuid = Guid.Parse(vacancyId);
-            var vacancyCheck = await _context.SavedVacancies.FirstOrDefaultAsync(x=>x.VacancyId == vacancyGuid);
+            var vacancyCheck = await _context.SavedVacancies.FirstOrDefaultAsync(x => x.VacancyId == vacancyGuid);
 
-            if(vacancyCheck != null)
+            if (vacancyCheck != null)
             {
                 _context.SavedVacancies.Remove(vacancyCheck);
             }
@@ -55,7 +49,7 @@ namespace Job.Business.Services.Vacancy
         {
             var savedVacanciesId = await _context.SavedVacancies
                 .Where(x => x.UserId == userGuid)
-                .Select(x => x.VacancyId) 
+                .Select(x => x.VacancyId)
                 .ToListAsync();
 
             var datas = await GetUserSavedVacancyDataAsync(savedVacanciesId);

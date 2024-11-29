@@ -16,5 +16,6 @@ namespace JobCompany.Business.Services.ApplicationServices
 
         Task<List<ApplicationUserListDto>> GetUserApplicationAsync(int skip = 1, int take = 9);
         Task<ApplicationGetByIdDto> GetApplicationByIdAsync(string applicationId);
+        Task<List<RecentApplicationDto>> GetRecentApplicationsAsync();
     }
 }
