@@ -9,7 +9,7 @@ using SharedLibrary.Exceptions;
 
 namespace Job.Business.Consumers
 {
-    public class UserApplicationConsumer(JobDbContext _context,JobCompanyDbContext _companyDb) : IConsumer<UserApplicationEvent>
+    public class UserApplicationConsumer(JobCompanyDbContext _companyDb) : IConsumer<UserApplicationEvent>
     {
         public async Task Consume(ConsumeContext<UserApplicationEvent> context)
         {
@@ -20,11 +20,12 @@ namespace Job.Business.Consumers
                 UserId = context.Message.UserId,
                 VacancyId = context.Message.VacancyId,
                 IsActive = true,
-                StatusId = status.Id,
-                CreatedDate = DateTime.Now
+                StatusId = status.Id
             };
             await _companyDb.Applications.AddAsync(newApp);
-            await _context.SaveChangesAsync();
+            await _companyDb.SaveChangesAsync();
         }
     }
 }
+
+
