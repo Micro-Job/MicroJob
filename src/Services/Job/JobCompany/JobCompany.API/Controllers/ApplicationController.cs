@@ -34,9 +34,9 @@ namespace JobCompany.API.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetAllApplication(string vacancyId)
+        public async Task<IActionResult> GetAllApplication()
         {
-            return Ok(await _service.GetAllApplicationAsync(vacancyId));
+            return Ok(await _service.GetAllApplicationAsync());
         }
 
         [HttpPut("[action]")]
