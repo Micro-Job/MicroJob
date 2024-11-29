@@ -9,7 +9,7 @@ namespace JobCompany.API.Controllers
     {
         private readonly IReportService _reportService = reportService;
         /// <summary>
-        /// Admin/Dashboard/ Muraciet, active vakansiya, qebul olunmus vakansiya sayi/ mohteshem 3-lu)))
+        /// Admin/Dashboard/ Muraciet, active vakansiya, qebul olunmus vakansiya sayi/ mohteshem 3-lu ;)
         /// </summary>
         [HttpGet("[action]")]
         public async Task<IActionResult> GetSummary()

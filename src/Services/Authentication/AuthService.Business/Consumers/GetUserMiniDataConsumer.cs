@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AuthService.Business.Services.CurrentUser;
 using AuthService.DAL.Contexts;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
@@ -17,7 +12,7 @@ namespace AuthService.Business.Consumers
         {
             var user = await _context.Users
                 .Where(x => x.Id == context.Message.UserId)
-                .Select(x => new 
+                .Select(x => new
                 {
                     x.Email,
                     x.MainPhoneNumber
