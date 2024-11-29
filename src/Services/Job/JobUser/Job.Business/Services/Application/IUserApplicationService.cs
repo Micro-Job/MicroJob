@@ -7,6 +7,6 @@ namespace Job.Business.Services.Application
 {
     public interface IUserApplicationService
     {
-        Task CreateUserApplicationAsync();
+        Task CreateUserApplicationAsync(string vacancyId);
     }
 }

@@ -21,11 +21,13 @@ namespace Job.Business.Services.Application
             userGuid = Guid.Parse(_currentUser.UserId);
         }
 
-        public async Task CreateUserApplicationAsync()
+        public async Task CreateUserApplicationAsync(string vacancyId)
         {
+            var guidVac = Guid.Parse(vacancyId);
             await _publishEndpoint.Publish(new UserApplicationEvent
             {
-                UserId = userGuid
+                UserId = userGuid,
+                VacancyId = guidVac
             });
         }
     }
