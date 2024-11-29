@@ -1,42 +1,39 @@
-﻿using AuthService.Business.Services.CurrentUser;
-using Job.Core.Entities;
+﻿using Job.Core.Entities;
 using Job.DAL.Contexts;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SharedLibrary.Responses;
-using SharedLibrary.Dtos.CompanyDtos;
 using MassTransit;
+using Microsoft.EntityFrameworkCore;
+using SharedLibrary.Dtos.CompanyDtos;
 using SharedLibrary.Requests;
+using SharedLibrary.Responses;
 using Microsoft.AspNetCore.Http.HttpResults;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
 
 namespace Job.Business.Services.Vacancy
 {
     public class VacancyService : IVacancyService
     {
         private readonly JobDbContext _context;
-        private readonly ICurrentUser _currentUser;
         private readonly Guid userGuid;
         private readonly IRequestClient<GetAllCompaniesRequest> _request;
         readonly IRequestClient<GetUserSavedVacanciesRequest> _client;
-        public VacancyService(JobDbContext context, ICurrentUser currentUser, IRequestClient<GetAllCompaniesRequest> request, IRequestClient<GetUserSavedVacanciesRequest> client)
+        private readonly IHttpContextAccessor _contextAccessor;
+
+        public VacancyService(JobDbContext context,IRequestClient<GetAllCompaniesRequest> request, IRequestClient<GetUserSavedVacanciesRequest> client,IHttpContextAccessor contextAccessor)
         {
             _context = context;
-            _currentUser = currentUser;
-            userGuid = Guid.Parse(_currentUser.UserId);
             _request = request;
             _client = client;
+            _contextAccessor = contextAccessor;
+            userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value);
         }
 
         public async Task ToggleSaveVacancyAsync(string vacancyId)
         {
             Guid vacancyGuid = Guid.Parse(vacancyId);
-            var vacancyCheck = await _context.SavedVacancies.FirstOrDefaultAsync(x=>x.VacancyId == vacancyGuid);
+            var vacancyCheck = await _context.SavedVacancies.FirstOrDefaultAsync(x => x.VacancyId == vacancyGuid);
 
-            if(vacancyCheck != null)
+            if (vacancyCheck != null)
             {
                 _context.SavedVacancies.Remove(vacancyCheck);
             }
@@ -55,7 +52,7 @@ namespace Job.Business.Services.Vacancy
         {
             var savedVacanciesId = await _context.SavedVacancies
                 .Where(x => x.UserId == userGuid)
-                .Select(x => x.VacancyId) 
+                .Select(x => x.VacancyId)
                 .ToListAsync();
 
             var datas = await GetUserSavedVacancyDataAsync(savedVacanciesId);

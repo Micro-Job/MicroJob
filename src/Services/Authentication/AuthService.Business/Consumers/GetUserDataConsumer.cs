@@ -4,7 +4,6 @@ using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Requests;
 using SharedLibrary.Responses;
-using System.Threading.Tasks;
 
 namespace AuthService.Business.Consumers
 {
@@ -14,7 +13,7 @@ namespace AuthService.Business.Consumers
         {
             var user = await _context.Users
                 .Where(x => x.Id == context.Message.UserId)
-                .Select(x => new 
+                .Select(x => new
                 {
                     x.Id,
                     x.FirstName,

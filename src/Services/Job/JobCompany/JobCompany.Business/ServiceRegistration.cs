@@ -1,5 +1,4 @@
-﻿using AuthService.Business.Services.CurrentUser;
-using JobCompany.Business.Consumers;
+﻿using JobCompany.Business.Consumers;
 using JobCompany.Business.Services.ApplicationServices;
 using JobCompany.Business.Services.CategoryServices;
 using JobCompany.Business.Services.CountryServices;
@@ -19,7 +18,6 @@ namespace JobCompany.Business
             services.AddHttpContextAccessor();
             services.AddScoped<IFileService, FileService>();
             services.AddScoped<IVacancyService, VacancyService>();
-            services.AddScoped<ICurrentUser, CurrentUser>();
             services.AddScoped<IStatusService, StatusService>();
             services.AddScoped<IApplicationService, ApplicationService>();
             services.AddScoped<ICategoryService, CategoryService>();

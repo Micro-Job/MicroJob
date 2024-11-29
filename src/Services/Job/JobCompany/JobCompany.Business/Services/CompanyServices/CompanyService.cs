@@ -1,34 +1,33 @@
-using AuthService.Business.Exceptions.UserException;
-using AuthService.Business.Services.CurrentUser;
 using JobCompany.Business.Dtos.CompanyDtos;
 using JobCompany.Business.Dtos.NumberDtos;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using MassTransit;
 using MassTransit.Initializers;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Shared.Exceptions;
 using Shared.Requests;
 using Shared.Responses;
 using SharedLibrary.Exceptions;
 using SharedLibrary.Responses;
+using System.Security.Claims;
 
 namespace JobCompany.Business.Services.CompanyServices
 {
     public class CompanyService : ICompanyService
     {
         private JobCompanyDbContext _context;
-        readonly ICurrentUser _currentUser;
         private readonly Guid userGuid;
         readonly IRequestClient<GetAllCompaniesDataRequest> _client;
+        private readonly IHttpContextAccessor _contextAccessor;
 
 
-        public CompanyService(JobCompanyDbContext context, ICurrentUser currentUser, IRequestClient<GetAllCompaniesDataRequest> client)
+        public CompanyService(JobCompanyDbContext context, IRequestClient<GetAllCompaniesDataRequest> client , IHttpContextAccessor contextAccessor)
         {
             _context = context;
-            _currentUser = currentUser;
-            userGuid = Guid.Parse(_currentUser.UserId ?? throw new UserNotLoggedInException());
             _client = client;
+            userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value);
         }
 
         public async Task UpdateCompanyAsync(CompanyUpdateDto dto)
