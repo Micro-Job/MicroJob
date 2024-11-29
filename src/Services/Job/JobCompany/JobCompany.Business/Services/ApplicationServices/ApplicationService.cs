@@ -8,6 +8,7 @@ using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using Shared.Events;
 using Shared.Requests;
 using Shared.Responses;
 using SharedLibrary.Exceptions;
@@ -218,8 +219,6 @@ namespace JobCompany.Business.Services.ApplicationServices
                     UserId = a.UserId,
                     CreatedDate = a.CreatedDate
                 })
-                .Skip((skip - 1) * take)
-                .Take(take)
                 .ToListAsync();
 
             var userIds = applications.Select(a => a.UserId).ToList();
@@ -227,30 +226,27 @@ namespace JobCompany.Business.Services.ApplicationServices
             var userDataResponse = await GetUserDataResponseAsync(userIds);
             var userResumeResponse = await GetResumeDataResponseAsync(userIds);
 
-            var applicationList = new List<ApplicationInfoListDto>();
-
-            foreach (var userId in userIds)
-            {
-                var userData = userDataResponse.Users.FirstOrDefault(u => u.UserId == userId);
-
-                var userResume = userResumeResponse.Users.FirstOrDefault(r => r.UserId == userId);
-
-                var userApplications = applications.Where(a => a.UserId == userId).ToList();
-
-                foreach (var application in userApplications)
+            var applicationList = applications
+                .GroupBy(a => a.UserId)
+                .SelectMany(group =>
                 {
-                    applicationList.Add(new ApplicationInfoListDto
+                    var userData = userDataResponse.Users.FirstOrDefault(u => u.UserId == group.Key);
+                    var userResume = userResumeResponse.Users.FirstOrDefault(r => r.UserId == group.Key);
+
+                    return group.Select(application => new ApplicationInfoListDto
                     {
-                        FullName = userData.FirstName + " " + userData.LastName,
+                        FullName = $"{userData?.FirstName} {userData?.LastName}",
                         ImageUrl = userData?.ProfileImage,
                         Position = userResume?.Position,
                         CreatedDate = application.CreatedDate
                     });
-                }
-            }
+                })
+                .Skip((skip - 1) * take)
+                .Take(take)
+                .ToList();
 
             return applicationList;
         }
-
     }
 }
+

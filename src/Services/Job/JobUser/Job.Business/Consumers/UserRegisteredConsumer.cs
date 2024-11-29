@@ -7,7 +7,6 @@ namespace Job.Business.Consumers
 {
     public class UserRegisteredConsumer(JobDbContext _context) : IConsumer<UserRegisteredEvent>
     {
-
         public async Task Consume(ConsumeContext<UserRegisteredEvent> context)
         {
             var newUser = new User
