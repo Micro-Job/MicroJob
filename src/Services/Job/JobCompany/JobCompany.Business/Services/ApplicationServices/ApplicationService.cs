@@ -1,27 +1,30 @@
-﻿using AuthService.Business.Services.CurrentUser;
-using JobCompany.Business.Dtos.ApplicationDtos;
+﻿using JobCompany.Business.Dtos.ApplicationDtos;
 using JobCompany.Business.Dtos.StatusDtos;
 using JobCompany.Business.Exceptions.ApplicationExceptions;
 using JobCompany.Business.Exceptions.StatusExceptions;
 using JobCompany.Business.Exceptions.VacancyExceptions;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Exceptions;
+using System.Security.Claims;
 
 namespace JobCompany.Business.Services.ApplicationServices
 {
     public class ApplicationService : IApplicationService
     {
         private readonly JobCompanyDbContext _context;
-        private readonly ICurrentUser _currentUser;
         private readonly Guid userGuid;
+        private readonly IHttpContextAccessor _contextAccessor;
+        private readonly string _baseUrl;
 
-        public ApplicationService(ICurrentUser currentUser, JobCompanyDbContext context)
+        public ApplicationService(JobCompanyDbContext context,IHttpContextAccessor contextAccessor)
         {
             _context = context;
-            _currentUser = currentUser;
-            userGuid = Guid.Parse(_currentUser.UserId);
+            _contextAccessor = contextAccessor;
+            userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value);
+            _baseUrl = $"{_contextAccessor.HttpContext.Request.Scheme}://{_contextAccessor.HttpContext.Request.Host.Value}{_contextAccessor.HttpContext.Request.PathBase.Value}";
         }
 
         public async Task CreateApplicationAsync(ApplicationCreateDto dto)
@@ -129,7 +132,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                 StatusColor = x.Status.StatusColor,
                 StatusName = x.Status.StatusName,
                 VacancyId = x.VacancyId,
-                VacancyImage = $"{_currentUser.BaseUrl}/{x.Vacancy.CompanyLogo}",
+                VacancyImage = $"{_baseUrl}/{x.Vacancy.CompanyLogo}",
                 VacancyTitle = x.Vacancy.Title,
                 ViewCount = x.Vacancy.ViewCount
             })

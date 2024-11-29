@@ -1,4 +1,3 @@
-using AuthService.Business.Services.CurrentUser;
 using Job.Business.Consumers;
 using Job.Business.Services.Certificate;
 using Job.Business.Services.Education;
@@ -28,7 +27,7 @@ namespace Job.Business
             services.AddScoped<ILanguageService, LanguageService>();
             services.AddScoped<ICertificateService, CertificateService>();
             services.AddScoped<IVacancyService, VacancyService>();
-            services.AddScoped<ICurrentUser, CurrentUser>();
+            //services.AddScoped<ICurrentUser, CurrentUser>();
             services.AddScoped<ISkillService, SkillService>();
         }
 

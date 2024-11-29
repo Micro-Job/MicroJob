@@ -1,5 +1,4 @@
-﻿using AuthService.Business.Services.CurrentUser;
-using Job.Core.Entities;
+﻿using Job.Core.Entities;
 using Job.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -12,23 +11,26 @@ using SharedLibrary.Dtos.CompanyDtos;
 using MassTransit;
 using SharedLibrary.Requests;
 using Microsoft.AspNetCore.Http.HttpResults;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
 
 namespace Job.Business.Services.Vacancy
 {
     public class VacancyService : IVacancyService
     {
         private readonly JobDbContext _context;
-        private readonly ICurrentUser _currentUser;
         private readonly Guid userGuid;
         private readonly IRequestClient<GetAllCompaniesRequest> _request;
         readonly IRequestClient<GetUserSavedVacanciesRequest> _client;
-        public VacancyService(JobDbContext context, ICurrentUser currentUser, IRequestClient<GetAllCompaniesRequest> request, IRequestClient<GetUserSavedVacanciesRequest> client)
+        private readonly IHttpContextAccessor _contextAccessor;
+
+        public VacancyService(JobDbContext context,IRequestClient<GetAllCompaniesRequest> request, IRequestClient<GetUserSavedVacanciesRequest> client,IHttpContextAccessor contextAccessor)
         {
             _context = context;
-            _currentUser = currentUser;
-            userGuid = Guid.Parse(_currentUser.UserId);
             _request = request;
             _client = client;
+            _contextAccessor = contextAccessor;
+            userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value);
         }
 
         public async Task ToggleSaveVacancyAsync(string vacancyId)

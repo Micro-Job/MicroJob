@@ -15,8 +15,7 @@ namespace Job.API
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-            builder.Services.AddScoped<AuthService.Business.Services.CurrentUser.CurrentUser>();
-            var configuration = builder.Configuration;
+            var configuration = builder.Configuration;  
 
             // Add services to the container.
 
