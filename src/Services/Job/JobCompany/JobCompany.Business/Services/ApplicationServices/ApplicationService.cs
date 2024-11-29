@@ -24,17 +24,14 @@ namespace JobCompany.Business.Services.ApplicationServices
         readonly IRequestClient<GetUsersDataResponse> _client;
         readonly IRequestClient<GetResumeDataResponse> _requestClient;
 
-        public ApplicationService(JobCompanyDbContext context,IHttpContextAccessor contextAccessor)
-        public ApplicationService(ICurrentUser currentUser, JobCompanyDbContext context, IRequestClient<GetUsersDataResponse> client, IRequestClient<GetResumeDataResponse> requestClient)
+        public ApplicationService(JobCompanyDbContext context, IRequestClient<GetUsersDataResponse> client, IRequestClient<GetResumeDataResponse> requestClient, IHttpContextAccessor contextAccessor)
         {
             _context = context;
             _contextAccessor = contextAccessor;
-            userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value);
-            _baseUrl = $"{_contextAccessor.HttpContext.Request.Scheme}://{_contextAccessor.HttpContext.Request.Host.Value}{_contextAccessor.HttpContext.Request.PathBase.Value}";
-            _currentUser = currentUser;
-            userGuid = Guid.Parse(_currentUser.UserId);
             _client = client;
             _requestClient = requestClient;
+            userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value);
+            _baseUrl = $"{_contextAccessor.HttpContext.Request.Scheme}://{_contextAccessor.HttpContext.Request.Host.Value}{_contextAccessor.HttpContext.Request.PathBase.Value}";
         }
 
         public async Task CreateApplicationAsync(ApplicationCreateDto dto)
