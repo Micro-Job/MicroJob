@@ -74,11 +74,8 @@ namespace JobCompany.Business.Services.ApplicationServices
             var applicationGuid = Guid.Parse(applicationId);
 
             var existAppVacancy = await _context.Applications
-                                                .Include(x => x.Vacancy)
-                                                    .ThenInclude(x => x.Company).FirstOrDefaultAsync(x => x.Id == applicationGuid)
+                                                    .FirstOrDefaultAsync(x => x.Id == applicationGuid && x.Vacancy.Company.UserId == userGuid)
                 ?? throw new NotFoundException<Application>("Müraciət mövcud deyil!");
-
-            if (existAppVacancy.Vacancy.Company.UserId != userGuid) throw new StatusPermissionException();
 
             existAppVacancy.StatusId = statusGuid;
             await _context.SaveChangesAsync();
@@ -112,7 +109,7 @@ namespace JobCompany.Business.Services.ApplicationServices
             return groupedData;
         }
 
-        //bu metodun return-ü olmalıdır
+        //bu metodun return-ü olmalıdır - tam deyil!!!!!!!!!!!!
         public async Task GetAllApplicationWithStatusAsync(string vacancyId, string statusId, int skip = 1, int take = 5)
         {
             var vacancyGuid = Guid.Parse(vacancyId);
@@ -154,25 +151,24 @@ namespace JobCompany.Business.Services.ApplicationServices
         {
             var applicationGuid = Guid.Parse(applicationId);
 
-            var application = await _context.Applications
-        .Where(a => a.Id == applicationGuid && a.IsActive && a.UserId == userGuid)
-        .Select(a => new ApplicationGetByIdDto
-        {
-            VacancyId = a.VacancyId,
-            VacancyImage = a.Vacancy.CompanyLogo,
-            VacancyTitle = a.Vacancy.Title,
-            CompanyName = a.Vacancy.CompanyName,
-            CreatedDate = a.CreatedDate,
-            Description = a.Vacancy.Description,
-            StatusName = a.Status.StatusName,
-            StatusColor = a.Status.StatusColor,
-            Steps = _context.Statuses
-                .OrderBy(s => s.Order)
-                .Select(s => s.StatusName)
-                .ToList()
-        })
-        .FirstOrDefaultAsync() ?? throw new NotFoundException<Application>();
-            return application;
+            var application = await _context.Applications.Where(a => a.Id == applicationGuid && a.IsActive && a.UserId == userGuid)
+            .Select(a => new ApplicationGetByIdDto
+            {
+                VacancyId = a.VacancyId,
+                VacancyImage = a.Vacancy.CompanyLogo,
+                VacancyTitle = a.Vacancy.Title,
+                CompanyName = a.Vacancy.CompanyName,
+                CreatedDate = a.CreatedDate,
+                Description = a.Vacancy.Description,
+                StatusName = a.Status.StatusName,
+                StatusColor = a.Status.StatusColor,
+                Steps = _context.Statuses
+                    .OrderBy(s => s.Order)
+                    .Select(s => s.StatusName)
+                    .ToList()
+            })
+            .FirstOrDefaultAsync() ?? throw new NotFoundException<Application>();
+                return application;
         }
 
         public async Task<GetUsersDataResponse> GetUserDataResponseAsync(List<Guid> userIds)

@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\JobCompany.DAL\JobCompany.DAL.csproj" />
-    <ProjectReference Include="../../JobUser/Job.Business/Job.Business.csproj" />
   </ItemGroup>
 
   <ItemGroup>

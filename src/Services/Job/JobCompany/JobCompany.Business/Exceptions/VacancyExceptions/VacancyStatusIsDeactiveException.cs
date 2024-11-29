@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Job.Business.Exceptions.Common;
 using Microsoft.AspNetCore.Http;
+using SharedLibrary.Exceptions.Common;
 
 namespace JobCompany.Business.Exceptions.VacancyExceptions
 {

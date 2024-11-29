@@ -51,6 +51,11 @@ namespace JobCompany.DAL.Configurations
                 .WithOne()
                 .HasForeignKey(v => v.CompanyId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasMany(x=> x.Notifications)
+                .WithOne(x=> x.Receiver)
+                .HasForeignKey(x=> x.ReceiverId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

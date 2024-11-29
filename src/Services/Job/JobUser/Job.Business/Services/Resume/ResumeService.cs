@@ -318,7 +318,5 @@ namespace Job.Business.Services.Resume
             };
             return resumeDetail;
         }
-
-
     }
 }
