@@ -1,4 +1,5 @@
-﻿using JobCompany.Business.Dtos.ApplicationDtos;
+﻿using AuthService.Business.Services.CurrentUser;
+using JobCompany.Business.Dtos.ApplicationDtos;
 using JobCompany.Business.Dtos.StatusDtos;
 using JobCompany.Business.Exceptions.ApplicationExceptions;
 using JobCompany.Business.Exceptions.StatusExceptions;
@@ -8,6 +9,7 @@ using JobCompany.DAL.Contexts;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Shared.Events;
 using Shared.Requests;
 using Shared.Responses;
 using SharedLibrary.Exceptions;
@@ -19,19 +21,21 @@ namespace JobCompany.Business.Services.ApplicationServices
     {
         private readonly JobCompanyDbContext _context;
         private readonly Guid userGuid;
+        private readonly ICurrentUser _currentUser;
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly string _baseUrl;
         readonly IRequestClient<GetUsersDataResponse> _client;
         readonly IRequestClient<GetResumeDataResponse> _requestClient;
 
-        public ApplicationService(JobCompanyDbContext context, IRequestClient<GetUsersDataResponse> client, IRequestClient<GetResumeDataResponse> requestClient, IHttpContextAccessor contextAccessor)
+        public ApplicationService(JobCompanyDbContext context, IRequestClient<GetUsersDataResponse> client, IRequestClient<GetResumeDataResponse> requestClient, IHttpContextAccessor contextAccessor, ICurrentUser currentUser)
         {
             _context = context;
             _contextAccessor = contextAccessor;
             _client = client;
             _requestClient = requestClient;
-            userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value);
             _baseUrl = $"{_contextAccessor.HttpContext.Request.Scheme}://{_contextAccessor.HttpContext.Request.Host.Value}{_contextAccessor.HttpContext.Request.PathBase.Value}";
+            userGuid = Guid.Parse(_currentUser.UserId);
+            _currentUser = currentUser;
         }
 
         public async Task CreateApplicationAsync(ApplicationCreateDto dto)
@@ -215,8 +219,6 @@ namespace JobCompany.Business.Services.ApplicationServices
                     UserId = a.UserId,
                     CreatedDate = a.CreatedDate
                 })
-                .Skip((skip - 1) * take)
-                .Take(take)
                 .ToListAsync();
 
             var userIds = applications.Select(a => a.UserId).ToList();
@@ -224,29 +226,27 @@ namespace JobCompany.Business.Services.ApplicationServices
             var userDataResponse = await GetUserDataResponseAsync(userIds);
             var userResumeResponse = await GetResumeDataResponseAsync(userIds);
 
-            var applicationList = new List<ApplicationInfoListDto>();
-
-            foreach (var userId in userIds)
-            {
-                var userData = userDataResponse.Users.FirstOrDefault(u => u.UserId == userId);
-
-                var userResume = userResumeResponse.Users.FirstOrDefault(r => r.UserId == userId);
-
-                var userApplications = applications.Where(a => a.UserId == userId).ToList();
-
-                foreach (var application in userApplications)
+            var applicationList = applications
+                .GroupBy(a => a.UserId)
+                .SelectMany(group =>
                 {
-                    applicationList.Add(new ApplicationInfoListDto
+                    var userData = userDataResponse.Users.FirstOrDefault(u => u.UserId == group.Key);
+                    var userResume = userResumeResponse.Users.FirstOrDefault(r => r.UserId == group.Key);
+
+                    return group.Select(application => new ApplicationInfoListDto
                     {
-                        FullName = userData.FirstName + " " + userData.LastName,
+                        FullName = $"{userData?.FirstName} {userData?.LastName}",
                         ImageUrl = userData?.ProfileImage,
                         Position = userResume?.Position,
                         CreatedDate = application.CreatedDate
                     });
-                }
-            }
+                })
+                .Skip((skip - 1) * take)
+                .Take(take)
+                .ToList();
 
             return applicationList;
         }
     }
 }
+

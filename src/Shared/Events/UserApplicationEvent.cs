@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace SharedLibrary.Events
+namespace Shared.Events
 {
-    public class UserRegisteredEvent
+    public class UserApplicationEvent
     {
         public Guid UserId { get; set; }
+        public Guid VacancyId { get; set; }
     }
 }

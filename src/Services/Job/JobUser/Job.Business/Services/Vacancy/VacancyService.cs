@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Dtos.CompanyDtos;
 using SharedLibrary.Requests;
 using SharedLibrary.Responses;
-using Microsoft.AspNetCore.Http.HttpResults;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 
@@ -66,7 +65,6 @@ namespace Job.Business.Services.Vacancy
 
             return response.Message.Companies;
         }
-
 
         public async Task<GetUserSavedVacanciesResponse> GetUserSavedVacancyDataAsync(List<Guid> vacancyIds)
         {
