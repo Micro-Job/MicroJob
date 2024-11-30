@@ -1,5 +1,4 @@
-﻿using AuthService.Business.Services.CurrentUser;
-using JobCompany.Business.Consumers;
+﻿using JobCompany.Business.Consumers;
 using JobCompany.Business.Services.ApplicationServices;
 using JobCompany.Business.Services.CategoryServices;
 using JobCompany.Business.Services.CountryServices;
@@ -24,7 +23,6 @@ namespace JobCompany.Business
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<ICountryService, CountryService>();
             services.AddScoped<IReportService, ReportService>();
-            services.AddScoped<ICurrentUser, CurrentUser>();
         }
 
         public static IServiceCollection AddMassTransitCompany(this IServiceCollection services, string cString)
