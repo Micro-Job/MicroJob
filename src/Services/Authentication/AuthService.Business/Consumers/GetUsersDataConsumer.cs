@@ -1,11 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using AuthService.DAL.Contexts;
 using MassTransit;
-using Shared.Requests;
 using Microsoft.EntityFrameworkCore;
+using Shared.Requests;
 
 namespace AuthService.Business.Consumers
 {
@@ -23,7 +19,7 @@ namespace AuthService.Business.Consumers
             var userIds = context.Message.UserIds;
 
             var users = await _context.Users
-                .Where(x => userIds.Contains(x.Id)) 
+                .Where(x => userIds.Contains(x.Id))
                 .Select(x => new
                 {
                     x.Id,
@@ -31,7 +27,7 @@ namespace AuthService.Business.Consumers
                     x.LastName,
                     x.Image,
                 })
-                .ToListAsync(); 
+                .ToListAsync();
 
             await context.RespondAsync(new
             {

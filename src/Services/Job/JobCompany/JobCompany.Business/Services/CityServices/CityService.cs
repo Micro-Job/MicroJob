@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using JobCompany.Business.Dtos.CityDtos;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
@@ -9,14 +5,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace JobCompany.Business.Services.CityServices
 {
-    public class CityService : ICityService
+    public class CityService(JobCompanyDbContext context) : ICityService
     {
-        readonly JobCompanyDbContext _context;
-
-        public CityService(JobCompanyDbContext context)
-        {
-            _context = context;
-        }
+        readonly JobCompanyDbContext _context = context;
 
         public async Task CreateCityAsync(CreateCityDto dto)
         {
@@ -61,7 +52,7 @@ namespace JobCompany.Business.Services.CityServices
         public async Task<ICollection<CityNameDto>> GetAllCitiesByCountryIdAsync(string countryId)
         {
             var guidCountryId = Guid.Parse(countryId);
-            var existCountry = await _context.Cities.FindAsync(guidCountryId) 
+            var existCountry = await _context.Cities.FindAsync(guidCountryId)
             ?? throw new Exceptions.Common.NotFoundException<Country>();
 
             var cities = await _context.Cities
@@ -78,7 +69,7 @@ namespace JobCompany.Business.Services.CityServices
         public async Task DeleteCityAsync(string cityId)
         {
             var guidCityId = Guid.Parse(cityId);
-            var existCity = await _context.Cities.FindAsync(guidCityId) 
+            var existCity = await _context.Cities.FindAsync(guidCityId)
                 ?? throw new Exceptions.Common.NotFoundException<City>();
             _context.Cities.Remove(existCity);
         }

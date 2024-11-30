@@ -1,8 +1,3 @@
-using Job.Business.Dtos.CertificateDtos;
-using Job.Business.Dtos.EducationDtos;
-using Job.Business.Dtos.ExperienceDtos;
-using Job.Business.Dtos.LanguageDtos;
-using Job.Business.Dtos.NumberDtos;
 using Job.Business.Dtos.ResumeDtos;
 using Job.Business.Services.Resume;
 using Microsoft.AspNetCore.Authorization;
@@ -19,9 +14,7 @@ namespace Job.API.Controllers
 
         [HttpPost("[action]")]
         public async Task<IActionResult> CreateResumeAsync(
-            ResumeCreateDto resumeCreateDto, 
-            ResumeCreateListsDto resumeCreateListsDto
-        )
+          [FromForm] ResumeCreateDto resumeCreateDto, [FromForm] ResumeCreateListsDto resumeCreateListsDto)
         {
             await _service.CreateResumeAsync(
                 resumeCreateDto,
@@ -29,8 +22,6 @@ namespace Job.API.Controllers
             );
             return Ok();
         }
-
-
 
         [HttpPost("[action]")]
         public async Task<IActionResult> UpdateResume([FromForm] ResumeUpdateDto resumeUpdateDto)

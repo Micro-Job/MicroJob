@@ -6,14 +6,9 @@ namespace JobCompany.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class CompanyController : ControllerBase
+    public class CompanyController(ICompanyService service) : ControllerBase
     {
-        readonly ICompanyService _service;
-
-        public CompanyController(ICompanyService service)
-        {
-            _service = service;
-        }
+        readonly ICompanyService _service = service;
 
         [HttpPut("[action]")]
         public async Task<IActionResult> UpdateCompanyAsync(CompanyUpdateDto dto)

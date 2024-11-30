@@ -11,7 +11,6 @@ using Shared.Exceptions;
 using Shared.Requests;
 using Shared.Responses;
 using SharedLibrary.Exceptions;
-using SharedLibrary.Responses;
 
 namespace JobCompany.Business.Services.CompanyServices
 {

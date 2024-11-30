@@ -99,6 +99,8 @@ namespace AuthService.Business.Services.Auth
             {
                 Id = Guid.NewGuid(),
                 Email = dto.Email,
+                FirstName = dto.FirstName,
+                LastName = dto.LastName,
                 MainPhoneNumber = dto.MainPhoneNumber,
                 RegistrationDate = DateTime.Now,
                 Password = _tokenHandler.GeneratePasswordHash(dto.Password),

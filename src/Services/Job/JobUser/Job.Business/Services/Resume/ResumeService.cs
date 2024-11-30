@@ -6,6 +6,7 @@ using Job.Business.Dtos.LanguageDtos;
 using Job.Business.Dtos.NumberDtos;
 using Job.Business.Dtos.ResumeDtos;
 using Job.Business.Exceptions.Common;
+using Job.Business.Exceptions.UserExceptions;
 using Job.Business.Services.Certificate;
 using Job.Business.Services.Education;
 using Job.Business.Services.Experience;
@@ -54,7 +55,7 @@ namespace Job.Business.Services.Resume
             _certificateService = certificateService;
             _userInformationService = userInformationService;
             _currentUser = currentUser;
-            userGuid = Guid.Parse(_currentUser.UserId);
+            userGuid = Guid.Parse(_currentUser.UserId ?? throw new UserIsNotLoggedInException());
         }
 
         public async Task CreateResumeAsync(ResumeCreateDto resumeCreateDto, ResumeCreateListsDto resumeCreateListsDto)
@@ -317,7 +318,5 @@ namespace Job.Business.Services.Resume
             };
             return resumeDetail;
         }
-
-
     }
 }
