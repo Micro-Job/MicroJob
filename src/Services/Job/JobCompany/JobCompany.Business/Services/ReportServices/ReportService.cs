@@ -1,12 +1,13 @@
-﻿using JobCompany.Business.Dtos.ReportDtos;
+﻿using JobCompany.Business.Dtos.ApplicationDtos;
+using JobCompany.Business.Dtos.ReportDtos;
+using JobCompany.Business.Services.ApplicationServices;
 using JobCompany.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
 
 namespace JobCompany.Business.Services.ReportServices
 {
-    public class ReportService(JobCompanyDbContext context) : IReportService
+    public class ReportService(JobCompanyDbContext _context,IApplicationService _appService) : IReportService
     {
-        private readonly JobCompanyDbContext _context = context;
 
         /// <summary>
         /// admin/dashboard yuxaridaki 3-luk
@@ -45,6 +46,43 @@ namespace JobCompany.Business.Services.ReportServices
                 AcceptedApplications = acceptedApplications
             };
             return summary;
+        }
+        public async Task<List<RecentApplicationDto>> GetRecentApplicationsAsync()
+        {
+            var recentApplications = await _context.Applications
+                    .OrderByDescending(a => a.CreatedDate)
+                    .Take(7)
+                    .Select(a => new
+                    {
+                        a.UserId,
+                        a.Vacancy.Title,
+                        a.Status.StatusName,
+                        a.Status.StatusColor
+                    })
+                    .ToListAsync();
+
+            var userIds = recentApplications.Select(a => a.UserId).Distinct().ToList();
+
+            var userDataResponse = await _appService.GetUserDataResponseAsync(userIds);
+
+            var recentApplicationDtos = new List<RecentApplicationDto>();
+
+            foreach (var application in recentApplications)
+            {
+                var userData = userDataResponse.Users.FirstOrDefault(u => u.UserId == application.UserId);
+
+                if (userData != null)
+                {
+                    recentApplicationDtos.Add(new RecentApplicationDto
+                    {
+                        Fullname = $"{userData.FirstName} {userData.LastName}",
+                        VacancyName = application.Title,
+                        StatusName = application.StatusName,
+                        StatusColor = application.StatusColor
+                    });
+                }
+            }
+            return recentApplicationDtos;
         }
     }
 }

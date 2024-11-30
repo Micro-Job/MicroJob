@@ -49,11 +49,6 @@ namespace JobCompany.API.Controllers
             return Ok(data);
         }
 
-        [HttpGet("[action]")]
-        public async Task<IActionResult> GetRecentApplications()
-        {
-            var recentApplications = await _service.GetRecentApplicationsAsync();
-            return Ok(recentApplications);
-        }
+
     }
 }

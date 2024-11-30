@@ -15,7 +15,7 @@ namespace Job.Business.Services.Vacancy
         private readonly JobDbContext _context;
         private readonly Guid userGuid;
         private readonly IRequestClient<GetAllCompaniesRequest> _request;
-        readonly IRequestClient<GetUserSavedVacanciesRequest> _client;
+        private readonly IRequestClient<GetUserSavedVacanciesRequest> _client;
         private readonly IHttpContextAccessor _contextAccessor;
 
         public VacancyService(JobDbContext context,IRequestClient<GetAllCompaniesRequest> request, IRequestClient<GetUserSavedVacanciesRequest> client,IHttpContextAccessor contextAccessor)
