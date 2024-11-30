@@ -2,8 +2,9 @@
 {
     public record RecentApplicationDto
     {
-        public string UserId {  get; set; }
-        public string VacancyId {  get; set; }
-        public string StatusId {  get; set; }
+        public string Fullname {  get; set; }
+        public string VacancyName {  get; set; }
+        public string StatusName {  get; set; }
+        public string StatusColor {  get; set; }
     }
 }

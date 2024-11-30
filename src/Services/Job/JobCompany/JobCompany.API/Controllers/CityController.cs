@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using JobCompany.Business.Dtos.CityDtos;
 using JobCompany.Business.Services.CityServices;
 using Microsoft.AspNetCore.Mvc;
@@ -10,16 +6,11 @@ namespace JobCompany.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class CityController : ControllerBase
+    public class CityController(ICityService service) : ControllerBase
     {
-        readonly ICityService _service;
+        readonly ICityService _service = service;
 
-        public CityController(ICityService service)
-        {
-            _service = service;
-        }
-
-        [HttpGet("[action]")]
+        [HttpPost("[action]")]
         public async Task<IActionResult> CreateCityAsync(CreateCityDto dto)
         {
             await _service.CreateCityAsync(dto);
@@ -36,21 +27,20 @@ namespace JobCompany.API.Controllers
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllCitiesAsync()
         {
-            await _service.GetAllCitiesAsync();
-            return Ok();
+            var data = await _service.GetAllCitiesAsync();
+            return Ok(data);
         }
 
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllCitiesByCountryIdAsync(string countryId)
         {
-            await _service.GetAllCitiesByCountryIdAsync(countryId);
-            return Ok();
+            return Ok(await _service.GetAllCitiesByCountryIdAsync(countryId));
         }
 
         [HttpDelete("[action]/{id}")]
-        public async Task<IActionResult> DeleteCityAsync(string cityId)
+        public async Task<IActionResult> DeleteCityAsync(string id)
         {
-            await _service.DeleteCityAsync(cityId);
+            await _service.DeleteCityAsync(id);
             return Ok();
         }
     }

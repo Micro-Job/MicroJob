@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using JobCompany.Business.Dtos.CountryDtos;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
@@ -9,26 +5,21 @@ using Microsoft.EntityFrameworkCore;
 
 namespace JobCompany.Business.Services.CountryServices
 {
-    public class CountryService : ICountryService
+    public class CountryService(JobCompanyDbContext context) : ICountryService
     {
-        readonly JobCompanyDbContext _context;
-
-        public CountryService(JobCompanyDbContext context)
-        {
-            _context = context;
-        }
+        readonly JobCompanyDbContext _context = context;
 
         public async Task CreateCountryAsync(string countryName)
         {
-            var existCountry = await _context.Categories.FindAsync(countryName);
-            if (existCountry != null) throw new Exceptions.Common.IsAlreadyExistException<Country>();
+            //var existCountry = await _context.Countries.FindAsync(countryName);
+            //if (existCountry != null) throw new Exceptions.Common.IsAlreadyExistException<Country>();
 
             var country = new Country
             {
                 CountryName = countryName,
             };
 
-            _context.Countries.Add(country);
+            await _context.Countries.AddAsync(country);
         }
 
         public async Task DeleteCountryAsync(string id)
@@ -49,7 +40,7 @@ namespace JobCompany.Business.Services.CountryServices
             return countries;
         }
 
-        public async Task UpdateCountryAsync(string id,string? countryName)
+        public async Task UpdateCountryAsync(string id, string? countryName)
         {
             var countryId = Guid.Parse(id);
             var country = await _context.Countries.FindAsync(countryId)

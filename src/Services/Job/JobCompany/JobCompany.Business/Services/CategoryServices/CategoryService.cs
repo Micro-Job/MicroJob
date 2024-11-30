@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using JobCompany.Business.Dtos.CategoryDtos;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
@@ -9,14 +5,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace JobCompany.Business.Services.CategoryServices
 {
-    public class CategoryService : ICategoryService
+    public class CategoryService(JobCompanyDbContext context) : ICategoryService
     {
-        readonly JobCompanyDbContext _context;
-
-        public CategoryService(JobCompanyDbContext context)
-        {
-            _context = context;
-        }
+        readonly JobCompanyDbContext _context = context;
 
         public async Task CreateCategoryAsync(string categoryName)
         {
@@ -34,7 +25,7 @@ namespace JobCompany.Business.Services.CategoryServices
         public async Task DeleteCategoryAsync(string id)
         {
             var categoryId = Guid.Parse(id);
-            var category = await _context.Categories.FindAsync(categoryId)??
+            var category = await _context.Categories.FindAsync(categoryId) ??
             throw new Exceptions.Common.NotFoundException<Category>();
 
             _context.Categories.Remove(category);

@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using JobCompany.Business.Dtos.CategoryDtos;
 using JobCompany.Business.Services.CategoryServices;
 using Microsoft.AspNetCore.Mvc;
 
@@ -43,8 +38,8 @@ namespace JobCompany.API.Controllers
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllCategoriesAsync()
         {
-            await _service.GetAllCategoriesAsync();
-            return Ok();
+            var data = await _service.GetAllCategoriesAsync();
+            return Ok(data);
         }
     }
 }

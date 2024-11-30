@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using JobCompany.Business.Dtos.ApplicationDtos;
 using JobCompany.Business.Services.ApplicationServices;
 using Microsoft.AspNetCore.Mvc;
@@ -51,6 +47,13 @@ namespace JobCompany.API.Controllers
         {
             var data = await _service.GetApplicationByIdAsync(applicationId);
             return Ok(data);
+        }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetRecentApplications()
+        {
+            var recentApplications = await _service.GetRecentApplicationsAsync();
+            return Ok(recentApplications);
         }
     }
 }
