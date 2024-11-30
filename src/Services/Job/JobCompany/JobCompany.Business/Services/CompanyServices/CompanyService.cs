@@ -1,63 +1,50 @@
-using AuthService.Business.Exceptions.UserException;
-using AuthService.Business.Services.CurrentUser;
 using JobCompany.Business.Dtos.CompanyDtos;
 using JobCompany.Business.Dtos.NumberDtos;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using MassTransit;
 using MassTransit.Initializers;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Shared.Exceptions;
 using Shared.Requests;
 using Shared.Responses;
 using SharedLibrary.Exceptions;
+using SharedLibrary.Responses;
+using System.Security.Claims;
 
 namespace JobCompany.Business.Services.CompanyServices
 {
     public class CompanyService : ICompanyService
     {
         private JobCompanyDbContext _context;
-        readonly ICurrentUser _currentUser;
         private readonly Guid userGuid;
         readonly IRequestClient<GetAllCompaniesDataRequest> _client;
+        private readonly IHttpContextAccessor _contextAccessor;
 
 
-        public CompanyService(JobCompanyDbContext context, ICurrentUser currentUser, IRequestClient<GetAllCompaniesDataRequest> client)
+        public CompanyService(JobCompanyDbContext context, IRequestClient<GetAllCompaniesDataRequest> client , IHttpContextAccessor contextAccessor)
         {
             _context = context;
-            _currentUser = currentUser;
-            userGuid = Guid.Parse(_currentUser.UserId ?? throw new UserNotLoggedInException());
             _client = client;
+            userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value);
         }
 
         public async Task UpdateCompanyAsync(CompanyUpdateDto dto)
         {
-            var company = await _context.Companies.FindAsync(userGuid)
-            ?? throw new NotFoundException<Company>();
+            var company = await _context.Companies.FirstOrDefaultAsync(x=> x.UserId == userGuid) ?? throw new NotFoundException<Company>();
 
             var companyName = dto.CompanyName.Trim();
 
-            var existingCompany = await _context.Companies.FirstOrDefaultAsync(x => x.CompanyName == companyName && x.UserId != userGuid);
-            if (existingCompany != null) throw new MustBeUniqueException<Core.Entites.Company>();
-
             company.CompanyName = dto.CompanyName;
-            company.CompanyInformation = dto.CompanyInformation;
-            company.CompanyLocation = dto.CompanyLocation;
+            company.CompanyInformation = dto.CompanyInformation.Trim();
+            company.CompanyLocation = dto.CompanyLocation.Trim();
             company.WebLink = dto.WebLink;
             company.EmployeeCount = dto.EmployeeCount.Value;
             company.CreatedDate = dto.CreatedDate;
-
-            var category = await _context.Categories.FindAsync(dto.CategoryId)
-            ?? throw new NotFoundException<Category>();
-            company.CategoryId = category.Id;
-
-            var country = await _context.Countries.FindAsync(dto.CountryId)
-            ?? throw new NotFoundException<Country>();
-            company.CountryId = country.Id;
-
-            var city = await _context.Cities.FindAsync(dto.CityId)
-            ?? throw new NotFoundException<City>();
-            company.CityId = city.Id;
+            company.CategoryId = dto.CategoryId;
+            company.CountryId = dto.CountryId;
+            company.CityId = dto.CityId;
 
             await _context.SaveChangesAsync();
         }

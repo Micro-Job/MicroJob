@@ -1,24 +1,25 @@
-﻿using AuthService.Business.Exceptions.UserException;
-using AuthService.Business.Services.CurrentUser;
-using JobCompany.Business.Dtos.StatusDtos;
+﻿using JobCompany.Business.Dtos.StatusDtos;
 using JobCompany.Business.Exceptions.StatusExceptions;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace JobCompany.Business.Services.StatusServices
 {
     public class StatusService : IStatusService
     {
         private readonly JobCompanyDbContext _context;
-        private readonly ICurrentUser _currentUser;
         private readonly Guid userGuid;
+        private readonly IHttpContextAccessor _contextAccessor;
 
-        public StatusService(JobCompanyDbContext context, ICurrentUser currentUser)
+
+        public StatusService(JobCompanyDbContext context, IHttpContextAccessor contextAccessor)
         {
             _context = context;
-            _currentUser = currentUser;
-            userGuid = Guid.Parse(_currentUser.UserId ?? throw new UserNotLoggedInException());
+            _contextAccessor = contextAccessor;
+            userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value);
         }
 
         public async Task CreateStatusAsync(CreateStatusDto dto)

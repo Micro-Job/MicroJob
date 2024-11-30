@@ -109,7 +109,7 @@ namespace AuthService.Business.Services.Auth
                     : null,
                 UserRole = UserRole.CompanyUser,
             };
-
+                
             var company = new Company
             {
                 Id = Guid.NewGuid(),

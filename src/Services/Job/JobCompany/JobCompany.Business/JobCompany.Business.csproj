@@ -7,9 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Authentication\AuthService.Business\AuthService.Business.csproj" />
     <ProjectReference Include="..\JobCompany.DAL\JobCompany.DAL.csproj" />
-    <ProjectReference Include="../../JobUser/Job.Business/Job.Business.csproj" />
   </ItemGroup>
 
   <ItemGroup>

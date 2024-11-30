@@ -1,32 +1,32 @@
-﻿using AuthService.Business.Services.CurrentUser;
-using AuthService.Core.Entities;
-using JobCompany.Business.Dtos.NumberDtos;
+﻿using JobCompany.Business.Dtos.NumberDtos;
 using JobCompany.Business.Dtos.VacancyDtos;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using MassTransit.Initializers;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.Exceptions;
 using SharedLibrary.ExternalServices.FileService;
 using SharedLibrary.Statics;
 using System.Linq;
+using System.Security.Claims;
 
 namespace JobCompany.Business.Services.VacancyServices
 {
     public class VacancyService : IVacancyService
     {
         private readonly JobCompanyDbContext _context;
-        private readonly ICurrentUser _currentUser;
         private readonly Guid _userGuid;
         private readonly IFileService _fileService;
+        private readonly IHttpContextAccessor _contextAccessor;
 
-        public VacancyService(JobCompanyDbContext context, ICurrentUser currentUser, IFileService fileService)
+        public VacancyService(JobCompanyDbContext context,IFileService fileService,IHttpContextAccessor contextAccessor)
         {
             _context = context;
-            _currentUser = currentUser;
             _fileService = fileService;
-            _userGuid = Guid.Parse(_currentUser.UserId ?? throw new NotFoundException<User>());
+            _contextAccessor = contextAccessor;
+            _userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value);
         }
 
         public async Task CreateVacancyAsync(CreateVacancyDto vacancyDto, ICollection<CreateNumberDto>? numberDto)
@@ -99,8 +99,8 @@ namespace JobCompany.Business.Services.VacancyServices
             }).ToList();
 
             var deletedCount = await _context.Vacancies
-        .Where(x => vacancyGuids.Contains(x.Id) && x.Company.UserId == _userGuid)
-        .ExecuteUpdateAsync(x => x.SetProperty(v => v.IsActive, false));
+            .Where(x => vacancyGuids.Contains(x.Id) && x.Company.UserId == _userGuid)
+            .ExecuteUpdateAsync(x => x.SetProperty(v => v.IsActive, false));
 
             if (deletedCount == 0)
                 throw new NotFoundException<Vacancy>();

@@ -1,5 +1,4 @@
-﻿using AuthService.Business.Services.CurrentUser;
-using Job.Business.Dtos.CertificateDtos;
+﻿using Job.Business.Dtos.CertificateDtos;
 using Job.Business.Dtos.EducationDtos;
 using Job.Business.Dtos.ExperienceDtos;
 using Job.Business.Dtos.LanguageDtos;
@@ -16,10 +15,12 @@ using Job.Business.Services.User;
 using Job.Core.Entities;
 using Job.DAL.Contexts;
 using MassTransit.Initializers;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.ExternalServices.FileService;
 using SharedLibrary.Statics;
+using System.Security.Claims;
 
 namespace Job.Business.Services.Resume
 {
@@ -33,8 +34,9 @@ namespace Job.Business.Services.Resume
         readonly ILanguageService _languageService;
         readonly ICertificateService _certificateService;
         readonly IUserInformationService _userInformationService;
-        readonly ICurrentUser _currentUser;
+        readonly IHttpContextAccessor _contextAccessor;
         private readonly Guid userGuid;
+        private readonly string? _baseUrl;
 
         public ResumeService(JobDbContext context,
             IFileService fileService,
@@ -43,8 +45,7 @@ namespace Job.Business.Services.Resume
             IExperienceService experienceService,
             ILanguageService languageService,
             ICertificateService certificateService,
-            IUserInformationService userInformationService,
-            ICurrentUser currentUser)
+            IUserInformationService userInformationService)
         {
             _context = context;
             _fileService = fileService;
@@ -54,8 +55,8 @@ namespace Job.Business.Services.Resume
             _languageService = languageService;
             _certificateService = certificateService;
             _userInformationService = userInformationService;
-            _currentUser = currentUser;
-            userGuid = Guid.Parse(_currentUser.UserId ?? throw new UserIsNotLoggedInException());
+            userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value);
+            _baseUrl = $"{_contextAccessor.HttpContext.Request.Scheme}://{_contextAccessor.HttpContext.Request.Host.Value}{_contextAccessor.HttpContext.Request.PathBase.Value}";
         }
 
         public async Task CreateResumeAsync(ResumeCreateDto resumeCreateDto, ResumeCreateListsDto resumeCreateListsDto)
@@ -269,7 +270,7 @@ namespace Job.Business.Services.Resume
                 LastName = userFullName.LastName,
                 FatherName = resume.FatherName,
                 Position = resume.Position,
-                UserPhoto = $"{_currentUser.BaseUrl}/{resume.UserPhoto}",
+                UserPhoto = $"{_baseUrl}/{resume.UserPhoto}",
                 IsDriver = resume.IsDriver,
                 IsMarried = resume.IsMarried,
                 IsCitizen = resume.IsCitizen,

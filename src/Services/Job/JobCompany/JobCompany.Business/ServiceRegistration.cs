@@ -19,12 +19,12 @@ namespace JobCompany.Business
             services.AddHttpContextAccessor();
             services.AddScoped<IFileService, FileService>();
             services.AddScoped<IVacancyService, VacancyService>();
-            services.AddScoped<ICurrentUser, CurrentUser>();
             services.AddScoped<IStatusService, StatusService>();
             services.AddScoped<IApplicationService, ApplicationService>();
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<ICountryService, CountryService>();
             services.AddScoped<IReportService, ReportService>();
+            services.AddScoped<ICurrentUser, CurrentUser>();
         }
 
         public static IServiceCollection AddMassTransitCompany(this IServiceCollection services, string cString)
