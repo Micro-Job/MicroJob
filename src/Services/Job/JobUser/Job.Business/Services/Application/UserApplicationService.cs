@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using AuthService.Business.Services.CurrentUser;
 using MassTransit;
+using Microsoft.AspNetCore.Http;
 using Shared.Events;
 
 namespace Job.Business.Services.Application
@@ -11,14 +13,14 @@ namespace Job.Business.Services.Application
     public class UserApplicationService : IUserApplicationService
     {
         readonly IPublishEndpoint _publishEndpoint;
-        private readonly ICurrentUser _currentUser;
+        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly Guid userGuid;
 
-        public UserApplicationService(IPublishEndpoint publishEndpoint, ICurrentUser currentUser)
+        public UserApplicationService(IPublishEndpoint publishEndpoint, IHttpContextAccessor httpContextAccessor)
         {
             _publishEndpoint = publishEndpoint;
-            _currentUser = currentUser;
-            userGuid = Guid.Parse(_currentUser.UserId);
+            _httpContextAccessor = httpContextAccessor;
+            userGuid = Guid.Parse(_httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value);
         }
 
         public async Task CreateUserApplicationAsync(string vacancyId)

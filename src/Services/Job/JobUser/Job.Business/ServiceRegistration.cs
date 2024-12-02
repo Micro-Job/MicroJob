@@ -39,7 +39,6 @@ namespace Job.Business
             {
                 x.AddConsumer<UserRegisteredConsumer>();
                 x.AddConsumer<GetResumeDataConsumer>();
-                x.AddConsumer<UserApplicationConsumer>();
                 x.SetKebabCaseEndpointNameFormatter();
                 x.UsingRabbitMq((con, cfg) =>
                 {

@@ -1,15 +1,16 @@
-using Job.Business.Exceptions.Common;
-using Job.DAL.Contexts;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Shared.Events;
-using SharedLibrary.Exceptions;
 
-namespace Job.Business.Consumers
+namespace JobCompany.Business.Consumers
 {
-    public class UserApplicationConsumer(JobCompanyDbContext _companyDb) : IConsumer<UserApplicationEvent>
+    public class UserApplicationConsumer(JobCompanyDbContext _companyDb): IConsumer<UserApplicationEvent>
     {
         public async Task Consume(ConsumeContext<UserApplicationEvent> context)
         {
@@ -27,5 +28,3 @@ namespace Job.Business.Consumers
         }
     }
 }
-
-
