@@ -1,4 +1,3 @@
-using AuthService.Business.Services.CurrentUser;
 using Job.Business.Consumers;
 using Job.Business.Services.Application;
 using Job.Business.Services.Certificate;
