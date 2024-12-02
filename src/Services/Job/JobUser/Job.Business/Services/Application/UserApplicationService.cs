@@ -2,9 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Security.Claims;
 using System.Threading.Tasks;
-using AuthService.Business.Services.CurrentUser;
 using MassTransit;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http;
 using Shared.Events;
 

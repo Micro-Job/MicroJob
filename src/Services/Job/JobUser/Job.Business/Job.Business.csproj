@@ -9,7 +9,6 @@
   <ItemGroup>
     <ProjectReference Include="../../../../Shared/SharedLibrary.csproj" />
     <ProjectReference Include="..\Job.DAL\Job.DAL.csproj" />
-    <ProjectReference Include="../../../Authentication/AuthService.Business/AuthService.Business.csproj" />
   </ItemGroup>
 
   <ItemGroup>
