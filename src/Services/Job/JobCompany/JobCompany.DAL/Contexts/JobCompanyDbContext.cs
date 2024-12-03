@@ -19,6 +19,7 @@ namespace JobCompany.DAL.Contexts
         public DbSet<Status> Statuses { get; set; }
         public DbSet<Vacancy> Vacancies { get; set; }
         public DbSet<VacancyTest> VacancyTests { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

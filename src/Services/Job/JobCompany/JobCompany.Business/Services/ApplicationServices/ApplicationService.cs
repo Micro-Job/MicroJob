@@ -76,32 +76,30 @@ namespace JobCompany.Business.Services.ApplicationServices
         /// Müraciətin statusunun dəyişilməsi ve eventle usere bildiris publishi
         /// </summary>
         /// <param name="">Company name'ni where selectle aldim include elemedim </param>
-        /// <returns></returns>
+        /// <returns> </returns>
+        /// 
+        ///TODO : include baxmaq lazimdir
         public async Task ChangeApplicationStatusAsync(string applicationId, string statusId)
         {
             var statusGuid = Guid.Parse(statusId);
             var applicationGuid = Guid.Parse(applicationId);
 
             var existAppVacancy = await _context.Applications
-                .Where(x => x.Id == applicationGuid && x.Vacancy.Company.UserId == userGuid)
-                .Select(x => new
-                {
-                    Application = x,
-                    CompanyName = x.Vacancy.Company.CompanyName
-                })
-                .FirstOrDefaultAsync() ?? throw new NotFoundException<Application>("Müraciət mövcud deyil!");
+                .Include(x => x.Vacancy)
+                .ThenInclude(v => v.Company) 
+                .FirstOrDefaultAsync(x => x.Id == applicationGuid && x.Vacancy.Company.UserId == userGuid)
+                ?? throw new NotFoundException<Application>("Müraciət mövcud deyil!");
 
-            var companyName = existAppVacancy.CompanyName;
-
-            existAppVacancy.Application.StatusId = statusGuid;
+            existAppVacancy.StatusId = statusGuid;
             await _context.SaveChangesAsync();
 
             await _publishEndpoint.Publish(new UpdateUserApplicationStatusEvent
             {
-                UserId = existAppVacancy.Application.UserId,
-                Content = $"{companyName} şirkətinin müraciət statusu dəyişdirildi: {existAppVacancy.Application.Status.StatusName}"
+                UserId = existAppVacancy.UserId,
+                Content = $"{existAppVacancy.Vacancy.Company.CompanyName} şirkətinin müraciət statusu dəyişdirildi: {existAppVacancy.Status.StatusName}"
             });
         }
+
 
 
 
