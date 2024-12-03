@@ -34,7 +34,8 @@ namespace JobCompany.Business.Services.ApplicationServices
             _baseUrl = $"{_contextAccessor.HttpContext.Request.Scheme}://{_contextAccessor.HttpContext.Request.Host.Value}{_contextAccessor.HttpContext.Request.PathBase.Value}";
             userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid).Value);
         }
-
+        
+        /// <summary> Deyesen bu silinmeli idi əmin deyiləm </summary>
         public async Task CreateApplicationAsync(ApplicationCreateDto dto)
         {
             var VacancyId = Guid.Parse(dto.VacancyId);
@@ -69,6 +70,7 @@ namespace JobCompany.Business.Services.ApplicationServices
             await _context.SaveChangesAsync();
         }
 
+        /// <summary> Müraciətin statusunun dəyişilməsi </summary>
         public async Task ChangeApplicationStatusAsync(string applicationId, string statusId)
         {
             var statusGuid = Guid.Parse(statusId);
@@ -82,6 +84,8 @@ namespace JobCompany.Business.Services.ApplicationServices
             await _context.SaveChangesAsync();
         }
 
+        
+        /// <summary> Müraciətlərin statusu ilə birlikdə gətirilməsi </summary>
         public async Task<List<StatusListDtoWithApps>> GetAllApplicationWithStatusAsync(string vacancyId)
         {
             var vacancyGuid = Guid.Parse(vacancyId);
@@ -110,6 +114,7 @@ namespace JobCompany.Business.Services.ApplicationServices
             return groupedData;
         }
 
+        /// <summary> vacancy ve statusa görə müraciətlərin gətirilməsi </summary>
         //bu metodun return-ü olmalıdır - tam deyil!!!!!!!!!!!!
         public async Task GetAllApplicationWithStatusAsync(string vacancyId, string statusId, int skip = 1, int take = 5)
         {
@@ -125,7 +130,8 @@ namespace JobCompany.Business.Services.ApplicationServices
             .Take(take)
             .ToListAsync();
         }
-
+        
+        /// <summary> Userin müraciətlərinin gətirilməsi </summary>
         public async Task<List<ApplicationUserListDto>> GetUserApplicationAsync(int skip = 1, int take = 9)
         {
             var userApps = await _context.Applications.Where(x => x.UserId == userGuid).Select(x => new ApplicationUserListDto
@@ -148,6 +154,7 @@ namespace JobCompany.Business.Services.ApplicationServices
             return userApps;
         }
 
+        /// <summary> Id'yə görə müraciətin gətirilməsi </summary>  
         public async Task<ApplicationGetByIdDto> GetApplicationByIdAsync(string applicationId)
         {
             var applicationGuid = Guid.Parse(applicationId);
@@ -172,6 +179,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                 return application;
         }
 
+        /// <summary> Consumer metodu - user idlərinə görə user datalarının gətirilməsi </summary>
         public async Task<GetUsersDataResponse> GetUserDataResponseAsync(List<Guid> userIds)
         {
             var request = new GetUsersDataRequest
@@ -189,6 +197,8 @@ namespace JobCompany.Business.Services.ApplicationServices
             return userDataResponse;
         }
 
+
+        /// <summary> Consumer metodu - Useridlere görə resumelerin getirilmesi </summary>
         public async Task<GetResumesDataResponse> GetResumeDataResponseAsync(List<Guid> userIds)
         {
             var request = new GetResumeDataRequest
@@ -206,6 +216,7 @@ namespace JobCompany.Business.Services.ApplicationServices
             return userDataResponse;
         }
 
+        /// <summary> Şirkət üçün bütün müraciətlərin gətirilməsi </summary>
         public async Task<ICollection<ApplicationInfoListDto>> GetAllApplicationAsync(int skip = 1, int take = 9)
         {
             var applications = await _context.Applications

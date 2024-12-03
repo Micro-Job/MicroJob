@@ -47,6 +47,8 @@ namespace JobCompany.Business.Services.ReportServices
             };
             return summary;
         }
+
+        /// <summary> Son müraciətlərin gətirilməsi </summary>
         public async Task<List<RecentApplicationDto>> GetRecentApplicationsAsync()
         {
             var recentApplications = await _context.Applications

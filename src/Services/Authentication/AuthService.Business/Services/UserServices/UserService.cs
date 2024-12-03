@@ -29,7 +29,8 @@ namespace AuthService.Business.Services.UserServices
             _currentUserId = _currentUser.UserId ?? throw new UserNotLoggedInException();
             _currentUserGuid = Guid.Parse(_currentUserId);
         }
-
+        
+        /// <summary> Loginde olan User informasiyası </summary>
         public async Task<UserInformationDto> GetUserInformationAsync()
         {
             var user = await _context.Users
@@ -48,6 +49,7 @@ namespace AuthService.Business.Services.UserServices
             return user;
         }
 
+        /// <summary> Logində olan userin informasiyasının update'si </summary>
         public async Task<UserUpdateResponseDto> UpdateUserInformationAsync(UserUpdateDto dto)
         {
             var userQuery = _context.Users.AsQueryable();
@@ -88,6 +90,7 @@ namespace AuthService.Business.Services.UserServices
             };
         }
 
+        /// <summary> Logində olan userin şəkil update'si </summary>
         public async Task<UserProfileImageUpdateResponseDto> UpdateUserProfileImageAsync(UserProfileImageUpdateDto dto)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == _currentUserGuid).Select(x => new User

@@ -66,12 +66,14 @@ namespace JobCompany.Business.Services.CompanyServices
             return companies;
         }
 
+        /// <summary> Consumer metodu - User id ye görə bütün şirkətlərin datalarının gətirilməsi </summary>
         public async Task<GetAllCompaniesDataResponse> GetAllCompaniesDataResponseAsync(Guid UserId)
         {
             var response = await _client.GetResponse<GetAllCompaniesDataResponse>(new GetAllCompaniesDataRequest { UserId = UserId });
             return response.Message;
         }
 
+        /// <summary> İdyə görə şirkət detaili consumer metodundan istifadə ilə </summary>
         public async Task<CompanyDetailItemDto> GetCompanyDetailAsync(string id)
         {
             var companyGuid = Guid.Parse(id);
