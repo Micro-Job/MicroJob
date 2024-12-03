@@ -32,10 +32,10 @@ namespace AuthService.DAL.Configurations
             modelBuilder.Property(e => e.RefreshToken)
                 .HasMaxLength(500);
 
-            //modelBuilder.HasOne(e => e.UserStatus)
-            //    .WithMany(us => us.Users)
-            //    .HasForeignKey(e => e.UserStatusId)
-            //    .OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.HasOne(e => e.UserStatus)
+               .WithMany(us => us.Users)
+               .HasForeignKey(e => e.UserStatusId)
+               .OnDelete(DeleteBehavior.SetNull);
 
             modelBuilder.HasMany(e => e.LoginLogs)
                 .WithOne(log => log.User)
