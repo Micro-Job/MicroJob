@@ -14,7 +14,7 @@ namespace AuthService.DAL.Contexts
         public DbSet<PasswordToken> PasswordTokens { get; set; }
         public DbSet<Company> Companies { get; set; }
 
-        public DbSet<UserStatus> UserStatuses { get; set; }
+        // public DbSet<UserStatus> UserStatuses { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

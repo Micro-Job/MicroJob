@@ -36,7 +36,7 @@ namespace AuthService.DAL.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("Companies");
+                    b.ToTable("Companies", (string)null);
                 });
 
             modelBuilder.Entity("AuthService.Core.Entities.LoginLog", b =>
@@ -62,7 +62,7 @@ namespace AuthService.DAL.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("LoginLogs");
+                    b.ToTable("LoginLogs", (string)null);
                 });
 
             modelBuilder.Entity("AuthService.Core.Entities.PasswordToken", b =>
@@ -86,7 +86,7 @@ namespace AuthService.DAL.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("PasswordTokens");
+                    b.ToTable("PasswordTokens", (string)null);
                 });
 
             modelBuilder.Entity("AuthService.Core.Entities.User", b =>
@@ -141,7 +141,7 @@ namespace AuthService.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("AuthService.Core.Entities.Company", b =>
