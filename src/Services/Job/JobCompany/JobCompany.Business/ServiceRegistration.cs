@@ -1,6 +1,7 @@
 ﻿using JobCompany.Business.Consumers;
 using JobCompany.Business.Services.ApplicationServices;
 using JobCompany.Business.Services.CategoryServices;
+using JobCompany.Business.Services.CityServices;
 using JobCompany.Business.Services.CountryServices;
 using JobCompany.Business.Services.ReportServices;
 using JobCompany.Business.Services.StatusServices;
@@ -22,6 +23,7 @@ namespace JobCompany.Business
             services.AddScoped<IApplicationService, ApplicationService>();
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<ICountryService, CountryService>();
+            services.AddScoped<ICityService, CityService>();
             services.AddScoped<IReportService, ReportService>();
         }
 

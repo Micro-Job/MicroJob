@@ -69,7 +69,7 @@ namespace JobCompany.API
             }
 
             app.UseHttpsRedirection();
-            app.UseCustomExceptionHandler();
+            // app.UseCustomExceptionHandler();
             app.UseStaticFiles();
 
             app.UseAuthentication();

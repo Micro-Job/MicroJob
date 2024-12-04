@@ -11,8 +11,9 @@ namespace JobCompany.Business.Services.CountryServices
 
         public async Task CreateCountryAsync(string countryName)
         {
-            //var existCountry = await _context.Countries.FindAsync(countryName);
-            //if (existCountry != null) throw new Exceptions.Common.IsAlreadyExistException<Country>();
+            var existCountry = await _context.Countries
+                                              .FirstOrDefaultAsync(c => c.CountryName == countryName);
+            if (existCountry != null) throw new Exceptions.Common.IsAlreadyExistException<Country>();
 
             var country = new Country
             {
@@ -20,6 +21,7 @@ namespace JobCompany.Business.Services.CountryServices
             };
 
             await _context.Countries.AddAsync(country);
+            await _context.SaveChangesAsync();
         }
 
         public async Task DeleteCountryAsync(string id)
@@ -29,12 +31,14 @@ namespace JobCompany.Business.Services.CountryServices
                 ?? throw new Exceptions.Common.NotFoundException<Country>();
 
             _context.Countries.Remove(country);
+            await _context.SaveChangesAsync();
         }
 
         public async Task<ICollection<CountryListDto>> GetAllCountryAsync()
         {
             var countries = await _context.Countries.Select(c => new CountryListDto
             {
+                Id = c.Id,
                 CountryName = c.CountryName,
             }).ToListAsync();
             return countries;
@@ -50,6 +54,7 @@ namespace JobCompany.Business.Services.CountryServices
             if (isExistCountry != null) throw new Exceptions.Common.IsAlreadyExistException<Country>();
 
             country.CountryName = countryName;
+            await _context.SaveChangesAsync();
         }
     }
 }
