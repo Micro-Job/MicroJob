@@ -171,7 +171,7 @@ namespace JobCompany.Business.Services.VacancyServices
         {
             var companyGuid = Guid.Parse(companyId);
             var vacancies = await _context.Vacancies
-            .Where(x => x.Company.Id == companyGuid && x.IsActive == true)
+            .Where(x => x.CompanyId == companyGuid && x.IsActive)
             .Select(x => new VacancyGetByCompanyIdDto
             {
                 CompanyName = x.CompanyName,
@@ -278,16 +278,14 @@ namespace JobCompany.Business.Services.VacancyServices
 
         public async Task<ICollection<VacancyGetAllDto>> GetAllVacanciesAsync(string? searchText, int skip = 1, int take = 9)
         {
-            var query = _context.Vacancies.AsQueryable();
+            var query = _context.Vacancies.Where(x=> x.IsActive);
+
             if (!string.IsNullOrWhiteSpace(searchText))
             {
                 var search = searchText.ToLower();
-                query = query.Where(v => v.Title.ToLower().Contains(search) && v.IsActive);
+                query = query.Where(v => v.Title.Contains(search));
             }
-            else
-            {
-                query = query.Where(v => v.IsActive);
-            }
+
             var vacancies = await query
                 .Select(v => new VacancyGetAllDto
                 {
@@ -305,10 +303,6 @@ namespace JobCompany.Business.Services.VacancyServices
                 .Take(take)
                 .ToListAsync();
 
-            if (!vacancies.Any())
-            {
-                throw new NotFoundException<Vacancy>("Axtarış mətni ilə uyğun gələn vakansiyalar tapılmadı");
-            }
             return vacancies;
         }
     }
