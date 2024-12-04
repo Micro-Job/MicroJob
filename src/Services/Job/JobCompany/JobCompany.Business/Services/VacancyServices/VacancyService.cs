@@ -243,7 +243,8 @@ namespace JobCompany.Business.Services.VacancyServices
         /// <summary> vacancynin update olunması </summary>
         public async Task UpdateVacancyAsync(UpdateVacancyDto vacancyDto, ICollection<UpdateNumberDto>? numberDtos)
         {
-            var existingVacancy = await _context.Vacancies.FirstOrDefaultAsync(v => v.Company.UserId == _userGuid)
+            var vacancyGuid = Guid.Parse(vacancyDto.Id);
+            var existingVacancy = await _context.Vacancies.FirstOrDefaultAsync(v => v.Id == vacancyGuid)
                 ?? throw new NotFoundException<Vacancy>();
 
             existingVacancy.CompanyId = Guid.Parse(vacancyDto.CompanyId);
