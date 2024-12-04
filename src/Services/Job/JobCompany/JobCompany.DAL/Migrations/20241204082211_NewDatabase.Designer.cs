@@ -4,6 +4,7 @@ using JobCompany.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JobCompany.DAL.Migrations
 {
     [DbContext(typeof(JobCompanyDbContext))]
-    partial class JobCompanyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241204082211_NewDatabase")]
+    partial class NewDatabase
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -49,7 +52,7 @@ namespace JobCompany.DAL.Migrations
 
                     b.HasIndex("VacancyId");
 
-                    b.ToTable("Applications", (string)null);
+                    b.ToTable("Applications");
                 });
 
             modelBuilder.Entity("JobCompany.Core.Entites.Category", b =>
@@ -65,7 +68,7 @@ namespace JobCompany.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories", (string)null);
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("JobCompany.Core.Entites.City", b =>
@@ -86,7 +89,7 @@ namespace JobCompany.DAL.Migrations
 
                     b.HasIndex("CountryId");
 
-                    b.ToTable("Cities", (string)null);
+                    b.ToTable("Cities");
                 });
 
             modelBuilder.Entity("JobCompany.Core.Entites.Company", b =>
@@ -140,7 +143,7 @@ namespace JobCompany.DAL.Migrations
 
                     b.HasIndex("CountryId");
 
-                    b.ToTable("Companies", (string)null);
+                    b.ToTable("Companies");
                 });
 
             modelBuilder.Entity("JobCompany.Core.Entites.CompanyNumber", b =>
@@ -165,7 +168,7 @@ namespace JobCompany.DAL.Migrations
 
                     b.HasIndex("VacancyId");
 
-                    b.ToTable("CompanyNumbers", (string)null);
+                    b.ToTable("CompanyNumbers");
                 });
 
             modelBuilder.Entity("JobCompany.Core.Entites.Country", b =>
@@ -181,7 +184,7 @@ namespace JobCompany.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Countries", (string)null);
+                    b.ToTable("Countries");
                 });
 
             modelBuilder.Entity("JobCompany.Core.Entites.Notification", b =>
@@ -246,7 +249,7 @@ namespace JobCompany.DAL.Migrations
 
                     b.HasIndex("CompanyId");
 
-                    b.ToTable("Statuses", (string)null);
+                    b.ToTable("Statuses");
                 });
 
             modelBuilder.Entity("JobCompany.Core.Entites.Vacancy", b =>
@@ -353,7 +356,7 @@ namespace JobCompany.DAL.Migrations
 
                     b.HasIndex("VacancyTestId");
 
-                    b.ToTable("Vacancies", (string)null);
+                    b.ToTable("Vacancies");
                 });
 
             modelBuilder.Entity("JobCompany.Core.Entites.VacancyTest", b =>
@@ -364,7 +367,7 @@ namespace JobCompany.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("VacancyTests", (string)null);
+                    b.ToTable("VacancyTests");
                 });
 
             modelBuilder.Entity("JobCompany.Core.Entites.Application", b =>
