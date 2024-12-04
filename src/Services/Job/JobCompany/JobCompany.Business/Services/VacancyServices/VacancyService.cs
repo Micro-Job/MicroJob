@@ -66,7 +66,8 @@ namespace JobCompany.Business.Services.VacancyServices
                 Driver = vacancyDto.Driver,
                 Family = vacancyDto.Family,
                 Citizenship = vacancyDto.Citizenship,
-                CategoryId = vacancyDto.CategoryId
+                CategoryId = vacancyDto.CategoryId,
+                IsActive = true
             };
 
             var numbers = new List<CompanyNumber>();
@@ -197,7 +198,9 @@ namespace JobCompany.Business.Services.VacancyServices
         public async Task<VacancyGetByIdDto> GetByIdVacancyAsync(string id)
         {
             var vacancyGuid = Guid.Parse(id);
-            var vacancy = await _context.Vacancies.FirstOrDefaultAsync(x => x.Id == vacancyGuid).Select(x => new VacancyGetByIdDto
+            var vacancy = await _context.Vacancies
+            .Where(x => x.Id == vacancyGuid)
+            .Select(x => new VacancyGetByIdDto
             {
                 Id = x.Id,
                 Title = x.Title,
@@ -232,7 +235,8 @@ namespace JobCompany.Business.Services.VacancyServices
                 {
                     CategoryName = x.Category.CategoryName
                 }
-            }) ?? throw new NotFoundException<Vacancy>();
+            })
+            .FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>();
             return vacancy;
         }
 
@@ -283,7 +287,7 @@ namespace JobCompany.Business.Services.VacancyServices
 
         public async Task<ICollection<VacancyGetAllDto>> GetAllVacanciesAsync(string? searchText, int skip = 1, int take = 9)
         {
-            var query = _context.Vacancies.Where(x=> x.IsActive);
+            var query = _context.Vacancies.Where(x => x.IsActive);
 
             if (!string.IsNullOrWhiteSpace(searchText))
             {
