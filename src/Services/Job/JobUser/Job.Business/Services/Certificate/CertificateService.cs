@@ -31,7 +31,7 @@ namespace Job.Business.Services.Certificate
 
             return [.. certificates];
         }
-
+        
         public async Task CreateCertificateAsync(CertificateCreateDto dto)
         {
             FileDto fileResult = await _fileService.UploadAsync(FilePaths.document, dto.CertificateFile);

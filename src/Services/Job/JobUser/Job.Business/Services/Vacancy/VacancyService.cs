@@ -27,6 +27,7 @@ namespace Job.Business.Services.Vacancy
             userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value);
         }
 
+        /// <summary> Userin vakansiya save etme toggle metodu </summary>
         public async Task ToggleSaveVacancyAsync(string vacancyId)
         {
             Guid vacancyGuid = Guid.Parse(vacancyId);
@@ -47,6 +48,7 @@ namespace Job.Business.Services.Vacancy
             await _context.SaveChangesAsync();
         }
 
+        /// <summary> Userin bütün save etdiyi vakansiyalarin get allu </summary>
         public async Task<GetUserSavedVacanciesResponse> GetAllSavedVacancyAsync()
         {
             var savedVacanciesId = await _context.SavedVacancies
@@ -59,6 +61,7 @@ namespace Job.Business.Services.Vacancy
             return datas;
         }
 
+        /// <summary> Bütün şirkətlərin get allu </summary>
         public async Task<ICollection<CompanyDto>> GetAllCompaniesAsync()
         {
             var response = await _request.GetResponse<GetAllCompaniesResponse>(new GetAllCompaniesRequest());
@@ -66,6 +69,7 @@ namespace Job.Business.Services.Vacancy
             return response.Message.Companies;
         }
 
+        /// <summary> Consumer metodu -  Vacancy idlerine göre saved olunan vakansiyalarin datasi </summary>
         public async Task<GetUserSavedVacanciesResponse> GetUserSavedVacancyDataAsync(List<Guid> vacancyIds)
         {
             if (vacancyIds == null || !vacancyIds.Any())

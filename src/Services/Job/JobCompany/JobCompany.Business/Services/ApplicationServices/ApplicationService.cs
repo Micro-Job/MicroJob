@@ -24,8 +24,9 @@ namespace JobCompany.Business.Services.ApplicationServices
         private readonly string _baseUrl;
         readonly IRequestClient<GetUsersDataResponse> _client;
         readonly IRequestClient<GetResumeDataResponse> _requestClient;
+        readonly IPublishEndpoint _publishEndpoint;
 
-        public ApplicationService(JobCompanyDbContext context, IRequestClient<GetUsersDataResponse> client, IRequestClient<GetResumeDataResponse> requestClient, IHttpContextAccessor contextAccessor)
+        public ApplicationService(JobCompanyDbContext context, IRequestClient<GetUsersDataResponse> client, IRequestClient<GetResumeDataResponse> requestClient, IHttpContextAccessor contextAccessor, IPublishEndpoint publishEndpoint)
         {
             _context = context;
             _contextAccessor = contextAccessor;
@@ -33,8 +34,10 @@ namespace JobCompany.Business.Services.ApplicationServices
             _requestClient = requestClient;
             _baseUrl = $"{_contextAccessor.HttpContext.Request.Scheme}://{_contextAccessor.HttpContext.Request.Host.Value}{_contextAccessor.HttpContext.Request.PathBase.Value}";
             userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid).Value);
+            _publishEndpoint = publishEndpoint;
         }
 
+        /// <summary> Deyesen bu silinmeli idi əmin deyiləm </summary>
         public async Task CreateApplicationAsync(ApplicationCreateDto dto)
         {
             var VacancyId = Guid.Parse(dto.VacancyId);
@@ -69,19 +72,38 @@ namespace JobCompany.Business.Services.ApplicationServices
             await _context.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Müraciətin statusunun dəyişilməsi ve eventle usere bildiris publishi
+        /// </summary>
+        /// <param name="">Company name'ni where selectle aldim include elemedim </param>
+        /// <returns> </returns>
+        /// 
+        ///TODO : include baxmaq lazimdir
         public async Task ChangeApplicationStatusAsync(string applicationId, string statusId)
         {
             var statusGuid = Guid.Parse(statusId);
             var applicationGuid = Guid.Parse(applicationId);
 
             var existAppVacancy = await _context.Applications
-                                                    .FirstOrDefaultAsync(x => x.Id == applicationGuid && x.Vacancy.Company.UserId == userGuid)
+                .Include(x => x.Vacancy)
+                .ThenInclude(v => v.Company) 
+                .FirstOrDefaultAsync(x => x.Id == applicationGuid && x.Vacancy.Company.UserId == userGuid)
                 ?? throw new NotFoundException<Application>("Müraciət mövcud deyil!");
 
             existAppVacancy.StatusId = statusGuid;
             await _context.SaveChangesAsync();
+
+            await _publishEndpoint.Publish(new UpdateUserApplicationStatusEvent
+            {
+                UserId = existAppVacancy.UserId,
+                Content = $"{existAppVacancy.Vacancy.Company.CompanyName} şirkətinin müraciət statusu dəyişdirildi: {existAppVacancy.Status.StatusName}"
+            });
         }
 
+
+
+
+        /// <summary> Müraciətlərin statusu ilə birlikdə gətirilməsi </summary>
         public async Task<List<StatusListDtoWithApps>> GetAllApplicationWithStatusAsync(string vacancyId)
         {
             var vacancyGuid = Guid.Parse(vacancyId);
@@ -110,6 +132,7 @@ namespace JobCompany.Business.Services.ApplicationServices
             return groupedData;
         }
 
+        /// <summary> vacancy ve statusa görə müraciətlərin gətirilməsi </summary>
         //bu metodun return-ü olmalıdır - tam deyil!!!!!!!!!!!!
         public async Task GetAllApplicationWithStatusAsync(string vacancyId, string statusId, int skip = 1, int take = 5)
         {
@@ -126,6 +149,7 @@ namespace JobCompany.Business.Services.ApplicationServices
             .ToListAsync();
         }
 
+        /// <summary> Userin müraciətlərinin gətirilməsi </summary>
         public async Task<List<ApplicationUserListDto>> GetUserApplicationAsync(int skip = 1, int take = 9)
         {
             var userApps = await _context.Applications.Where(x => x.UserId == userGuid).Select(x => new ApplicationUserListDto
@@ -148,6 +172,7 @@ namespace JobCompany.Business.Services.ApplicationServices
             return userApps;
         }
 
+        /// <summary> Id'yə görə müraciətin gətirilməsi </summary>  
         public async Task<ApplicationGetByIdDto> GetApplicationByIdAsync(string applicationId)
         {
             var applicationGuid = Guid.Parse(applicationId);
@@ -169,9 +194,10 @@ namespace JobCompany.Business.Services.ApplicationServices
                     .ToList()
             })
             .FirstOrDefaultAsync() ?? throw new NotFoundException<Application>();
-                return application;
+            return application;
         }
 
+        /// <summary> Consumer metodu - user idlərinə görə user datalarının gətirilməsi </summary>
         public async Task<GetUsersDataResponse> GetUserDataResponseAsync(List<Guid> userIds)
         {
             var request = new GetUsersDataRequest
@@ -189,6 +215,8 @@ namespace JobCompany.Business.Services.ApplicationServices
             return userDataResponse;
         }
 
+
+        /// <summary> Consumer metodu - Useridlere görə resumelerin getirilmesi </summary>
         public async Task<GetResumesDataResponse> GetResumeDataResponseAsync(List<Guid> userIds)
         {
             var request = new GetResumeDataRequest
@@ -206,6 +234,7 @@ namespace JobCompany.Business.Services.ApplicationServices
             return userDataResponse;
         }
 
+        /// <summary> Şirkət üçün bütün müraciətlərin gətirilməsi </summary>
         public async Task<ICollection<ApplicationInfoListDto>> GetAllApplicationAsync(int skip = 1, int take = 9)
         {
             var applications = await _context.Applications
@@ -245,7 +274,7 @@ namespace JobCompany.Business.Services.ApplicationServices
             return applicationList;
         }
 
-        
+
     }
 }
 

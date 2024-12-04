@@ -28,7 +28,8 @@ namespace JobCompany.Business.Services.VacancyServices
             _contextAccessor = contextAccessor;
             _userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value);
         }
-
+        
+        /// <summary> vacancy yaradılması </summary>
         public async Task CreateVacancyAsync(CreateVacancyDto vacancyDto, ICollection<CreateNumberDto>? numberDto)
         {
             string? companyLogoPath = null;
@@ -156,6 +157,7 @@ namespace JobCompany.Business.Services.VacancyServices
             return vacancies;
         }
 
+        /// <summary>  </summary>
         public async Task<List<VacancyListDtoForAppDto>> GetAllVacanciesForAppAsync()
         {
             var vacancies = await _context.Vacancies.Where(x => x.Company.UserId == _userGuid && x.IsActive == true).Select(x => new VacancyListDtoForAppDto
@@ -167,6 +169,7 @@ namespace JobCompany.Business.Services.VacancyServices
             return vacancies;
         }
 
+        /// <summary> şirkət id'sinə görə vacanciyaların gətirilməsi </summary>
         public async Task<ICollection<VacancyGetByCompanyIdDto>> GetVacancyByCompanyIdAsync(string companyId, int skip = 1, int take = 9)
         {
             var companyGuid = Guid.Parse(companyId);
@@ -190,6 +193,7 @@ namespace JobCompany.Business.Services.VacancyServices
             return vacancies;
         }
 
+        /// <summary> vacanciya id'sinə görə vacancyın gətirilməsi </summary>
         public async Task<VacancyGetByIdDto> GetByIdVacancyAsync(string id)
         {
             var vacancyGuid = Guid.Parse(id);
@@ -232,6 +236,7 @@ namespace JobCompany.Business.Services.VacancyServices
             return vacancy;
         }
 
+        /// <summary> vacancynin update olunması </summary>
         public async Task UpdateVacancyAsync(UpdateVacancyDto vacancyDto, ICollection<UpdateNumberDto>? numberDtos)
         {
             var existingVacancy = await _context.Vacancies.FirstOrDefaultAsync(v => v.Company.UserId == _userGuid)
