@@ -17,7 +17,7 @@ namespace JobCompany.DAL.Configurations
             builder.HasOne(c => c.Country)
                    .WithMany(country => country.Cities)
                    .HasForeignKey(c => c.CountryId)
-                   .OnDelete(DeleteBehavior.Cascade);
+                   .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasMany(c => c.Vacancies)
                    .WithOne(v => v.City)

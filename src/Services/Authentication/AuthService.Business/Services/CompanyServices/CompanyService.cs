@@ -12,6 +12,8 @@ namespace AuthService.Business.Services.CompanyServices
         private readonly JobCompanyDbContext _context = context;
         private readonly ICurrentUser _currentUser = currentUser;
         private readonly Guid userGuid;
+
+
         public async Task UpdateCompanyAsync(CompanyUpdateDto dto)
         {
             var companyGuid = Guid.Parse(dto.Id);

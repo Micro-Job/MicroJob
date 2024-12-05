@@ -31,8 +31,7 @@ namespace JobCompany.API.Controllers
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllCountriesAsync()
         {
-            await _service.GetAllCountryAsync();
-            return Ok();
+            return Ok(await _service.GetAllCountryAsync());
         }
 
         [HttpDelete("[action]/{id}")]

@@ -12,7 +12,8 @@ namespace JobCompany.Business.Services.CityServices
         public async Task CreateCityAsync(CreateCityDto dto)
         {
             var GuidCountrId = Guid.Parse(dto.CountryId);
-            var existCity = await _context.Cities.FindAsync(dto.CityName);
+            var existCity = await _context.Cities
+                .SingleOrDefaultAsync(c => c.CityName == dto.CityName);
             if (existCity != null) throw new Exceptions.Common.IsAlreadyExistException<City>();
 
             var isExistCountry = await _context.Countries.FindAsync(GuidCountrId);
@@ -25,6 +26,7 @@ namespace JobCompany.Business.Services.CityServices
             };
 
             _context.Cities.Add(city);
+            await _context.SaveChangesAsync();
         }
 
         public async Task<ICollection<CityListDto>> GetAllCitiesAsync()
@@ -32,6 +34,7 @@ namespace JobCompany.Business.Services.CityServices
             var cities = await _context.Cities
                .Select(c => new CityListDto
                {
+                   Id = c.Id,
                    CityName = c.CityName,
                    CountryId = c.CountryId
                })
@@ -47,13 +50,14 @@ namespace JobCompany.Business.Services.CityServices
             ?? throw new Exceptions.Common.NotFoundException<City>();
 
             city.CityName = dto.CityName;
+            await _context.SaveChangesAsync();
         }
 
         public async Task<ICollection<CityNameDto>> GetAllCitiesByCountryIdAsync(string countryId)
         {
             var guidCountryId = Guid.Parse(countryId);
-            var existCountry = await _context.Cities.FindAsync(guidCountryId)
-            ?? throw new Exceptions.Common.NotFoundException<Country>();
+            var existCountry = await _context.Countries.FirstOrDefaultAsync(c => c.Id == guidCountryId)
+                ?? throw new Exceptions.Common.NotFoundException<Country>();
 
             var cities = await _context.Cities
             .Where(city => city.CountryId == guidCountryId)
@@ -72,6 +76,8 @@ namespace JobCompany.Business.Services.CityServices
             var existCity = await _context.Cities.FindAsync(guidCityId)
                 ?? throw new Exceptions.Common.NotFoundException<City>();
             _context.Cities.Remove(existCity);
+            await _context.SaveChangesAsync();
+
         }
     }
 }

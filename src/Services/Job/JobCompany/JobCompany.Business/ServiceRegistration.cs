@@ -1,7 +1,8 @@
-﻿using AuthService.Business.Services.CurrentUser;
-using JobCompany.Business.Consumers;
+﻿using JobCompany.Business.Consumers;
 using JobCompany.Business.Services.ApplicationServices;
 using JobCompany.Business.Services.CategoryServices;
+using JobCompany.Business.Services.CityServices;
+using JobCompany.Business.Services.CompanyServices;
 using JobCompany.Business.Services.CountryServices;
 using JobCompany.Business.Services.ReportServices;
 using JobCompany.Business.Services.StatusServices;
@@ -23,8 +24,9 @@ namespace JobCompany.Business
             services.AddScoped<IApplicationService, ApplicationService>();
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<ICountryService, CountryService>();
+            services.AddScoped<ICompanyService, CompanyService>();
+            services.AddScoped<ICityService, CityService>();
             services.AddScoped<IReportService, ReportService>();
-            services.AddScoped<ICurrentUser, CurrentUser>();
         }
 
         public static IServiceCollection AddMassTransitCompany(this IServiceCollection services, string cString)
@@ -34,6 +36,8 @@ namespace JobCompany.Business
                 x.AddConsumer<CompanyRegisteredConsumer>();
                 x.AddConsumer<VacancyDataConsumer>();
                 x.AddConsumer<GetAllCompaniesConsumer>();
+                x.AddConsumer<UserApplicationConsumer>();
+                x.AddConsumer<VacancyApplicationConsumer>();
                 x.SetKebabCaseEndpointNameFormatter();
                 x.UsingRabbitMq((con, cfg) =>
                 {

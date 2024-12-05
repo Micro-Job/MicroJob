@@ -11,13 +11,13 @@ namespace JobCompany.API.Controllers
         /// <summary>
         /// Admin/Dashboard/ Muraciet, active vakansiya, qebul olunmus vakansiya sayi/ mohteshem 3-lu ;)
         /// </summary>
+
         [HttpGet("[action]")]
         public async Task<IActionResult> GetSummary()
         {
             var data = await _reportService.GetSummaryAsync();
             return Ok(data);
         }
-
         [HttpGet("[action]")]
         public async Task<IActionResult> GetRecentApplications()
         {

@@ -1,4 +1,3 @@
-using AuthService.Business.Services.CurrentUser;
 using Job.Business.Consumers;
 using Job.Business.Services.Application;
 using Job.Business.Services.Certificate;
@@ -10,7 +9,6 @@ using Job.Business.Services.Resume;
 using Job.Business.Services.Skill;
 using Job.Business.Services.User;
 using Job.Business.Services.Vacancy;
-using JobCompany.DAL.Contexts;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using SharedLibrary.ExternalServices.FileService;
@@ -30,10 +28,8 @@ namespace Job.Business
             services.AddScoped<ILanguageService, LanguageService>();
             services.AddScoped<ICertificateService, CertificateService>();
             services.AddScoped<IVacancyService, VacancyService>();
-            services.AddScoped<ICurrentUser, CurrentUser>();
             services.AddScoped<ISkillService, SkillService>();
             services.AddScoped<IUserApplicationService, UserApplicationService>();
-            services.AddScoped<JobCompanyDbContext>();
         }
 
         public static IServiceCollection AddMassTransit(this IServiceCollection services, string cString)
@@ -42,7 +38,7 @@ namespace Job.Business
             {
                 x.AddConsumer<UserRegisteredConsumer>();
                 x.AddConsumer<GetResumeDataConsumer>();
-                x.AddConsumer<UserApplicationConsumer>();
+                x.AddConsumer<UpdateUserApplicationStatusConsumer>();
                 x.SetKebabCaseEndpointNameFormatter();
                 x.UsingRabbitMq((con, cfg) =>
                 {

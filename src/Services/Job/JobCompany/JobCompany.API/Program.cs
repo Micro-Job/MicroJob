@@ -16,6 +16,7 @@ namespace JobCompany.API
             var builder = WebApplication.CreateBuilder(args);
 
 
+
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(opt =>
@@ -69,7 +70,7 @@ namespace JobCompany.API
             }
 
             app.UseHttpsRedirection();
-            app.UseCustomExceptionHandler();
+            // app.UseCustomExceptionHandler();
             app.UseStaticFiles();
 
             app.UseAuthentication();

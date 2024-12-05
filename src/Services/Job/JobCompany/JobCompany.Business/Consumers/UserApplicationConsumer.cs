@@ -4,9 +4,9 @@ using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Shared.Events;
 
-namespace Job.Business.Consumers
+namespace JobCompany.Business.Consumers
 {
-    public class UserApplicationConsumer(JobCompanyDbContext _companyDb) : IConsumer<UserApplicationEvent>
+    public class UserApplicationConsumer(JobCompanyDbContext _companyDb): IConsumer<UserApplicationEvent>
     {
         public async Task Consume(ConsumeContext<UserApplicationEvent> context)
         {

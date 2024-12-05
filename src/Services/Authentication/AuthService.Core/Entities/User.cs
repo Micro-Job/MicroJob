@@ -25,11 +25,10 @@ namespace AuthService.Core.Entities
 
         public string? Image { get; set; }
 
-        public virtual ICollection<LoginLog> LoginLogs { get; set; } = new List<LoginLog>();
+        public virtual ICollection<LoginLog> LoginLogs { get; set; } = new List<LoginLog>(); 
 
         public PasswordToken? PasswordToken { get; set; }
+
         public UserRole UserRole { get; set; }
-        //public Guid? UserStatusId { get; set; }
-        //public virtual UserStatus? UserStatus { get; set; }
     }
 }

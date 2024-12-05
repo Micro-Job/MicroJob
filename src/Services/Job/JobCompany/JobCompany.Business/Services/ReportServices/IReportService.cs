@@ -1,4 +1,5 @@
-﻿using JobCompany.Business.Dtos.ReportDtos;
+﻿using JobCompany.Business.Dtos.ApplicationDtos;
+using JobCompany.Business.Dtos.ReportDtos;
 
 namespace JobCompany.Business.Services.ReportServices
 {
