@@ -7,6 +7,5 @@ namespace JobCompany.Business.Services.ReportServices
     {
         Task<SummaryDto> GetSummaryAsync();
         Task<List<RecentApplicationDto>> GetRecentApplicationsAsync();
-
     }
 }

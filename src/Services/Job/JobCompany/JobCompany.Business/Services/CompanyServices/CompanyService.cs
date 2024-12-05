@@ -27,7 +27,8 @@ namespace JobCompany.Business.Services.CompanyServices
         {
             _context = context;
             _client = client;
-            userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value);
+            _contextAccessor = contextAccessor;
+            userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid).Value);
         }
 
         public async Task UpdateCompanyAsync(CompanyUpdateDto dto)

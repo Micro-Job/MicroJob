@@ -2,7 +2,7 @@
 {
     public class BulkEmailMessage
     {
-        public List<string> Emails { get; set; } = new List<string>();
+        public List<string> Emails { get; set; } = [];
 
         public string? Subject { get; set; }
 

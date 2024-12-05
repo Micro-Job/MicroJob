@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Job.Business.Services.Vacancy;
+﻿using Job.Business.Services.Vacancy;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Job.API.Controllers
@@ -18,13 +17,19 @@ namespace Job.API.Controllers
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllSavedVacancy()
         {
-           return Ok(await _vacancyService.GetAllSavedVacancyAsync());
+            return Ok(await _vacancyService.GetAllSavedVacancyAsync());
         }
 
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllCompanies()
         {
             return Ok(await _vacancyService.GetAllCompaniesAsync());
+        }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetAllUserVacancies()
+        {
+            return Ok(await _vacancyService.GetAllUserVacanciesAsync());
         }
 
     }

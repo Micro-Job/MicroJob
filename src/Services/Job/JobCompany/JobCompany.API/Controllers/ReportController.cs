@@ -18,10 +18,6 @@ namespace JobCompany.API.Controllers
             var data = await _reportService.GetSummaryAsync();
             return Ok(data);
         }
-        /// <summary>
-        /// Company Dashboard hissesinde Son muracietler hissesi
-        /// </summary>
-        /// <returns></returns>
         [HttpGet("[action]")]
         public async Task<IActionResult> GetRecentApplications()
         {

@@ -1,12 +1,15 @@
 ﻿using Job.Core.Entities;
 using Job.DAL.Contexts;
 using MassTransit;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Dtos.CompanyDtos;
+using SharedLibrary.Dtos.VacancyDtos;
+using SharedLibrary.Events;
+using SharedLibrary.Exceptions;
 using SharedLibrary.Requests;
 using SharedLibrary.Responses;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Http;
 
 namespace Job.Business.Services.Vacancy
 {
@@ -17,14 +20,16 @@ namespace Job.Business.Services.Vacancy
         private readonly IRequestClient<GetAllCompaniesRequest> _request;
         private readonly IRequestClient<GetUserSavedVacanciesRequest> _client;
         private readonly IHttpContextAccessor _contextAccessor;
+        private readonly IRequestClient<UserRegisteredEvent> _requestClient;
 
-        public VacancyService(JobDbContext context,IRequestClient<GetAllCompaniesRequest> request, IRequestClient<GetUserSavedVacanciesRequest> client,IHttpContextAccessor contextAccessor)
+        public VacancyService(JobDbContext context, IRequestClient<GetAllCompaniesRequest> request, IRequestClient<GetUserSavedVacanciesRequest> client, IHttpContextAccessor contextAccessor, IRequestClient<UserRegisteredEvent> requestClient)
         {
             _context = context;
             _request = request;
             _client = client;
             _contextAccessor = contextAccessor;
             userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value);
+            _requestClient = requestClient;
         }
 
         /// <summary> Userin vakansiya save etme toggle metodu </summary>
@@ -72,11 +77,11 @@ namespace Job.Business.Services.Vacancy
         /// <summary> Consumer metodu -  Vacancy idlerine göre saved olunan vakansiyalarin datasi </summary>
         public async Task<GetUserSavedVacanciesResponse> GetUserSavedVacancyDataAsync(List<Guid> vacancyIds)
         {
-            if (vacancyIds == null || !vacancyIds.Any())
+            if (vacancyIds == null || vacancyIds.Count == 0)
             {
                 return new GetUserSavedVacanciesResponse
                 {
-                    Vacancies = new List<VacancyResponse>()
+                    Vacancies = []
                 };
             }
 
@@ -85,6 +90,13 @@ namespace Job.Business.Services.Vacancy
             );
 
             return response.Message;
+        }
+
+        public async Task<List<VacancyDto>> GetAllUserVacanciesAsync()
+        {
+            var response = await _request.GetResponse<UserVacanciesResponse>(new GetAllUserVacanciesRequest());
+
+            return response.Message.Vacancies;
         }
     }
 }
