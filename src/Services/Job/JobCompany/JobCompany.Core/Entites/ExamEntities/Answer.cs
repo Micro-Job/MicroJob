@@ -1,4 +1,4 @@
-namespace JobCompany.Core.Entites
+namespace JobCompany.Core.Entites.ExamEntities
 {
     public class Answer
     {

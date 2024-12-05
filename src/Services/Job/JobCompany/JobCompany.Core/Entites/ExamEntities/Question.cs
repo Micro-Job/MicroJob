@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using JobCompany.Core.Enums;
 
-namespace JobCompany.Core.Entites
+namespace JobCompany.Core.Entites.ExamEntities
 {
     public class Question
     {
