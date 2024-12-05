@@ -17,5 +17,12 @@ namespace JobCompany.API.Controllers
             var data = await _reportService.GetSummaryAsync();
             return Ok(data);
         }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetRecentApplications()
+        {
+            var recentApplications = await _reportService.GetRecentApplicationsAsync();
+            return Ok(recentApplications);
+        }
     }
 }

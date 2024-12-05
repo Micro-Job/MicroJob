@@ -1,12 +1,16 @@
 ﻿using JobCompany.Business.Dtos.ReportDtos;
 using JobCompany.DAL.Contexts;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using Shared.Requests;
+using Shared.Responses;
 
 namespace JobCompany.Business.Services.ReportServices
 {
-    public class ReportService(JobCompanyDbContext context) : IReportService
+    public class ReportService(JobCompanyDbContext context, IRequestClient<GetUsersDataResponse> client) : IReportService
     {
         private readonly JobCompanyDbContext _context = context;
+        readonly IRequestClient<GetUsersDataResponse> _client = client;
 
         /// <summary>
         /// admin/dashboard yuxaridaki 3-luk
@@ -45,6 +49,61 @@ namespace JobCompany.Business.Services.ReportServices
                 AcceptedApplications = acceptedApplications
             };
             return summary;
+        }
+
+        /// <summary>
+        /// admin/dashboard son muracietler
+        /// </summary>
+        public async Task<List<RecentApplicationDto>> GetRecentApplicationsAsync()
+        {
+            var recentApplications = await _context.Applications
+                    .OrderByDescending(a => a.CreatedDate)
+                    .Take(7)
+                    .Select(a => new
+                    {
+                        a.UserId,
+                        a.Vacancy.Title,
+                        a.Status.StatusName,
+                        a.Status.StatusColor
+                    })
+                    .ToListAsync();
+
+            var userIds = recentApplications.Select(a => a.UserId).Distinct().ToList();
+
+            var userDataResponse = await GetUserDataResponseAsync(userIds);
+
+            var recentApplicationDtos = new List<RecentApplicationDto>();
+
+            foreach (var application in recentApplications)
+            {
+                var userData = userDataResponse.Users.FirstOrDefault(u => u.UserId == application.UserId);
+
+                if (userData != null)
+                {
+                    recentApplicationDtos.Add(new RecentApplicationDto
+                    {
+                        Fullname = $"{userData.FirstName} {userData.LastName}",
+                        VacancyName = application.Title,
+                        StatusName = application.StatusName,
+                        StatusColor = application.StatusColor
+                    });
+                }
+            }
+            return recentApplicationDtos;
+        }
+
+        public async Task<GetUsersDataResponse> GetUserDataResponseAsync(List<Guid> userIds)
+        {
+            var request = new GetUsersDataRequest
+            {
+                UserIds = userIds
+            };
+            var response = await _client.GetResponse<GetUsersDataResponse>(request);
+            var userDataResponse = new GetUsersDataResponse
+            {
+                Users = response.Message.Users
+            };
+            return userDataResponse;
         }
     }
 }

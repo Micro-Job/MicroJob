@@ -1,11 +1,8 @@
-using Job.Business.Exceptions.Common;
-using Job.DAL.Contexts;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Shared.Events;
-using SharedLibrary.Exceptions;
 
 namespace Job.Business.Consumers
 {
@@ -27,5 +24,3 @@ namespace Job.Business.Consumers
         }
     }
 }
-
-

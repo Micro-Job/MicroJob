@@ -16,6 +16,5 @@ namespace JobCompany.Business.Services.ApplicationServices
         Task<GetUsersDataResponse> GetUserDataResponseAsync(List<Guid> userIds);
         Task<GetResumesDataResponse> GetResumeDataResponseAsync(List<Guid> userIds);
         Task<ICollection<ApplicationInfoListDto>> GetAllApplicationAsync(int skip = 1, int take = 9);
-        Task<List<RecentApplicationDto>> GetRecentApplicationsAsync();
     }
 }

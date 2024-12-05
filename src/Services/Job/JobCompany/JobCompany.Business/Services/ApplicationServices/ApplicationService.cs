@@ -2,18 +2,15 @@
 using JobCompany.Business.Dtos.ApplicationDtos;
 using JobCompany.Business.Dtos.StatusDtos;
 using JobCompany.Business.Exceptions.ApplicationExceptions;
-using JobCompany.Business.Exceptions.StatusExceptions;
 using JobCompany.Business.Exceptions.VacancyExceptions;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Shared.Events;
 using Shared.Requests;
 using Shared.Responses;
 using SharedLibrary.Exceptions;
-using System.Security.Claims;
 
 namespace JobCompany.Business.Services.ApplicationServices
 {
@@ -172,7 +169,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                     .ToList()
             })
             .FirstOrDefaultAsync() ?? throw new NotFoundException<Application>();
-                return application;
+            return application;
         }
 
         public async Task<GetUsersDataResponse> GetUserDataResponseAsync(List<Guid> userIds)
@@ -248,43 +245,6 @@ namespace JobCompany.Business.Services.ApplicationServices
             return applicationList;
         }
 
-        public async Task<List<RecentApplicationDto>> GetRecentApplicationsAsync()
-        {
-            var recentApplications = await _context.Applications
-                    .OrderByDescending(a => a.CreatedDate)
-                    .Take(7)
-                    .Select(a => new
-                    {
-                        a.UserId,
-                        a.Vacancy.Title,
-                        a.Status.StatusName,
-                        a.Status.StatusColor
-                    })
-                    .ToListAsync();
 
-            var userIds = recentApplications.Select(a => a.UserId).Distinct().ToList();
-
-            var userDataResponse = await GetUserDataResponseAsync(userIds);
-
-            var recentApplicationDtos = new List<RecentApplicationDto>();
-
-            foreach (var application in recentApplications)
-            {
-                var userData = userDataResponse.Users.FirstOrDefault(u => u.UserId == application.UserId);
-
-                if (userData != null)
-                {
-                    recentApplicationDtos.Add(new RecentApplicationDto
-                    {
-                        Fullname = $"{userData.FirstName} {userData.LastName}",
-                        VacancyName = application.Title,
-                        StatusName = application.StatusName,
-                        StatusColor = application.StatusColor
-                    });
-                }
-            }
-            return recentApplicationDtos;
-        }
     }
 }
-

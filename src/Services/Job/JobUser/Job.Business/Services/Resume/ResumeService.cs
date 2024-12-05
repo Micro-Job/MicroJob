@@ -1,11 +1,11 @@
-﻿using Job.Business.Dtos.CertificateDtos;
+﻿using AuthService.Business.Exceptions.UserException;
+using Job.Business.Dtos.CertificateDtos;
 using Job.Business.Dtos.EducationDtos;
 using Job.Business.Dtos.ExperienceDtos;
 using Job.Business.Dtos.LanguageDtos;
 using Job.Business.Dtos.NumberDtos;
 using Job.Business.Dtos.ResumeDtos;
 using Job.Business.Exceptions.Common;
-using Job.Business.Exceptions.UserExceptions;
 using Job.Business.Services.Certificate;
 using Job.Business.Services.Education;
 using Job.Business.Services.Experience;
@@ -55,7 +55,7 @@ namespace Job.Business.Services.Resume
             _languageService = languageService;
             _certificateService = certificateService;
             _userInformationService = userInformationService;
-            userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value);
+            userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value ?? throw new UserNotLoggedInException());
             _baseUrl = $"{_contextAccessor.HttpContext.Request.Scheme}://{_contextAccessor.HttpContext.Request.Host.Value}{_contextAccessor.HttpContext.Request.PathBase.Value}";
         }
 
@@ -123,7 +123,7 @@ namespace Job.Business.Services.Resume
                     SkillId = skillId,
                     ResumeId = resume.Id
                 }).ToList()
-                : new();
+                : [];
 
             resume.PhoneNumbers = numbers;
             resume.Educations = educations;
@@ -198,7 +198,7 @@ namespace Job.Business.Services.Resume
                 foreach (var experienceDto in resumeUpdateDto.Experiences)
                 {
                     var experienceGuid = Guid.Parse(experienceDto.Id);
-                    var experience = resume.Experiences.FirstOrDefault(e => e.Id == experienceGuid);
+                    var experience = resume.Experiences?.FirstOrDefault(e => e.Id == experienceGuid);
                     if (experience != null)
                     {
                         experience.OrganizationName = experienceDto.OrganizationName;
@@ -215,7 +215,7 @@ namespace Job.Business.Services.Resume
                 foreach (var languageDto in resumeUpdateDto.Languages)
                 {
                     var languageGuid = Guid.Parse(languageDto.Id);
-                    var language = resume.Languages.FirstOrDefault(l => l.Id == languageGuid);
+                    var language = resume.Languages?.FirstOrDefault(l => l.Id == languageGuid);
                     if (language != null && language.LanguageName != languageDto.LanguageName)
                     {
                         language.LanguageName = languageDto.LanguageName;
@@ -228,7 +228,7 @@ namespace Job.Business.Services.Resume
                 foreach (var certificateDto in resumeUpdateDto.Certificates)
                 {
                     var certificateGuid = Guid.Parse(certificateDto.Id);
-                    var certificate = resume.Certificates.FirstOrDefault(c => c.Id == certificateGuid);
+                    var certificate = resume.Certificates?.FirstOrDefault(c => c.Id == certificateGuid);
                     if (certificate != null && certificate.CertificateName != certificateDto.CertificateName)
                     {
                         certificate.CertificateName = certificateDto.CertificateName;
@@ -259,8 +259,8 @@ namespace Job.Business.Services.Resume
 
             var userFullName = await _userInformationService.GetUserDataAsync(userGuid).Select(x => new
             {
-                FirstName = x.FirstName,
-                LastName = x.LastName,
+                x.FirstName,
+                x.LastName,
             });
 
             var resumeDetail = new ResumeDetailItemDto
@@ -294,7 +294,7 @@ namespace Job.Business.Services.Resume
                     ProfessionDegree = e.ProfessionDegree
                 }).ToList(),
 
-                Experiences = resume.Experiences.Select(ex => new ExperienceGetByIdDto
+                Experiences = resume.Experiences?.Select(ex => new ExperienceGetByIdDto
                 {
                     OrganizationName = ex.OrganizationName,
                     PositionName = ex.PositionName,
@@ -304,13 +304,13 @@ namespace Job.Business.Services.Resume
                     IsCurrentOrganization = ex.IsCurrentOrganization
                 }).ToList(),
 
-                Languages = resume.Languages.Select(l => new LanguageGetByIdDto
+                Languages = resume.Languages?.Select(l => new LanguageGetByIdDto
                 {
                     LanguageName = l.LanguageName,
                     LanguageLevel = l.LanguageLevel
                 }).ToList(),
 
-                Certificates = resume.Certificates.Select(c => new CertificateGetByIdDto
+                Certificates = resume.Certificates?.Select(c => new CertificateGetByIdDto
                 {
                     CertificateName = c.CertificateName,
                     GivenOrganization = c.GivenOrganization,

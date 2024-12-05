@@ -11,8 +11,8 @@ namespace JobCompany.Business.Services.CountryServices
 
         public async Task CreateCountryAsync(string countryName)
         {
-            //var existCountry = await _context.Countries.FindAsync(countryName);
-            //if (existCountry != null) throw new Exceptions.Common.IsAlreadyExistException<Country>();
+            var existCountry = await _context.Countries.FindAsync(countryName);
+            if (existCountry != null) throw new Exceptions.Common.IsAlreadyExistException<Country>();
 
             var country = new Country
             {
