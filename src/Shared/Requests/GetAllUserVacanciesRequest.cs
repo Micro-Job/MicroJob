@@ -1,6 +1,6 @@
 ﻿namespace SharedLibrary.Requests
 {
-    public class GetAllCompaniesRequest
+    public class GetAllUserVacanciesRequest
     {
     }
 }

@@ -4,11 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Dtos.CompanyDtos;
 using SharedLibrary.Requests;
 using SharedLibrary.Responses;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace JobCompany.Business.Consumers
 {
@@ -16,7 +11,7 @@ namespace JobCompany.Business.Consumers
     {
         public async Task Consume(ConsumeContext<GetAllCompaniesRequest> context)
         {
-            var companies  = await _context.Companies.Select(x=> new CompanyDto
+            var companies = await _context.Companies.Select(x => new CompanyDto
             {
                 CompanyId = x.Id,
                 CompanyName = x.CompanyName,

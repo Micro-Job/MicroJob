@@ -48,7 +48,5 @@ namespace JobCompany.API.Controllers
             var data = await _service.GetApplicationByIdAsync(applicationId);
             return Ok(data);
         }
-
-
     }
 }

@@ -65,7 +65,7 @@ namespace AuthService.Business.Services.Auth
             await _context.SaveChangesAsync();
 
             await _publishEndpoint.Publish(new UserRegisteredEvent
-            {
+            {   
                 UserId = user.Id
             });
 
@@ -210,10 +210,9 @@ namespace AuthService.Business.Services.Auth
             {
                 UserId = user.Id.ToString(),
                 FullName = user.FirstName + " " + user.LastName,
-                UserRole = user.UserRole,
+                UserStatusId = (byte)user.UserRole,
                 AccessToken = accessToken,
                 RefreshToken = refreshToken.Token,
-                UserStatusId = (byte)user.UserRole,
                 Expires = refreshToken.Expires
             };
         }

@@ -2,12 +2,17 @@
 using JobCompany.Business.Dtos.ReportDtos;
 using JobCompany.Business.Services.ApplicationServices;
 using JobCompany.DAL.Contexts;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using Shared.Requests;
+using Shared.Responses;
 
 namespace JobCompany.Business.Services.ReportServices
 {
-    public class ReportService(JobCompanyDbContext _context,IApplicationService _appService) : IReportService
+    public class ReportService(JobCompanyDbContext context, IRequestClient<GetUsersDataResponse> client) : IReportService
     {
+        private readonly JobCompanyDbContext _context = context;
+        readonly IRequestClient<GetUsersDataResponse> _client = client;
 
         /// <summary>
         /// admin/dashboard yuxaridaki 3-luk
@@ -48,7 +53,9 @@ namespace JobCompany.Business.Services.ReportServices
             return summary;
         }
 
-        /// <summary> Son müraciətlərin gətirilməsi </summary>
+        /// <summary>
+        /// admin/dashboard son muracietler
+        /// </summary>
         public async Task<List<RecentApplicationDto>> GetRecentApplicationsAsync()
         {
             var recentApplications = await _context.Applications
@@ -65,7 +72,7 @@ namespace JobCompany.Business.Services.ReportServices
 
             var userIds = recentApplications.Select(a => a.UserId).Distinct().ToList();
 
-            var userDataResponse = await _appService.GetUserDataResponseAsync(userIds);
+            var userDataResponse = await GetUserDataResponseAsync(userIds);
 
             var recentApplicationDtos = new List<RecentApplicationDto>();
 
@@ -85,6 +92,20 @@ namespace JobCompany.Business.Services.ReportServices
                 }
             }
             return recentApplicationDtos;
+        }
+
+        public async Task<GetUsersDataResponse> GetUserDataResponseAsync(List<Guid> userIds)
+        {
+            var request = new GetUsersDataRequest
+            {
+                UserIds = userIds
+            };
+            var response = await _client.GetResponse<GetUsersDataResponse>(request);
+            var userDataResponse = new GetUsersDataResponse
+            {
+                Users = response.Message.Users
+            };
+            return userDataResponse;
         }
     }
 }

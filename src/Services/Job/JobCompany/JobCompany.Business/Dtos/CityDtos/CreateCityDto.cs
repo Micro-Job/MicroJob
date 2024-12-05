@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using FluentValidation;
 
 namespace JobCompany.Business.Dtos.CityDtos
@@ -12,7 +8,7 @@ namespace JobCompany.Business.Dtos.CityDtos
         public string CountryId { get; set; }
     }
 
-    public class CreateCityDtoValidator: AbstractValidator<CreateCityDto>
+    public class CreateCityDtoValidator : AbstractValidator<CreateCityDto>
     {
         public CreateCityDtoValidator()
         {

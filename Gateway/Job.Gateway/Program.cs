@@ -14,7 +14,7 @@ namespace Job.Gateway
 
             builder.Services.AddOcelot();
 
-            builder.Configuration.AddJsonFile("ocelot.json");
+            builder.Configuration.AddJsonFile("ocelot.json"); 
 
             builder.Services.AddControllers();
 

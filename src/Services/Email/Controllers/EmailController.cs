@@ -1,8 +1,6 @@
 ﻿using EmailService.API.Services;
-using Hangfire;
 using Microsoft.AspNetCore.Mvc;
 using SharedLibrary.Dtos.EmailDtos;
-using System.Net.Mail;
 
 namespace EmailService.API.Controllers
 {
@@ -37,7 +35,6 @@ namespace EmailService.API.Controllers
             await _emailService.SendMessageWithCredentialsAndAttachmentsAsync(model.Message, model.Attachments, model.Settings);
             return Ok();
         }
-
 
         [HttpPost("[action]")]
         public async Task<IActionResult> SendBulkMessage(BulkEmailMessage model)

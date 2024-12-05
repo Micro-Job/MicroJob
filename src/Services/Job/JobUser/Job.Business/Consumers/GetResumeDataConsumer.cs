@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Job.DAL.Contexts;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
@@ -22,7 +18,7 @@ namespace Job.Business.Consumers
         public async Task Consume(ConsumeContext<GetResumeDataRequest> context)
         {
             var resume = await _context.Resumes
-                .Include(r => r.User) 
+                .Include(r => r.User)
                 .Where(r => context.Message.UserIds.Contains(r.UserId))
                 .Select(r => new
                 {
