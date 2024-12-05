@@ -7,9 +7,11 @@ using JobCompany.DAL.Contexts;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Shared.Events;
 using Shared.Requests;
 using Shared.Responses;
 using SharedLibrary.Exceptions;
+using System.Security.Claims;
 
 namespace JobCompany.Business.Services.ApplicationServices
 {
@@ -56,7 +58,6 @@ namespace JobCompany.Business.Services.ApplicationServices
             await _context.SaveChangesAsync();
         }
 
-
         /// <summary> Yaradılan müraciətin geri alınması </summary>
         public async Task RemoveApplicationAsync(string applicationId)
         {
@@ -68,7 +69,6 @@ namespace JobCompany.Business.Services.ApplicationServices
             existApplication.IsActive = false;
             await _context.SaveChangesAsync();
         }
-
         /// <summary>
         /// Müraciətin statusunun dəyişilməsi ve eventle usere bildiris publishi
         /// </summary>
@@ -96,9 +96,6 @@ namespace JobCompany.Business.Services.ApplicationServices
                 Content = $"{existAppVacancy.Vacancy.Company.CompanyName} şirkətinin müraciət statusu dəyişdirildi: {existAppVacancy.Status.StatusName}"
             });
         }
-
-
-
 
         /// <summary> Müraciətlərin statusu ilə birlikdə gətirilməsi </summary>
         public async Task<List<StatusListDtoWithApps>> GetAllApplicationWithStatusAsync(string vacancyId)
@@ -212,7 +209,6 @@ namespace JobCompany.Business.Services.ApplicationServices
             return userDataResponse;
         }
 
-
         /// <summary> Consumer metodu - Useridlere görə resumelerin getirilmesi </summary>
         public async Task<GetResumesDataResponse> GetResumeDataResponseAsync(List<Guid> userIds)
         {
@@ -270,7 +266,5 @@ namespace JobCompany.Business.Services.ApplicationServices
 
             return applicationList;
         }
-
-
     }
 }
