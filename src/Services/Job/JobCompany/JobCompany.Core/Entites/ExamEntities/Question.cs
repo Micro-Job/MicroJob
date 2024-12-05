@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using JobCompany.Core.Enums;
 
 namespace JobCompany.Core.Entites.ExamEntities
@@ -13,6 +9,6 @@ namespace JobCompany.Core.Entites.ExamEntities
         public bool IsRequired { get; set; }
         public Exam Exam { get; set; }
         public Guid ExamId { get; set; }
-        public ICollection<Answer> Answers{ get; set; }
+        public ICollection<Answer> Answers { get; set; }
     }
 }
