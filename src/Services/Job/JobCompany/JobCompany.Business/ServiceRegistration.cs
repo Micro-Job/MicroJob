@@ -4,9 +4,10 @@ using JobCompany.Business.Services.CategoryServices;
 using JobCompany.Business.Services.CityServices;
 using JobCompany.Business.Services.CompanyServices;
 using JobCompany.Business.Services.CountryServices;
-using JobCompany.Business.Services.QuestionServices;
+using JobCompany.Business.Services.ExamServices.QuestionServices;
 using JobCompany.Business.Services.ReportServices;
 using JobCompany.Business.Services.StatusServices;
+using JobCompany.Business.Services.TemplateServices;
 using JobCompany.Business.Services.VacancyServices;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,6 +30,7 @@ namespace JobCompany.Business
             services.AddScoped<ICityService, CityService>();
             services.AddScoped<IReportService, ReportService>();
             services.AddScoped<IQuestionService, QuestionService>();
+            services.AddScoped<ITemplateService, TemplateService>();
         }
 
         public static IServiceCollection AddMassTransitCompany(this IServiceCollection services, string cString)

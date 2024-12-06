@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentValidation;
+using JobCompany.Business.Dtos.ExamDtos.AnswerDtos;
 using JobCompany.Core.Enums;
 using Microsoft.AspNetCore.Http;
 
-namespace JobCompany.Business.Dtos.QuestionDtos
+namespace JobCompany.Business.Dtos.ExamDtos.QuestionDtos
 {
     public record QuestionCreateDto
     {
@@ -14,6 +15,7 @@ namespace JobCompany.Business.Dtos.QuestionDtos
         public IFormFile? Image { get; set; }
         public QuestionType QuestionType { get; set; }
         public bool IsRequired { get; set; }
+        public ICollection<CreateAnswerDto> Answers { get; set; }
     }
 
     public class QuestionCreateDtoValidator : AbstractValidator<QuestionCreateDto>

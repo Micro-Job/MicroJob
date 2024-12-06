@@ -1,8 +1,9 @@
+using JobCompany.Core.Entites.Base;
 using JobCompany.Core.Enums;
 
 namespace JobCompany.Core.Entites
 {
-    public class Question
+    public class Question : BaseEntity
     {
         public string Title { get; set; }
         public string? Image { get; set; }
