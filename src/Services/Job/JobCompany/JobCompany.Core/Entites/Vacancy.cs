@@ -1,5 +1,4 @@
 ﻿using JobCompany.Core.Entites.Base;
-using JobCompany.Core.Entites.ExamEntities;
 using JobCompany.Core.Enums;
 using SharedLibrary.Enums;
 

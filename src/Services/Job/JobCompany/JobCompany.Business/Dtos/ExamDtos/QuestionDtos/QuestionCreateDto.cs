@@ -6,7 +6,7 @@ using FluentValidation;
 using JobCompany.Core.Enums;
 using Microsoft.AspNetCore.Http;
 
-namespace JobCompany.Business.Dtos.QuestionDtos
+namespace JobCompany.Business.Dtos.ExamDtos.QuestionDtos
 {
     public record QuestionCreateDto
     {
