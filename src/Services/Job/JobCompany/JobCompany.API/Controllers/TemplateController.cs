@@ -1,4 +1,5 @@
-﻿using JobCompany.Business.Services.TemplateServices;
+﻿using JobCompany.Business.Dtos.TemplateDtos;
+using JobCompany.Business.Services.TemplateServices;
 using Microsoft.AspNetCore.Mvc;
 
 namespace JobCompany.API.Controllers;
@@ -20,7 +21,14 @@ public class TemplateController(ITemplateService service) : ControllerBase
         var result = await service.GetTemplateByIdAsync(templateId);
         return Ok(result);
     }
-    
+
+    [HttpPut("[action]")]
+    public async Task<IActionResult> UpdateTemplateAsync(TemplateUpdateDto templateUpdateDto)
+    {
+        await service.UpdateTemplateAsync(templateUpdateDto);
+        return Ok();
+    }
+
     [HttpDelete("[action]")]
     public async Task<IActionResult> DeleteTemplateAsync(string templateId)
     {
