@@ -4,13 +4,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using FluentValidation;
 using JobCompany.Core.Enums;
+using Microsoft.AspNetCore.Http;
 
 namespace JobCompany.Business.Dtos.QuestionDtos
 {
     public record QuestionCreateDto
     {
         public string Title { get; set; }
-        public string? Image { get; set; }
+        public IFormFile? Image { get; set; }
         public QuestionType QuestionType { get; set; }
         public bool IsRequired { get; set; }
     }
