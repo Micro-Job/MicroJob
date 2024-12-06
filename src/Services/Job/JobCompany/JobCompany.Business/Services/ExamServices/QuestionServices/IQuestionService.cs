@@ -9,5 +9,6 @@ namespace JobCompany.Business.Services.ExamServices.QuestionServices
     public interface IQuestionService
     {
         Task CreateQuestionAsync(QuestionCreateDto dto);
+        Task DeleteQuestionAsync(string questionId);
     }
 }

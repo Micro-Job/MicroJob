@@ -6,7 +6,9 @@ using JobCompany.Business.Dtos.ExamDtos.QuestionDtos;
 using JobCompany.Business.Exceptions.ExamExceptions;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
+using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Dtos.FileDtos;
+using SharedLibrary.Exceptions;
 using SharedLibrary.ExternalServices.FileService;
 using SharedLibrary.Statics;
 
@@ -40,6 +42,16 @@ namespace JobCompany.Business.Services.ExamServices.QuestionServices
             };
 
             await _context.Questions.AddAsync(question);
+        }
+
+        public async Task DeleteQuestionAsync(string questionId)
+        {
+            var guidQuestionId = Guid.Parse(questionId);
+            var question = await _context.Questions.FirstOrDefaultAsync(x => x.Id == guidQuestionId)
+             ?? throw new NotFoundException<Question>();
+
+            _context.Questions.Remove(question);
+            await _context.SaveChangesAsync();
         }
     }
 }

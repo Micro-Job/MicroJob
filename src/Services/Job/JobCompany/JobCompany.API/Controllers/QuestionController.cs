@@ -20,9 +20,16 @@ namespace JobCompany.API.Controllers
         }
 
         [HttpPost("[action]")]
-        public async Task<IActionResult> CreateCityAsync(QuestionCreateDto dto)
+        public async Task<IActionResult> CreateQuestionAsync(QuestionCreateDto dto)
         {
             await _service.CreateQuestionAsync(dto);
+            return Ok();
+        }
+
+        [HttpDelete("[action]/{id}")]
+        public async Task<IActionResult> DeleteQuestionAsync(string id)
+        {
+            await _service.DeleteQuestionAsync(id);
             return Ok();
         }
     }
