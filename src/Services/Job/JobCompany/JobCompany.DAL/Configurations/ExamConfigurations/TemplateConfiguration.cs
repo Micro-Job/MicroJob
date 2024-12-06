@@ -1,4 +1,4 @@
-﻿using JobCompany.Core.Entites.ExamEntities;
+﻿using JobCompany.Core.Entites;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
