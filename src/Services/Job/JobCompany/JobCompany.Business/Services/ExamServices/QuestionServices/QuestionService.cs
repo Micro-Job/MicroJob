@@ -1,16 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using JobCompany.Business.Dtos.ExamDtos.AnswerDtos;
 using JobCompany.Business.Dtos.ExamDtos.QuestionDtos;
 using JobCompany.Business.Exceptions.ExamExceptions;
 using JobCompany.Business.Services.ExamServices.AnswerServices;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
-using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Dtos.FileDtos;
-using SharedLibrary.Exceptions;
 using SharedLibrary.ExternalServices.FileService;
 using SharedLibrary.Statics;
 
