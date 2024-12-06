@@ -1,6 +1,6 @@
 using JobCompany.Core.Entites.Base;
 
-namespace JobCompany.Core.Entites.ExamEntities
+namespace JobCompany.Core.Entites
 {
     public class Exam : BaseEntity
     {
