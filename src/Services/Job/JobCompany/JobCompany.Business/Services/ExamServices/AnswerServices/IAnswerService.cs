@@ -1,9 +1,10 @@
 ﻿using JobCompany.Business.Dtos.ExamDtos.AnswerDtos;
+using JobCompany.Core.Entites;
 
 namespace JobCompany.Business.Services.ExamServices.AnswerServices
 {
     public interface IAnswerService
     {
-        Task CreateAnswerAsync(CreateAnswerDto dto);
+        Task<ICollection<Answer>> CreateBulkAnswerAsync(List<CreateAnswerDto> dtos, string questionId);
     }
 }
