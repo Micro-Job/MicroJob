@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using JobCompany.Business.Dtos.QuestionDtos;
-using JobCompany.Business.Services.QuestionServices;
+using JobCompany.Business.Dtos.ExamDtos.QuestionDtos;
+using JobCompany.Business.Services.ExamServices.QuestionServices;
 using Microsoft.AspNetCore.Mvc;
 
 namespace JobCompany.API.Controllers

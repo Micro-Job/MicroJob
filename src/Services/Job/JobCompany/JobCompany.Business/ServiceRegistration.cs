@@ -4,7 +4,7 @@ using JobCompany.Business.Services.CategoryServices;
 using JobCompany.Business.Services.CityServices;
 using JobCompany.Business.Services.CompanyServices;
 using JobCompany.Business.Services.CountryServices;
-using JobCompany.Business.Services.QuestionServices;
+using JobCompany.Business.Services.ExamServices.QuestionServices;
 using JobCompany.Business.Services.ReportServices;
 using JobCompany.Business.Services.StatusServices;
 using JobCompany.Business.Services.VacancyServices;

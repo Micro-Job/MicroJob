@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using JobCompany.Business.Dtos.QuestionDtos;
+using JobCompany.Business.Dtos.ExamDtos.QuestionDtos;
 using JobCompany.Business.Exceptions.ExamExceptions;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
@@ -10,7 +10,7 @@ using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.ExternalServices.FileService;
 using SharedLibrary.Statics;
 
-namespace JobCompany.Business.Services.QuestionServices
+namespace JobCompany.Business.Services.ExamServices.QuestionServices
 {
     public class QuestionService : IQuestionService
     {
