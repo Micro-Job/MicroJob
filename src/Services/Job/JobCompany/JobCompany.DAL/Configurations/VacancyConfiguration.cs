@@ -70,11 +70,6 @@ namespace JobCompany.DAL.Configurations
                    .HasForeignKey(v => v.CategoryId)
                    .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasOne(v => v.VacancyTest)
-                   .WithMany(c => c.Vacancies)
-                   .HasForeignKey(v => v.VacancyTestId)
-                   .OnDelete(DeleteBehavior.Restrict);
-
             builder.HasMany(c => c.Applications)
                    .WithOne(v => v.Vacancy)
                    .HasForeignKey(v => v.VacancyId)
