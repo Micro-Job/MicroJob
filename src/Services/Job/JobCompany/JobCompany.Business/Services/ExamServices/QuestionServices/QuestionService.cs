@@ -25,6 +25,28 @@ namespace JobCompany.Business.Services.ExamServices.QuestionServices
             _context = context;
         }
 
+        /// <summary> Question yaradılması coxlu </summary>
+        public async Task<ICollection<Question>> CreateBulkQuestionAsync(ICollection<QuestionCreateDto> dtos, string examId)
+        {
+            var guidExam = Guid.Parse(examId);
+            var questionsToAdd = dtos.Select(dto => new Question
+            {
+                ExamId = guidExam,
+                Title = dto.Title,
+                Image = dto.Image != null
+                    ? $"{_fileService.UploadAsync(FilePaths.document, dto.Image).Result.FilePath}/{_fileService.UploadAsync(FilePaths.document, dto.Image).Result.FileName}"
+                    : null,
+                QuestionType = dto.QuestionType,
+                IsRequired = dto.IsRequired,
+            }).ToList();
+
+            await _context.Questions.AddRangeAsync(questionsToAdd);
+            await _context.SaveChangesAsync();
+
+            return questionsToAdd;
+        }
+
+        /// <summary> Question yaradılması tekli </summary>
         public async Task CreateQuestionAsync(QuestionCreateDto dto)
         {
             FileDto fileResult = dto.Image != null
@@ -42,16 +64,6 @@ namespace JobCompany.Business.Services.ExamServices.QuestionServices
             };
 
             await _context.Questions.AddAsync(question);
-        }
-
-        public async Task DeleteQuestionAsync(string questionId)
-        {
-            var guidQuestionId = Guid.Parse(questionId);
-            var question = await _context.Questions.FirstOrDefaultAsync(x => x.Id == guidQuestionId)
-             ?? throw new NotFoundException<Question>();
-
-            _context.Questions.Remove(question);
-            await _context.SaveChangesAsync();
         }
     }
 }
