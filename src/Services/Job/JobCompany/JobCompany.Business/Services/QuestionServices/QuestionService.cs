@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using JobCompany.Business.Dtos.QuestionDtos;
+using JobCompany.Business.Exceptions.ExamExceptions;
 using JobCompany.Core.Entites.ExamEntities;
 using JobCompany.DAL.Contexts;
 using SharedLibrary.Dtos.FileDtos;
@@ -27,6 +28,8 @@ namespace JobCompany.Business.Services.QuestionServices
             FileDto fileResult = dto.Image != null
                 ? await _fileService.UploadAsync(FilePaths.document, dto.Image)
                 : new FileDto();
+
+            if(dto.QuestionType == Core.Enums.QuestionType.ImageBased && dto.Image == null) throw new InvalidQuestionException();
             
             var question = new Question
             {

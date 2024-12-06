@@ -4,6 +4,7 @@ using JobCompany.Business.Services.CategoryServices;
 using JobCompany.Business.Services.CityServices;
 using JobCompany.Business.Services.CompanyServices;
 using JobCompany.Business.Services.CountryServices;
+using JobCompany.Business.Services.QuestionServices;
 using JobCompany.Business.Services.ReportServices;
 using JobCompany.Business.Services.StatusServices;
 using JobCompany.Business.Services.VacancyServices;
@@ -27,6 +28,7 @@ namespace JobCompany.Business
             services.AddScoped<ICompanyService, CompanyService>();
             services.AddScoped<ICityService, CityService>();
             services.AddScoped<IReportService, ReportService>();
+            services.AddScoped<IQuestionService, QuestionService>();
         }
 
         public static IServiceCollection AddMassTransitCompany(this IServiceCollection services, string cString)
