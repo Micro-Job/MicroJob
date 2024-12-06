@@ -107,5 +107,69 @@ namespace JobCompany.Business.Services.ReportServices
             };
             return userDataResponse;
         }
+
+        public async Task<VacancyStatisticsDto> GetVacancyStatisticsAsync()
+        {
+            var vacancies = await _context.Vacancies.ToListAsync();
+            var applications = await _context.Applications
+                                              //   .Where(a => a.Vacancy.IsActive)
+                                              .ToListAsync();
+
+            var totalVacancies = vacancies.Count;
+            // .(v => v.IsActive);
+            var monthlyStatistics = new List<MonthlyStatisticDto>();
+            var groupedApplications = applications
+                .GroupBy(a => a.CreatedDate.ToString("yyyy-MM"))
+                .OrderByDescending(g => g.Key);
+
+            var currentMonthApplications = groupedApplications.FirstOrDefault();
+            var previousMonthApplications = groupedApplications.Skip(1).FirstOrDefault();
+
+            var previousMonthCount = previousMonthApplications?.Count() ?? 0;
+
+            var currentMonthCount = currentMonthApplications?.Count() ?? 0;
+
+            double percentageChange = 0;
+            bool isPositive = false;
+
+            if (previousMonthCount > 0)
+            {
+                percentageChange = (double)(currentMonthCount - previousMonthCount) / previousMonthCount * 100;
+                isPositive = percentageChange > 0;
+            }
+
+            var percentageChangeDto = new PercentageChangeDto
+            {
+                Value = percentageChange,
+                IsPositive = isPositive
+            };
+
+            foreach (var group in groupedApplications)
+            {
+                monthlyStatistics.Add(new MonthlyStatisticDto
+                {
+                    Month = group.Key,
+                    Value = group.Count(),
+                    IsHighlighted = group.Count() > 100
+                });
+            }
+
+            var applicationDetails = vacancies
+            .Select(v => new ApplicationDetailDto
+            {
+                Position = v.Title,
+                ApplicationsCount = applications.Count(a => a.VacancyId == v.Id)
+            }).ToList();
+
+            var vacancyStatisticsDto = new VacancyStatisticsDto
+            {
+                TotalVacancies = totalVacancies,
+                PercentageChange = percentageChangeDto,
+                MonthlyStatistics = monthlyStatistics,
+                Applications = applicationDetails
+            };
+
+            return vacancyStatisticsDto;
+        }
     }
 }
