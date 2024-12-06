@@ -10,6 +10,6 @@ namespace JobCompany.Core.Entites.ExamEntities
         public bool IsRequired { get; set; }
         public Exam Exam { get; set; }
         public Guid ExamId { get; set; }
-        public ICollection<Answer> Answers { get; set; }
+        public ICollection<Answer>? Answers { get; set; }
     }
 }

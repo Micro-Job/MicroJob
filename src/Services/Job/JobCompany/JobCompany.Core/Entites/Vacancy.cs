@@ -1,4 +1,5 @@
 ﻿using JobCompany.Core.Entites.Base;
+using JobCompany.Core.Entites.ExamEntities;
 using JobCompany.Core.Enums;
 using SharedLibrary.Enums;
 
@@ -36,8 +37,8 @@ namespace JobCompany.Core.Entites
         public Guid? CityId { get; set; }
         public City? City { get; set; }
 
-        public Guid? VacancyTestId { get; set; }
-        public VacancyTest? VacancyTest { get; set; }
+        public Guid? ExamId { get; set; }
+        public Exam? Exam { get; set; }
 
         public Guid? CategoryId { get; set; }
         public Category? Category { get; set; }

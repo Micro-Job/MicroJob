@@ -8,5 +8,6 @@ namespace JobCompany.Core.Entites.ExamEntities
         public Template? Template { get; set; }
         public Guid? TemplateId { get; set; }
         public ICollection<Question> Questions { get; set; }
+        public ICollection<Vacancy> Vacancies { get; set; }
     }
 }
