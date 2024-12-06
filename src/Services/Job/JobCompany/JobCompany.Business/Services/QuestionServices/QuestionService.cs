@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using JobCompany.Business.Dtos.QuestionDtos;
 using JobCompany.Business.Exceptions.ExamExceptions;
-using JobCompany.Core.Entites.ExamEntities;
+using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.ExternalServices.FileService;
