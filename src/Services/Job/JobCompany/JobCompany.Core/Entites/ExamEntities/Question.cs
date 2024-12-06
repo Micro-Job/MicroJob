@@ -1,6 +1,6 @@
 using JobCompany.Core.Enums;
 
-namespace JobCompany.Core.Entites.ExamEntities
+namespace JobCompany.Core.Entites
 {
     public class Question
     {
