@@ -2,7 +2,7 @@
 
 namespace JobCompany.Business.Dtos.TemplateDtos;
 
-public class TemplateGetByIdDto
+public record TemplateGetByIdDto
 {
     public Guid Id { get; set; }
     public string Name { get; set; }
