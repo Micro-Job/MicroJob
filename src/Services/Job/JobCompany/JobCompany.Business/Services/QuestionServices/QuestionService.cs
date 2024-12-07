@@ -48,14 +48,12 @@ namespace JobCompany.Business.Services.QuestionServices
         }
 
 
-        ///<summary> Question yaradılması bulk method + answers </summary>
+        ///<summary> Question yaradılması bulk method + answers_bulk /// </summary>
         public async Task<ICollection<Question>> CreateBulkQuestionAsync(ICollection<QuestionCreateDto> dtos, string examId)
         {
             var guidExam = Guid.Parse(examId);
 
-            var questionsToAdd = new List<Question>();
-
-            foreach (var dto in dtos)
+            var tasks = dtos.Select(async dto =>
             {
                 FileDto fileResult = dto.Image != null
                     ? await _fileService.UploadAsync(FilePaths.document, dto.Image)
@@ -74,14 +72,16 @@ namespace JobCompany.Business.Services.QuestionServices
 
                 if (dto.Answers != null && dto.Answers.Any())
                 {
-                    var answers = await _answerService.CreateBulkAnswerAsync(dto.Answers, questionId);
-                    question.Answers = answers;
+                    question.Answers = await _answerService.CreateBulkAnswerAsync(dto.Answers, questionId);
                 }
 
-                questionsToAdd.Add(question);
-            }
+                return question;
+            });
+
+            var questionsToAdd = await Task.WhenAll(tasks);
 
             await _context.Questions.AddRangeAsync(questionsToAdd);
+
             return questionsToAdd;
         }
     }

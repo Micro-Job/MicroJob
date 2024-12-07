@@ -11,7 +11,7 @@ namespace JobCompany.Business.Dtos.ExamDtos.QuestionDtos
         public IFormFile? Image { get; set; }
         public QuestionType QuestionType { get; set; }
         public bool IsRequired { get; set; }
-        public ICollection<CreateAnswerDto> Answers { get; set; }
+        public ICollection<CreateAnswerDto>? Answers { get; set; }
     }
 
     public class QuestionCreateDtoValidator : AbstractValidator<QuestionCreateDto>
