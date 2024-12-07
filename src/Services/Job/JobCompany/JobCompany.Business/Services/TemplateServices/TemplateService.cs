@@ -23,9 +23,10 @@ public class TemplateService : ITemplateService
 
     public async Task<ICollection<TemplateListDto>> GetAllTemplatesAsync(int skip = 1, int take = 9)
     {
-        var company = await _context.Companies.FirstOrDefaultAsync(x => x.UserId == userGuid) ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>();
+        var company = await _context.Companies.FirstOrDefaultAsync(x => x.UserId == userGuid)
+            ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>();
 
-        var templatesQuery = _context.Vacancies
+        IQueryable<Template?> templatesQuery = _context.Vacancies
             .Where(v => v.CompanyId == company.Id && v.Exam != null && v.Exam.TemplateId != null)
             .Select(v => v.Exam.Template)
             .Distinct();
@@ -95,5 +96,31 @@ public class TemplateService : ITemplateService
         _context.Templates.Remove(template);
 
         await _context.SaveChangesAsync();
+    }
+
+    public async Task<ICollection<TemplateWithExamListDto>> GetAllTemplatesWithQuestionCountAsync(int skip = 1, int take = 10)
+    {
+        var company = await _context.Companies
+            .FirstOrDefaultAsync(c => c.UserId == userGuid)
+            ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>();
+
+        IQueryable<Template?> templatesQuery = _context.Vacancies
+            .Where(v => v.CompanyId == company.Id)
+            .Skip((skip - 1) * take)
+            .Take(take)    
+            .Select(v => v.Exam.Template);
+
+        var templates = await templatesQuery
+            .Select(template => new TemplateWithExamListDto
+            {
+                Id = template!.Id.ToString(),
+                Name = template.Name,
+                QuestionCount = template.Exams
+                    .SelectMany(e => e.Questions)
+                    .Count()
+            })
+            .ToListAsync();
+
+        return templates;
     }
 }

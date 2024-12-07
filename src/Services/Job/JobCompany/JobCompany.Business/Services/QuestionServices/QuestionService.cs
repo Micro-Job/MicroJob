@@ -1,13 +1,14 @@
+using JobCompany.Business.Dtos.ExamDtos.AnswerDtos;
 using JobCompany.Business.Dtos.ExamDtos.QuestionDtos;
 using JobCompany.Business.Exceptions.ExamExceptions;
-using JobCompany.Business.Services.ExamServices.AnswerServices;
+using JobCompany.Business.Services.AnswerServices;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.ExternalServices.FileService;
 using SharedLibrary.Statics;
 
-namespace JobCompany.Business.Services.ExamServices.QuestionServices
+namespace JobCompany.Business.Services.QuestionServices
 {
     public class QuestionService : IQuestionService
     {
