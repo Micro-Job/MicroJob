@@ -74,6 +74,21 @@ public class TemplateService : ITemplateService
         await _context.SaveChangesAsync();
     }
 
+    public async Task CreateTemplateAsync(TemplateCreateDto templateCreateDto)
+    {
+        var company = await _context.Companies.FirstOrDefaultAsync(x => x.UserId == userGuid)
+            ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>();
+
+        var template = new Template
+        {
+            Name = templateCreateDto.Title,
+        };
+        
+        await _context.Templates.AddAsync(template);
+        
+        await _context.SaveChangesAsync();
+    }
+
     public async Task UpdateTemplateAsync(TemplateUpdateDto templateUpdateDto)
     {
         var templateGuidId = Guid.Parse(templateUpdateDto.Id);
