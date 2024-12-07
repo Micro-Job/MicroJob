@@ -1,11 +1,11 @@
-﻿using AuthService.Business.Exceptions.UserException;
-using Job.Business.Dtos.CertificateDtos;
+﻿using Job.Business.Dtos.CertificateDtos;
 using Job.Business.Dtos.EducationDtos;
 using Job.Business.Dtos.ExperienceDtos;
 using Job.Business.Dtos.LanguageDtos;
 using Job.Business.Dtos.NumberDtos;
 using Job.Business.Dtos.ResumeDtos;
 using Job.Business.Exceptions.Common;
+using Job.Business.Exceptions.UserExceptions;
 using Job.Business.Services.Certificate;
 using Job.Business.Services.Education;
 using Job.Business.Services.Experience;
@@ -55,7 +55,7 @@ namespace Job.Business.Services.Resume
             _languageService = languageService;
             _certificateService = certificateService;
             _userInformationService = userInformationService;
-            userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value ?? throw new UserNotLoggedInException());
+            userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value ?? throw new UserIsNotLoggedInException());
             _baseUrl = $"{_contextAccessor.HttpContext.Request.Scheme}://{_contextAccessor.HttpContext.Request.Host.Value}{_contextAccessor.HttpContext.Request.PathBase.Value}";
         }
 

@@ -5,6 +5,6 @@ namespace JobCompany.Business.Services.ExamServices.AnswerServices
 {
     public interface IAnswerService
     {
-        Task<ICollection<Answer>> CreateBulkAnswerAsync(List<CreateAnswerDto> dtos, string questionId);
+        Task<ICollection<Answer>> CreateBulkAnswerAsync(ICollection<CreateAnswerDto> dtos, string questionId);
     }
 }

@@ -8,7 +8,7 @@ namespace JobCompany.Business.Services.ExamServices.AnswerServices
     {
         private readonly JobCompanyDbContext _context = context;
 
-        public async Task<ICollection<Answer>> CreateBulkAnswerAsync(List<CreateAnswerDto> dtos, string questionId)
+        public async Task<ICollection<Answer>> CreateBulkAnswerAsync(ICollection<CreateAnswerDto> dtos, string questionId)
         {
             Guid questionGuid = Guid.Parse(questionId);
             var answersToAdd = dtos.Select(dto => new Answer
