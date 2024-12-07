@@ -14,9 +14,6 @@ namespace JobCompany.Infrastructure.Configurations.ExamConfigurations
                    .IsRequired()
                    .HasMaxLength(200);
 
-            builder.Property(t => t.ViewCount)
-                   .HasDefaultValue(0);
-
             builder.HasMany(t => t.Exams)
                    .WithOne(e => e.Template)
                    .HasForeignKey(e => e.TemplateId)
