@@ -108,6 +108,9 @@ namespace JobCompany.Business.Services.ReportServices
             return userDataResponse;
         }
 
+        /// <summary> Vakansiyanin statistikasi 
+        /// Vakansiyalar isActive yoxsa hamisi ?
+        /// </summary>
         public async Task<VacancyStatisticsDto> GetVacancyStatisticsAsync()
         {
             var vacancies = await _context.Vacancies.ToListAsync();
@@ -144,16 +147,14 @@ namespace JobCompany.Business.Services.ReportServices
                 IsPositive = isPositive
             };
 
-            foreach (var group in groupedApplications)
-            {
-                monthlyStatistics.Add(new MonthlyStatisticDto
-                {
-                    Month = group.Key,
-                    Value = group.Count(),
-                    IsHighlighted = group.Count() > 100
-                });
-            }
-
+            monthlyStatistics = groupedApplications
+               .Select(g => new MonthlyStatisticDto
+               {
+                   Month = g.Key,
+                   Value = g.Count(),
+                   IsHighlighted = g.Count() > 100
+               }).ToList();
+               
             var applicationDetails = vacancies
             .Select(v => new ApplicationDetailDto
             {

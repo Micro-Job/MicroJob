@@ -1,3 +1,4 @@
+using JobCompany.Business.Dtos.ExamDtos.AnswerDtos;
 using JobCompany.Business.Dtos.ExamDtos.QuestionDtos;
 using JobCompany.Business.Exceptions.ExamExceptions;
 using JobCompany.Business.Services.ExamServices.AnswerServices;
@@ -47,7 +48,7 @@ namespace JobCompany.Business.Services.ExamServices.QuestionServices
         }
 
 
-        ///<summary> Question yaradılması bulk method + answers </summary>
+        ///<summary> Question yaradılması bulk method + answers_bulk </summary>
         public async Task<ICollection<Question>> CreateBulkQuestionAsync(ICollection<QuestionCreateDto> dtos, string examId)
         {
             var guidExam = Guid.Parse(examId);
