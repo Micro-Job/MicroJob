@@ -31,7 +31,7 @@ namespace JobCompany.Business.Consumers
             {
                 await context.RespondAsync(new GetUserSavedVacanciesResponse
                 {
-                    Vacancies = new List<VacancyResponse>()
+                    Vacancies = []
                 });
                 return;
             }
