@@ -1,9 +1,11 @@
 ﻿using JobCompany.Business.Consumers;
+using JobCompany.Business.Services.AnswerServices;
 using JobCompany.Business.Services.ApplicationServices;
 using JobCompany.Business.Services.CategoryServices;
 using JobCompany.Business.Services.CityServices;
 using JobCompany.Business.Services.CompanyServices;
 using JobCompany.Business.Services.CountryServices;
+using JobCompany.Business.Services.ExamServices;
 using JobCompany.Business.Services.QuestionServices;
 using JobCompany.Business.Services.ReportServices;
 using JobCompany.Business.Services.StatusServices;
@@ -31,6 +33,8 @@ namespace JobCompany.Business
             services.AddScoped<IReportService, ReportService>();
             services.AddScoped<IQuestionService, QuestionService>();
             services.AddScoped<ITemplateService, TemplateService>();
+            services.AddScoped<IExamService, ExamService>();
+            services.AddScoped<IAnswerService, AnswerService>();
         }
 
         public static IServiceCollection AddMassTransitCompany(this IServiceCollection services, string cString)

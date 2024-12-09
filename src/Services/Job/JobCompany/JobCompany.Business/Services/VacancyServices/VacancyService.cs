@@ -1,5 +1,6 @@
 ﻿using JobCompany.Business.Dtos.NumberDtos;
 using JobCompany.Business.Dtos.VacancyDtos;
+using JobCompany.Business.Services.ExamServices;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using MassTransit.Initializers;
@@ -9,7 +10,6 @@ using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.Exceptions;
 using SharedLibrary.ExternalServices.FileService;
 using SharedLibrary.Statics;
-using System.Linq;
 using System.Security.Claims;
 
 namespace JobCompany.Business.Services.VacancyServices
@@ -20,13 +20,15 @@ namespace JobCompany.Business.Services.VacancyServices
         private readonly Guid _userGuid;
         private readonly IFileService _fileService;
         private readonly IHttpContextAccessor _contextAccessor;
+        private readonly IExamService _examService;
 
-        public VacancyService(JobCompanyDbContext context, IFileService fileService, IHttpContextAccessor contextAccessor)
+        public VacancyService(JobCompanyDbContext context, IFileService fileService, IHttpContextAccessor contextAccessor, IExamService examService)
         {
             _context = context;
             _fileService = fileService;
             _contextAccessor = contextAccessor;
             _userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value);
+            _examService = examService;
         }
 
         /// <summary> vacancy yaradılması </summary>
@@ -83,6 +85,22 @@ namespace JobCompany.Business.Services.VacancyServices
                 }
             }
             await _context.CompanyNumbers.AddRangeAsync(numbers);
+
+            if (vacancyDto.TemplateId != null)
+            {
+                var template = await _context.Templates
+                    .Include(t => t.Exams)
+                    .FirstOrDefaultAsync(t => t.Id == Guid.Parse(vacancyDto.TemplateId))
+                    ?? throw new NotFoundException<Template>();
+
+                vacancy.ExamId = template.Exams.FirstOrDefault()?.Id;
+            }
+
+            else if (vacancyDto.Exam != null)
+            {
+                var createdExamId = await _examService.CreateExamAsync(vacancyDto.Exam);
+                vacancy.ExamId = createdExamId;
+            };
 
             vacancy.CompanyNumbers = numbers;
             await _context.Vacancies.AddAsync(vacancy);

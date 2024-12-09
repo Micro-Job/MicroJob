@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using JobCompany.Business.Dtos.ExamDtos;
 using JobCompany.Core.Enums;
 using Microsoft.AspNetCore.Http;
 using SharedLibrary.Enums;
@@ -26,8 +27,9 @@ namespace JobCompany.Business.Dtos.VacancyDtos
         public Driver Driver { get; set; }
         public FamilySituation Family { get; set; }
         public Citizenship Citizenship { get; set; }
-        //public Guid? VacancyTestId { get; set; }
         public Guid CategoryId { get; set; }
+        public string? TemplateId { get; set; }
+        public CreateExamDto? Exam { get; set; }
     }
 
     public class CreateVacancyDtoValidator : AbstractValidator<CreateVacancyDto>
