@@ -26,9 +26,9 @@ namespace JobCompany.API.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetVacancyStatisticsAsync()
+        public async Task<IActionResult> GetApplicationStatisticsAsync(string periodTime ="1")
         {
-            var vacancyStatistics = await _reportService.GetVacancyStatisticsAsync();
+            var vacancyStatistics = await _reportService.GetApplicationStatisticsAsync(periodTime);
             return Ok(vacancyStatistics);
         }
     }

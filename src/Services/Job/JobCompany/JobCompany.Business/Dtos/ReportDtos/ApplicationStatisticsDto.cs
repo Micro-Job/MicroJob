@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 
 namespace JobCompany.Business.Dtos.ReportDtos
 {
-    public record VacancyStatisticsDto
+    public record ApplicationStatisticsDto
     {
-        public int TotalVacancies { get; set; }
+        public int TotalApplications { get; set; }
         public PercentageChangeDto PercentageChange { get; set; }
-        public List<MonthlyStatisticDto> MonthlyStatistics { get; set; }
+        public List<PeriodStatisticDto> PeriodStatistics { get; set; }
         public List<ApplicationDetailDto> Applications { get; set; }
     }
 }

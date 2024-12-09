@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 
 namespace JobCompany.Business.Dtos.ReportDtos
 {
-    public class MonthlyStatisticDto
+    public class PeriodStatisticDto
     {
-        public string Month { get; set; }
+        public string Period { get; set; }
         public int Value { get; set; }
-        public bool IsHighlighted { get; set; }
+        // public bool IsHighlighted { get; set; }
     }
 }

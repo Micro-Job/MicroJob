@@ -7,6 +7,6 @@ namespace JobCompany.Business.Services.ReportServices
     {
         Task<SummaryDto> GetSummaryAsync();
         Task<List<RecentApplicationDto>> GetRecentApplicationsAsync();
-        Task<VacancyStatisticsDto> GetVacancyStatisticsAsync();
+        Task<ApplicationStatisticsDto> GetApplicationStatisticsAsync(string periodTime);
     }
 }

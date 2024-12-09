@@ -111,66 +111,92 @@ namespace JobCompany.Business.Services.ReportServices
         /// <summary> Vakansiyanin statistikasi 
         /// Vakansiyalar isActive yoxsa hamisi ?
         /// </summary>
-        public async Task<VacancyStatisticsDto> GetVacancyStatisticsAsync()
+        /// 
+        public async Task<ApplicationStatisticsDto> GetApplicationStatisticsAsync(string periodTime)
         {
-            var vacancies = await _context.Vacancies.ToListAsync();
             var applications = await _context.Applications
-                                              //   .Where(a => a.Vacancy.IsActive)
-                                              .ToListAsync();
+                                           .Include(a => a.Vacancy)
+                                           .Select(a => new
+                                           {
+                                               a.VacancyId,
+                                               a.Vacancy.Title,
+                                               a.CreatedDate
+                                           })
+                                           .ToListAsync();
 
-            var totalVacancies = vacancies.Count;
-            // .(v => v.IsActive);
-            var monthlyStatistics = new List<MonthlyStatisticDto>();
-            var groupedApplications = applications
-                .GroupBy(a => a.CreatedDate.ToString("yyyy-MM"))
-                .OrderByDescending(g => g.Key);
+            IEnumerable<IGrouping<string, dynamic>> groupedApplications;
 
-            var currentMonthApplications = groupedApplications.FirstOrDefault();
-            var previousMonthApplications = groupedApplications.Skip(1).FirstOrDefault();
-
-            var previousMonthCount = previousMonthApplications?.Count() ?? 0;
-
-            var currentMonthCount = currentMonthApplications?.Count() ?? 0;
-
-            double percentageChange = 0;
-            bool isPositive = false;
-
-            if (previousMonthCount > 0)
+            if (periodTime == "1")
             {
-                percentageChange = (double)(currentMonthCount - previousMonthCount) / previousMonthCount * 100;
-                isPositive = percentageChange > 0;
+                groupedApplications = applications
+                    .GroupBy(a => $"{a.CreatedDate.Year}-{GetWeekNumber(a.CreatedDate)}")
+                    .OrderByDescending(g => g.Key);
+            }
+            else if (periodTime == "2")
+            {
+                groupedApplications = applications
+                    .GroupBy(a => a.CreatedDate.ToString("yyyy-MM"))
+                    .OrderByDescending(g => g.Key);
+            }
+            else if (periodTime == "3")
+            {
+                groupedApplications = applications
+                    .GroupBy(a => a.CreatedDate.ToString("yyyy"))
+                    .OrderByDescending(g => g.Key);
+            }
+            else
+            {
+                throw new ArgumentException("Invalid period time");
             }
 
-            var percentageChangeDto = new PercentageChangeDto
-            {
-                Value = percentageChange,
-                IsPositive = isPositive
-            };
+            var currentPeriodApplications = groupedApplications.FirstOrDefault();
+            var previousPeriodApplications = groupedApplications.Skip(1).FirstOrDefault();
 
-            monthlyStatistics = groupedApplications
-               .Select(g => new MonthlyStatisticDto
-               {
-                   Month = g.Key,
-                   Value = g.Count(),
-                   IsHighlighted = g.Count() > 100
-               }).ToList();
-               
-            var applicationDetails = vacancies
-            .Select(v => new ApplicationDetailDto
-            {
-                Position = v.Title,
-                ApplicationsCount = applications.Count(a => a.VacancyId == v.Id)
-            }).ToList();
+            var currentPeriodCount = currentPeriodApplications?.Count() ?? 0;
+            var previousPeriodCount = previousPeriodApplications?.Count() ?? 0;
 
-            var vacancyStatisticsDto = new VacancyStatisticsDto
+            double percentageChange = previousPeriodCount > 0
+                ? (double)(currentPeriodCount - previousPeriodCount) / previousPeriodCount * 100
+                : 0;
+
+            var groupedStatistics = groupedApplications
+                .Select(g => new PeriodStatisticDto
+                {
+                    Period = g.Key,
+                    Value = g.Count(),
+                    // IsHighlighted = g.Count() 
+                    //en cox olanin countu
+                })
+                .ToList();
+
+            var applicationDetails = applications
+                .GroupBy(a => a.VacancyId)
+                .Select(g => new ApplicationDetailDto
+                {
+                    Position = g.FirstOrDefault()?.Title,
+                    ApplicationsCount = g.Count()
+                })
+                .ToList();
+
+            var vacancyStatisticsDto = new ApplicationStatisticsDto
             {
-                TotalVacancies = totalVacancies,
-                PercentageChange = percentageChangeDto,
-                MonthlyStatistics = monthlyStatistics,
+                TotalApplications = applicationDetails.Count,
+                PercentageChange = new PercentageChangeDto
+                {
+                    Value = percentageChange,
+                    IsPositive = percentageChange > 0
+                },
+                PeriodStatistics = groupedStatistics,
                 Applications = applicationDetails
             };
 
             return vacancyStatisticsDto;
+        }
+
+        private int GetWeekNumber(DateTime date)
+        {
+            var calendar = System.Globalization.CultureInfo.CurrentCulture.Calendar;
+            return calendar.GetWeekOfYear(date, System.Globalization.CalendarWeekRule.FirstDay, DayOfWeek.Monday);
         }
     }
 }
