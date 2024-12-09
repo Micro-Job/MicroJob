@@ -32,6 +32,7 @@ namespace JobCompany.Business.Services.VacancyServices
         }
 
         /// <summary> vacancy yaradılması </summary>
+        /// vacancy yaradilan zaman exam yaradılması eger templateİd secilirsen exam oradan alinir
         public async Task CreateVacancyAsync(CreateVacancyDto vacancyDto, ICollection<CreateNumberDto>? numberDto)
         {
             string? companyLogoPath = null;
