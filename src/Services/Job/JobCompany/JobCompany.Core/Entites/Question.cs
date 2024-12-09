@@ -12,6 +12,7 @@ namespace JobCompany.Core.Entites
         public Exam Exam { get; set; }
         public Guid ExamId { get; set; }
         public TimeSpan Time { get; set; }
+        public int? Duration { get; set; }
         public ICollection<Answer>? Answers { get; set; }
     }
 }

@@ -1,6 +1,4 @@
-﻿using JobCompany.Business.Dtos.ApplicationDtos;
-using JobCompany.Business.Dtos.ReportDtos;
-using JobCompany.Business.Services.ApplicationServices;
+﻿using JobCompany.Business.Dtos.ReportDtos;
 using JobCompany.DAL.Contexts;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;

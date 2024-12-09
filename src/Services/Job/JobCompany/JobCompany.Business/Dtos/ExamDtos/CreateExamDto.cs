@@ -1,4 +1,4 @@
-﻿using JobCompany.Business.Dtos.ExamDtos.QuestionDtos;
+﻿using JobCompany.Business.Dtos.QuestionDtos;
 using Microsoft.AspNetCore.Http;
 
 namespace JobCompany.Business.Dtos.ExamDtos
