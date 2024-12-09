@@ -2,9 +2,9 @@
 
 namespace JobCompany.Business.Services.ExamServices
 {
-    public interface IExamServices
+    public interface IExamService
     {
-        Task CreateExamAsync(CreateExamDto dto);
+        Task<Guid> CreateExamAsync(CreateExamDto dto);
         Task<GetExamByIdDto> GetExamByIdAsync(string examId, byte step);
     }
 }

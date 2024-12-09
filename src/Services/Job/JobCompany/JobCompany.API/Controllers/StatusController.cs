@@ -1,6 +1,5 @@
 ﻿using JobCompany.Business.Dtos.StatusDtos;
 using JobCompany.Business.Services.StatusServices;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace JobCompany.API.Controllers

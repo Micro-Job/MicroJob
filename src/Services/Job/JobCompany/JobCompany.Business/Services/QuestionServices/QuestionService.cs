@@ -1,5 +1,5 @@
-using JobCompany.Business.Dtos.ExamDtos.AnswerDtos;
-using JobCompany.Business.Dtos.ExamDtos.QuestionDtos;
+using JobCompany.Business.Dtos.AnswerDtos;
+using JobCompany.Business.Dtos.QuestionDtos;
 using JobCompany.Business.Exceptions.ExamExceptions;
 using JobCompany.Business.Services.AnswerServices;
 using JobCompany.Core.Entites;
@@ -37,6 +37,7 @@ namespace JobCompany.Business.Services.QuestionServices
                 Image = dto.Image != null ? $"{fileResult.FilePath}/{fileResult.FileName}" : null,
                 QuestionType = dto.QuestionType,
                 IsRequired = dto.IsRequired,
+                Duration = dto.Duration,
             };
 
             var questionId = question.Id.ToString();

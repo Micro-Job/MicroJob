@@ -1,9 +1,9 @@
 using FluentValidation;
-using JobCompany.Business.Dtos.ExamDtos.AnswerDtos;
+using JobCompany.Business.Dtos.AnswerDtos;
 using JobCompany.Core.Enums;
 using Microsoft.AspNetCore.Http;
 
-namespace JobCompany.Business.Dtos.ExamDtos.QuestionDtos
+namespace JobCompany.Business.Dtos.QuestionDtos
 {
     public record QuestionCreateDto
     {
@@ -11,6 +11,7 @@ namespace JobCompany.Business.Dtos.ExamDtos.QuestionDtos
         public IFormFile? Image { get; set; }
         public QuestionType QuestionType { get; set; }
         public bool IsRequired { get; set; }
+        public int? Duration { get; set; }
         public ICollection<CreateAnswerDto>? Answers { get; set; }
     }
 
@@ -28,6 +29,11 @@ namespace JobCompany.Business.Dtos.ExamDtos.QuestionDtos
                     .NotEmpty()
                     .WithMessage("Şəkil əsaslı suallar üçün şəkil URL-si tələb olunur.");
             });
+
+            RuleFor(q => q.Duration)
+                .GreaterThan(0)
+                .When(q => q.Duration.HasValue)
+                .WithMessage("Zaman 0-dan böyük olmalıdır.");
         }
     }
 }

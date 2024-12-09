@@ -6,9 +6,9 @@ namespace JobCompany.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ExamController(IExamServices examServices) : ControllerBase
+    public class ExamController(IExamService examServices) : ControllerBase
     {
-        private readonly IExamServices _examServices = examServices;
+        private readonly IExamService _examServices = examServices;
 
         [HttpPost("[action]")]
         public async Task<IActionResult> CreateExam(CreateExamDto dto)

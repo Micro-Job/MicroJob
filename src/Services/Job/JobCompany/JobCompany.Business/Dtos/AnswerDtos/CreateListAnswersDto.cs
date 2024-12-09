@@ -1,4 +1,4 @@
-namespace JobCompany.Business.Dtos.ExamDtos.AnswerDtos
+namespace JobCompany.Business.Dtos.AnswerDtos
 {
     public class CreateListAnswersDto
     {

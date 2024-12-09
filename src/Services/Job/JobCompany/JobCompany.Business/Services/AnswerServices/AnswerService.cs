@@ -1,4 +1,4 @@
-﻿using JobCompany.Business.Dtos.ExamDtos.AnswerDtos;
+﻿using JobCompany.Business.Dtos.AnswerDtos;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 

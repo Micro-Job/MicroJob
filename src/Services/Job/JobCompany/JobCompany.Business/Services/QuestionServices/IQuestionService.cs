@@ -1,5 +1,5 @@
-using JobCompany.Business.Dtos.ExamDtos.AnswerDtos;
-using JobCompany.Business.Dtos.ExamDtos.QuestionDtos;
+using JobCompany.Business.Dtos.AnswerDtos;
+using JobCompany.Business.Dtos.QuestionDtos;
 using JobCompany.Core.Entites;
 
 namespace JobCompany.Business.Services.QuestionServices
