@@ -3,6 +3,10 @@ using Job.DAL.Contexts;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Shared.Dtos.CompanyDtos;
+using Shared.Dtos.VacancyDtos;
+using Shared.Requests;
+using Shared.Responses;
 using SharedLibrary.Dtos.CompanyDtos;
 using SharedLibrary.Dtos.VacancyDtos;
 using SharedLibrary.Events;
@@ -19,10 +23,11 @@ namespace Job.Business.Services.Vacancy
         private readonly Guid userGuid;
         private readonly IRequestClient<GetAllCompaniesRequest> _request;
         private readonly IRequestClient<GetUserSavedVacanciesRequest> _client;
+        private readonly IRequestClient<GetAllVacanciesRequest> _vacClient;
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly IRequestClient<UserRegisteredEvent> _requestClient;
 
-        public VacancyService(JobDbContext context, IRequestClient<GetAllCompaniesRequest> request, IRequestClient<GetUserSavedVacanciesRequest> client, IHttpContextAccessor contextAccessor, IRequestClient<UserRegisteredEvent> requestClient)
+        public VacancyService(JobDbContext context, IRequestClient<GetAllCompaniesRequest> request, IRequestClient<GetUserSavedVacanciesRequest> client, IHttpContextAccessor contextAccessor, IRequestClient<UserRegisteredEvent> requestClient, IRequestClient<GetAllVacanciesRequest> vacClient)
         {
             _context = context;
             _request = request;
@@ -30,6 +35,7 @@ namespace Job.Business.Services.Vacancy
             _contextAccessor = contextAccessor;
             userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value);
             _requestClient = requestClient;
+            _vacClient = vacClient;
         }
 
         /// <summary> Userin vakansiya save etme toggle metodu </summary>
@@ -92,11 +98,38 @@ namespace Job.Business.Services.Vacancy
             return response.Message;
         }
 
+        /// <summary>Company'e gore butun vakansiyalarin getirilmesi</summary>
         public async Task<List<VacancyDto>> GetAllUserVacanciesAsync()
         {
             var response = await _request.GetResponse<UserVacanciesResponse>(new GetAllUserVacanciesRequest());
 
             return response.Message.Vacancies;
+        }
+
+        /// <summary> Butun vakansiyalarin getirilmesi - search ve filter</summary>
+        public async Task<ICollection<AllVacanyDto>> GetAllVacanciesAsync(string? titleName, string? categoryId, string? countryId, string? cityId, bool? isActive, decimal? minSalary, decimal? maxSalary, int skip = 1, int take = 6)
+        {
+            var request = new GetAllVacanciesRequest
+            {
+                TitleName = titleName,
+                CategoryId = categoryId,
+                CountryId = countryId,
+                CityId = cityId,
+                IsActive = isActive,
+                MinSalary = minSalary,
+                MaxSalary = maxSalary,
+            };
+
+            var response = await _vacClient.GetResponse<GetAllVacanciesResponse>(request);
+
+            var vacancies = response.Message.Vacancies.AsQueryable();
+
+            var pagedVacancies = vacancies
+                .Skip((skip - 1) * take)
+                .Take(take)
+                .ToList();
+
+            return pagedVacancies;
         }
     }
 }

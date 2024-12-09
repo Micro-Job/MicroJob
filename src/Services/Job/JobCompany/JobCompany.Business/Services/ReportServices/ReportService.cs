@@ -1,18 +1,31 @@
-﻿using JobCompany.Business.Dtos.ApplicationDtos;
+﻿using System.Security.Claims;
+using JobCompany.Business.Dtos.ApplicationDtos;
 using JobCompany.Business.Dtos.ReportDtos;
 using JobCompany.Business.Services.ApplicationServices;
 using JobCompany.DAL.Contexts;
 using MassTransit;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Shared.Requests;
 using Shared.Responses;
 
 namespace JobCompany.Business.Services.ReportServices
 {
-    public class ReportService(JobCompanyDbContext context, IRequestClient<GetUsersDataResponse> client) : IReportService
+    public class ReportService : IReportService
     {
-        private readonly JobCompanyDbContext _context = context;
-        readonly IRequestClient<GetUsersDataResponse> _client = client;
+        private readonly JobCompanyDbContext _context;
+        private readonly IRequestClient<GetUsersDataResponse> _client;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly Guid _userGuid;
+
+
+        public ReportService(JobCompanyDbContext context, IRequestClient<GetUsersDataResponse> client, IHttpContextAccessor httpContextAccessor)
+        {
+            _context = context;
+            _client = client;
+            _httpContextAccessor = httpContextAccessor;
+            _userGuid = Guid.Parse(_httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value);
+        }
 
         /// <summary>
         /// admin/dashboard yuxaridaki 3-luk
@@ -108,13 +121,12 @@ namespace JobCompany.Business.Services.ReportServices
             return userDataResponse;
         }
 
-        /// <summary> Vakansiyanin statistikasi 
-        /// Vakansiyalar isActive yoxsa hamisi ?
-        /// </summary>
-        /// 
+        /// <summary> Vakansiyanin statistikasi /// </summary>
+
         public async Task<ApplicationStatisticsDto> GetApplicationStatisticsAsync(string periodTime)
         {
             var applications = await _context.Applications
+                                           .Where(a => a.UserId == _userGuid)
                                            .Include(a => a.Vacancy)
                                            .Select(a => new
                                            {

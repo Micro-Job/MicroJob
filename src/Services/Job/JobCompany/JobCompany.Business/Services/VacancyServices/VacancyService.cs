@@ -138,7 +138,6 @@ namespace JobCompany.Business.Services.VacancyServices
                 query = query.Where(x => x.CityId == cityGuid);
             }
 
-
             var vacancies = await query.Select(x => new VacancyGetAllDto
             {
                 Id = x.Id,
