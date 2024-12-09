@@ -29,6 +29,13 @@ public class TemplateController(ITemplateService service) : ControllerBase
         return Ok(result);
     }
 
+    [HttpPost("[action]")]
+    public async Task<IActionResult> CreateTemplate(TemplateCreateDto templateCreateDto)
+    {
+        await service.CreateTemplateAsync(templateCreateDto);
+        return Ok();
+    }
+
     [HttpPut("[action]")]
     public async Task<IActionResult> UpdateTemplate(TemplateUpdateDto templateUpdateDto)
     {

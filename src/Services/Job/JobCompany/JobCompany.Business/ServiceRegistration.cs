@@ -32,6 +32,7 @@ namespace JobCompany.Business
             services.AddScoped<ICityService, CityService>();
             services.AddScoped<IReportService, ReportService>();
             services.AddScoped<IQuestionService, QuestionService>();
+            services.AddScoped<IAnswerService, AnswerService>();
             services.AddScoped<ITemplateService, TemplateService>();
             services.AddScoped<IExamService, ExamService>();
             services.AddScoped<IAnswerService, AnswerService>();
