@@ -2,7 +2,7 @@
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 
-namespace JobCompany.Business.Services.ExamServices.AnswerServices
+namespace JobCompany.Business.Services.AnswerServices
 {
     public class AnswerService(JobCompanyDbContext context) : IAnswerService
     {

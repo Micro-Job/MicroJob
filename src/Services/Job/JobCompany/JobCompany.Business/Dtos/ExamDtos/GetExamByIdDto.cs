@@ -8,6 +8,7 @@ namespace JobCompany.Business.Dtos.ExamDtos
         public string IntroDescription { get; set; }
         public string LastDescription { get; set; }
         public string Result { get; set; }
+        public byte CurrentStep {  get; set; }
         public ICollection<Question> Questions { get; set; }// dto olacaq
     }
 }

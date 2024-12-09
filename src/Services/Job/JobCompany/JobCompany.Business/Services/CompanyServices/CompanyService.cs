@@ -50,9 +50,16 @@ namespace JobCompany.Business.Services.CompanyServices
             await _context.SaveChangesAsync();
         }
 
-        public async Task<ICollection<CompanyListDto>> GetAllCompanies(int skip = 1, int take = 12)
+        public async Task<ICollection<CompanyListDto>> GetAllCompanies(string? searchTerm, int skip = 1, int take = 12)
         {
-            var companies = await _context.Companies
+            var query = _context.Companies.AsQueryable();
+
+            if(!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                query = query.Where(c => c.CompanyName.ToLower().Contains(searchTerm.Trim().ToLower()));
+            }
+
+            var companies = await query
                 .Select(c => new CompanyListDto
                 {
                     CompanyId = c.Id,
