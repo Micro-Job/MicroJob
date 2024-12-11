@@ -26,8 +26,9 @@ namespace Job.Business.Services.Vacancy
         private readonly IRequestClient<GetAllVacanciesRequest> _vacClient;
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly IRequestClient<UserRegisteredEvent> _requestClient;
+        private readonly IRequestClient<SimilarVacanciesRequest> _similarRequest;
 
-        public VacancyService(JobDbContext context, IRequestClient<GetAllCompaniesRequest> request, IRequestClient<GetUserSavedVacanciesRequest> client, IHttpContextAccessor contextAccessor, IRequestClient<UserRegisteredEvent> requestClient, IRequestClient<GetAllVacanciesRequest> vacClient)
+        public VacancyService(JobDbContext context, IRequestClient<GetAllCompaniesRequest> request, IRequestClient<GetUserSavedVacanciesRequest> client, IHttpContextAccessor contextAccessor, IRequestClient<UserRegisteredEvent> requestClient, IRequestClient<GetAllVacanciesRequest> vacClient, IRequestClient<SimilarVacanciesRequest> similarRequest)
         {
             _context = context;
             _request = request;
@@ -36,6 +37,7 @@ namespace Job.Business.Services.Vacancy
             userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value);
             _requestClient = requestClient;
             _vacClient = vacClient;
+            _similarRequest = similarRequest;
         }
 
         /// <summary> Userin vakansiya save etme toggle metodu </summary>
@@ -132,10 +134,42 @@ namespace Job.Business.Services.Vacancy
             return pagedVacancies;
         }
 
-        public async Task<ICollection<AllVacanyDto>> SimilarVacancies(string vacancyId)
+
+        /// <summary> Oxşar vakansiyaların gətirilməsi </summary>
+        public async Task<ICollection<SimilarVacancyDto>> SimilarVacancies(string vacancyId, string userId)
         {
-            var guidVacId = Guid.Parse(vacancyId);
-            
+            var guidUserId = Guid.Parse(userId);
+            var response = await _similarRequest.GetResponse<SimilarVacanciesResponse>(
+                new SimilarVacanciesRequest { VacancyId = vacancyId }
+            );
+
+            var allVacancies = new List<SimilarVacancyDto>();
+
+            foreach (var v in response.Message.Vacancies)
+            {
+                var savedVacancy = await _context.SavedVacancies
+                    .FirstOrDefaultAsync(sv => sv.UserId == guidUserId && sv.VacancyId == v.Id);
+
+                var isSaved = savedVacancy != null;
+
+                allVacancies.Add(new SimilarVacancyDto
+                {
+                    CompanyName = v.CompanyName,
+                    Title = v.Title,
+                    CompanyLogo = v.CompanyPhoto,
+                    StartDate = v.CreatedDate,
+                    Location = v.CompanyLocation,
+                    MainSalary = v.MainSalary,
+                    ViewCount = v.ViewCount,
+                    WorkType = v.WorkType,
+                    IsVip = v.IsVip,
+                    IsActive = v.IsActive,
+                    CategoryId = v.CategoryId,
+                    IsSaved = isSaved
+                });
+            }
+
+            return allVacancies;
         }
     }
 }

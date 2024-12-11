@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using JobCompany.DAL.Contexts;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
@@ -25,30 +21,41 @@ namespace JobCompany.Business.Consumers
             var guidVacId = Guid.Parse(vacancyId);
 
             var vacancies = await _context.Vacancies
-                .Where(v => v.Id == guidVacId || 
-                            (v.CategoryId == _context.Vacancies
-                                .Where(vac => vac.Id == guidVacId)
-                                .Select(vac => vac.CategoryId)
-                                .FirstOrDefault() && v.Id != guidVacId))
-                .Take(6) 
-                .ToListAsync();
+                .Where(v => v.Id == guidVacId)
+                .Select(v => new
+                {
+                    v.CategoryId,
+                    SimilarVacancies = _context.Vacancies
+                        .Where(s => s.CategoryId == v.CategoryId && s.Id != guidVacId)
+                        .Take(6)
+                        .Select(sim => new SimilarVacancyResponse
+                        {
+                            Title = sim.Title,
+                            CompanyName = sim.Company.CompanyName,
+                            CompanyLocation = sim.Company.CompanyLocation,
+                            CreatedDate = sim.StartDate,
+                            CompanyPhoto = sim.Company.CompanyLogo,
+                            MainSalary = sim.MainSalary,
+                            MaxSalary = sim.MaxSalary,
+                            ViewCount = sim.ViewCount,
+                            IsVip = sim.IsVip,
+                            WorkType = sim.WorkType
+                        }).ToList()
+                })
+                .FirstOrDefaultAsync();
+
+            if (vacancies == null || vacancies.CategoryId == Guid.Empty)
+            {
+                await context.RespondAsync(new SimilarVacanciesResponse
+                {
+                    Vacancies = new List<SimilarVacancyResponse>()
+                });
+                return;
+            }
 
             var response = new SimilarVacanciesResponse
             {
-                Vacancies = vacancies.Select(v => new SimilarVacancyResponse
-                {
-                    Title = v.Title,
-                    CompanyName = v.Company.CompanyName,
-                    CompanyLocation = v.Company.CompanyLocation,
-                    CreatedDate = v.StartDate,
-                    CompanyPhoto = v.Company.CompanyLogo,
-                    MainSalary = v.MainSalary,
-                    MaxSalary = v.MaxSalary,
-                    ViewCount = v.ViewCount,
-                    IsVip = v.IsVip,
-                    IsSaved = false, 
-                    WorkType = v.WorkType
-                }).ToList()
+                Vacancies = vacancies.SimilarVacancies
             };
 
             await context.RespondAsync(response);

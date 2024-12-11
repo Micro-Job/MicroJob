@@ -8,11 +8,12 @@ namespace Shared.Responses
 {
     public class SimilarVacanciesResponse
     {
-        public List<SimilarVacancyResponse> Vacancies { get; set; } = new List<SimilarVacancyResponse>();
+        public ICollection<SimilarVacancyResponse> Vacancies { get; set; } = new List<SimilarVacancyResponse>();
     }
 
     public class SimilarVacancyResponse
     {
+        public Guid Id { get; set; }
         public string Title { get; set; }
         public string CompanyName { get; set; }
         public string? CompanyLocation { get; set; }
@@ -22,7 +23,8 @@ namespace Shared.Responses
         public decimal? MaxSalary { get; set; }
         public int? ViewCount { get; set; }
         public bool IsVip { get; set; }
-        public bool IsSaved { get; set; }
+        public bool IsActive { get; set; }
+        public Guid CategoryId { get; set; }
         public WorkType? WorkType { get; set; }
     }
 }
