@@ -45,5 +45,11 @@ namespace Job.API.Controllers
             return Ok(await _vacancyService.GetAllVacanciesAsync(titleName, categoryId, countryId, cityId, isActive, minSalary, maxSalary, skip, take));
         }
 
+        [HttpGet("[action]")]
+        public async Task<IActionResult> SimilarVacanciesAsync(string vacancyId, string userId)
+        {
+            var data = await _vacancyService.SimilarVacanciesAsync(vacancyId, userId);
+            return Ok(data);
+        }
     }
 }

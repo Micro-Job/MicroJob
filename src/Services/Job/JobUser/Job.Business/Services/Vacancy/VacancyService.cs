@@ -9,6 +9,7 @@ using Shared.Responses;
 using SharedLibrary.Dtos.CompanyDtos;
 using SharedLibrary.Dtos.VacancyDtos;
 using SharedLibrary.Events;
+using SharedLibrary.Exceptions;
 using SharedLibrary.Requests;
 using SharedLibrary.Responses;
 using System.Security.Claims;
@@ -24,9 +25,9 @@ namespace Job.Business.Services.Vacancy
         private readonly IRequestClient<GetAllVacanciesRequest> _vacClient;
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly IRequestClient<UserRegisteredEvent> _requestClient;
-        private readonly IRequestClient<GetVacancyInfoRequest> _vacancyClient;
+        private readonly IRequestClient<SimilarVacanciesRequest> _similarRequest;
 
-        public VacancyService(JobDbContext context, IRequestClient<GetAllCompaniesRequest> request, IRequestClient<GetUserSavedVacanciesRequest> client, IHttpContextAccessor contextAccessor, IRequestClient<UserRegisteredEvent> requestClient, IRequestClient<GetVacancyInfoRequest> vacancyClient, IRequestClient<GetAllVacanciesRequest> vacClient)
+        public VacancyService(JobDbContext context, IRequestClient<GetAllCompaniesRequest> request, IRequestClient<GetUserSavedVacanciesRequest> client, IHttpContextAccessor contextAccessor, IRequestClient<UserRegisteredEvent> requestClient, IRequestClient<GetAllVacanciesRequest> vacClient, IRequestClient<SimilarVacanciesRequest> similarRequest)
         {
             _context = context;
             _request = request;
@@ -34,8 +35,8 @@ namespace Job.Business.Services.Vacancy
             _contextAccessor = contextAccessor;
             userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value);
             _requestClient = requestClient;
-            _vacancyClient = vacancyClient;
             _vacClient = vacClient;
+            _similarRequest = similarRequest;
         }
 
         /// <summary> Userin vakansiya save etme toggle metodu </summary>
@@ -114,7 +115,6 @@ namespace Job.Business.Services.Vacancy
         {
             var response = await _vacancyClient.GetResponse<GetVacancyInfoResponse>(vacancyId);
             return response.Message;
-        }
 
         /// <summary> Butun vakansiyalarin getirilmesi - search ve filter</summary>
         public async Task<ICollection<AllVacanyDto>> GetAllVacanciesAsync(string? titleName, string? categoryId, string? countryId, string? cityId, bool? isActive, decimal? minSalary, decimal? maxSalary, int skip = 1, int take = 6)
@@ -142,10 +142,38 @@ namespace Job.Business.Services.Vacancy
             return pagedVacancies;
         }
 
-        public async Task<ICollection<AllVacanyDto>> SimilarVacancies(string vacancyId)
+        /// <summary> Oxsar vakansiylarin getirilmesi category'e gore </summary>
+        public async Task<List<SimilarVacancyResponse>> SimilarVacanciesAsync(string vacancyId, string userId)
         {
-            var guidVacId = Guid.Parse(vacancyId);
+            var guidUserId = Guid.Parse(userId);
+            var guidVacancyId = Guid.Parse(vacancyId);
 
+            var savedVacancies = await _context.SavedVacancies
+                .Where(sv => sv.UserId == guidUserId)
+                .Select(sv => sv.VacancyId)
+                .ToListAsync();
+
+            var response = await _similarRequest.GetResponse<SimilarVacanciesResponse>(
+                new SimilarVacanciesRequest { VacancyId = vacancyId }
+            );
+
+            var allVacancies = response.Message.Vacancies.Select(v => new SimilarVacancyResponse
+            {
+                CompanyName = v.CompanyName,
+                Title = v.Title,
+                CompanyPhoto = v.CompanyPhoto,
+                CreatedDate = v.CreatedDate,
+                CompanyLocation = v.CompanyLocation,
+                MainSalary = v.MainSalary,
+                ViewCount = v.ViewCount,
+                WorkType = v.WorkType,
+                IsVip = v.IsVip,
+                IsActive = v.IsActive,
+                CategoryId = v.CategoryId,
+                IsSaved = savedVacancies.Contains(v.Id)
+            }).ToList();
+
+            return allVacancies;
         }
     }
 }
