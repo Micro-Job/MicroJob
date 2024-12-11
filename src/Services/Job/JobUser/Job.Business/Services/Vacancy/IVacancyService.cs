@@ -15,6 +15,6 @@ namespace Job.Business.Services.Vacancy
         Task<List<VacancyDto>> GetAllUserVacanciesAsync();
         Task<GetVacancyInfoResponse> GetVacancyInfoAsync(Guid vacancyId);
         Task<ICollection<AllVacanyDto>> GetAllVacanciesAsync(string? titleName, string? categoryId, string? countryId, string? cityId, bool? IsActive, decimal? minSalary, decimal? maxSalary, int skip = 1, int take = 6);
-        Task<List<SimilarVacancyResponse>> SimilarVacanciesAsync(string vacancyId, string userId);
+        Task<List<SimilarVacancyResponse>> SimilarVacanciesAsync(string vacancyId);
     }
 }

@@ -143,13 +143,12 @@ namespace Job.Business.Services.Vacancy
         }
 
         /// <summary> Oxsar vakansiylarin getirilmesi category'e gore </summary>
-        public async Task<List<SimilarVacancyResponse>> SimilarVacanciesAsync(string vacancyId, string userId)
+        public async Task<List<SimilarVacancyResponse>> SimilarVacanciesAsync(string vacancyId)
         {
-            var guidUserId = Guid.Parse(userId);
             var guidVacancyId = Guid.Parse(vacancyId);
 
             var savedVacancies = await _context.SavedVacancies
-                .Where(sv => sv.UserId == guidUserId)
+                .Where(sv => sv.UserId == userGuid)
                 .Select(sv => sv.VacancyId)
                 .ToListAsync();
 

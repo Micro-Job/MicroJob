@@ -46,9 +46,9 @@ namespace Job.API.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> SimilarVacanciesAsync(string vacancyId, string userId)
+        public async Task<IActionResult> SimilarVacanciesAsync(string vacancyId)
         {
-            var data = await _vacancyService.SimilarVacanciesAsync(vacancyId, userId);
+            var data = await _vacancyService.SimilarVacanciesAsync(vacancyId);
             return Ok(data);
         }
     }
