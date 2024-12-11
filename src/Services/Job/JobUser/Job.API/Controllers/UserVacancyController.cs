@@ -33,6 +33,11 @@ namespace Job.API.Controllers
         }
 
         [HttpGet("[action]")]
+        public async Task<IActionResult> GetVacancyInfo(Guid vacancyId)
+        {
+            var data = await _vacancyService.GetVacancyInfoAsync(vacancyId);
+            return Ok(data);
+        }
         public async Task<IActionResult> GetAllVacanciesAsync(string titleName, string categoryId, string countryId, string cityId, bool? isActive, decimal? minSalary, decimal? maxSalary, int skip = 1, int take = 6)
         {
             return Ok(await _vacancyService.GetAllVacanciesAsync(titleName, categoryId, countryId, cityId, isActive, minSalary, maxSalary, skip, take));

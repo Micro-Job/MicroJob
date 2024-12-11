@@ -6,14 +6,9 @@ using Shared.Responses;
 
 namespace Job.Business.Consumers
 {
-    public class GetResumeDataConsumer : IConsumer<GetResumeDataRequest>
+    public class GetResumeDataConsumer(JobDbContext context) : IConsumer<GetResumeDataRequest>
     {
-        private readonly JobDbContext _context;
-
-        public GetResumeDataConsumer(JobDbContext context)
-        {
-            _context = context;
-        }
+        private readonly JobDbContext _context = context;
 
         public async Task Consume(ConsumeContext<GetResumeDataRequest> context)
         {

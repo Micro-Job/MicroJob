@@ -1,13 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Security.Claims;
-using System.Threading.Tasks;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http;
 using Shared.Events;
+using System.Security.Claims;
 
 namespace Job.Business.Services.Application
 {
@@ -23,7 +17,6 @@ namespace Job.Business.Services.Application
             _httpContextAccessor = httpContextAccessor;
             userGuid = Guid.Parse(_httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value);
         }
-
 
         /// <summary> Eventle userin application yaratmasi  ve 
         /// vakansiyaya muraciet ederken companye bildiris getmesi </summary>

@@ -19,10 +19,10 @@ namespace JobCompany.Core.Entites
         public decimal? MaxSalary { get; set; }
         public string Requirement { get; set; }
         public string? Description { get; set; }
-        public Gender Gender { get; set; }
+        public SharedLibrary.Enums.Gender Gender { get; set; }
         public Military Military { get; set; }
         public Driver Driver { get; set; }
-        public FamilySituation Family { get; set; }
+        public SharedLibrary.Enums.FamilySituation Family { get; set; }
         public Citizenship Citizenship { get; set; }
         public bool IsActive { get; set; }
         public bool IsVip { get; set; }
@@ -44,5 +44,7 @@ namespace JobCompany.Core.Entites
 
         public ICollection<CompanyNumber>? CompanyNumbers { get; set; }
         public ICollection<Application>? Applications { get; set; }
+
+        public ICollection<VacancySkill> Skills { get; set; }
     }
 }
