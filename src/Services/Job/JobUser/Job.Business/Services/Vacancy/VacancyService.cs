@@ -142,8 +142,8 @@ namespace Job.Business.Services.Vacancy
             return pagedVacancies;
         }
 
-
-        public async Task<ICollection<SimilarVacancyDto>> SimilarVacancies(string vacancyId, string userId)
+        /// <summary> Oxsar vakansiylarin getirilmesi category'e gore </summary>
+        public async Task<ICollection<SimilarVacancyDto>> SimilarVacanciesAsync(string vacancyId, string userId)
         {
             var guidUserId = Guid.Parse(userId);
             var response = await _similarRequest.GetResponse<SimilarVacanciesResponse>(
