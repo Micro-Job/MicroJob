@@ -3,7 +3,6 @@ using Job.DAL.Contexts;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Shared.Dtos.CompanyDtos;
 using Shared.Dtos.VacancyDtos;
 using Shared.Requests;
 using Shared.Responses;
@@ -107,6 +106,16 @@ namespace Job.Business.Services.Vacancy
 
             return response.Message.Vacancies;
         }
+        /// <summary>
+        /// Vacancy detail-də şirket haqqında
+        /// </summary>
+        /// <param name="vacancyId"></param>
+        /// <returns></returns>
+        public async Task<GetVacancyInfoResponse> GetVacancyInfoAsync(Guid vacancyId)
+        {
+            var response = await _vacancyClient.GetResponse<GetVacancyInfoResponse>(vacancyId);
+            return response.Message;
+        }
 
         /// <summary> Butun vakansiyalarin getirilmesi - search ve filter</summary>
         public async Task<ICollection<AllVacanyDto>> GetAllVacanciesAsync(string? titleName, string? categoryId, string? countryId, string? cityId, bool? isActive, decimal? minSalary, decimal? maxSalary, int skip = 1, int take = 6)
@@ -134,44 +143,11 @@ namespace Job.Business.Services.Vacancy
             return pagedVacancies;
         }
 
+        //public async Task<ICollection<AllVacanyDto>> SimilarVacancies(string vacancyId)
+        //{
+        //    var guidVacId = Guid.Parse(vacancyId);
 
-        /// <summary> Oxşar vakansiyaların gətirilməsi </summary>
-        public async Task<ICollection<SimilarVacancyDto>> SimilarVacanciesAsync(string vacancyId, string userId)
-        {
-            var guidUserId = Guid.Parse(userId);
-            var response = await _similarRequest.GetResponse<SimilarVacanciesResponse>(
-                new SimilarVacanciesRequest { VacancyId = vacancyId }
-            );
-
-            var allVacancies = new List<SimilarVacancyDto>();
-
-            foreach (var v in response.Message.Vacancies)
-            {
-                var savedVacancy = await _context.SavedVacancies
-                    .FirstOrDefaultAsync(sv => sv.UserId == guidUserId && sv.VacancyId == v.Id);
-
-                var isSaved = savedVacancy != null;
-
-                allVacancies.Add(new SimilarVacancyDto
-                {
-                    CompanyName = v.CompanyName,
-                    Title = v.Title,
-                    CompanyLogo = v.CompanyPhoto,
-                    StartDate = v.CreatedDate,
-                    Location = v.CompanyLocation,
-                    MainSalary = v.MainSalary,
-                    ViewCount = v.ViewCount,
-                    WorkType = v.WorkType,
-                    IsVip = v.IsVip,
-                    IsActive = v.IsActive,
-                    CategoryId = v.CategoryId,
-                    IsSaved = isSaved
-                });
-            }
-
-            return allVacancies;
-        }
-
+        //}
     }
 }
 

@@ -50,7 +50,7 @@ namespace JobCompany.Business.Services.CompanyServices
             await _context.SaveChangesAsync();
         }
 
-        public async Task<ICollection<CompanyListDto>> GetAllCompanies(string? searchTerm, int skip = 1, int take = 12)
+        public async Task<ICollection<CompanyListDto>> GetAllCompaniesAsync(string? searchTerm, int skip = 1, int take = 12)
         {
             var query = _context.Companies.AsQueryable();
 
