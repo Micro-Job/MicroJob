@@ -27,6 +27,7 @@ public class TemplateService : ITemplateService
             ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>();
 
         IQueryable<Template?> templatesQuery = _context.Vacancies
+            .AsNoTracking()
             .Where(v => v.CompanyId == company.Id && v.Exam != null && v.Exam.TemplateId != null)
             .Select(v => v.Exam.Template)
             .Distinct();
