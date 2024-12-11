@@ -165,10 +165,37 @@ namespace Job.Business.Services.Vacancy
             return pagedVacancies;
         }
 
-        public async Task<ICollection<AllVacanyDto>> SimilarVacancies(string vacancyId)
+     /// <summary> Oxsar vakansiylarin getirilmesi category'e gore </summary>
+        public async Task<ICollection<SimilarVacancyDto>> SimilarVacanciesAsync(string vacancyId)
         {
-            var guidVacId = Guid.Parse(vacancyId);
-            
+            var guidVacancyId = Guid.Parse(vacancyId);
+
+            var savedVacancies = await _context.SavedVacancies
+                .Where(sv => sv.UserId == userGuid)
+                .Select(sv => sv.VacancyId)
+                .ToListAsync();
+
+            var response = await _similarRequest.GetResponse<SimilarVacanciesResponse>(
+                new SimilarVacanciesRequest { VacancyId = vacancyId }
+            );
+
+            var allVacancies = response.Message.Vacancies.Select(v => new SimilarVacancyDto
+            {
+                CompanyName = v.CompanyName,
+                Title = v.Title,
+                CompanyLogo = v.CompanyPhoto,
+                StartDate = v.CreatedDate,
+                Location = v.CompanyLocation,
+                MainSalary = v.MainSalary,
+                ViewCount = v.ViewCount,
+                WorkType = v.WorkType,
+                IsVip = v.IsVip,
+                IsActive = v.IsActive,
+                CategoryId = v.CategoryId,
+                IsSaved = savedVacancies.Contains(v.Id)  
+            }).ToList();
+
+            return allVacancies;
         }
     }
 }
