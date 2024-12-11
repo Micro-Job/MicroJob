@@ -1,12 +1,11 @@
-﻿namespace Job.Core.Entities
+﻿namespace JobCompany.Business.Dtos.NotificationDtos
 {
-    public class Notification : BaseEntity
+    public class NotificationDto
     {
         public Guid ReceiverId { get; set; }
-        public User Receiver { get; set; }
         public Guid SenderId { get; set; }
         public DateTime CreatedDate { get; set; }
         public string? Content { get; set; }
-        public bool IsSeen { get; set; }
     }
+
 }

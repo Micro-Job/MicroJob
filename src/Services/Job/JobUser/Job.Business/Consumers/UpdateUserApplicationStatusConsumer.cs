@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Job.Core.Entities;
 using Job.DAL.Contexts;
 using MassTransit;

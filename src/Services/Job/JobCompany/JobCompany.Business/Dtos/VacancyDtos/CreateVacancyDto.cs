@@ -30,6 +30,7 @@ namespace JobCompany.Business.Dtos.VacancyDtos
         public Guid CategoryId { get; set; }
         public string? TemplateId { get; set; }
         public CreateExamDto? Exam { get; set; }
+        public List<Guid>? SkillIds { get; set; }
     }
 
     public class CreateVacancyDtoValidator : AbstractValidator<CreateVacancyDto>
