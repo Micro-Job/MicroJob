@@ -143,7 +143,7 @@ namespace Job.Business.Services.Vacancy
         }
 
         /// <summary> Oxsar vakansiylarin getirilmesi category'e gore </summary>
-        public async Task<ICollection<SimilarVacancyDto>> SimilarVacanciesAsync(string vacancyId, string userId)
+        public async Task<List<SimilarVacancyResponse>> SimilarVacanciesAsync(string vacancyId, string userId)
         {
             var guidUserId = Guid.Parse(userId);
             var guidVacancyId = Guid.Parse(vacancyId);
@@ -157,20 +157,20 @@ namespace Job.Business.Services.Vacancy
                 new SimilarVacanciesRequest { VacancyId = vacancyId }
             );
 
-            var allVacancies = response.Message.Vacancies.Select(v => new SimilarVacancyDto
+            var allVacancies = response.Message.Vacancies.Select(v => new SimilarVacancyResponse
             {
                 CompanyName = v.CompanyName,
                 Title = v.Title,
-                CompanyLogo = v.CompanyPhoto,
-                StartDate = v.CreatedDate,
-                Location = v.CompanyLocation,
+                CompanyPhoto = v.CompanyPhoto,
+                CreatedDate = v.CreatedDate,
+                CompanyLocation = v.CompanyLocation,
                 MainSalary = v.MainSalary,
                 ViewCount = v.ViewCount,
                 WorkType = v.WorkType,
                 IsVip = v.IsVip,
                 IsActive = v.IsActive,
                 CategoryId = v.CategoryId,
-                IsSaved = savedVacancies.Contains(v.Id)  
+                IsSaved = savedVacancies.Contains(v.Id)
             }).ToList();
 
             return allVacancies;
