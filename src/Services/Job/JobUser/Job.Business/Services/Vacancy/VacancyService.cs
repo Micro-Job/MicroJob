@@ -23,11 +23,14 @@ namespace Job.Business.Services.Vacancy
         private readonly IRequestClient<GetAllCompaniesRequest> _request;
         private readonly IRequestClient<GetUserSavedVacanciesRequest> _client;
         private readonly IRequestClient<GetAllVacanciesRequest> _vacClient;
+        private readonly IRequestClient<GetOtherVacanciesByCompanyRequest> _othVacClient;
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly IRequestClient<UserRegisteredEvent> _requestClient;
         private readonly IRequestClient<GetVacancyInfoRequest> _vacancyClient;
 
-        public VacancyService(JobDbContext context, IRequestClient<GetAllCompaniesRequest> request, IRequestClient<GetUserSavedVacanciesRequest> client, IHttpContextAccessor contextAccessor, IRequestClient<UserRegisteredEvent> requestClient, IRequestClient<GetVacancyInfoRequest> vacancyClient, IRequestClient<GetAllVacanciesRequest> vacClient)
+        public VacancyService(JobDbContext context, IRequestClient<GetAllCompaniesRequest> request, IRequestClient<GetUserSavedVacanciesRequest> client,
+            IHttpContextAccessor contextAccessor, IRequestClient<UserRegisteredEvent> requestClient, IRequestClient<GetVacancyInfoRequest> vacancyClient,
+            IRequestClient<GetAllVacanciesRequest> vacClient, IRequestClient<GetOtherVacanciesByCompanyRequest> othVacClient)
         {
             _context = context;
             _request = request;
@@ -37,6 +40,7 @@ namespace Job.Business.Services.Vacancy
             _requestClient = requestClient;
             _vacancyClient = vacancyClient;
             _vacClient = vacClient;
+            _othVacClient = othVacClient;
         }
 
         /// <summary> Userin vakansiya save etme toggle metodu </summary>
@@ -106,6 +110,29 @@ namespace Job.Business.Services.Vacancy
 
             return response.Message.Vacancies;
         }
+
+        /// <summary>
+        /// Şirkətə aid olan digər vakansiyaların gətirilməsi
+        /// </summary>
+        /// <param name="companyId"></param>
+        /// <param name="currentVacancyId"></param>
+        /// <returns></returns>
+        public async Task<ICollection<AllVacanyDto>> GetOtherVacanciesByCompanyAsync(string companyId, string currentVacancyId)
+        {
+            var guidCompanyId = Guid.Parse(companyId);
+            var guidVacancyId = Guid.Parse(currentVacancyId);
+
+            var request = new GetOtherVacanciesByCompanyRequest
+            {
+                CompanyId = guidCompanyId,
+                CurrentVacancyId = guidVacancyId
+            };
+
+            var response = await _othVacClient.GetResponse<GetOtherVacanciesByCompanyResponse>(request);
+
+            return response.Message.Vacancies ?? [];
+        }
+
         /// <summary>
         /// Vacancy detail-də şirket haqqında
         /// </summary>
@@ -145,7 +172,7 @@ namespace Job.Business.Services.Vacancy
         public async Task<ICollection<AllVacanyDto>> SimilarVacancies(string vacancyId)
         {
             var guidVacId = Guid.Parse(vacancyId);
-            
+
         }
     }
 }

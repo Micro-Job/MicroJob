@@ -1,6 +1,7 @@
 ﻿using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using MassTransit;
+using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Dtos.CompanyDtos;
 using SharedLibrary.Exceptions;
 using SharedLibrary.Requests;
@@ -12,7 +13,7 @@ public class GetCompanyDetailByIdConsumer(JobCompanyDbContext jobDbContext, IReq
 {
     public async Task Consume(ConsumeContext<GetCompanyDetailByIdRequest> context)
     {
-        var company = await jobDbContext.Companies.FindAsync(context.Message.CompanyId)
+        var company = await jobDbContext.Companies.Include(x => x.CompanyNumbers).FirstOrDefaultAsync(x => x.Id == context.Message.CompanyId)
             ?? throw new NotFoundException<Company>();
 
         GetUserEmailRequest userEmailRequest = new() { UserId = company.UserId };
