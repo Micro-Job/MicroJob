@@ -13,5 +13,6 @@ namespace Job.Business.Services.Vacancy
         Task<ICollection<CompanyDto>> GetAllCompaniesAsync();
         Task<List<VacancyDto>> GetAllUserVacanciesAsync();
         Task<ICollection<AllVacanyDto>> GetAllVacanciesAsync(string? titleName, string? categoryId, string? countryId, string? cityId, bool? IsActive, decimal? minSalary, decimal? maxSalary, int skip = 1, int take = 6);
+        Task<ICollection<AllVacanyDto>> SimilarVacancies(string vacancyId);
     }
 }

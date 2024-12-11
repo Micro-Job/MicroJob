@@ -131,5 +131,11 @@ namespace Job.Business.Services.Vacancy
 
             return pagedVacancies;
         }
+
+        public async Task<ICollection<AllVacanyDto>> SimilarVacancies(string vacancyId)
+        {
+            var guidVacId = Guid.Parse(vacancyId);
+            
+        }
     }
 }
