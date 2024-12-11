@@ -1,8 +1,14 @@
-﻿using SharedLibrary.Enums;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Shared.Dtos.CompanyDtos;
+using SharedLibrary.Dtos.CompanyDtos;
+using SharedLibrary.Enums;
 
-namespace SharedLibrary.Dtos.VacancyDtos
+namespace Shared.Dtos.VacancyDtos
 {
-    public class VacancyDto
+    public class AllVacanyDto
     {
         public string CompanyName { get; set; }
         public string Title { get; set; }
@@ -16,5 +22,7 @@ namespace SharedLibrary.Dtos.VacancyDtos
         public bool IsSaved { get; set; }
         public bool IsVip { get; set; }
         public bool IsActive { get; set; }
+        public Guid? CategoryId { get; set; }
+        public CompanyDetailDto Company { get; set; }
     }
 }

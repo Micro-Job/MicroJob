@@ -1,16 +1,30 @@
-﻿using JobCompany.Business.Dtos.ReportDtos;
+using System.Security.Claims;
+using JobCompany.Business.Dtos.ApplicationDtos;
+using JobCompany.Business.Dtos.ReportDtos;
 using JobCompany.DAL.Contexts;
 using MassTransit;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Shared.Requests;
 using Shared.Responses;
 
 namespace JobCompany.Business.Services.ReportServices
 {
-    public class ReportService(JobCompanyDbContext context, IRequestClient<GetUsersDataResponse> client) : IReportService
+    public class ReportService : IReportService
     {
-        private readonly JobCompanyDbContext _context = context;
-        readonly IRequestClient<GetUsersDataResponse> _client = client;
+        private readonly JobCompanyDbContext _context;
+        private readonly IRequestClient<GetUsersDataResponse> _client;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly Guid _userGuid;
+
+
+        public ReportService(JobCompanyDbContext context, IRequestClient<GetUsersDataResponse> client, IHttpContextAccessor httpContextAccessor)
+        {
+            _context = context;
+            _client = client;
+            _httpContextAccessor = httpContextAccessor;
+            _userGuid = Guid.Parse(_httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value);
+        }
 
         /// <summary>
         /// admin/dashboard yuxaridaki 3-luk
@@ -106,45 +120,40 @@ namespace JobCompany.Business.Services.ReportServices
             return userDataResponse;
         }
 
-        /// <summary> Vakansiyanin statistikasi 
-        /// Vakansiyalar isActive yoxsa hamisi ?
-        /// </summary>
-        /// 
+        /// <summary> Vakansiyanin statistikasi /// </summary>
         public async Task<ApplicationStatisticsDto> GetApplicationStatisticsAsync(string periodTime)
         {
             var applications = await _context.Applications
-                                           .Include(a => a.Vacancy)
-                                           .Select(a => new
-                                           {
-                                               a.VacancyId,
-                                               a.Vacancy.Title,
-                                               a.CreatedDate
-                                           })
-                                           .ToListAsync();
+                .Where(a => a.UserId == _userGuid)
+                .Include(a => a.Vacancy)
+                .Select(a => new
+                {
+                    a.VacancyId,
+                    a.Vacancy.Title,
+                    a.CreatedDate
+                })
+                .ToListAsync();
 
             IEnumerable<IGrouping<string, dynamic>> groupedApplications;
 
-            if (periodTime == "1")
+            switch (periodTime)
             {
-                groupedApplications = applications
-                    .GroupBy(a => $"{a.CreatedDate.Year}-{GetWeekNumber(a.CreatedDate)}")
-                    .OrderByDescending(g => g.Key);
-            }
-            else if (periodTime == "2")
-            {
-                groupedApplications = applications
-                    .GroupBy(a => a.CreatedDate.ToString("yyyy-MM"))
-                    .OrderByDescending(g => g.Key);
-            }
-            else if (periodTime == "3")
-            {
-                groupedApplications = applications
-                    .GroupBy(a => a.CreatedDate.ToString("yyyy"))
-                    .OrderByDescending(g => g.Key);
-            }
-            else
-            {
-                throw new ArgumentException("Invalid period time");
+                case "1":
+                    groupedApplications = applications
+                        .GroupBy(a => $"{a.CreatedDate.Year}-{GetWeekNumber(a.CreatedDate)}")
+                        .OrderByDescending(g => g.Key);
+                    break;
+                case "2":
+                    groupedApplications = applications
+                        .GroupBy(a => a.CreatedDate.ToString("yyyy-MM"))
+                        .OrderByDescending(g => g.Key);
+                    break;
+                case "3":                    groupedApplications = applications
+                        .GroupBy(a => a.CreatedDate.ToString("yyyy"))
+                        .OrderByDescending(g => g.Key);
+                    break;
+                default:
+                    throw new ArgumentException("Invalid period time");
             }
 
             var currentPeriodApplications = groupedApplications.FirstOrDefault();
@@ -157,13 +166,14 @@ namespace JobCompany.Business.Services.ReportServices
                 ? (double)(currentPeriodCount - previousPeriodCount) / previousPeriodCount * 100
                 : 0;
 
+            var mostCommonCount = groupedApplications.Max(g => g.Count());
+
             var groupedStatistics = groupedApplications
                 .Select(g => new PeriodStatisticDto
                 {
                     Period = g.Key,
                     Value = g.Count(),
-                    // IsHighlighted = g.Count() 
-                    //en cox olanin countu
+                    IsHighlighted = g.Count() == mostCommonCount 
                 })
                 .ToList();
 
@@ -193,7 +203,7 @@ namespace JobCompany.Business.Services.ReportServices
 
         private int GetWeekNumber(DateTime date)
         {
-            var calendar = System.Globalization.CultureInfo.CurrentCulture.Calendar;
+            var calendar = System.Globalization.CultureInfo.InvariantCulture.Calendar;
             return calendar.GetWeekOfYear(date, System.Globalization.CalendarWeekRule.FirstDay, DayOfWeek.Monday);
         }
     }
