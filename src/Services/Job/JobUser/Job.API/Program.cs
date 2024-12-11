@@ -1,10 +1,11 @@
 using FluentValidation.AspNetCore;
 using Job.Business;
+using Job.Business.Consumers;
 using Job.Business.Services.Resume;
 using Job.DAL.Contexts;
-using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using RabbitMQ.Client;
 using SharedLibrary.Middlewares;
 using SharedLibrary.ServiceRegistration;
 
@@ -15,10 +16,9 @@ namespace Job.API
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-            var configuration = builder.Configuration;  
+            var configuration = builder.Configuration;
 
             // Add services to the container.
-
             builder.Services.AddControllers();
 
             // Add Swagger
@@ -52,11 +52,11 @@ namespace Job.API
                 });
             });
 
-            builder.Services.AddAuth(builder.Configuration["Jwt:Issuer"]!, builder.Configuration["Jwt:Audience"]!, builder.Configuration["Jwt:SigningKey"]!);
+            builder.Services.AddAuth(configuration["Jwt:Issuer"]!, configuration["Jwt:Audience"]!, configuration["Jwt:SigningKey"]!);
 
             builder.Services.AddDbContext<JobDbContext>(opt =>
             {
-                opt.UseSqlServer(builder.Configuration.GetConnectionString("MSSQL"));
+                opt.UseSqlServer(configuration.GetConnectionString("MSSQL"));
             });
 
             builder.Services.AddFluentValidation(opt =>
@@ -64,8 +64,21 @@ namespace Job.API
                 opt.RegisterValidatorsFromAssemblyContaining<ResumeService>();
             });
 
-            builder.Services.AddMassTransit(builder.Configuration["RabbitMQ"]!);
+            // RabbitMQ Connection Factory
+            //builder.Services.AddSingleton<IConnectionFactory>(sp =>
+            //{
+            //    return new ConnectionFactory
+            //    {
+            //        HostName = configuration["RabbitMQ:HostName"],
+            //        UserName = configuration["RabbitMQ:UserName"],
+            //        Password = configuration["RabbitMQ:Password"]
+            //    };
+            //});
 
+            // Add Background Service
+            builder.Services.AddHostedService<VacancyCreatedConsumer>();
+
+            builder.Services.AddMassTransit(configuration["RabbitMQ"]!);
             builder.Services.AddJobServices();
             builder.Services.AddCorsPolicy("http://localhost:3000");
 

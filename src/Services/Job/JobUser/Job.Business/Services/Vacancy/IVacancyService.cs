@@ -11,5 +11,6 @@ namespace Job.Business.Services.Vacancy
         Task<GetUserSavedVacanciesResponse> GetUserSavedVacancyDataAsync(List<Guid> VacancyIds);
         Task<ICollection<CompanyDto>> GetAllCompaniesAsync();
         Task<List<VacancyDto>> GetAllUserVacanciesAsync();
+        Task<GetVacancyInfoResponse> GetVacancyInfoAsync(Guid vacancyId);
     }
 }

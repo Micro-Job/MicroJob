@@ -3,10 +3,12 @@ using JobCompany.Business.Dtos.VacancyDtos;
 using JobCompany.Business.Services.ExamServices;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
+using MassTransit;
 using MassTransit.Initializers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Dtos.FileDtos;
+using SharedLibrary.Events;
 using SharedLibrary.Exceptions;
 using SharedLibrary.ExternalServices.FileService;
 using SharedLibrary.Statics;
@@ -21,14 +23,16 @@ namespace JobCompany.Business.Services.VacancyServices
         private readonly IFileService _fileService;
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly IExamService _examService;
+        private readonly IPublishEndpoint _publishEndpoint;
 
-        public VacancyService(JobCompanyDbContext context, IFileService fileService, IHttpContextAccessor contextAccessor, IExamService examService)
+        public VacancyService(JobCompanyDbContext context, IFileService fileService, IHttpContextAccessor contextAccessor, IExamService examService, IPublishEndpoint publishEndpoint)
         {
             _context = context;
             _fileService = fileService;
             _contextAccessor = contextAccessor;
-            _userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value);
+            _userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value ?? throw new Exception("Istifadeci sisteme daxil olmayib."));
             _examService = examService;
+            _publishEndpoint = publishEndpoint;
         }
 
         /// <summary> vacancy yaradılması </summary>
@@ -47,6 +51,7 @@ namespace JobCompany.Business.Services.VacancyServices
                 FileDto fileResult = await _fileService.UploadAsync(FilePaths.image, vacancyDto.CompanyLogo);
                 companyLogoPath = $"{fileResult.FilePath}/{fileResult.FileName}";
             }
+
             var vacancy = new Vacancy
             {
                 Id = Guid.NewGuid(),
@@ -70,7 +75,6 @@ namespace JobCompany.Business.Services.VacancyServices
                 Family = vacancyDto.Family,
                 Citizenship = vacancyDto.Citizenship,
                 CategoryId = vacancyDto.CategoryId,
-                IsActive = true
             };
 
             var numbers = new List<CompanyNumber>();
@@ -85,6 +89,14 @@ namespace JobCompany.Business.Services.VacancyServices
                     numbers.Add(number);
                 }
             }
+
+            var resumeSkills = vacancyDto.SkillIds != null
+                ? vacancyDto.SkillIds.Select(skillId => new VacancySkill
+                {
+                    SkillId = skillId,
+                    VacancyId = vacancy.Id
+                }).ToList() : [];
+
             await _context.CompanyNumbers.AddRangeAsync(numbers);
 
             if (vacancyDto.TemplateId != null)
@@ -106,6 +118,14 @@ namespace JobCompany.Business.Services.VacancyServices
             vacancy.CompanyNumbers = numbers;
             await _context.Vacancies.AddAsync(vacancy);
             await _context.SaveChangesAsync();
+
+            var vacancyCreatedEvent = new VacancyCreatedEvent
+            {
+                VacancyId = vacancy.Id,
+                SkillIds = vacancyDto.SkillIds ?? [],
+                CreatedById = vacancy.Company.UserId
+            };
+            await _publishEndpoint.Publish(vacancyCreatedEvent);
         }
 
         public async Task DeleteAsync(List<string> ids)
