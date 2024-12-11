@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using JobCompany.DAL.Contexts;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
@@ -25,12 +21,12 @@ namespace JobCompany.Business.Consumers
             var guidVacId = Guid.Parse(vacancyId);
 
             var vacancies = await _context.Vacancies
-                .Where(v => v.Id == guidVacId || 
+                .Where(v => v.Id == guidVacId ||
                             (v.CategoryId == _context.Vacancies
                                 .Where(vac => vac.Id == guidVacId)
                                 .Select(vac => vac.CategoryId)
                                 .FirstOrDefault() && v.Id != guidVacId))
-                .Take(6) 
+                .Take(6)
                 .ToListAsync();
 
             var response = new SimilarVacanciesResponse
@@ -46,7 +42,7 @@ namespace JobCompany.Business.Consumers
                     MaxSalary = v.MaxSalary,
                     ViewCount = v.ViewCount,
                     IsVip = v.IsVip,
-                    IsSaved = false, 
+                    IsSaved = false,
                     WorkType = v.WorkType
                 }).ToList()
             };
