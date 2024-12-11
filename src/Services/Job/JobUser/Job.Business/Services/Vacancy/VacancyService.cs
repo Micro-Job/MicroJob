@@ -10,6 +10,7 @@ using Shared.Responses;
 using SharedLibrary.Dtos.CompanyDtos;
 using SharedLibrary.Dtos.VacancyDtos;
 using SharedLibrary.Events;
+using SharedLibrary.Exceptions;
 using SharedLibrary.Requests;
 using SharedLibrary.Responses;
 using System.Security.Claims;
@@ -25,10 +26,8 @@ namespace Job.Business.Services.Vacancy
         private readonly IRequestClient<GetAllVacanciesRequest> _vacClient;
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly IRequestClient<UserRegisteredEvent> _requestClient;
-        private readonly IRequestClient<GetVacancyInfoRequest> _vacancyClient;
         private readonly IRequestClient<SimilarVacanciesRequest> _similarRequest;
 
-        public VacancyService(JobDbContext context, IRequestClient<GetAllCompaniesRequest> request, IRequestClient<GetUserSavedVacanciesRequest> client, IHttpContextAccessor contextAccessor, IRequestClient<UserRegisteredEvent> requestClient, IRequestClient<GetVacancyInfoRequest> vacancyClient, IRequestClient<GetAllVacanciesRequest> vacClient)
         public VacancyService(JobDbContext context, IRequestClient<GetAllCompaniesRequest> request, IRequestClient<GetUserSavedVacanciesRequest> client, IHttpContextAccessor contextAccessor, IRequestClient<UserRegisteredEvent> requestClient, IRequestClient<GetAllVacanciesRequest> vacClient, IRequestClient<SimilarVacanciesRequest> similarRequest)
         {
             _context = context;
@@ -37,7 +36,6 @@ namespace Job.Business.Services.Vacancy
             _contextAccessor = contextAccessor;
             userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value);
             _requestClient = requestClient;
-            _vacancyClient = vacancyClient;
             _vacClient = vacClient;
             _similarRequest = similarRequest;
         }
@@ -109,15 +107,6 @@ namespace Job.Business.Services.Vacancy
 
             return response.Message.Vacancies;
         }
-        /// <summary>
-        /// Vacancy detail-də şirket haqqında
-        /// </summary>
-        /// <param name="vacancyId"></param>
-        /// <returns></returns>
-        public async Task<GetVacancyInfoResponse> GetVacancyInfoAsync(Guid vacancyId)
-        {
-            var response = await _vacancyClient.GetResponse<GetVacancyInfoResponse>(vacancyId);
-            return response.Message;
 
         /// <summary> Butun vakansiyalarin getirilmesi - search ve filter</summary>
         public async Task<ICollection<AllVacanyDto>> GetAllVacanciesAsync(string? titleName, string? categoryId, string? countryId, string? cityId, bool? isActive, decimal? minSalary, decimal? maxSalary, int skip = 1, int take = 6)
@@ -147,7 +136,7 @@ namespace Job.Business.Services.Vacancy
 
 
         /// <summary> Oxşar vakansiyaların gətirilməsi </summary>
-        public async Task<ICollection<SimilarVacancyDto>> SimilarVacancies(string vacancyId, string userId)
+        public async Task<ICollection<SimilarVacancyDto>> SimilarVacanciesAsync(string vacancyId, string userId)
         {
             var guidUserId = Guid.Parse(userId);
             var response = await _similarRequest.GetResponse<SimilarVacanciesResponse>(
@@ -182,5 +171,7 @@ namespace Job.Business.Services.Vacancy
 
             return allVacancies;
         }
+
     }
 }
+
