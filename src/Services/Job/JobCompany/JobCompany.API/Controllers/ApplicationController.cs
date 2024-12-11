@@ -6,14 +6,9 @@ namespace JobCompany.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ApplicationController : ControllerBase
+    public class ApplicationController(IApplicationService service) : ControllerBase
     {
-        readonly IApplicationService _service;
-
-        public ApplicationController(IApplicationService service)
-        {
-            _service = service;
-        }
+        readonly IApplicationService _service = service;
 
         [HttpPost("[action]")]
         public async Task<IActionResult> CreateApplication(ApplicationCreateDto dto)
@@ -35,7 +30,7 @@ namespace JobCompany.API.Controllers
             return Ok(await _service.GetAllApplicationAsync(skip,take));
         }
 
-        [HttpPut("[action]")]
+        [HttpPatch("[action]")]
         public async Task<IActionResult> ChangeApplicationStatus(string applicationId, string statusId)
         {
             await _service.ChangeApplicationStatusAsync(applicationId, statusId);

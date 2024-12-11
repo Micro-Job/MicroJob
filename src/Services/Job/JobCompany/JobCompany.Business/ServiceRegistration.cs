@@ -51,7 +51,7 @@ namespace JobCompany.Business
                 x.AddConsumer<VacancyApplicationConsumer>();
                 x.AddConsumer<GetAllVacanciesConsumer>();
                 x.AddConsumer<GetCompanyDetailByIdConsumer>();
-                x.AddConsumer<GetOtherVacanciesByCompanyConsumer>();
+                x.AddConsumer<SimilarVacanciesConsumer>();
                 x.SetKebabCaseEndpointNameFormatter();
                 x.UsingRabbitMq((con, cfg) =>
                 {

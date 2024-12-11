@@ -1,4 +1,5 @@
 ﻿using Shared.Dtos.VacancyDtos;
+using Shared.Responses;
 using SharedLibrary.Dtos.CompanyDtos;
 using SharedLibrary.Dtos.VacancyDtos;
 using SharedLibrary.Responses;
@@ -15,6 +16,6 @@ namespace Job.Business.Services.Vacancy
         Task<ICollection<AllVacanyDto>> GetOtherVacanciesByCompanyAsync(string companyId, string currentVacancyId);  
         Task<GetVacancyInfoResponse> GetVacancyInfoAsync(Guid vacancyId);
         Task<ICollection<AllVacanyDto>> GetAllVacanciesAsync(string? titleName, string? categoryId, string? countryId, string? cityId, bool? IsActive, decimal? minSalary, decimal? maxSalary, int skip = 1, int take = 6);
-        Task<ICollection<AllVacanyDto>> SimilarVacancies(string vacancyId);
+        Task<List<SimilarVacancyResponse>> SimilarVacanciesAsync(string vacancyId);
     }
 }

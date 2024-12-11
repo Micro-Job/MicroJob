@@ -6,54 +6,56 @@ namespace JobCompany.API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class TemplateController(ITemplateService service) : ControllerBase
+public class TemplateController(ITemplateService templateService) : ControllerBase
 {
+    private readonly ITemplateService _templateService = templateService;
+
     [HttpGet("[action]")]
     public async Task<IActionResult> GetAllTemplates(int skip = 1, int take = 9)
     {
-        var result = await service.GetAllTemplatesAsync(skip, take);
+        var result = await _templateService.GetAllTemplatesAsync(skip, take);
         return Ok(result);
     }
 
     [HttpGet("[action]")]
     public async Task<IActionResult> GetAllTemplatesWithQuestionCount(int skip = 1, int take = 10)
     {
-        var data = await service.GetAllTemplatesWithQuestionCountAsync(skip, take);
+        var data = await _templateService.GetAllTemplatesWithQuestionCountAsync(skip, take);
         return Ok(data);
     }
 
     [HttpGet("[action]")]
     public async Task<IActionResult> GetTemplateById(string templateId)
     {
-        var result = await service.GetTemplateByIdAsync(templateId);
+        var result = await _templateService.GetTemplateByIdAsync(templateId);
         return Ok(result);
     }
 
     [HttpPost("[action]")]
     public async Task<IActionResult> CreateTemplate(TemplateCreateDto templateCreateDto)
     {
-        await service.CreateTemplateAsync(templateCreateDto);
+        await _templateService.CreateTemplateAsync(templateCreateDto);
         return Ok();
     }
 
     [HttpPut("[action]")]
     public async Task<IActionResult> UpdateTemplate(TemplateUpdateDto templateUpdateDto)
     {
-        await service.UpdateTemplateAsync(templateUpdateDto);
+        await _templateService.UpdateTemplateAsync(templateUpdateDto);
         return Ok();
     }
 
     [HttpDelete("[action]")]
     public async Task<IActionResult> DeleteTemplate(string templateId)
     {
-        await service.DeleteTemplateAsync(templateId);
+        await _templateService.DeleteTemplateAsync(templateId);
         return Ok();
     }
 
     [HttpPost("[action]")]
     public async Task<IActionResult> SaveExamToTemplate(string examId, string templateId)
     {
-        await service.SaveExamToTemplateAsync(examId, templateId);
+        await _templateService.SaveExamToTemplateAsync(examId, templateId);
         return Ok();
     }
 }

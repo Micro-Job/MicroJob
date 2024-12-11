@@ -3,13 +3,13 @@ using Job.DAL.Contexts;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Shared.Dtos.CompanyDtos;
 using Shared.Dtos.VacancyDtos;
 using Shared.Requests;
 using Shared.Responses;
 using SharedLibrary.Dtos.CompanyDtos;
 using SharedLibrary.Dtos.VacancyDtos;
 using SharedLibrary.Events;
+using SharedLibrary.Exceptions;
 using SharedLibrary.Requests;
 using SharedLibrary.Responses;
 using System.Security.Claims;
@@ -26,11 +26,9 @@ namespace Job.Business.Services.Vacancy
         private readonly IRequestClient<GetOtherVacanciesByCompanyRequest> _othVacClient;
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly IRequestClient<UserRegisteredEvent> _requestClient;
-        private readonly IRequestClient<GetVacancyInfoRequest> _vacancyClient;
+        private readonly IRequestClient<SimilarVacanciesRequest> _similarRequest;
 
-        public VacancyService(JobDbContext context, IRequestClient<GetAllCompaniesRequest> request, IRequestClient<GetUserSavedVacanciesRequest> client,
-            IHttpContextAccessor contextAccessor, IRequestClient<UserRegisteredEvent> requestClient, IRequestClient<GetVacancyInfoRequest> vacancyClient,
-            IRequestClient<GetAllVacanciesRequest> vacClient, IRequestClient<GetOtherVacanciesByCompanyRequest> othVacClient)
+        public VacancyService(JobDbContext context, IRequestClient<GetAllCompaniesRequest> request, IRequestClient<GetUserSavedVacanciesRequest> client, IHttpContextAccessor contextAccessor, IRequestClient<UserRegisteredEvent> requestClient, IRequestClient<GetAllVacanciesRequest> vacClient, IRequestClient<SimilarVacanciesRequest> similarRequest)
         {
             _context = context;
             _request = request;
@@ -38,9 +36,7 @@ namespace Job.Business.Services.Vacancy
             _contextAccessor = contextAccessor;
             userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value);
             _requestClient = requestClient;
-            _vacancyClient = vacancyClient;
             _vacClient = vacClient;
-            _othVacClient = othVacClient;
         }
 
         /// <summary> Userin vakansiya save etme toggle metodu </summary>
@@ -172,7 +168,7 @@ namespace Job.Business.Services.Vacancy
         public async Task<ICollection<AllVacanyDto>> SimilarVacancies(string vacancyId)
         {
             var guidVacId = Guid.Parse(vacancyId);
-
+            
         }
     }
 }
