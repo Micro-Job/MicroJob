@@ -3,7 +3,6 @@ using Job.DAL.Contexts;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Shared.Dtos.CompanyDtos;
 using Shared.Dtos.VacancyDtos;
 using Shared.Requests;
 using Shared.Responses;
@@ -115,6 +114,7 @@ namespace Job.Business.Services.Vacancy
         {
             var response = await _vacancyClient.GetResponse<GetVacancyInfoResponse>(vacancyId);
             return response.Message;
+        }
 
         /// <summary> Butun vakansiyalarin getirilmesi - search ve filter</summary>
         public async Task<ICollection<AllVacanyDto>> GetAllVacanciesAsync(string? titleName, string? categoryId, string? countryId, string? cityId, bool? isActive, decimal? minSalary, decimal? maxSalary, int skip = 1, int take = 6)
@@ -142,10 +142,10 @@ namespace Job.Business.Services.Vacancy
             return pagedVacancies;
         }
 
-        public async Task<ICollection<AllVacanyDto>> SimilarVacancies(string vacancyId)
-        {
-            var guidVacId = Guid.Parse(vacancyId);
-            
-        }
+        //public async Task<ICollection<AllVacanyDto>> SimilarVacancies(string vacancyId)
+        //{
+        //    var guidVacId = Guid.Parse(vacancyId);
+
+        //}
     }
 }

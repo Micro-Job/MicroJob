@@ -11,7 +11,7 @@ namespace JobCompany.API.Controllers
         readonly ICompanyService _service = service;
 
         [HttpPut("[action]")]
-        public async Task<IActionResult> UpdateCompanyAsync(CompanyUpdateDto dto)
+        public async Task<IActionResult> UpdateCompany(CompanyUpdateDto dto)
         {
             await _service.UpdateCompanyAsync(dto);
             return Ok();
@@ -20,11 +20,11 @@ namespace JobCompany.API.Controllers
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllCompanies([FromQuery] string? searchTerm = null)
         {
-            return Ok(await _service.GetAllCompanies(searchTerm));
+            return Ok(await _service.GetAllCompaniesAsync(searchTerm));
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetCompanyDetailAsync(string companyId)
+        public async Task<IActionResult> GetCompanyDetail(string companyId)
         {
             return Ok(await _service.GetCompanyDetailAsync(companyId));
         }

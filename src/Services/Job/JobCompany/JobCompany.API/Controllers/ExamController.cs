@@ -18,7 +18,7 @@ namespace JobCompany.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetExamByIdAsync(string examId, byte step)
+        public async Task<IActionResult> GetExamById(string examId, byte step)
         {
             var data = await _examServices.GetExamByIdAsync(examId, step);
             return Ok(data);
