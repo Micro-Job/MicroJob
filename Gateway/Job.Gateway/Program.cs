@@ -2,7 +2,6 @@ using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
 using SharedLibrary.Middlewares;
 using SharedLibrary.ServiceRegistration;
-using SharedLibrary.Middlewares;
 
 namespace Job.Gateway
 {
@@ -14,7 +13,7 @@ namespace Job.Gateway
 
             builder.Services.AddOcelot();
 
-            builder.Configuration.AddJsonFile("ocelot.json"); 
+            builder.Configuration.AddJsonFile("ocelot.json");
 
             builder.Services.AddControllers();
 

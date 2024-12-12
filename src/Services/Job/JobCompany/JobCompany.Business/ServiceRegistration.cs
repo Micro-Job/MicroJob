@@ -14,6 +14,7 @@ using JobCompany.Business.Services.TemplateServices;
 using JobCompany.Business.Services.VacancyServices;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
+using SharedLibrary.Events;
 using SharedLibrary.ExternalServices.FileService;
 
 namespace JobCompany.Business
