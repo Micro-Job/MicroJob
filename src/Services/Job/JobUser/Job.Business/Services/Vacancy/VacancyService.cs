@@ -22,6 +22,7 @@ namespace Job.Business.Services.Vacancy
         private readonly IRequestClient<GetAllCompaniesRequest> _request;
         private readonly IRequestClient<GetUserSavedVacanciesRequest> _client;
         private readonly IRequestClient<GetAllVacanciesRequest> _vacClient;
+        private readonly IRequestClient<GetOtherVacanciesByCompanyRequest> _othVacClient;
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly IRequestClient<UserRegisteredEvent> _requestClient;
         private readonly IRequestClient<SimilarVacanciesRequest> _similarRequest;
@@ -108,6 +109,29 @@ namespace Job.Business.Services.Vacancy
 
             return response.Message.Vacancies;
         }
+
+        /// <summary>
+        /// Şirkətə aid olan digər vakansiyaların gətirilməsi
+        /// </summary>
+        /// <param name="companyId"></param>
+        /// <param name="currentVacancyId"></param>
+        /// <returns></returns>
+        public async Task<ICollection<AllVacanyDto>> GetOtherVacanciesByCompanyAsync(string companyId, string currentVacancyId)
+        {
+            var guidCompanyId = Guid.Parse(companyId);
+            var guidVacancyId = Guid.Parse(currentVacancyId);
+
+            var request = new GetOtherVacanciesByCompanyRequest
+            {
+                CompanyId = guidCompanyId,
+                CurrentVacancyId = guidVacancyId
+            };
+
+            var response = await _othVacClient.GetResponse<GetOtherVacanciesByCompanyResponse>(request);
+
+            return response.Message.Vacancies ?? [];
+        }
+
         /// <summary>
         /// Vacancy detail-də şirket haqqında
         /// </summary>
@@ -144,8 +168,8 @@ namespace Job.Business.Services.Vacancy
             return pagedVacancies;
         }
 
-        /// <summary> Oxsar vakansiylarin getirilmesi category'e gore </summary>
-        public async Task<List<SimilarVacancyResponse>> SimilarVacanciesAsync(string vacancyId)
+     /// <summary> Oxsar vakansiylarin getirilmesi category'e gore </summary>
+        public async Task<ICollection<SimilarVacancyDto>> SimilarVacanciesAsync(string vacancyId)
         {
             var guidVacancyId = Guid.Parse(vacancyId);
 
@@ -158,20 +182,20 @@ namespace Job.Business.Services.Vacancy
                 new SimilarVacanciesRequest { VacancyId = vacancyId }
             );
 
-            var allVacancies = response.Message.Vacancies.Select(v => new SimilarVacancyResponse
+            var allVacancies = response.Message.Vacancies.Select(v => new SimilarVacancyDto
             {
                 CompanyName = v.CompanyName,
                 Title = v.Title,
-                CompanyPhoto = v.CompanyPhoto,
-                CreatedDate = v.CreatedDate,
-                CompanyLocation = v.CompanyLocation,
+                CompanyLogo = v.CompanyPhoto,
+                StartDate = v.CreatedDate,
+                Location = v.CompanyLocation,
                 MainSalary = v.MainSalary,
                 ViewCount = v.ViewCount,
                 WorkType = v.WorkType,
                 IsVip = v.IsVip,
                 IsActive = v.IsActive,
                 CategoryId = v.CategoryId,
-                IsSaved = savedVacancies.Contains(v.Id)
+                IsSaved = savedVacancies.Contains(v.Id)  
             }).ToList();
 
             return allVacancies;
