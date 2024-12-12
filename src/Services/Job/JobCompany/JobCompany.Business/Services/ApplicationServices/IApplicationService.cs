@@ -13,8 +13,6 @@ namespace JobCompany.Business.Services.ApplicationServices
         Task GetAllApplicationWithStatusAsync(string vacancyId, string statusId, int skip = 1, int take = 5);
         Task<List<ApplicationUserListDto>> GetUserApplicationAsync(int skip = 1, int take = 9);
         Task<ApplicationGetByIdDto> GetApplicationByIdAsync(string applicationId);
-        Task<GetUsersDataResponse> GetUserDataResponseAsync(List<Guid> userIds);
-        Task<GetResumesDataResponse> GetResumeDataResponseAsync(List<Guid> userIds);
         Task<ICollection<ApplicationInfoListDto>> GetAllApplicationAsync(int skip = 1, int take = 9);
     }
 }

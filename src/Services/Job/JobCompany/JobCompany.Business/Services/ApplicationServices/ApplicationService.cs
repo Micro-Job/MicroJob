@@ -192,7 +192,7 @@ namespace JobCompany.Business.Services.ApplicationServices
         }
 
         /// <summary> Consumer metodu - user idlərinə görə user datalarının gətirilməsi </summary>
-        public async Task<GetUsersDataResponse> GetUserDataResponseAsync(List<Guid> userIds)
+        private async Task<GetUsersDataResponse> GetUserDataResponseAsync(List<Guid> userIds)
         {
             var request = new GetUsersDataRequest
             {
@@ -210,7 +210,7 @@ namespace JobCompany.Business.Services.ApplicationServices
         }
 
         /// <summary> Consumer metodu - Useridlere görə resumelerin getirilmesi </summary>
-        public async Task<GetResumesDataResponse> GetResumeDataResponseAsync(List<Guid> userIds)
+        private async Task<GetResumesDataResponse> GetResumeDataResponseAsync(List<Guid> userIds)
         {
             var request = new GetResumeDataRequest
             {
