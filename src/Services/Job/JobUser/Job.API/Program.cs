@@ -76,7 +76,7 @@ namespace Job.API
             //});
 
             // Add Background Service
-            builder.Services.AddHostedService<VacancyCreatedConsumer>();
+            //builder.Services.AddHostedService<VacancyCreatedConsumer>();
 
             builder.Services.AddMassTransit(configuration["RabbitMQ"]!);
             builder.Services.AddJobServices();

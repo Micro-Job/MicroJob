@@ -44,7 +44,6 @@ namespace JobCompany.Core.Entites
 
         public ICollection<CompanyNumber>? CompanyNumbers { get; set; }
         public ICollection<Application>? Applications { get; set; }
-
         public ICollection<VacancySkill> Skills { get; set; }
     }
 }
