@@ -22,10 +22,10 @@ namespace JobCompany.Business.Dtos.VacancyDtos
         public decimal? MaxSalary { get; set; }
         public string Requirement { get; set; }
         public string Description { get; set; }
-        public Gender Gender { get; set; }
+        public SharedLibrary.Enums.Gender Gender { get; set; }
         public Military Military { get; set; }
         public Driver Driver { get; set; }
-        public FamilySituation Family { get; set; }
+        public SharedLibrary.Enums.FamilySituation Family { get; set; }
         public Citizenship Citizenship { get; set; }
         public Guid CategoryId { get; set; }
         public string? TemplateId { get; set; }
