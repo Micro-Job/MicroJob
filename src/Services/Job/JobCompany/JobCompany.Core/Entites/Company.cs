@@ -24,5 +24,6 @@
         public ICollection<Vacancy>? Vacancies { get; set; }
         public ICollection<Status> Statuses { get; set; }
         public ICollection<Notification> Notifications { get; set; }
+        public ICollection<Exam> Exams { get; set; }
     }
 }

@@ -5,6 +5,5 @@ namespace JobCompany.Core.Enums
         OpenEnded,
         SingleChoice,
         MultipleChoice,
-        ImageBased
     }
 }

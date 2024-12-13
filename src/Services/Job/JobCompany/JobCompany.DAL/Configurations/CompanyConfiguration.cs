@@ -14,8 +14,8 @@ namespace JobCompany.DAL.Configurations
                 .IsRequired();
 
             builder.Property(c => c.CompanyInformation)
-                .HasMaxLength(500); 
-            
+                .HasMaxLength(500);
+
             builder.Property(c => c.CompanyLocation)
                 .HasMaxLength(128);
 
@@ -32,9 +32,9 @@ namespace JobCompany.DAL.Configurations
                 .HasForeignKey(v => v.CompanyId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasOne(x=>x.Country)
-                .WithMany(x=>x.Companies)
-                .HasForeignKey(x=>x.CountryId)
+            builder.HasOne(x => x.Country)
+                .WithMany(x => x.Companies)
+                .HasForeignKey(x => x.CountryId)
                 .OnDelete(DeleteBehavior.SetNull);
 
             builder.HasOne(x => x.City)
@@ -42,9 +42,9 @@ namespace JobCompany.DAL.Configurations
                .HasForeignKey(x => x.CityId)
                .OnDelete(DeleteBehavior.SetNull);
 
-            builder.HasOne(x=>x.Category)
-                .WithMany(x=>x.Companies)
-                .HasForeignKey(x=>x.CategoryId)
+            builder.HasOne(x => x.Category)
+                .WithMany(x => x.Companies)
+                .HasForeignKey(x => x.CategoryId)
                 .OnDelete(DeleteBehavior.SetNull);
 
             builder.HasMany(c => c.Statuses)
@@ -52,10 +52,15 @@ namespace JobCompany.DAL.Configurations
                 .HasForeignKey(v => v.CompanyId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasMany(x=> x.Notifications)
-                .WithOne(x=> x.Receiver)
-                .HasForeignKey(x=> x.ReceiverId)
+            builder.HasMany(x => x.Notifications)
+                .WithOne(x => x.Receiver)
+                .HasForeignKey(x => x.ReceiverId)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            builder.HasMany(x => x.Exams)
+                   .WithOne(e => e.Company)
+                   .HasForeignKey(e => e.CompanyId)
+                   .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

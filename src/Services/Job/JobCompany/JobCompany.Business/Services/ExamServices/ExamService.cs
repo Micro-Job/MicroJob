@@ -24,10 +24,6 @@ namespace JobCompany.Business.Services.ExamServices
                 : new FileDto();
             var exam = new Exam
             {
-                LogoUrl = dto.Logo != null
-                    ? $"{fileResult.FilePath}/{fileResult.FileName}"
-                    : throw new Exception("Sekil daxil edin!"),
-                TemplateId = dto.TemplateId,
                 IntroDescription = dto.IntroDescription,
                 LastDescription = dto.LastDescription,
             };
@@ -48,7 +44,6 @@ namespace JobCompany.Business.Services.ExamServices
                 ?? throw new NotFoundException<Exam>();
             var examDto = new GetExamByIdDto
             {
-                LogoUrl = $"{_baseUrl}/{exam.LogoUrl}",
                 IntroDescription = step == 1 ? exam.IntroDescription : null,
                 CurrentStep = step,
                 LastDescription = exam.LastDescription,
@@ -59,7 +54,6 @@ namespace JobCompany.Business.Services.ExamServices
                 Id = q.Id,
                 Title = q.Title,
                 QuestionType = q.QuestionType,
-                Time = q.Time,
                 Answers = q.Answers?.Select(a => new Answer
                 {
                     Id = a.Id,
