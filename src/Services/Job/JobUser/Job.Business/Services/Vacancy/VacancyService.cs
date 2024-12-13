@@ -147,6 +147,11 @@ namespace Job.Business.Services.Vacancy
         /// <summary> Butun vakansiyalarin getirilmesi - search ve filter</summary>
         public async Task<ICollection<AllVacanyDto>> GetAllVacanciesAsync(string? titleName, string? categoryId, string? countryId, string? cityId, bool? isActive, decimal? minSalary, decimal? maxSalary, int skip = 1, int take = 6)
         {
+            var userSkills = await _context.Resumes
+            .Where(r => r.UserId == userGuid)
+            .SelectMany(r => r.ResumeSkills)
+            .ToListAsync();
+
             var request = new GetAllVacanciesRequest
             {
                 TitleName = titleName,
@@ -161,6 +166,7 @@ namespace Job.Business.Services.Vacancy
             var response = await _vacClient.GetResponse<GetAllVacanciesResponse>(request);
 
             var vacancies = response.Message.Vacancies.AsQueryable();
+
 
             var pagedVacancies = vacancies
                 .Skip((skip - 1) * take)
