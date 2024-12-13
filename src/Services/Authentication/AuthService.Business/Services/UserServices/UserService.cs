@@ -118,6 +118,5 @@ namespace AuthService.Business.Services.UserServices
                 ImageUrl = user.Image
             };
         }
-
     }
 }

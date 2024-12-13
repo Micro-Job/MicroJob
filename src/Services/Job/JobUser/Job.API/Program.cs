@@ -64,12 +64,12 @@ namespace Job.API
                 opt.RegisterValidatorsFromAssemblyContaining<ResumeService>();
             });
 
-            // RabbitMQ Connection Factory
+            //RabbitMQ Connection Factory
             //builder.Services.AddSingleton<IConnectionFactory>(sp =>
             //{
             //    return new ConnectionFactory
             //    {
-            //        HostName = configuration["RabbitMQ:HostName"],
+            //        HostName = configuration["RabbitMQ:Host"],
             //        UserName = configuration["RabbitMQ:UserName"],
             //        Password = configuration["RabbitMQ:Password"]
             //    };
@@ -78,7 +78,9 @@ namespace Job.API
             // Add Background Service
             //builder.Services.AddHostedService<VacancyCreatedConsumer>();
 
-            builder.Services.AddMassTransit(configuration["RabbitMQ"]!);
+
+            //builder.Services.AddMassTransit(configuration["RabbitMQ"]!);
+            builder.Services.AddMassTransit(builder.Configuration);
             builder.Services.AddJobServices();
             builder.Services.AddCorsPolicy("http://localhost:3000");
 
