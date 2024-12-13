@@ -7,7 +7,6 @@ using SharedLibrary.ServiceRegistration;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -21,34 +20,25 @@ builder.Services.AddMassTransit(x =>
 {
     x.AddConsumer<SendEmailConsumer>();
     x.SetKebabCaseEndpointNameFormatter();
-    x.UsingRabbitMq((con, cfg) =>
+
+    // RabbitMQ ayarlarını manuel alıyoruz
+    x.UsingRabbitMq((context, cfg) =>
     {
-        cfg.Host(builder.Configuration["RabbitMQ"]);
-        cfg.ConfigureEndpoints(con);
+        var rabbitMqHost = builder.Configuration["RabbitMQ:Host"];
+        var username = builder.Configuration["RabbitMQ:Username"];
+        var password = builder.Configuration["RabbitMQ:Password"];
+
+        cfg.Host(rabbitMqHost, h =>
+        {
+            h.Username(username);
+            h.Password(password);
+        });
+
+        cfg.ConfigureEndpoints(context);
     });
 });
 
-//builder.Services.AddHangfireServer();
-//builder.Services.AddHangfire(x =>
-//{
-//    var option = new SqlServerStorageOptions
-//    {
-//        PrepareSchemaIfNecessary = true,
-//        QueuePollInterval = TimeSpan.FromMinutes(5),
-//        CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
-//        SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
-//        UseRecommendedIsolationLevel = true,
-//        UsePageLocksOnDequeue = true,
-//        DisableGlobalLocks = true
-//    };
-
-//    x.UseSqlServerStorage(builder.Configuration.GetConnectionString("MSSql"), option)
-//    .WithJobExpirationTimeout(TimeSpan.FromMinutes(5));
-//});
 var app = builder.Build();
-
-//app.UseHangfireServer();
-//app.UseHangfireDashboard();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

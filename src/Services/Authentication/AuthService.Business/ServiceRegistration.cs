@@ -6,6 +6,7 @@ using AuthService.Business.Services.Auth;
 using AuthService.Business.Services.CurrentUser;
 using AuthService.Business.Services.UserServices;
 using MassTransit;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SharedLibrary.ExternalServices.FileService;
 
@@ -24,8 +25,9 @@ namespace AuthService.Business
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IFileService, FileService>();
         }
-        public static IServiceCollection AddMassTransit(this IServiceCollection services, string cString)
+        public static IServiceCollection AddMassTransit(this IServiceCollection services, IConfiguration configuration)
         {
+            var rabbitMqConfig = configuration.GetSection("RabbitMQ");
             services.AddMassTransit(x =>
             {
                 x.AddConsumer<GetUserDataConsumer>();
@@ -34,10 +36,15 @@ namespace AuthService.Business
                 x.AddConsumer<GetUserEmailConsumer>();
 
                 x.SetKebabCaseEndpointNameFormatter();
-                x.UsingRabbitMq((con, cfg) =>
+                x.UsingRabbitMq((context, cfg) =>
                 {
-                    cfg.Host(cString);
-                    cfg.ConfigureEndpoints(con);
+                    cfg.Host(rabbitMqConfig["Host"], "/", h =>
+                    {
+                        h.Username(rabbitMqConfig["UserName"]);
+                        h.Password(rabbitMqConfig["Password"]);
+                    });
+
+                    cfg.ConfigureEndpoints(context);
                 });
             });
             return services;
