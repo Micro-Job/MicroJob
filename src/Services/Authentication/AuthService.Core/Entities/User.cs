@@ -30,5 +30,6 @@ namespace AuthService.Core.Entities
         public PasswordToken? PasswordToken { get; set; }
 
         public UserRole UserRole { get; set; }
+        public JobStatus JobStatus { get; set; }
     }
 }

@@ -77,6 +77,7 @@ namespace AuthService.Business.Services.UserServices
             user.LastName = dto.LastName.Trim();
             user.Email = dto.Email.Trim();
             user.MainPhoneNumber = dto.MainPhoneNumber.Trim();
+            user.JobStatus = dto.JobStatus;
             await _context.SaveChangesAsync();
 
             return new UserUpdateResponseDto
@@ -86,7 +87,8 @@ namespace AuthService.Business.Services.UserServices
                 LastName = user.LastName,
                 Email = user.Email,
                 MainPhoneNumber = user.MainPhoneNumber,
-                Image = user.Image
+                Image = user.Image,
+                JobStatus = user.JobStatus
             };
         }
 
