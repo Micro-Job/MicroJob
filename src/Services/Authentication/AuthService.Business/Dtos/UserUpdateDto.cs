@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using AuthService.Core.Enums;
+using FluentValidation;
 
 namespace AuthService.Business.Dtos
 {
@@ -9,6 +10,7 @@ namespace AuthService.Business.Dtos
         public string LastName { get; set; }
         public string Email { get; set; }
         public string MainPhoneNumber { get; set; }
+        public JobStatus JobStatus { get; set; }
     }
 
     public class UserUpdateDtoValidator : AbstractValidator<UserUpdateDto>
@@ -39,6 +41,10 @@ namespace AuthService.Business.Dtos
             RuleFor(x => x.MainPhoneNumber)
                 .Matches(@"^(?:\+\d{1,3})?\d{1,4}\d{7,10}$")
                 .WithMessage("Telefon nömrəsi doğru formatda deyil");
+
+            RuleFor(x => x.JobStatus)
+                .IsInEnum()
+                .WithMessage("İş statusu doğru deyil");
         }
     }
 }
