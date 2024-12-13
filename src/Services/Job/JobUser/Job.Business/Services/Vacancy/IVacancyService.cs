@@ -1,5 +1,4 @@
 ﻿using Shared.Dtos.VacancyDtos;
-using Shared.Responses;
 using SharedLibrary.Dtos.CompanyDtos;
 using SharedLibrary.Dtos.VacancyDtos;
 using SharedLibrary.Responses;
