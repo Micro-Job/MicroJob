@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JobCompany.DAL.Migrations
 {
     [DbContext(typeof(JobCompanyDbContext))]
-    [Migration("20241213103723_UpdateExamsTables")]
-    partial class UpdateExamsTables
+    [Migration("20241213104707_UpdateExamTable")]
+    partial class UpdateExamTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -589,7 +589,7 @@ namespace JobCompany.DAL.Migrations
                     b.HasOne("JobCompany.Core.Entites.Exam", "Exam")
                         .WithMany("Questions")
                         .HasForeignKey("ExamId")
-                        .OnDelete(DeleteBehavior.SetNull)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Exam");

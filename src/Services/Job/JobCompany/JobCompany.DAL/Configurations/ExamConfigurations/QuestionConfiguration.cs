@@ -24,7 +24,7 @@ namespace JobCompany.Infrastructure.Configurations.ExamConfigurations
             builder.HasOne(q => q.Exam)
                    .WithMany(e => e.Questions)
                    .HasForeignKey(q => q.ExamId)
-                   .OnDelete(DeleteBehavior.SetNull);
+                   .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasMany(q => q.Answers)
                    .WithOne(a => a.Question)

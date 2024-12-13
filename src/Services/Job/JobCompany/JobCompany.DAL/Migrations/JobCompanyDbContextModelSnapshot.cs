@@ -586,7 +586,7 @@ namespace JobCompany.DAL.Migrations
                     b.HasOne("JobCompany.Core.Entites.Exam", "Exam")
                         .WithMany("Questions")
                         .HasForeignKey("ExamId")
-                        .OnDelete(DeleteBehavior.SetNull)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Exam");

@@ -13,6 +13,7 @@ public class GetOtherVacanciesByCompanyConsumer(JobCompanyDbContext dbContext) :
     {
         var vacancies = await dbContext.Vacancies
             .Where(x => x.CompanyId == context.Message.CompanyId && x.Id != context.Message.CurrentVacancyId)
+            .OrderByDescending(x => x.StartDate)
             .Include(x => x.Company)
             .ToListAsync();
 

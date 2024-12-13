@@ -60,7 +60,7 @@ namespace JobCompany.DAL.Configurations
             builder.HasMany(x => x.Exams)
                    .WithOne(e => e.Company)
                    .HasForeignKey(e => e.CompanyId)
-                   .OnDelete(DeleteBehavior.NoAction);
+                   .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
