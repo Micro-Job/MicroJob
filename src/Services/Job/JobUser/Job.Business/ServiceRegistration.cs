@@ -48,14 +48,8 @@ namespace Job.Business
                 x.SetKebabCaseEndpointNameFormatter();
                 x.UsingRabbitMq((context, cfg) =>
                 {
-                    // RabbitMQ host bilgisi yapılandırılıyor
-                    cfg.Host(rabbitMqConfig["Host"], "/", h =>
-                    {
-                        h.Username(rabbitMqConfig["UserName"]);
-                        h.Password(rabbitMqConfig["Password"]);
-                    });
+                    cfg.Host(configuration["RabbitMQ:ConnectionString"]);
 
-                    // Endpoint'ler yapılandırılıyor
                     cfg.ConfigureEndpoints(context);
                 });
             });

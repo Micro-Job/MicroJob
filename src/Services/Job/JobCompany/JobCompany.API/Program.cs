@@ -4,7 +4,6 @@ using JobCompany.Business.Dtos.VacancyDtos;
 using JobCompany.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using SharedLibrary.Middlewares;
 using SharedLibrary.ServiceRegistration;
 
 namespace JobCompany.API
