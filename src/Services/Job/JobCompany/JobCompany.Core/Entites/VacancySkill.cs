@@ -1,6 +1,8 @@
-﻿namespace JobCompany.Core.Entites
+﻿using JobCompany.Core.Entites.Base;
+
+namespace JobCompany.Core.Entites
 {
-    public class VacancySkill
+    public class VacancySkill : BaseEntity
     {
         public Guid VacancyId { get; set; }
         public Vacancy Vacancy { get; set; }

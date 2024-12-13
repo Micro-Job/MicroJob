@@ -32,6 +32,7 @@ public class GetOtherVacanciesByCompanyConsumer(JobCompanyDbContext dbContext) :
             {
                 CompanyName = x.Company.CompanyName,
                 CompanyLogo = x.Company.CompanyLogo,
+                Location = x.Company.CompanyLocation,
                 Title = x.Title,
                 WorkType = x.WorkType,
                 IsActive = x.IsActive,

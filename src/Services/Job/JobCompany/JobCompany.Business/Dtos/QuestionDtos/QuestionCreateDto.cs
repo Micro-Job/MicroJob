@@ -23,13 +23,6 @@ namespace JobCompany.Business.Dtos.QuestionDtos
                 .NotEmpty()
                 .WithMessage("Sual başlığı boş ola bilməz.");
 
-            When(q => q.QuestionType == QuestionType.ImageBased, () =>
-            {
-                RuleFor(q => q.Image)
-                    .NotEmpty()
-                    .WithMessage("Şəkil əsaslı suallar üçün şəkil URL-si tələb olunur.");
-            });
-
             RuleFor(q => q.Duration)
                 .GreaterThan(0)
                 .When(q => q.Duration.HasValue)

@@ -10,7 +10,6 @@ using JobCompany.Business.Services.ExamServices;
 using JobCompany.Business.Services.QuestionServices;
 using JobCompany.Business.Services.ReportServices;
 using JobCompany.Business.Services.StatusServices;
-using JobCompany.Business.Services.TemplateServices;
 using JobCompany.Business.Services.VacancyServices;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
@@ -35,7 +34,6 @@ namespace JobCompany.Business
             services.AddScoped<IReportService, ReportService>();
             services.AddScoped<IQuestionService, QuestionService>();
             services.AddScoped<IAnswerService, AnswerService>();
-            services.AddScoped<ITemplateService, TemplateService>();
             services.AddScoped<IExamService, ExamService>();
             services.AddScoped<IAnswerService, AnswerService>();
         }
@@ -53,6 +51,7 @@ namespace JobCompany.Business
                 x.AddConsumer<GetCompanyDetailByIdConsumer>();
                 x.AddConsumer<SimilarVacanciesConsumer>();
                 x.AddConsumer<GetVacancyInfoConsumer>();
+                x.AddConsumer<GetAllVacanciesByCompanyIdConsumer>();
                 x.SetKebabCaseEndpointNameFormatter();
                 x.UsingRabbitMq((con, cfg) =>
                 {

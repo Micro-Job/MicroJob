@@ -99,22 +99,6 @@ namespace JobCompany.Business.Services.VacancyServices
 
             await _context.CompanyNumbers.AddRangeAsync(numbers);
 
-            if (vacancyDto.TemplateId != null)
-            {
-                var template = await _context.Templates
-                    .Include(t => t.Exams)
-                    .FirstOrDefaultAsync(t => t.Id == Guid.Parse(vacancyDto.TemplateId))
-                    ?? throw new NotFoundException<Template>();
-
-                vacancy.ExamId = template.Exams.FirstOrDefault()?.Id;
-            }
-
-            else if (vacancyDto.Exam != null)
-            {
-                var createdExamId = await _examService.CreateExamAsync(vacancyDto.Exam);
-                vacancy.ExamId = createdExamId;
-            };
-
             vacancy.CompanyNumbers = numbers;
             await _context.Vacancies.AddAsync(vacancy);
             await _context.SaveChangesAsync();
@@ -196,7 +180,7 @@ namespace JobCompany.Business.Services.VacancyServices
             return vacancies;
         }
 
-        /// <summary>  </summary>
+        /// <summary> ??? </summary>
         public async Task<List<VacancyListDtoForAppDto>> GetAllVacanciesForAppAsync()
         {
             var vacancies = await _context.Vacancies.Where(x => x.Company.UserId == _userGuid && x.IsActive == true).Select(x => new VacancyListDtoForAppDto

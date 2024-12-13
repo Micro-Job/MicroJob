@@ -29,7 +29,6 @@ namespace JobCompany.Business.Services.QuestionServices
                 ? await _fileService.UploadAsync(FilePaths.document, dto.Image)
                 : new FileDto();
 
-            if (dto.QuestionType == Core.Enums.QuestionType.ImageBased && dto.Image == null) throw new InvalidQuestionException();
 
             var question = new Question
             {
@@ -37,7 +36,6 @@ namespace JobCompany.Business.Services.QuestionServices
                 Image = dto.Image != null ? $"{fileResult.FilePath}/{fileResult.FileName}" : null,
                 QuestionType = dto.QuestionType,
                 IsRequired = dto.IsRequired,
-                Duration = dto.Duration,
             };
 
             var questionId = question.Id.ToString();

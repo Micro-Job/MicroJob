@@ -27,9 +27,10 @@ namespace Job.Business.Services.Vacancy
         private readonly IRequestClient<UserRegisteredEvent> _requestClient;
         private readonly IRequestClient<SimilarVacanciesRequest> _similarRequest;
         private readonly IRequestClient<GetVacancyInfoRequest> _vacancyInforRequest;
+        private readonly IRequestClient<GetAllVacanciesByCompanyIdDataRequest> _vacancyByCompanyId;
 
         public VacancyService(JobDbContext context, IRequestClient<GetAllCompaniesRequest> request, IRequestClient<GetUserSavedVacanciesRequest> client, IHttpContextAccessor contextAccessor,
-            IRequestClient<UserRegisteredEvent> requestClient, IRequestClient<GetAllVacanciesRequest> vacClient, IRequestClient<SimilarVacanciesRequest> similarRequest, IRequestClient<GetVacancyInfoRequest> vacancyInforRequest)
+            IRequestClient<UserRegisteredEvent> requestClient, IRequestClient<GetAllVacanciesRequest> vacClient, IRequestClient<SimilarVacanciesRequest> similarRequest, IRequestClient<GetVacancyInfoRequest> vacancyInforRequest, IRequestClient<GetAllVacanciesByCompanyIdDataRequest> vacancyByCompanyId)
         {
             _context = context;
             _request = request;
@@ -40,6 +41,7 @@ namespace Job.Business.Services.Vacancy
             _vacClient = vacClient;
             _similarRequest = similarRequest;
             _vacancyInforRequest = vacancyInforRequest;
+            _vacancyByCompanyId = vacancyByCompanyId;
         }
 
         /// <summary> Userin vakansiya save etme toggle metodu </summary>
@@ -85,7 +87,7 @@ namespace Job.Business.Services.Vacancy
         }
 
         /// <summary> Consumer metodu -  Vacancy idlerine göre saved olunan vakansiyalarin datasi </summary>
-        public async Task<GetUserSavedVacanciesResponse> GetUserSavedVacancyDataAsync(List<Guid> vacancyIds)
+        private async Task<GetUserSavedVacanciesResponse> GetUserSavedVacancyDataAsync(List<Guid> vacancyIds)
         {
             if (vacancyIds == null || vacancyIds.Count == 0)
             {
@@ -102,7 +104,7 @@ namespace Job.Business.Services.Vacancy
             return response.Message;
         }
 
-        /// <summary>Company'e gore butun vakansiyalarin getirilmesi</summary>
+        /// <summary>Butun vakansiyalarin getirilmesi</summary>
         public async Task<List<VacancyDto>> GetAllUserVacanciesAsync()
         {
             var response = await _request.GetResponse<UserVacanciesResponse>(new GetAllUserVacanciesRequest());
@@ -168,7 +170,7 @@ namespace Job.Business.Services.Vacancy
             return pagedVacancies;
         }
 
-     /// <summary> Oxsar vakansiylarin getirilmesi category'e gore </summary>
+        /// <summary> Oxsar vakansiylarin getirilmesi category'e gore </summary>
         public async Task<ICollection<SimilarVacancyDto>> SimilarVacanciesAsync(string vacancyId)
         {
             var guidVacancyId = Guid.Parse(vacancyId);
@@ -195,10 +197,21 @@ namespace Job.Business.Services.Vacancy
                 IsVip = v.IsVip,
                 IsActive = v.IsActive,
                 CategoryId = v.CategoryId,
-                IsSaved = savedVacancies.Contains(v.Id)  
+                IsSaved = savedVacancies.Contains(v.Id)
             }).ToList();
 
             return allVacancies;
+        }
+
+        public async Task<ICollection<AllVacanyDto>> GetAllVacanciesByCompanyId(string companyId)
+        {
+            var guidCompanyId = Guid.Parse(companyId);
+
+            var response = await _vacancyByCompanyId.GetResponse<GetAllVacanciesByCompanyIdDataResponse>(
+                new GetAllVacanciesByCompanyIdDataRequest { CompanyId = guidCompanyId }
+            );
+
+            return response.Message.Vacancies;
         }
     }
 }
