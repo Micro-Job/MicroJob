@@ -29,7 +29,7 @@ namespace AuthService.Business.Services.UserServices
             _currentUserId = _currentUser.UserId ?? throw new UserNotLoggedInException();
             _currentUserGuid = Guid.Parse(_currentUserId);
         }
-        
+
         /// <summary> Loginde olan User informasiyası </summary>
         public async Task<UserInformationDto> GetUserInformationAsync()
         {
@@ -93,23 +93,31 @@ namespace AuthService.Business.Services.UserServices
         /// <summary> Logində olan userin şəkil update'si </summary>
         public async Task<UserProfileImageUpdateResponseDto> UpdateUserProfileImageAsync(UserProfileImageUpdateDto dto)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == _currentUserGuid).Select(x => new User
+            var user = await _context.Users
+                .Where(u => u.Id == _currentUserGuid)
+                .Select(u => new User
+                {
+                    Image = u.Image,
+                    Id = u.Id
+                })
+                .FirstOrDefaultAsync() ?? throw new UserNotFoundException();
+
+            if (!string.IsNullOrEmpty(user.Image))
             {
-                Image = x.Image,
-                Id = x.Id
-            }) ?? throw new UserNotFoundException();
-            if (user.Image is not null) _fileService.DeleteFile(user.Image);
-            FileDto image = await _fileService.UploadAsync("wwwroot/images", dto.Image);
-            var imageUrl = image.FilePath;
-            user.Image = imageUrl;
+                _fileService.DeleteFile(user.Image);
+            }
+
+            FileDto fileResult = await _fileService.UploadAsync("wwwroot/images", dto.Image);
+            user.Image = $"{fileResult.FilePath}/{fileResult.FileName}";
 
             await _context.SaveChangesAsync();
 
             return new UserProfileImageUpdateResponseDto
             {
                 UserId = user.Id,
-                ImageUrl = imageUrl
+                ImageUrl = user.Image
             };
         }
+
     }
 }

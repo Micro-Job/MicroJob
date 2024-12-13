@@ -10,6 +10,7 @@ namespace Shared.Dtos.VacancyDtos
 {
     public class AllVacanyDto
     {
+        public string VacancyId { get; set; }
         public string CompanyName { get; set; }
         public string Title { get; set; }
         public string? CompanyLogo { get; set; }

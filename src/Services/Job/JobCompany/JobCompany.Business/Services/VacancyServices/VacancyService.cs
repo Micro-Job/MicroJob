@@ -196,7 +196,7 @@ namespace JobCompany.Business.Services.VacancyServices
             return vacancies;
         }
 
-        /// <summary>  </summary>
+        /// <summary> ??? </summary>
         public async Task<List<VacancyListDtoForAppDto>> GetAllVacanciesForAppAsync()
         {
             var vacancies = await _context.Vacancies.Where(x => x.Company.UserId == _userGuid && x.IsActive == true).Select(x => new VacancyListDtoForAppDto
