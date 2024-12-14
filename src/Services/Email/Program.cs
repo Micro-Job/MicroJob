@@ -1,3 +1,4 @@
+using Email;
 using EmailService.API.Consumers;
 using EmailService.API.Services;
 using MassTransit;
@@ -25,29 +26,7 @@ builder.Services.AddCors(options =>
 });
 
 // Configure MassTransit with RabbitMQ
-builder.Services.AddMassTransit(x =>
-{
-    x.AddConsumer<SendEmailConsumer>();
-    x.SetKebabCaseEndpointNameFormatter();
-
-    x.UsingRabbitMq((context, cfg) =>
-    {
-        var rabbitMqHost = builder.Configuration["RabbitMQ:Host"];
-        var username = builder.Configuration["RabbitMQ:Username"];
-        var password = builder.Configuration["RabbitMQ:Password"];
-
-        var encodedPassword = Uri.EscapeDataString(password);
-
-        cfg.Host(rabbitMqHost, h =>
-        {
-            h.Username(username);
-            h.Password(encodedPassword); 
-        });
-
-        cfg.ConfigureEndpoints(context);
-    });
-});
-
+builder.Services.AddMassTransitEmail(builder.Configuration);
 
 var app = builder.Build();
 
