@@ -15,6 +15,7 @@ public class GetOtherVacanciesByCompanyConsumer(JobCompanyDbContext dbContext) :
             .Where(x => x.CompanyId == context.Message.CompanyId && x.Id != context.Message.CurrentVacancyId)
             .OrderByDescending(x => x.StartDate)
             .Include(x => x.Company)
+            .AsNoTracking()
             .ToListAsync();
 
         if(vacancies is null)

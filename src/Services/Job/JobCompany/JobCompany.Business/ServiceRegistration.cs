@@ -36,7 +36,7 @@ namespace JobCompany.Business
             services.AddScoped<IQuestionService, QuestionService>();
             services.AddScoped<IAnswerService, AnswerService>();
             services.AddScoped<IExamService, ExamService>();
-            services.AddScoped<IAnswerService, AnswerService>();  
+            services.AddScoped<IAnswerService, AnswerService>();
         }
 
         public static IServiceCollection AddMassTransitCompany(this IServiceCollection services, IConfiguration configuration)
@@ -54,18 +54,23 @@ namespace JobCompany.Business
                 x.AddConsumer<SimilarVacanciesConsumer>();
                 x.AddConsumer<GetVacancyInfoConsumer>();
                 x.AddConsumer<GetAllVacanciesByCompanyIdConsumer>();
+                x.AddConsumer<GetUserApplicationsConsumer>();
                 x.SetKebabCaseEndpointNameFormatter();
+
                 x.UsingRabbitMq((context, cfg) =>
                 {
-                    cfg.Host(rabbitMqConfig["Host"], "/", h =>
+                    var rabbitMqConnectionString = configuration["RabbitMQ:ConnectionString"];
+                    if (string.IsNullOrEmpty(rabbitMqConnectionString))
                     {
-                        h.Username(rabbitMqConfig["UserName"]);
-                        h.Password(rabbitMqConfig["Password"]);
-                    });
+                        throw new InvalidOperationException("RabbitMQ Connection String is missing.");
+                    }
+
+                    cfg.Host(rabbitMqConnectionString);
 
                     cfg.ConfigureEndpoints(context);
                 });
             });
+
             return services; 
         }
     }

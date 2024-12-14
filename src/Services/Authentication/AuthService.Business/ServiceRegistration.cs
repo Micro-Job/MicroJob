@@ -25,6 +25,7 @@ namespace AuthService.Business
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IFileService, FileService>();
         }
+
         public static IServiceCollection AddMassTransit(this IServiceCollection services, IConfiguration configuration)
         {
             var rabbitMqConfig = configuration.GetSection("RabbitMQ");
@@ -38,15 +39,18 @@ namespace AuthService.Business
                 x.SetKebabCaseEndpointNameFormatter();
                 x.UsingRabbitMq((context, cfg) =>
                 {
-                    cfg.Host(rabbitMqConfig["Host"], "/", h =>
+                    var rabbitMqConnectionString = configuration["RabbitMQ:ConnectionString"];
+                    if (string.IsNullOrEmpty(rabbitMqConnectionString))
                     {
-                        h.Username(rabbitMqConfig["UserName"]);
-                        h.Password(rabbitMqConfig["Password"]);
-                    });
+                        throw new InvalidOperationException("RabbitMQ Connection String is missing.");
+                    }
+
+                    cfg.Host(rabbitMqConnectionString);
 
                     cfg.ConfigureEndpoints(context);
                 });
             });
+
             return services;
         }
     }

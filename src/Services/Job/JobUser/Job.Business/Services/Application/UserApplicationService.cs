@@ -1,6 +1,8 @@
 using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Shared.Events;
+using SharedLibrary.Requests;
+using SharedLibrary.Responses;
 using System.Security.Claims;
 
 namespace Job.Business.Services.Application
@@ -9,13 +11,25 @@ namespace Job.Business.Services.Application
     {
         readonly IPublishEndpoint _publishEndpoint;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IRequestClient<GetUserApplicationsRequest> _userApplicationRequest;
         private readonly Guid userGuid;
 
-        public UserApplicationService(IPublishEndpoint publishEndpoint, IHttpContextAccessor httpContextAccessor)
+        public UserApplicationService(IPublishEndpoint publishEndpoint, IHttpContextAccessor httpContextAccessor, IRequestClient<GetUserApplicationsRequest> userApplicationRequest)
         {
             _publishEndpoint = publishEndpoint;
             _httpContextAccessor = httpContextAccessor;
+            _userApplicationRequest = userApplicationRequest;
             userGuid = Guid.Parse(_httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value);
+        }
+
+        /// <summary> İstifadəçinin bütün müraciətlərini gətirir </summary>
+        public async Task<GetUserApplicationsResponse> GetUserApplicationsAsync(int skip, int take)
+        {
+            GetUserApplicationsRequest request = new() { UserId = userGuid, Skip = skip, Take = take };
+
+            var response = await _userApplicationRequest.GetResponse<GetUserApplicationsResponse>(request);
+
+            return response.Message;
         }
 
         /// <summary> Eventle userin application yaratmasi  ve 

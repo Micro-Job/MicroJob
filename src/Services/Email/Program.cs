@@ -14,29 +14,40 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IEmailService, EmailService.API.Services.EmailService>();
 builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
-builder.Services.AddCorsPolicy("http://localhost:3000");
 
+// Configure CORS policy with a specific origin for security
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("_myAllowSpecificOrigins",
+        builder => builder.WithOrigins("http://localhost:3000")
+                          .AllowAnyMethod()
+                          .AllowAnyHeader());
+});
+
+// Configure MassTransit with RabbitMQ
 builder.Services.AddMassTransit(x =>
 {
     x.AddConsumer<SendEmailConsumer>();
     x.SetKebabCaseEndpointNameFormatter();
 
-    // RabbitMQ ayarlarını manuel alıyoruz
     x.UsingRabbitMq((context, cfg) =>
     {
         var rabbitMqHost = builder.Configuration["RabbitMQ:Host"];
         var username = builder.Configuration["RabbitMQ:Username"];
         var password = builder.Configuration["RabbitMQ:Password"];
 
+        var encodedPassword = Uri.EscapeDataString(password);
+
         cfg.Host(rabbitMqHost, h =>
         {
             h.Username(username);
-            h.Password(password);
+            h.Password(encodedPassword); 
         });
 
         cfg.ConfigureEndpoints(context);
     });
 });
+
 
 var app = builder.Build();
 
@@ -48,7 +59,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Use the configured CORS policy
 app.UseCors("_myAllowSpecificOrigins");
+
 app.UseAuthorization();
 
 app.MapControllers();
