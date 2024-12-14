@@ -45,6 +45,7 @@ namespace Job.Business.Services.Resume
             IExperienceService experienceService,
             ILanguageService languageService,
             ICertificateService certificateService,
+            IHttpContextAccessor httpContextAccess,
             IUserInformationService userInformationService)
         {
             _context = context;
@@ -55,8 +56,10 @@ namespace Job.Business.Services.Resume
             _languageService = languageService;
             _certificateService = certificateService;
             _userInformationService = userInformationService;
+            _contextAccessor = httpContextAccess;
             userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value ?? throw new UserIsNotLoggedInException());
             _baseUrl = $"{_contextAccessor.HttpContext.Request.Scheme}://{_contextAccessor.HttpContext.Request.Host.Value}{_contextAccessor.HttpContext.Request.PathBase.Value}";
+            
         }
 
         public async Task CreateResumeAsync(ResumeCreateDto resumeCreateDto, ResumeCreateListsDto resumeCreateListsDto)

@@ -7,6 +7,6 @@ namespace AuthService.Business.Services.CurrentUser
     {
         public string UserId => _contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value;
         public string? UserName => _contextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.Name);
-        public string? BaseUrl => $"{_contextAccessor.HttpContext.Request.Scheme}://{_contextAccessor.HttpContext.Request.Host.Value}{_contextAccessor.HttpContext.Request.PathBase.Value}";
+        public string? BaseUrl => $"{_contextAccessor.HttpContext?.Request.Scheme}://{_contextAccessor.HttpContext?.Request.Host.Value}{_contextAccessor.HttpContext?.Request.PathBase.Value}";
     }
 }
