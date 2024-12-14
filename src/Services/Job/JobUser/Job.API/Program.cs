@@ -98,7 +98,7 @@ namespace Job.API
 
             app.UseHttpsRedirection();
             app.UseAuthorization();
-            app.UseCustomExceptionHandler();
+            // app.UseCustomExceptionHandler();
             app.UseCors("_myAllowSpecificOrigins");
 
             app.MapControllers();
