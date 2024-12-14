@@ -3,8 +3,10 @@ using JobCompany.Business.Dtos.StatusDtos;
 using JobCompany.Business.Exceptions.ApplicationExceptions;
 using JobCompany.Business.Exceptions.VacancyExceptions;
 using JobCompany.Core.Entites;
+using JobCompany.Core.Enums;
 using JobCompany.DAL.Contexts;
 using MassTransit;
+using MassTransit.Initializers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Shared.Events;
@@ -83,7 +85,7 @@ namespace JobCompany.Business.Services.ApplicationServices
 
             var existAppVacancy = await _context.Applications
                 .Include(x => x.Vacancy)
-                .ThenInclude(v => v.Company) 
+                .ThenInclude(v => v.Company)
                 .FirstOrDefaultAsync(x => x.Id == applicationGuid && x.Vacancy.Company.UserId == userGuid)
                 ?? throw new NotFoundException<Application>("Müraciət mövcud deyil!");
 
@@ -265,6 +267,56 @@ namespace JobCompany.Business.Services.ApplicationServices
                 .ToList();
 
             return applicationList;
+        }
+
+        /// <summary> Şirkətə daxil olan bütün müraciətlərin filterlə birlikdə detallı şəkildə gətirilməsi </summary>
+        public async Task<ICollection<AllApplicationListDto>> GetAllApplicationsListAsync(int skip = 1, int take = 10)
+        {
+            var applications = await GetPaginatedApplicationsAsync(skip, take);
+
+            var userIds = applications.Select(a => a.UserId).ToList();
+
+            var userDataResponse = await GetUserDataResponseAsync(userIds);
+
+            return MapApplicationsToDto(applications, userDataResponse);
+        }
+
+        private List<AllApplicationListDto> MapApplicationsToDto(List<Application> applications, GetUsersDataResponse usersDataResponse)
+        {
+            var response = applications.Select(a =>
+            {
+                var user = usersDataResponse.Users.FirstOrDefault(u => u.UserId == a.UserId);
+
+                return new AllApplicationListDto()
+                {
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Email = user.Email,
+                    PhoneNumber = user.PhoneNumber,
+                    StatusName = a.Status.StatusName,
+                    VacancyId = a.VacancyId,
+                    VacancyName = a.Vacancy.Title
+                };
+            }).ToList();
+
+            return response;
+        }
+
+        private async Task<List<Application>> GetPaginatedApplicationsAsync(int skip, int take)
+        {
+            var query = _context.Applications
+                .Include(a => a.Vacancy)
+                .Include(a => a.Status)
+                .Where(a => a.Vacancy.CompanyId == userGuid)
+                .AsNoTracking();
+
+            var applications = await query
+                .OrderByDescending(a => a.CreatedDate)
+                .Skip((skip - 1) * take)
+                .Take(take)
+                .ToListAsync();
+
+            return applications;
         }
     }
 }

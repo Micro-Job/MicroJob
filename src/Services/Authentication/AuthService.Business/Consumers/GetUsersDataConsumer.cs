@@ -26,6 +26,8 @@ namespace AuthService.Business.Consumers
                     x.FirstName,
                     x.LastName,
                     x.Image,
+                    x.Email,
+                    x.MainPhoneNumber
                 })
                 .ToListAsync();
 
