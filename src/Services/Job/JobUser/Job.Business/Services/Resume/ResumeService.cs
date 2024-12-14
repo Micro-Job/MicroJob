@@ -63,8 +63,8 @@ namespace Job.Business.Services.Resume
 
         public async Task CreateResumeAsync(ResumeCreateDto resumeCreateDto, ResumeCreateListsDto resumeCreateListsDto)
         {
-            if (await _context.Resumes.AnyAsync(x => x.UserId == userGuid))
-                throw new IsAlreadyExistException<Core.Entities.Resume>();
+            // if (await _context.Resumes.AnyAsync(x => x.UserId == userGuid))
+            //     throw new IsAlreadyExistException<Core.Entities.Resume>();
 
             FileDto fileResult = resumeCreateDto.UserPhoto != null
                 ? await _fileService.UploadAsync(FilePaths.document, resumeCreateDto.UserPhoto)
