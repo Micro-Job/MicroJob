@@ -62,6 +62,7 @@ public class GetAllVacanciesConsumer : IConsumer<GetAllVacanciesRequest>
         }
 
         var vacancies = await query
+            .Include(q=>q.Skills)
             .Select(v => new AllVacanyDto
             {
                 Title = v.Title,

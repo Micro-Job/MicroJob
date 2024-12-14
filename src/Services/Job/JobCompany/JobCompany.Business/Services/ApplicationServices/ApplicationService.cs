@@ -227,7 +227,7 @@ namespace JobCompany.Business.Services.ApplicationServices
             return userDataResponse;
         }
 
-        /// <summary> Şirkət üçün bütün müraciətlərin gətirilməsi </summary>
+        /// <summary> Daxil olmus muracietler -> Şirkət üçün bütün müraciətlərin gətirilməsi </summary>
         public async Task<ICollection<ApplicationInfoListDto>> GetAllApplicationAsync(int skip = 1, int take = 9)
         {
             var applications = await _context.Applications

@@ -1,4 +1,4 @@
-using Job.Business.Consumers;
+﻿using Job.Business.Consumers;
 using Job.Business.Services.Application;
 using Job.Business.Services.Certificate;
 using Job.Business.Services.Company;
@@ -12,6 +12,7 @@ using Job.Business.Services.Skill;
 using Job.Business.Services.User;
 using Job.Business.Services.Vacancy;
 using MassTransit;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SharedLibrary.ExternalServices.FileService;
 
@@ -36,21 +37,23 @@ namespace Job.Business
             services.AddScoped<ICompanyInformationService, CompanyInformationService>();
         }
 
-        public static IServiceCollection AddMassTransit(this IServiceCollection services, string cString)
+        public static IServiceCollection AddMassTransit(this IServiceCollection services, IConfiguration configuration)
         {
+            var rabbitMqConfig = configuration.GetSection("RabbitMQ");
             services.AddMassTransit(x =>
             {
                 x.AddConsumer<UserRegisteredConsumer>();
                 x.AddConsumer<GetResumeDataConsumer>();
                 x.AddConsumer<UpdateUserApplicationStatusConsumer>();
                 x.SetKebabCaseEndpointNameFormatter();
-                x.UsingRabbitMq((con, cfg) =>
+                x.UsingRabbitMq((context, cfg) =>
                 {
-                    cfg.Host(cString);
-                    cfg.ConfigureEndpoints(con);
+                    cfg.Host(configuration["RabbitMQ:ConnectionString"]);
+
+                    cfg.ConfigureEndpoints(context);
                 });
             });
-            //services.AddMassTransitHostedService();   
+            //services.AddMassTransitHostedService();
             return services;
         }
     }

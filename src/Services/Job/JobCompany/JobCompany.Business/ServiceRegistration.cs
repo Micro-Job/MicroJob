@@ -12,6 +12,7 @@ using JobCompany.Business.Services.ReportServices;
 using JobCompany.Business.Services.StatusServices;
 using JobCompany.Business.Services.VacancyServices;
 using MassTransit;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SharedLibrary.Events;
 using SharedLibrary.ExternalServices.FileService;
@@ -35,11 +36,12 @@ namespace JobCompany.Business
             services.AddScoped<IQuestionService, QuestionService>();
             services.AddScoped<IAnswerService, AnswerService>();
             services.AddScoped<IExamService, ExamService>();
-            services.AddScoped<IAnswerService, AnswerService>();
+            services.AddScoped<IAnswerService, AnswerService>();  
         }
 
-        public static IServiceCollection AddMassTransitCompany(this IServiceCollection services, string cString)
+        public static IServiceCollection AddMassTransitCompany(this IServiceCollection services, IConfiguration configuration)
         {
+            var rabbitMqConfig = configuration.GetSection("RabbitMQ");
             services.AddMassTransit(x =>
             {
                 x.AddConsumer<CompanyRegisteredConsumer>();
@@ -54,13 +56,18 @@ namespace JobCompany.Business
                 x.AddConsumer<GetAllVacanciesByCompanyIdConsumer>();
                 x.AddConsumer<GetUserApplicationsConsumer>();
                 x.SetKebabCaseEndpointNameFormatter();
-                x.UsingRabbitMq((con, cfg) =>
+                x.UsingRabbitMq((context, cfg) =>
                 {
-                    cfg.Host(cString);
-                    cfg.ConfigureEndpoints(con);
+                    cfg.Host(rabbitMqConfig["Host"], "/", h =>
+                    {
+                        h.Username(rabbitMqConfig["UserName"]);
+                        h.Password(rabbitMqConfig["Password"]);
+                    });
+
+                    cfg.ConfigureEndpoints(context);
                 });
             });
-            return services;
+            return services; 
         }
     }
 }

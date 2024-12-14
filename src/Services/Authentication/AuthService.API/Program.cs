@@ -48,7 +48,7 @@ builder.Services.AddSwaggerGen(opt =>
 
 
 builder.Services.AddAuthServices();
-builder.Services.AddMassTransit(builder.Configuration["RabbitMQ"]!);
+builder.Services.AddMassTransit(builder.Configuration);
 
 builder.Services.AddDbContext<AppDbContext>(opt =>
 {

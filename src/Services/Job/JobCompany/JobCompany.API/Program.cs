@@ -4,7 +4,6 @@ using JobCompany.Business.Dtos.VacancyDtos;
 using JobCompany.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using SharedLibrary.Middlewares;
 using SharedLibrary.ServiceRegistration;
 
 namespace JobCompany.API
@@ -58,7 +57,8 @@ namespace JobCompany.API
 
             builder.Services.AddAuth(builder.Configuration["Jwt:Issuer"]!, builder.Configuration["Jwt:Audience"]!, builder.Configuration["Jwt:SigningKey"]!);
             builder.Services.AddJobCompanyServices();
-            builder.Services.AddMassTransitCompany(builder.Configuration["RabbitMQ"]!);
+            builder.Services.AddMassTransitCompany(builder.Configuration);
+            
             builder.Services.AddCorsPolicy("http://localhost:3000");
 
             var app = builder.Build();
