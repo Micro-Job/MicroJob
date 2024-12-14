@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Job.Business.Services.Application;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,6 +12,12 @@ namespace Job.API.Controllers
         public ApplicationController(IUserApplicationService service)
         {
             _service = service;
+        }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetUserApplicationsAsync([FromQuery] int skip, [FromQuery] int take)
+        {
+            return Ok(await _service.GetUserApplicationsAsync(skip, take));
         }
 
         [HttpPost("[action]")]
