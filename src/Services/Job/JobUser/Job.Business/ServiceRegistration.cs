@@ -45,15 +45,25 @@ namespace Job.Business
                 x.AddConsumer<UserRegisteredConsumer>();
                 x.AddConsumer<GetResumeDataConsumer>();
                 x.AddConsumer<UpdateUserApplicationStatusConsumer>();
+
                 x.SetKebabCaseEndpointNameFormatter();
+
                 x.UsingRabbitMq((context, cfg) =>
                 {
-                    cfg.Host(configuration["RabbitMQ:ConnectionString"]);
+                    var rabbitMqConnectionString = configuration["RabbitMQ:ConnectionString"];
+                    if (string.IsNullOrEmpty(rabbitMqConnectionString))
+                    {
+                        throw new InvalidOperationException("RabbitMQ Connection String is missing.");
+                    }
+
+                    cfg.Host(rabbitMqConnectionString);
 
                     cfg.ConfigureEndpoints(context);
                 });
             });
-            //services.AddMassTransitHostedService();
+
+            services.AddMassTransitHostedService();
+
             return services;
         }
     }
