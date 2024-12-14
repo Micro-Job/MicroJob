@@ -65,7 +65,7 @@ namespace AuthService.Business.Services.Auth
             await _context.SaveChangesAsync();
 
             await _publishEndpoint.Publish(new UserRegisteredEvent
-            {   
+            {
                 UserId = user.Id
             });
 
@@ -109,7 +109,7 @@ namespace AuthService.Business.Services.Auth
                     : null,
                 UserRole = UserRole.CompanyUser,
             };
-                
+
             var company = new Company
             {
                 Id = Guid.NewGuid(),
