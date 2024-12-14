@@ -4,48 +4,48 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Job.DAL.Configurations
 {
-    public class ResumeConfiguration : IEntityTypeConfiguration<Resume>
-    {
-        public void Configure(EntityTypeBuilder<Resume> builder)
+        public class ResumeConfiguration : IEntityTypeConfiguration<Resume>
         {
-            builder.Property(r => r.FatherName).HasMaxLength(32).IsRequired();
-            builder.Property(r => r.UserPhoto).HasMaxLength(255);
-            builder.Property(r => r.Adress).HasMaxLength(128);
+                public void Configure(EntityTypeBuilder<Resume> builder)
+                {
+                        builder.Property(r => r.FatherName).HasMaxLength(32).IsRequired();
+                        builder.Property(r => r.UserPhoto).HasMaxLength(255);
+                        builder.Property(r => r.Adress).HasMaxLength(128);
 
-            builder.HasMany(r => r.Educations)
-                   .WithOne(e => e.Resume)
-                   .HasForeignKey(e => e.ResumeId)
-                   .OnDelete(DeleteBehavior.Cascade);
+                        builder.HasMany(r => r.Educations)
+                               .WithOne(e => e.Resume)
+                               .HasForeignKey(e => e.ResumeId)
+                               .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasMany(r => r.Experiences)
-                   .WithOne(ex => ex.Resume)
-                   .HasForeignKey(ex => ex.ResumeId)
-                   .OnDelete(DeleteBehavior.Cascade);
+                        builder.HasMany(r => r.Experiences)
+                               .WithOne(ex => ex.Resume)
+                               .HasForeignKey(ex => ex.ResumeId)
+                               .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasMany(r => r.PhoneNumbers)
-                    .WithOne(ei => ei.Resume)
-                    .HasForeignKey(ei => ei.ResumeId)
-                    .OnDelete(DeleteBehavior.Cascade);
+                        builder.HasMany(r => r.PhoneNumbers)
+                                .WithOne(ei => ei.Resume)
+                                .HasForeignKey(ei => ei.ResumeId)
+                                .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasMany(r => r.Languages)
-                    .WithOne(ei => ei.Resume)
-                    .HasForeignKey(ei => ei.ResumeId)
-                    .OnDelete(DeleteBehavior.Cascade);
+                        builder.HasMany(r => r.Languages)
+                                .WithOne(ei => ei.Resume)
+                                .HasForeignKey(ei => ei.ResumeId)
+                                .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasMany(r => r.Certificates)
-                    .WithOne(ei => ei.Resume)
-                    .HasForeignKey(ei => ei.ResumeId)
-                    .OnDelete(DeleteBehavior.Cascade);
+                        builder.HasMany(r => r.Certificates)
+                                .WithOne(ei => ei.Resume)
+                                .HasForeignKey(ei => ei.ResumeId)
+                                .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasMany(r => r.ResumeSkills)
-                    .WithOne(rs => rs.Resume)
-                    .HasForeignKey(rs => rs.ResumeId)
-                    .OnDelete(DeleteBehavior.Cascade);
+                        builder.HasMany(r => r.ResumeSkills)
+                                .WithOne(rs => rs.Resume)
+                                .HasForeignKey(rs => rs.ResumeId)
+                                .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasOne(u => u.User)
-                   .WithOne()
-                   .HasForeignKey<Resume>(r => r.UserId)
-                   .OnDelete(DeleteBehavior.Cascade);
+                        builder.HasOne(r => r.User)
+                               .WithOne(u => u.Resume)
+                               .HasForeignKey<Resume>(r => r.UserId)
+                               .OnDelete(DeleteBehavior.Cascade);
+                }
         }
-    }
 }
