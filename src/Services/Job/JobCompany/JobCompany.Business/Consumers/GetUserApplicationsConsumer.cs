@@ -21,11 +21,11 @@ public class GetUserApplicationsConsumer(JobCompanyDbContext jobCompanyDbContext
 
         var applications = await query
             .OrderByDescending(a => a.CreatedDate)
-            .Skip(context.Message.Skip)
+            .Skip(Math.Max(0, (context.Message.Skip - 1) * context.Message.Take))
             .Take(context.Message.Take)
             .ToListAsync();
 
-        if (applications == null)
+        if (!applications.Any() == applications is null)
         {
             await context.RespondAsync(new GetUserApplicationsResponse()
             {
