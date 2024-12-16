@@ -59,7 +59,7 @@ namespace Job.Business.Services.Resume
             _contextAccessor = httpContextAccess;
             userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value ?? throw new UserIsNotLoggedInException());
             _baseUrl = $"{_contextAccessor.HttpContext.Request.Scheme}://{_contextAccessor.HttpContext.Request.Host.Value}{_contextAccessor.HttpContext.Request.PathBase.Value}";
-            
+
         }
 
         public async Task CreateResumeAsync(ResumeCreateDto resumeCreateDto, ResumeCreateListsDto resumeCreateListsDto)
@@ -116,7 +116,7 @@ namespace Job.Business.Services.Resume
             var experiences = await _experienceService.CreateBulkExperienceAsync(resumeCreateListsDto.ExperienceCreateDtos.Experiences, resume.Id);
             var languages = await _languageService.CreateBulkLanguageAsync(resumeCreateListsDto.LanguageCreateDtos.Languages, resume.Id);
 
-            var certificates = resumeCreateDto.Certificates != null 
+            var certificates = resumeCreateDto.Certificates != null
                 ? await _certificateService.CreateBulkCertificateAsync(resumeCreateDto.Certificates)
                 : [];
 

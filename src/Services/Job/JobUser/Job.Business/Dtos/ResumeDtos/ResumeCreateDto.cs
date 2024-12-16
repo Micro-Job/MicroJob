@@ -23,7 +23,6 @@ namespace Job.Business.Dtos.ResumeDtos
         public DateTime BirthDay { get; set; }
         public ICollection<Guid>? SkillIds { get; set; }
         public ICollection<CertificateCreateDto>? Certificates { get; set; }
-        public ICollection<LanguageCreateDto> Languages { get; set; }
     }
 
     public class ResumeCreateDtoValidator : AbstractValidator<ResumeCreateDto>
