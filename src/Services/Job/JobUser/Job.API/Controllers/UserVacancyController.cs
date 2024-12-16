@@ -40,7 +40,7 @@ namespace Job.API.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetAllVacancies(string titleName, string categoryId, string countryId, string cityId, bool? isActive, decimal? minSalary, decimal? maxSalary, int skip = 1, int take = 6)
+        public async Task<IActionResult> GetAllVacancies(string? titleName, string? categoryId, string? countryId, string? cityId, bool? isActive, decimal? minSalary, decimal? maxSalary, int skip = 1, int take = 6)
         {
             return Ok(await _vacancyService.GetAllVacanciesAsync(titleName, categoryId, countryId, cityId, isActive, minSalary, maxSalary, skip, take));
         }
