@@ -1,3 +1,5 @@
+using SharedLibrary.Enums;
+
 namespace Shared.Responses
 {
     public class GetUsersDataResponse
@@ -10,5 +12,7 @@ namespace Shared.Responses
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string? ProfileImage { get; set; }
+        public string Email { get; set; }
+        public string PhoneNumber { get; set; }
     }
 }

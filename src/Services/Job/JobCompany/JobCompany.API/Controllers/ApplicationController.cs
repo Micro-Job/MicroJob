@@ -30,6 +30,12 @@ namespace JobCompany.API.Controllers
             return Ok(await _service.GetAllApplicationAsync(skip,take));
         }
 
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetAllApplicationsList(int skip = 1, int take = 10)
+        {
+            return Ok(await _service.GetAllApplicationsListAsync(skip, take));
+        }
+
         [HttpPatch("[action]")]
         public async Task<IActionResult> ChangeApplicationStatus(string applicationId, string statusId)
         {
