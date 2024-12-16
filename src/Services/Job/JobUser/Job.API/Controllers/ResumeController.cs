@@ -26,9 +26,10 @@ namespace Job.API.Controllers
         }
 
         [HttpPost("[action]")]
-        public async Task<IActionResult> UpdateResume([FromForm] ResumeUpdateDto resumeUpdateDto)
+        public async Task<IActionResult> UpdateResume(ResumeUpdateDto resumeUpdateDto,
+            ResumeUpdateListDto resumeUpdateListsDto)
         {
-            await _service.UpdateResumeAsync(resumeUpdateDto);
+            await _service.UpdateResumeAsync(resumeUpdateDto, resumeUpdateListsDto);
             return Ok();
         }
 

@@ -6,6 +6,7 @@ namespace Job.Business.Services.Certificate
     {
         Task CreateCertificateAsync(CertificateCreateDto dto);
         Task<ICollection<Core.Entities.Certificate>> CreateBulkCertificateAsync(ICollection<CertificateCreateDto> dtos);
-        Task UpdateCertificateAsync(string id, CertificateUpdateDto dto);
+        Task UpdateCertificateAsync(CertificateUpdateDto dto);
+        Task<ICollection<Core.Entities.Certificate>> UpdateBulkCertificateAsync(ICollection<CertificateUpdateDto> dtos);
     }
 }

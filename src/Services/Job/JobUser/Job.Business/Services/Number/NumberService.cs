@@ -1,6 +1,7 @@
 using Job.Business.Dtos.NumberDtos;
 using Job.Business.Exceptions.Common;
 using Job.DAL.Contexts;
+using Microsoft.EntityFrameworkCore;
 
 namespace Job.Business.Services.Number
 {
@@ -17,7 +18,7 @@ namespace Job.Business.Services.Number
             await _context.Numbers.AddAsync(number);
         }
 
-        public async Task<List<Core.Entities.Number>> CreateBulkNumberAsync(ICollection<NumberCreateDto> numberCreateDtos,Guid resumeId)
+        public async Task<List<Core.Entities.Number>> CreateBulkNumberAsync(ICollection<NumberCreateDto> numberCreateDtos, Guid resumeId)
         {
             var numbersToAdd = new List<Core.Entities.Number>();
 
@@ -35,17 +36,39 @@ namespace Job.Business.Services.Number
             return numbersToAdd;
         }
 
-        public async Task UpdateNumberAsync(string id, NumberUpdateDto numberUpdateDto)
+        public async Task<List<Core.Entities.Number>> UpdateBulkNumberAsync(ICollection<NumberUpdateDto> numberUpdateDtos, Guid resumeId)
         {
-            var numberId = Guid.Parse(id);
-            var number = await _context.Numbers.FindAsync(numberId)
-                ?? throw new NotFoundException<Core.Entities.Number>();
-            number.PhoneNumber = numberUpdateDto.PhoneNumber;
+            var numbersToUpdate = new List<Core.Entities.Number>();
+
+            foreach (var numberUpdateDto in numberUpdateDtos)
+            {
+                var number = await _context.Numbers
+                    .FirstOrDefaultAsync(n => n.PhoneNumber == numberUpdateDto.PhoneNumber && n.ResumeId == resumeId);
+
+                if (number == null)
+                {
+                    throw new NotFoundException<Core.Entities.Number>();
+                }
+
+                number.PhoneNumber = numberUpdateDto.PhoneNumber;
+                numbersToUpdate.Add(number);
+            }
+
+            _context.Numbers.UpdateRange(numbersToUpdate); 
+            await _context.SaveChangesAsync(); 
+
+            return numbersToUpdate;
         }
 
-        public Task UpdateNumberAsync(ICollection<NumberUpdateDto> dtos)
+
+        public async Task UpdateNumberAsync(NumberUpdateDto numberUpdateDto)
         {
-            throw new NotImplementedException();
+            var number = await _context.Numbers
+                .FirstOrDefaultAsync(n => n.PhoneNumber == numberUpdateDto.PhoneNumber)
+                ?? throw new NotFoundException<Core.Entities.Number>();
+
+            number.PhoneNumber = numberUpdateDto.PhoneNumber;
+            await _context.SaveChangesAsync();
         }
     }
 }
