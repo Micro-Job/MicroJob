@@ -38,7 +38,7 @@ namespace AuthService.Business.Services.Auth
             if (dto.Password != dto.ConfirmPassword) throw new WrongPasswordException();
 
             FileDto fileResult = dto.Image != null
-              ? await _fileService.UploadAsync(FilePaths.document, dto.Image)
+              ? await _fileService.UploadAsync(FilePaths.image, dto.Image)
               : new FileDto();
 
             var user = new User
@@ -92,7 +92,7 @@ namespace AuthService.Business.Services.Auth
             if (dto.Password != dto.ConfirmPassword) throw new WrongPasswordException();
 
             FileDto fileResult = dto.Image != null
-              ? await _fileService.UploadAsync(FilePaths.document, dto.Image)
+              ? await _fileService.UploadAsync(FilePaths.image, dto.Image)
               : new FileDto();
 
             var user = new User

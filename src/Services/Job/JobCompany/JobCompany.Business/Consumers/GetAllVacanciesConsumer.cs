@@ -62,9 +62,10 @@ public class GetAllVacanciesConsumer : IConsumer<GetAllVacanciesRequest>
         }
 
         var vacancies = await query
-            .Include(q=>q.Skills)
+            // .Include(q => q.Skills)
             .Select(v => new AllVacanyDto
             {
+                VacancyId = v.Id.ToString(),
                 Title = v.Title,
                 CompanyName = v.Company.CompanyName,
                 CompanyLogo = v.Company.CompanyLogo,
@@ -77,6 +78,7 @@ public class GetAllVacanciesConsumer : IConsumer<GetAllVacanciesRequest>
                 CategoryId = v.CategoryId,
                 Company = new CompanyDetailDto
                 {
+                    CompanyId = v.Company.Id,
                     CityId = v.Company.CityId,
                     CountryId = v.Company.CountryId,
                 }

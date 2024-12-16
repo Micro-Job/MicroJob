@@ -10,6 +10,7 @@ using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.ExternalServices.FileService;
 using SharedLibrary.Requests;
 using SharedLibrary.Responses;
+using SharedLibrary.Statics;
 
 namespace AuthService.Business.Services.UserServices
 {
@@ -96,20 +97,18 @@ namespace AuthService.Business.Services.UserServices
         public async Task<UserProfileImageUpdateResponseDto> UpdateUserProfileImageAsync(UserProfileImageUpdateDto dto)
         {
             var user = await _context.Users
-                .Where(u => u.Id == _currentUserGuid)
-                .Select(u => new User
-                {
-                    Image = u.Image,
-                    Id = u.Id
-                })
-                .FirstOrDefaultAsync() ?? throw new UserNotFoundException();
+                .FirstOrDefaultAsync(u => u.Id == _currentUserGuid)
+                ?? throw new UserNotFoundException();
 
             if (!string.IsNullOrEmpty(user.Image))
             {
                 _fileService.DeleteFile(user.Image);
             }
 
-            FileDto fileResult = await _fileService.UploadAsync("wwwroot/images", dto.Image);
+            FileDto fileResult = dto.Image != null
+                ? await _fileService.UploadAsync(FilePaths.image, dto.Image)
+                : new FileDto();
+
             user.Image = $"{fileResult.FilePath}/{fileResult.FileName}";
 
             await _context.SaveChangesAsync();
@@ -120,5 +119,6 @@ namespace AuthService.Business.Services.UserServices
                 ImageUrl = user.Image
             };
         }
+
     }
 }
