@@ -1,5 +1,6 @@
 using FluentValidation;
 using Job.Business.Dtos.CertificateDtos;
+using Job.Business.Dtos.LanguageDtos;
 using Job.Core.Enums;
 using Microsoft.AspNetCore.Http;
 

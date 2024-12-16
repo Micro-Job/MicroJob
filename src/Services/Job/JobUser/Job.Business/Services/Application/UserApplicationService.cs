@@ -37,7 +37,6 @@ namespace Job.Business.Services.Application
         public async Task CreateUserApplicationAsync(string vacancyId)
         {
             var guidVac = Guid.Parse(vacancyId);
-
             await _publishEndpoint.Publish(new UserApplicationEvent
             {
                 UserId = userGuid,

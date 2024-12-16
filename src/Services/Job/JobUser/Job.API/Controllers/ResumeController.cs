@@ -13,7 +13,7 @@ namespace Job.API.Controllers
         readonly IResumeService _service = service;
 
         [HttpPost("[action]")]
-        public async Task<IActionResult> CreateResumeAsync(
+        public async Task<IActionResult> CreateResume(
             ResumeCreateDto resumeCreateDto,
             ResumeCreateListsDto resumeCreateListsDto
         )
