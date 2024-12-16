@@ -11,7 +11,7 @@ namespace Job.API.Controllers
         private readonly ISkillService _skillService = skillService;
 
         [HttpPost("[action]")]
-        public async Task<IActionResult> CreateSkillAsync(SkillDto dto)
+        public async Task<IActionResult> CreateSkill(SkillDto dto)
         {
             await _skillService.CreateSkillAsync(dto);
             return Ok();

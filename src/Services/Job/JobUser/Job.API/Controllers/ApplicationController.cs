@@ -15,13 +15,13 @@ namespace Job.API.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetUserApplicationsAsync([FromQuery] int skip, [FromQuery] int take)
+        public async Task<IActionResult> GetUserApplication([FromQuery] int skip, [FromQuery] int take)
         {
             return Ok(await _service.GetUserApplicationsAsync(skip, take));
         }
 
         [HttpPost("[action]")]
-        public async Task<IActionResult> CreateUserApplicationAsync(string vacancyId)
+        public async Task<IActionResult> CreateUserApplication(string vacancyId)
         {
             await _service.CreateUserApplicationAsync(vacancyId);
             return Ok();
