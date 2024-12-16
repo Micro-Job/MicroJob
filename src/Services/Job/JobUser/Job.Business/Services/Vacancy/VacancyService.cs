@@ -1,4 +1,5 @@
-﻿using Job.Core.Entities;
+﻿using Job.Business.Exceptions.Common;
+using Job.Core.Entities;
 using Job.DAL.Contexts;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
@@ -28,9 +29,11 @@ namespace Job.Business.Services.Vacancy
         private readonly IRequestClient<SimilarVacanciesRequest> _similarRequest;
         private readonly IRequestClient<GetVacancyInfoRequest> _vacancyInforRequest;
         private readonly IRequestClient<GetAllVacanciesByCompanyIdDataRequest> _vacancyByCompanyId;
+        private readonly IRequestClient<CheckVacancyRequest> _checkVacancyRequest;
 
         public VacancyService(JobDbContext context, IRequestClient<GetAllCompaniesRequest> request, IRequestClient<GetUserSavedVacanciesRequest> client, IHttpContextAccessor contextAccessor,
-            IRequestClient<UserRegisteredEvent> requestClient, IRequestClient<GetAllVacanciesRequest> vacClient, IRequestClient<SimilarVacanciesRequest> similarRequest, IRequestClient<GetVacancyInfoRequest> vacancyInforRequest, IRequestClient<GetAllVacanciesByCompanyIdDataRequest> vacancyByCompanyId)
+            IRequestClient<UserRegisteredEvent> requestClient, IRequestClient<GetAllVacanciesRequest> vacClient, IRequestClient<SimilarVacanciesRequest> similarRequest, 
+            IRequestClient<GetVacancyInfoRequest> vacancyInforRequest, IRequestClient<GetAllVacanciesByCompanyIdDataRequest> vacancyByCompanyId, IRequestClient<CheckVacancyRequest> checkVacancyRequest)
         {
             _context = context;
             _request = request;
@@ -42,12 +45,21 @@ namespace Job.Business.Services.Vacancy
             _similarRequest = similarRequest;
             _vacancyInforRequest = vacancyInforRequest;
             _vacancyByCompanyId = vacancyByCompanyId;
+            _checkVacancyRequest = checkVacancyRequest;
         }
 
         /// <summary> Userin vakansiya save etme toggle metodu </summary>
         public async Task ToggleSaveVacancyAsync(string vacancyId)
         {
             Guid vacancyGuid = Guid.Parse(vacancyId);
+
+            var response = await _checkVacancyRequest.GetResponse<CheckVacancyResponse>(new CheckVacancyRequest
+            {
+                VacancyId = vacancyGuid
+            });
+
+            if (!response.Message.IsExist) throw new EntityNotFoundException("Vacancy");
+
             var vacancyCheck = await _context.SavedVacancies.FirstOrDefaultAsync(x => x.VacancyId == vacancyGuid);
 
             if (vacancyCheck != null)
@@ -181,6 +193,13 @@ namespace Job.Business.Services.Vacancy
         public async Task<ICollection<SimilarVacancyDto>> SimilarVacanciesAsync(string vacancyId)
         {
             var guidVacancyId = Guid.Parse(vacancyId);
+
+            var checkVacancyresponse = await _checkVacancyRequest.GetResponse<CheckVacancyResponse>(new CheckVacancyRequest
+            {
+                VacancyId = guidVacancyId
+            });
+
+            if (!checkVacancyresponse.Message.IsExist) throw new EntityNotFoundException("Vacancy");
 
             var savedVacancies = await _context.SavedVacancies
                 .Where(sv => sv.UserId == userGuid)
