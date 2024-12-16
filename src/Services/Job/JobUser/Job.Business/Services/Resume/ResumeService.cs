@@ -138,116 +138,81 @@ namespace Job.Business.Services.Resume
             await _context.SaveChangesAsync();
         }
 
-        public async Task UpdateResumeAsync(ResumeUpdateDto resumeUpdateDto)
+        public async Task UpdateResumeAsync(ResumeUpdateDto resumeUpdateDto, ResumeUpdateListDto resumeUpdateListsDto)
         {
             var resume = await _context.Resumes
-                    .Include(r => r.PhoneNumbers)
-                    .Include(r => r.Educations)
-                    .Include(r => r.Experiences)
-                    .Include(r => r.Languages)
-                    .Include(r => r.Certificates).FirstOrDefaultAsync(r => r.UserId == userGuid)
-                            ?? throw new NotFoundException<Core.Entities.Resume>();
+                .Include(x => x.PhoneNumbers)
+                .Include(x => x.Educations)
+                .Include(x => x.Certificates)
+                .Include(x => x.Experiences)
+                .Include(x => x.Languages)
+                .FirstOrDefaultAsync(x => x.UserId == userGuid) ??
+                throw new NotFoundException<Core.Entities.Resume>();
 
             resume.FatherName = resumeUpdateDto.FatherName;
             resume.Position = resumeUpdateDto.Position;
             resume.IsDriver = resumeUpdateDto.IsDriver;
             resume.IsMarried = resumeUpdateDto.IsMarried;
             resume.IsCitizen = resumeUpdateDto.IsCitizen;
+            resume.IsPublic = resumeUpdateDto.IsPublic;
             resume.Gender = resumeUpdateDto.Gender;
             resume.Adress = resumeUpdateDto.Adress;
             resume.BirthDay = resumeUpdateDto.BirthDay;
 
-            //if (resumeUpdateDto.UserPhoto != null)
-            //{
-            //    if (resume.UserPhoto != null)
-            //    {
-            //        _fileService.DeleteFile(resume.UserPhoto);
-            //    };
-            //    var fileResult = await _fileService.UploadAsync(FilePaths.image, resumeUpdateDto.UserPhoto);
-            //    resume.UserPhoto = $"{fileResult.FilePath}/{fileResult.FileName}";
-            //}
-
-            if (resumeUpdateDto.PhoneNumbers != null)
+            if (resumeUpdateDto.UserPhoto != null)
             {
-                foreach (var phoneNumberDto in resumeUpdateDto.PhoneNumbers)
-                {
-                    var phoneNumberGuid = Guid.Parse(phoneNumberDto.Id);
-                    var phoneNumber = resume.PhoneNumbers.FirstOrDefault(p => p.Id == phoneNumberGuid);
-                    if (phoneNumber != null && phoneNumber.PhoneNumber != phoneNumberDto.PhoneNumber)
-                    {
-                        phoneNumber.PhoneNumber = phoneNumberDto.PhoneNumber;
-                    }
-                }
+                FileDto fileResult = await _fileService.UploadAsync(FilePaths.document, resumeUpdateDto.UserPhoto);
+                resume.UserPhoto = $"{fileResult.FilePath}/{fileResult.FileName}";
             }
 
-            if (resumeUpdateDto.Educations != null)
+            string email = resumeUpdateDto.IsMainEmail
+                ? await _userInformationService.GetUserDataAsync(userGuid).Select(x => x.Email)
+                : resumeUpdateDto.ResumeEmail;
+            resume.ResumeEmail = email;
+
+            if (!resumeUpdateDto.IsMainNumber)
             {
-                foreach (var educationDto in resumeUpdateDto.Educations)
+                _context.Numbers.RemoveRange(resume.PhoneNumbers);
+                var numbers = await _numberService.UpdateBulkNumberAsync(resumeUpdateListsDto.NumberUpdateDtos.PhoneNumbers, resume.Id);
+                resume.PhoneNumbers = numbers;
+            }
+            else
+            {
+                var mainNumber = await _userInformationService.GetUserDataAsync(userGuid).Select(x => new Core.Entities.Number
                 {
-                    var educationGuid = Guid.Parse(educationDto.Id);
-                    var education = resume.Educations.FirstOrDefault(e => e.Id == educationGuid);
-                    if (education != null)
-                    {
-                        education.InstitutionName = educationDto.InstitutionName;
-                        education.Profession = educationDto.Profession;
-                        education.StartDate = educationDto.StartDate;
-                        education.EndDate = educationDto.EndDate;
-                    }
-                }
+                    PhoneNumber = x.MainPhoneNumber,
+                    ResumeId = resume.Id
+                });
+                resume.PhoneNumbers = new List<Core.Entities.Number> { mainNumber };
             }
 
-            if (resumeUpdateDto.Experiences != null)
-            {
-                foreach (var experienceDto in resumeUpdateDto.Experiences)
-                {
-                    var experienceGuid = Guid.Parse(experienceDto.Id);
-                    var experience = resume.Experiences?.FirstOrDefault(e => e.Id == experienceGuid);
-                    if (experience != null)
-                    {
-                        experience.OrganizationName = experienceDto.OrganizationName;
-                        experience.PositionName = experienceDto.PositionName;
-                        experience.PositionDescription = experienceDto.PositionDescription;
-                        experience.StartDate = experienceDto.StartDate;
-                        experience.EndDate = experienceDto.EndDate;
-                    }
-                }
-            }
+            var educations = await _educationService.UpdateBulkEducationAsync(resumeUpdateListsDto.EducationUpdateDtos.Educations, resume.Id);
+            resume.Educations = educations;
 
-            if (resumeUpdateDto.Languages != null)
-            {
-                foreach (var languageDto in resumeUpdateDto.Languages)
-                {
-                    var languageGuid = Guid.Parse(languageDto.Id);
-                    var language = resume.Languages?.FirstOrDefault(l => l.Id == languageGuid);
-                    if (language != null && language.LanguageName != languageDto.LanguageName)
-                    {
-                        language.LanguageName = languageDto.LanguageName;
-                    }
-                }
-            }
+            var experiences = await _experienceService.UpdateBulkExperienceAsync(resumeUpdateListsDto.ExperienceUpdateDtos.Experiences, resume.Id);
+            resume.Experiences = experiences;
 
-            if (resumeUpdateDto.Certificates != null)
-            {
-                foreach (var certificateDto in resumeUpdateDto.Certificates)
+            var languages = await _languageService.UpdateBulkLanguageAsync(resumeUpdateListsDto.LanguageUpdateDtos.Languages, resume.Id);
+            resume.Languages = languages;
+
+            var certificates = resumeUpdateDto.Certificates != null
+                ? await _certificateService.UpdateBulkCertificateAsync(resumeUpdateDto.Certificates)
+                : new List<Core.Entities.Certificate>();
+            resume.Certificates = certificates;
+
+            var resumeSkills = resumeUpdateDto.SkillIds != null
+                ? resumeUpdateDto.SkillIds.Select(skillId => new ResumeSkill
                 {
-                    var certificateGuid = Guid.Parse(certificateDto.Id);
-                    var certificate = resume.Certificates?.FirstOrDefault(c => c.Id == certificateGuid);
-                    if (certificate != null && certificate.CertificateName != certificateDto.CertificateName)
-                    {
-                        certificate.CertificateName = certificateDto.CertificateName;
-                        certificate.GivenOrganization = certificateDto.GivenOrganization;
-                        if (certificate.CertificateFile != null)
-                        {
-                            _fileService.DeleteFile(certificate.CertificateFile);
-                        }
-                        var fileResult = await _fileService.UploadAsync(FilePaths.document, certificateDto.CertificateFile);
-                        certificate.CertificateFile = $"{fileResult.FilePath}/{fileResult.FileName}";
-                    }
-                }
-            }
+                    SkillId = skillId,
+                    ResumeId = resume.Id
+                }).ToList()
+                : new List<ResumeSkill>();
+            resume.ResumeSkills = resumeSkills;
+
             _context.Resumes.Update(resume);
             await _context.SaveChangesAsync();
         }
+
 
         public async Task<ResumeDetailItemDto> GetByIdResumeAsync()
         {

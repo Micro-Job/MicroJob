@@ -6,8 +6,8 @@ namespace Job.Business.Services.Resume
     {
         Task CreateResumeAsync(ResumeCreateDto resumeCreateDto,
         ResumeCreateListsDto resumeCreateListsDto);
-        Task UpdateResumeAsync(ResumeUpdateDto resumeUpdateDto);
-        //Task<IEnumerable<ResumeListDto>> GetAllResumeAsync();
+        Task UpdateResumeAsync(ResumeUpdateDto resumeUpdateDto,
+        ResumeUpdateListDto resumeUpdateListsDto);
         Task<ResumeDetailItemDto> GetByIdResumeAsync();
     }
 }

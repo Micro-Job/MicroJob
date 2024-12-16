@@ -5,7 +5,8 @@ namespace Job.Business.Services.Language
     public interface ILanguageService
     {
         Task CreateLanguageAsync(LanguageCreateDto dto);
-        Task<ICollection<Core.Entities.Language>> CreateBulkLanguageAsync(ICollection<LanguageCreateDto> dtos,Guid resumeId);
-        Task UpdateLanguageAsync(string id, LanguageUpdateDto dto);
+        Task<ICollection<Core.Entities.Language>> CreateBulkLanguageAsync(ICollection<LanguageCreateDto> dtos, Guid resumeId);
+        Task UpdateLanguageAsync(LanguageUpdateDto dto);
+        Task<ICollection<Core.Entities.Language>> UpdateBulkLanguageAsync(ICollection<LanguageUpdateDto> dtos, Guid resumeId);
     }
 }

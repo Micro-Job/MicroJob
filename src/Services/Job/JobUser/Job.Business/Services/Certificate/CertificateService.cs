@@ -31,7 +31,7 @@ namespace Job.Business.Services.Certificate
 
             return [.. certificates];
         }
-        
+
         public async Task CreateCertificateAsync(CertificateCreateDto dto)
         {
             FileDto fileResult = await _fileService.UploadAsync(FilePaths.document, dto.CertificateFile);
@@ -44,10 +44,29 @@ namespace Job.Business.Services.Certificate
             await _context.Certificates.AddAsync(certificate);
         }
 
-        public async Task UpdateCertificateAsync(string id, CertificateUpdateDto dto)
+        public async Task<ICollection<Core.Entities.Certificate>> UpdateBulkCertificateAsync(ICollection<CertificateUpdateDto> dtos)
         {
-            var certificateId = Guid.Parse(id);
-            var certificate = await _context.Certificates.FindAsync(certificateId)
+            var updatedCertificates = new List<Core.Entities.Certificate>();
+
+            foreach (var dto in dtos)
+            {
+                var certificate = await _context.Certificates.FindAsync(dto.Id)
+                    ?? throw new NotFoundException<Core.Entities.Certificate>(); 
+
+                certificate.CertificateName = dto.CertificateName;
+                certificate.GivenOrganization = dto.GivenOrganization;
+
+                updatedCertificates.Add(certificate);
+            }
+
+            await _context.SaveChangesAsync();
+            return updatedCertificates;
+        }
+
+
+        public async Task UpdateCertificateAsync(CertificateUpdateDto dto)
+        {
+            var certificate = await _context.Certificates.FindAsync(dto.Id)
                 ?? throw new NotFoundException<Core.Entities.Certificate>();
             certificate.CertificateName = dto.CertificateName;
             certificate.GivenOrganization = dto.GivenOrganization;

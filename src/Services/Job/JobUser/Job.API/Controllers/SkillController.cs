@@ -16,5 +16,11 @@ namespace Job.API.Controllers
             await _skillService.CreateSkillAsync(dto);
             return Ok();
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllSkills()
+        {
+            return Ok(await _skillService.GetAllSkillsAsync());
+        }
     }
 }
