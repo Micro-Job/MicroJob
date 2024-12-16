@@ -50,7 +50,7 @@ namespace Job.DAL.Migrations
 
                     b.HasIndex("ResumeId");
 
-                    b.ToTable("Certificates");
+                    b.ToTable("Certificates", (string)null);
                 });
 
             modelBuilder.Entity("Job.Core.Entities.Education", b =>
@@ -88,7 +88,7 @@ namespace Job.DAL.Migrations
 
                     b.HasIndex("ResumeId");
 
-                    b.ToTable("Educations");
+                    b.ToTable("Educations", (string)null);
                 });
 
             modelBuilder.Entity("Job.Core.Entities.Experience", b =>
@@ -127,7 +127,7 @@ namespace Job.DAL.Migrations
 
                     b.HasIndex("ResumeId");
 
-                    b.ToTable("Experiences");
+                    b.ToTable("Experiences", (string)null);
                 });
 
             modelBuilder.Entity("Job.Core.Entities.Language", b =>
@@ -149,7 +149,7 @@ namespace Job.DAL.Migrations
 
                     b.HasIndex("ResumeId");
 
-                    b.ToTable("Languages");
+                    b.ToTable("Languages", (string)null);
                 });
 
             modelBuilder.Entity("Job.Core.Entities.Notification", b =>
@@ -183,7 +183,7 @@ namespace Job.DAL.Migrations
 
                     b.HasIndex("ReceiverId");
 
-                    b.ToTable("Notifications");
+                    b.ToTable("Notifications", (string)null);
                 });
 
             modelBuilder.Entity("Job.Core.Entities.Number", b =>
@@ -204,7 +204,7 @@ namespace Job.DAL.Migrations
 
                     b.HasIndex("ResumeId");
 
-                    b.ToTable("Numbers");
+                    b.ToTable("Numbers", (string)null);
                 });
 
             modelBuilder.Entity("Job.Core.Entities.Resume", b =>
@@ -259,7 +259,7 @@ namespace Job.DAL.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("Resumes");
+                    b.ToTable("Resumes", (string)null);
                 });
 
             modelBuilder.Entity("Job.Core.Entities.ResumeSkill", b =>
@@ -274,7 +274,7 @@ namespace Job.DAL.Migrations
 
                     b.HasIndex("SkillId");
 
-                    b.ToTable("ResumeSkills");
+                    b.ToTable("ResumeSkills", (string)null);
                 });
 
             modelBuilder.Entity("Job.Core.Entities.SavedVacancy", b =>
@@ -293,7 +293,7 @@ namespace Job.DAL.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("SavedVacancies");
+                    b.ToTable("SavedVacancies", (string)null);
                 });
 
             modelBuilder.Entity("Job.Core.Entities.Skill", b =>
@@ -309,7 +309,7 @@ namespace Job.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Skills");
+                    b.ToTable("Skills", (string)null);
                 });
 
             modelBuilder.Entity("Job.Core.Entities.User", b =>
@@ -320,7 +320,7 @@ namespace Job.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("Job.Core.Entities.Certificate", b =>

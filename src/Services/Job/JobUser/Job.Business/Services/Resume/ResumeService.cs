@@ -116,7 +116,7 @@ namespace Job.Business.Services.Resume
             var experiences = await _experienceService.CreateBulkExperienceAsync(resumeCreateListsDto.ExperienceCreateDtos.Experiences, resume.Id);
             var languages = await _languageService.CreateBulkLanguageAsync(resumeCreateListsDto.LanguageCreateDtos.Languages, resume.Id);
 
-            var certificates = resumeCreateDto.Certificates != null
+            var certificates = resumeCreateDto.Certificates != null 
                 ? await _certificateService.CreateBulkCertificateAsync(resumeCreateDto.Certificates)
                 : [];
 
