@@ -141,7 +141,8 @@ namespace Job.Business.Services.Vacancy
         /// <returns></returns>
         public async Task<GetVacancyInfoResponse> GetVacancyInfoAsync(Guid vacancyId)
         {
-            var response = await _vacancyInforRequest.GetResponse<GetVacancyInfoResponse>(vacancyId);
+            var request = new GetVacancyInfoRequest { Id = vacancyId };
+            var response = await _vacancyInforRequest.GetResponse<GetVacancyInfoResponse>(request);
             return response.Message;
         }
         /// <summary> Butun vakansiyalarin getirilmesi - search ve filter</summary>
