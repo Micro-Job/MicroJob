@@ -24,6 +24,7 @@ namespace JobCompany.Business.Services.Skill
             var skills = await _context.Skills.ToListAsync();
             return skills.Select(s => new GetAllSkillDto
             {
+                Id = s.Id,
                 Name = s.Name
             }).ToList();
         }

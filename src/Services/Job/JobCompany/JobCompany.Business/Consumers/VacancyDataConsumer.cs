@@ -6,14 +6,9 @@ using SharedLibrary.Responses;
 
 namespace JobCompany.Business.Consumers
 {
-    public class VacancyDataConsumer : IConsumer<GetUserSavedVacanciesRequest>
+    public class VacancyDataConsumer(JobCompanyDbContext context) : IConsumer<GetUserSavedVacanciesRequest>
     {
-        private readonly JobCompanyDbContext _context;
-
-        public VacancyDataConsumer(JobCompanyDbContext context)
-        {
-            _context = context;
-        }
+        private readonly JobCompanyDbContext _context = context;
 
         public async Task Consume(ConsumeContext<GetUserSavedVacanciesRequest> context)
         {
@@ -21,9 +16,9 @@ namespace JobCompany.Business.Consumers
 
             var vacancies = await _context.Vacancies
                 .Where(v => vacancyIds.Contains(v.Id))
-                .ToListAsync();
+                .AsNoTracking().ToListAsync();
 
-            if (vacancies == null || !vacancies.Any())
+            if (vacancies == null || vacancies.Count == 0)
             {
                 await context.RespondAsync(new GetUserSavedVacanciesResponse
                 {

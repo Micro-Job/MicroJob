@@ -28,9 +28,12 @@ namespace Job.Business.Services.Vacancy
         private readonly IRequestClient<SimilarVacanciesRequest> _similarRequest;
         private readonly IRequestClient<GetVacancyInfoRequest> _vacancyInforRequest;
         private readonly IRequestClient<GetAllVacanciesByCompanyIdDataRequest> _vacancyByCompanyId;
+        private readonly IRequestClient<GetAllUserVacanciesRequest> _userVacancyRequest;
 
         public VacancyService(JobDbContext context, IRequestClient<GetAllCompaniesRequest> request, IRequestClient<GetUserSavedVacanciesRequest> client, IHttpContextAccessor contextAccessor,
-            IRequestClient<UserRegisteredEvent> requestClient, IRequestClient<GetAllVacanciesRequest> vacClient, IRequestClient<SimilarVacanciesRequest> similarRequest, IRequestClient<GetVacancyInfoRequest> vacancyInforRequest, IRequestClient<GetAllVacanciesByCompanyIdDataRequest> vacancyByCompanyId)
+            IRequestClient<UserRegisteredEvent> requestClient, IRequestClient<GetAllVacanciesRequest> vacClient, IRequestClient<SimilarVacanciesRequest> similarRequest,
+            IRequestClient<GetVacancyInfoRequest> vacancyInforRequest, IRequestClient<GetAllVacanciesByCompanyIdDataRequest> vacancyByCompanyId,
+            IRequestClient<GetAllUserVacanciesRequest> userVacancyRequest)
         {
             _context = context;
             _request = request;
@@ -41,6 +44,7 @@ namespace Job.Business.Services.Vacancy
             _vacClient = vacClient;
             _similarRequest = similarRequest;
             _vacancyInforRequest = vacancyInforRequest;
+            _userVacancyRequest = userVacancyRequest;
             _vacancyByCompanyId = vacancyByCompanyId;
         }
 
@@ -102,14 +106,6 @@ namespace Job.Business.Services.Vacancy
             );
 
             return response.Message;
-        }
-
-        /// <summary>Butun vakansiyalarin getirilmesi</summary>
-        public async Task<List<VacancyDto>> GetAllUserVacanciesAsync()
-        {
-            var response = await _request.GetResponse<UserVacanciesResponse>(new GetAllUserVacanciesRequest());
-
-            return response.Message.Vacancies;
         }
 
         /// <summary>

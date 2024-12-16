@@ -25,7 +25,7 @@ public class GetUserApplicationsConsumer(JobCompanyDbContext jobCompanyDbContext
             .Take(context.Message.Take)
             .ToListAsync();
 
-        if (!applications.Any() == applications is null)
+        if (!applications.Any() || applications is null)
         {
             await context.RespondAsync(new GetUserApplicationsResponse()
             {
