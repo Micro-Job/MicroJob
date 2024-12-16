@@ -56,6 +56,7 @@ namespace JobCompany.Business.Services.VacancyServices
             {
                 Id = Guid.NewGuid(),
                 CompanyName = vacancyDto.CompanyName.Trim(),
+                CompanyId = company?.Id,
                 Title = vacancyDto.Title.Trim(),
                 CompanyLogo = companyLogoPath,
                 StartDate = vacancyDto.StartDate,
@@ -85,21 +86,23 @@ namespace JobCompany.Business.Services.VacancyServices
                     var number = new CompanyNumber
                     {
                         Number = numberCreateDto.PhoneNumber,
+                        CompanyId = company?.Id
                     };
                     numbers.Add(number);
                 }
             }
 
-            var resumeSkills = vacancyDto.SkillIds != null
+            await _context.CompanyNumbers.AddRangeAsync(numbers);
+            vacancy.CompanyNumbers = numbers;
+
+            var vacancySkills = vacancyDto.SkillIds != null
                 ? vacancyDto.SkillIds.Select(skillId => new VacancySkill
                 {
                     SkillId = skillId,
                     VacancyId = vacancy.Id
                 }).ToList() : [];
+            vacancy.Skills = vacancySkills;
 
-            await _context.CompanyNumbers.AddRangeAsync(numbers);
-
-            vacancy.CompanyNumbers = numbers;
             await _context.Vacancies.AddAsync(vacancy);
             await _context.SaveChangesAsync();
 

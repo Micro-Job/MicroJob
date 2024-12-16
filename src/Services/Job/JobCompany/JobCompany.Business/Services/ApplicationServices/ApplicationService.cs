@@ -3,7 +3,6 @@ using JobCompany.Business.Dtos.StatusDtos;
 using JobCompany.Business.Exceptions.ApplicationExceptions;
 using JobCompany.Business.Exceptions.VacancyExceptions;
 using JobCompany.Core.Entites;
-using JobCompany.Core.Enums;
 using JobCompany.DAL.Contexts;
 using MassTransit;
 using MassTransit.Initializers;
@@ -36,28 +35,6 @@ namespace JobCompany.Business.Services.ApplicationServices
             _baseUrl = $"{_contextAccessor.HttpContext.Request.Scheme}://{_contextAccessor.HttpContext.Request.Host.Value}{_contextAccessor.HttpContext.Request.PathBase.Value}";
             userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid).Value);
             _publishEndpoint = publishEndpoint;
-        }
-
-        /// <summary> Deyesen bu silinmeli idi əmin deyiləm </summary>
-        public async Task CreateApplicationAsync(ApplicationCreateDto dto)
-        {
-            var VacancyId = Guid.Parse(dto.VacancyId);
-            var vacancy = await _context.Vacancies
-                .Where(v => v.Id == VacancyId)
-                .FirstOrDefaultAsync()
-                ?? throw new NotFoundException<Vacancy>();
-
-            if (vacancy.IsActive == false) throw new VacancyStatusIsDeactiveException();
-
-            var application = new Application
-            {
-                UserId = userGuid,
-                VacancyId = vacancy.Id,
-                IsActive = true
-            };
-
-            _context.Applications.Add(application);
-            await _context.SaveChangesAsync();
         }
 
         /// <summary> Yaradılan müraciətin geri alınması </summary>

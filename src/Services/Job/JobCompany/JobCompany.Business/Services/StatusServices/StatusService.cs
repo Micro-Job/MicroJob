@@ -19,7 +19,7 @@ namespace JobCompany.Business.Services.StatusServices
         {
             _context = context;
             _contextAccessor = contextAccessor;
-            userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value);
+            userGuid = Guid.Parse(_contextAccessor?.HttpContext?.User.FindFirst(ClaimTypes.Sid)?.Value);
         }
 
         public async Task CreateStatusAsync(CreateStatusDto dto)
@@ -31,7 +31,9 @@ namespace JobCompany.Business.Services.StatusServices
             {
                 IsDefault = false,
                 StatusName = dto.StatusName.Trim(),
-                CompanyId = companyId
+                StatusColor = dto.StatusColor.Trim(),
+                CompanyId = companyId,
+                Order = dto.Order,
             };
 
             await _context.Statuses.AddAsync(newStatus);
@@ -42,9 +44,9 @@ namespace JobCompany.Business.Services.StatusServices
         {
             var statusGuid = Guid.Parse(statusId);
 
-            var existStatus = await _context.Statuses.FirstOrDefaultAsync(x => x.Id == statusGuid);
+            var existStatus = await _context.Statuses.FirstOrDefaultAsync(x => x.Id == statusGuid)
+                ?? throw new SharedLibrary.Exceptions.NotFoundException<Status>();
 
-            if (existStatus == null) throw new SharedLibrary.Exceptions.NotFoundException<Status>();
             if (existStatus.IsDefault == true) throw new StatusPermissionException();
 
             _context.Statuses.Remove(existStatus);
@@ -55,12 +57,12 @@ namespace JobCompany.Business.Services.StatusServices
         {
             var company = await _context.Companies.FirstOrDefaultAsync(x => x.UserId == userGuid);
 
-            var allStatus = await _context.Statuses.Where(x => x.IsDefault == true && x.CompanyId == company.Id) 
+            var allStatus = await _context.Statuses.Where(x => x.IsDefault == true && x.CompanyId == company.Id)
             .Select(x => new StatusListDto
             {
-                StatusId = x.Id, 
+                StatusId = x.Id,
                 StatusName = x.StatusName,
-                StatusColor = x.StatusColor
+                StatusColor = x.StatusColor,
             }).ToListAsync();
 
             return allStatus;

@@ -9,12 +9,13 @@ using JobCompany.Business.Services.CountryServices;
 using JobCompany.Business.Services.ExamServices;
 using JobCompany.Business.Services.QuestionServices;
 using JobCompany.Business.Services.ReportServices;
+using JobCompany.Business.Services.Skill;
+using JobCompany.Business.Services.SkillServices;
 using JobCompany.Business.Services.StatusServices;
 using JobCompany.Business.Services.VacancyServices;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using SharedLibrary.Events;
 using SharedLibrary.ExternalServices.FileService;
 
 namespace JobCompany.Business
@@ -37,6 +38,7 @@ namespace JobCompany.Business
             services.AddScoped<IAnswerService, AnswerService>();
             services.AddScoped<IExamService, ExamService>();
             services.AddScoped<IAnswerService, AnswerService>();
+            services.AddScoped<ISkillService, SkillService>();
         }
 
         public static IServiceCollection AddMassTransitCompany(this IServiceCollection services, IConfiguration configuration)
@@ -55,6 +57,7 @@ namespace JobCompany.Business
                 x.AddConsumer<GetVacancyInfoConsumer>();
                 x.AddConsumer<GetAllVacanciesByCompanyIdConsumer>();
                 x.AddConsumer<GetUserApplicationsConsumer>();
+                x.AddConsumer<CheckVacancyConsumer>();
                 x.SetKebabCaseEndpointNameFormatter();
 
                 x.UsingRabbitMq((context, cfg) =>
@@ -71,7 +74,7 @@ namespace JobCompany.Business
                 });
             });
 
-            return services; 
+            return services;
         }
     }
 }

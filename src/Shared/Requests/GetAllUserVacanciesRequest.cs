@@ -2,5 +2,6 @@
 {
     public class GetAllUserVacanciesRequest
     {
+        public Guid UserId {  get; set; }
     }
 }

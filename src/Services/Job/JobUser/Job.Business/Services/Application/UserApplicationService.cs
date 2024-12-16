@@ -1,3 +1,4 @@
+using Job.Business.Exceptions.Common;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Shared.Events;
@@ -12,12 +13,14 @@ namespace Job.Business.Services.Application
         readonly IPublishEndpoint _publishEndpoint;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IRequestClient<GetUserApplicationsRequest> _userApplicationRequest;
+        private readonly IRequestClient<CheckVacancyRequest> _requestClient;
         private readonly Guid userGuid;
 
-        public UserApplicationService(IPublishEndpoint publishEndpoint, IHttpContextAccessor httpContextAccessor, IRequestClient<GetUserApplicationsRequest> userApplicationRequest)
+        public UserApplicationService(IPublishEndpoint publishEndpoint, IHttpContextAccessor httpContextAccessor, IRequestClient<GetUserApplicationsRequest> userApplicationRequest, IRequestClient<CheckVacancyRequest> requestClient)
         {
             _publishEndpoint = publishEndpoint;
             _httpContextAccessor = httpContextAccessor;
+            _requestClient = requestClient;
             _userApplicationRequest = userApplicationRequest;
             userGuid = Guid.Parse(_httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value);
         }
@@ -37,6 +40,14 @@ namespace Job.Business.Services.Application
         public async Task CreateUserApplicationAsync(string vacancyId)
         {
             var guidVac = Guid.Parse(vacancyId);
+
+            var response = await _requestClient.GetResponse<CheckVacancyResponse>(new CheckVacancyRequest
+            {
+                VacancyId = guidVac
+            });
+
+            if (!response.Message.IsExist) throw new EntityNotFoundException("Vacancy");
+
             await _publishEndpoint.Publish(new UserApplicationEvent
             {
                 UserId = userGuid,

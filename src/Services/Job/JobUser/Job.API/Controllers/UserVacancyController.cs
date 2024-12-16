@@ -27,12 +27,6 @@ namespace Job.API.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetAllUserVacancies()
-        {
-            return Ok(await _vacancyService.GetAllUserVacanciesAsync());
-        }
-
-        [HttpGet("[action]")]
         public async Task<IActionResult> GetVacancyInfo(Guid vacancyId)
         {
             var data = await _vacancyService.GetVacancyInfoAsync(vacancyId);
