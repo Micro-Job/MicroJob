@@ -78,22 +78,22 @@ namespace JobCompany.Business.Services.VacancyServices
                 CategoryId = vacancyDto.CategoryId,
             };
 
-            var numbers = new List<CompanyNumber>();
+            var numbers = new List<VacancyNumber>();
             if (numberDto is not null)
             {
                 foreach (var numberCreateDto in numberDto)
                 {
-                    var number = new CompanyNumber
+                    var number = new VacancyNumber
                     {
                         Number = numberCreateDto.PhoneNumber,
-                        CompanyId = company?.Id
+                        VacancyId = vacancy?.Id
                     };
                     numbers.Add(number);
                 }
             }
 
-            await _context.CompanyNumbers.AddRangeAsync(numbers);
-            vacancy.CompanyNumbers = numbers;
+            await _context.VacancyNumbers.AddRangeAsync(numbers);
+            vacancy.VacancyNumbers = numbers;
 
             var vacancySkills = vacancyDto.SkillIds != null
                 ? vacancyDto.SkillIds.Select(skillId => new VacancySkill
@@ -243,7 +243,7 @@ namespace JobCompany.Business.Services.VacancyServices
                 Family = x.Family,
                 Driver = x.Driver,
                 Citizenship = x.Citizenship,
-                CompanyNumbers = x.CompanyNumbers,
+                VacancyNumbers = x.VacancyNumbers,
 
                 Country = new Country
                 {
@@ -298,7 +298,7 @@ namespace JobCompany.Business.Services.VacancyServices
                 foreach (var numberDto in numberDtos)
                 {
                     var phoneNumberGuid = Guid.Parse(numberDto.Id);
-                    var phoneNumber = existingVacancy.CompanyNumbers?.FirstOrDefault(p => p.Id == phoneNumberGuid);
+                    var phoneNumber = existingVacancy.VacancyNumbers?.FirstOrDefault(p => p.Id == phoneNumberGuid);
                     if (phoneNumber != null && phoneNumber.Number != numberDto.PhoneNumber)
                     {
                         phoneNumber.Number = numberDto.PhoneNumber;

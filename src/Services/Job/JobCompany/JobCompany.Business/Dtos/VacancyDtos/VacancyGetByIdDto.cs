@@ -17,7 +17,7 @@ namespace JobCompany.Business.Dtos.VacancyDtos
         public Country Country { get; set; }
         public City City { get; set; }
         //public string? Email { get; set; }
-        public ICollection<CompanyNumber>? CompanyNumbers { get; set; }
+        public ICollection<VacancyNumber>? VacancyNumbers { get; set; }
         public WorkType? WorkType { get; set; }
         public decimal? MainSalary { get; set; }
         public decimal? MaxSalary { get; set; }
