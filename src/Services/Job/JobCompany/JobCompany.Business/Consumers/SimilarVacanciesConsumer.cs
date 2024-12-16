@@ -21,6 +21,7 @@ namespace JobCompany.Business.Consumers
             var guidVacId = Guid.Parse(vacancyId);
 
             var vacancies = await _context.Vacancies
+                .Include(v => v.Company)
                 .Where(v => v.Id == guidVacId)
                 .Select(v => new
                 {

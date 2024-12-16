@@ -13,11 +13,6 @@ namespace JobCompany.DAL.Configurations
             builder.Property(cn => cn.Number)
                    .HasMaxLength(32);
 
-            builder.HasOne(cn => cn.Vacancy)
-                   .WithMany(v => v.CompanyNumbers)
-                   .HasForeignKey(cn => cn.VacancyId)
-                   .OnDelete(DeleteBehavior.Restrict);
-
             builder.HasOne(cn => cn.Company)
                    .WithMany(v => v.CompanyNumbers)
                    .HasForeignKey(cn => cn.CompanyId)
