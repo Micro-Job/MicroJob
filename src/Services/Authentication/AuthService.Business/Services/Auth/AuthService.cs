@@ -113,7 +113,7 @@ namespace AuthService.Business.Services.Auth
             var company = new Company
             {
                 Id = Guid.NewGuid(),
-                UserId = user.Id,
+                UserId = user.Id
             };
 
             await _context.Users.AddAsync(user);
@@ -124,7 +124,8 @@ namespace AuthService.Business.Services.Auth
             {
                 CompanyId = company.Id,
                 UserId = user.Id,
-                CompanyName = dto.CompanyName.Trim()
+                CompanyName = dto.CompanyName.Trim(),
+                CompanyLogo = user.Image
             });
 
             await _publishEndpoint.Publish(new UserRegisteredEvent

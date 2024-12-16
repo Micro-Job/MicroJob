@@ -54,7 +54,7 @@ namespace JobCompany.Business.Services.VacancyServices
 
             var vacancy = new Vacancy
             {
-                Id = Guid.NewGuid(),
+                //Id = Guid.NewGuid(),
                 CompanyName = vacancyDto.CompanyName.Trim(),
                 CompanyId = company?.Id,
                 Title = vacancyDto.Title.Trim(),

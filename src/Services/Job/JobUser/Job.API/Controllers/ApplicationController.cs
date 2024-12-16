@@ -21,7 +21,7 @@ namespace Job.API.Controllers
         }
 
         [HttpPost("[action]")]
-        public async Task<IActionResult> CreateUserApplication([FromBody] string vacancyId)
+        public async Task<IActionResult> CreateUserApplication(string vacancyId)
         {
             await _service.CreateUserApplicationAsync(vacancyId);
             return Ok();
