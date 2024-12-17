@@ -23,17 +23,19 @@ namespace Job.Business.Services.Vacancy
         private readonly IRequestClient<GetAllCompaniesRequest> _request;
         private readonly IRequestClient<GetUserSavedVacanciesRequest> _client;
         private readonly IRequestClient<GetAllVacanciesRequest> _vacClient;
-        private readonly IRequestClient<GetOtherVacanciesByCompanyRequest> _othVacClient;
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly IRequestClient<UserRegisteredEvent> _requestClient;
         private readonly IRequestClient<SimilarVacanciesRequest> _similarRequest;
         private readonly IRequestClient<GetVacancyInfoRequest> _vacancyInforRequest;
         private readonly IRequestClient<GetAllVacanciesByCompanyIdDataRequest> _vacancyByCompanyId;
         private readonly IRequestClient<CheckVacancyRequest> _checkVacancyRequest;
+        private readonly IRequestClient<CheckCompanyRequest> _checkCompanyRequest;
+        private readonly IRequestClient<GetOtherVacanciesByCompanyRequest> _othVacRequest;
 
         public VacancyService(JobDbContext context, IRequestClient<GetAllCompaniesRequest> request, IRequestClient<GetUserSavedVacanciesRequest> client, IHttpContextAccessor contextAccessor,
-            IRequestClient<UserRegisteredEvent> requestClient, IRequestClient<GetAllVacanciesRequest> vacClient, IRequestClient<SimilarVacanciesRequest> similarRequest, 
-            IRequestClient<GetVacancyInfoRequest> vacancyInforRequest, IRequestClient<GetAllVacanciesByCompanyIdDataRequest> vacancyByCompanyId, IRequestClient<CheckVacancyRequest> checkVacancyRequest)
+            IRequestClient<UserRegisteredEvent> requestClient, IRequestClient<GetAllVacanciesRequest> vacClient, IRequestClient<SimilarVacanciesRequest> similarRequest,
+            IRequestClient<GetVacancyInfoRequest> vacancyInforRequest, IRequestClient<GetAllVacanciesByCompanyIdDataRequest> vacancyByCompanyId, IRequestClient<CheckVacancyRequest> checkVacancyRequest,
+            IRequestClient<CheckCompanyRequest> checkCompanyRequest, IRequestClient<GetOtherVacanciesByCompanyRequest> othVacRequest)
         {
             _context = context;
             _request = request;
@@ -46,6 +48,8 @@ namespace Job.Business.Services.Vacancy
             _vacancyInforRequest = vacancyInforRequest;
             _vacancyByCompanyId = vacancyByCompanyId;
             _checkVacancyRequest = checkVacancyRequest;
+            _checkCompanyRequest = checkCompanyRequest;
+            _othVacRequest = othVacRequest;
         }
 
         /// <summary> Userin vakansiya save etme toggle metodu </summary>
@@ -53,12 +57,7 @@ namespace Job.Business.Services.Vacancy
         {
             Guid vacancyGuid = Guid.Parse(vacancyId);
 
-            var response = await _checkVacancyRequest.GetResponse<CheckVacancyResponse>(new CheckVacancyRequest
-            {
-                VacancyId = vacancyGuid
-            });
-
-            if (!response.Message.IsExist) throw new EntityNotFoundException("Vacancy");
+            await EnsureVacancyExistsAsync(vacancyGuid);
 
             var vacancyCheck = await _context.SavedVacancies.FirstOrDefaultAsync(x => x.VacancyId == vacancyGuid);
 
@@ -127,13 +126,17 @@ namespace Job.Business.Services.Vacancy
             var guidCompanyId = Guid.Parse(companyId);
             var guidVacancyId = Guid.Parse(currentVacancyId);
 
+            await EnsureCompanyExistsAsync(guidCompanyId);
+
+            await EnsureVacancyExistsAsync(guidVacancyId);
+
             var request = new GetOtherVacanciesByCompanyRequest
             {
                 CompanyId = guidCompanyId,
                 CurrentVacancyId = guidVacancyId
             };
 
-            var response = await _othVacClient.GetResponse<GetOtherVacanciesByCompanyResponse>(request);
+            var response = await _othVacRequest.GetResponse<GetOtherVacanciesByCompanyResponse>(request);
 
             return response.Message.Vacancies ?? [];
         }
@@ -186,12 +189,7 @@ namespace Job.Business.Services.Vacancy
         {
             var guidVacancyId = Guid.Parse(vacancyId);
 
-            var checkVacancyresponse = await _checkVacancyRequest.GetResponse<CheckVacancyResponse>(new CheckVacancyRequest
-            {
-                VacancyId = guidVacancyId
-            });
-
-            if (!checkVacancyresponse.Message.IsExist) throw new EntityNotFoundException("Vacancy");
+            await EnsureVacancyExistsAsync(guidVacancyId);
 
             var savedVacancies = await _context.SavedVacancies
                 .Where(sv => sv.UserId == userGuid)
@@ -230,6 +228,26 @@ namespace Job.Business.Services.Vacancy
             );
 
             return response.Message.Vacancies;
+        }
+
+        private async Task EnsureVacancyExistsAsync(Guid vacancyId)
+        {
+            var response = await _checkVacancyRequest.GetResponse<CheckVacancyResponse>(new CheckVacancyRequest
+            {
+                VacancyId = vacancyId
+            });
+
+            if (!response.Message.IsExist) throw new EntityNotFoundException("Vacancy");
+        }
+
+        private async Task EnsureCompanyExistsAsync(Guid companyId)
+        {
+            var response = await _checkCompanyRequest.GetResponse<CheckCompanyResponse>(new CheckCompanyRequest
+            {
+                CompanyId = companyId
+            });
+
+            if (!response.Message.IsExist) throw new EntityNotFoundException("Company");
         }
     }
 }
