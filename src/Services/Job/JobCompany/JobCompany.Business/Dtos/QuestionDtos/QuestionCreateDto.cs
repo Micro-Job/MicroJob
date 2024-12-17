@@ -11,7 +11,6 @@ namespace JobCompany.Business.Dtos.QuestionDtos
         public IFormFile? Image { get; set; }
         public QuestionType QuestionType { get; set; }
         public bool IsRequired { get; set; }
-        public int? Duration { get; set; }
         public ICollection<CreateAnswerDto>? Answers { get; set; }
     }
 
@@ -22,11 +21,6 @@ namespace JobCompany.Business.Dtos.QuestionDtos
             RuleFor(q => q.Title)
                 .NotEmpty()
                 .WithMessage("Sual başlığı boş ola bilməz.");
-
-            RuleFor(q => q.Duration)
-                .GreaterThan(0)
-                .When(q => q.Duration.HasValue)
-                .WithMessage("Zaman 0-dan böyük olmalıdır.");
         }
     }
 }

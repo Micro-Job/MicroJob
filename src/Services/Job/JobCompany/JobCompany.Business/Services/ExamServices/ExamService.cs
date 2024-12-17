@@ -14,14 +14,9 @@ namespace JobCompany.Business.Services.ExamServices
     public class ExamService(JobCompanyDbContext context, IFileService fileService, IQuestionService questionService, IHttpContextAccessor contextAccessor) : IExamService
     {
         private readonly JobCompanyDbContext _context = context;
-        private readonly IFileService _fileService = fileService;
         private readonly IQuestionService _questionService = questionService;
-        private readonly string? _baseUrl = $"{contextAccessor?.HttpContext?.Request.Scheme}://{contextAccessor?.HttpContext?.Request.Host.Value}{contextAccessor?.HttpContext?.Request.PathBase.Value}";
         public async Task<Guid> CreateExamAsync(CreateExamDto dto)
         {
-            FileDto fileResult = dto.Logo != null
-                ? await _fileService.UploadAsync(FilePaths.lowImage, dto.Logo)
-                : new FileDto();
             var exam = new Exam
             {
                 IntroDescription = dto.IntroDescription,

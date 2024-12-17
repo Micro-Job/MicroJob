@@ -47,6 +47,7 @@ namespace Job.Business.Services.Application
             });
 
             if (!response.Message.IsExist) throw new EntityNotFoundException("Vacancy");
+            var companyId = response.Message.CompanyId;
 
             await _publishEndpoint.Publish(new UserApplicationEvent
             {
@@ -56,7 +57,7 @@ namespace Job.Business.Services.Application
 
             await _publishEndpoint.Publish(new VacancyApplicationEvent
             {
-                UserId = userGuid,
+                UserId = companyId,
                 VacancyId = guidVac,
                 Content = $"İstifadəçi {userGuid} {guidVac} vakansiyasına müraciət etdi."
             });

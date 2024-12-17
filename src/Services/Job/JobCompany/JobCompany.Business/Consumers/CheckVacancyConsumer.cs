@@ -14,7 +14,8 @@ public class CheckVacancyConsumer(JobCompanyDbContext companyDb) : IConsumer<Che
         
         var response = new CheckVacancyResponse
         {
-            IsExist = vacancy != null
+            IsExist = vacancy != null,
+            CompanyId = vacancy?.CompanyId ?? Guid.Empty
         };
         
         await context.RespondAsync(response);
