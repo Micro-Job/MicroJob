@@ -44,7 +44,6 @@ namespace Job.Business.Services.Vacancy
             _vacClient = vacClient;
             _similarRequest = similarRequest;
             _vacancyInforRequest = vacancyInforRequest;
-            _userVacancyRequest = userVacancyRequest;
             _vacancyByCompanyId = vacancyByCompanyId;
             _checkVacancyRequest = checkVacancyRequest;
         }
