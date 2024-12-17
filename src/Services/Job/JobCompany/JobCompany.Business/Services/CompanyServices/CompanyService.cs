@@ -23,7 +23,7 @@ namespace JobCompany.Business.Services.CompanyServices
         private readonly IHttpContextAccessor _contextAccessor;
 
 
-        public CompanyService(JobCompanyDbContext context, IRequestClient<GetAllCompaniesDataRequest> client , IHttpContextAccessor contextAccessor)
+        public CompanyService(JobCompanyDbContext context, IRequestClient<GetAllCompaniesDataRequest> client, IHttpContextAccessor contextAccessor)
         {
             _context = context;
             _client = client;
@@ -31,30 +31,52 @@ namespace JobCompany.Business.Services.CompanyServices
             userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid).Value);
         }
 
-        public async Task UpdateCompanyAsync(CompanyUpdateDto dto)
+        public async Task UpdateCompanyAsync(CompanyUpdateDto dto, ICollection<CreateNumberDto>? numbersDto)
         {
-            var company = await _context.Companies.FirstOrDefaultAsync(x=> x.UserId == userGuid) ?? throw new NotFoundException<Company>();
+            var company = await _context.Companies
+                .Include(c => c.CompanyNumbers)
+                .FirstOrDefaultAsync(x => x.UserId == userGuid)
+                ?? throw new NotFoundException<Company>();
 
-            var companyName = dto.CompanyName.Trim();
-
-            company.CompanyName = dto.CompanyName;
+            company.CompanyName = dto.CompanyName.Trim();
             company.CompanyInformation = dto.CompanyInformation.Trim();
             company.CompanyLocation = dto.CompanyLocation.Trim();
             company.WebLink = dto.WebLink;
-            company.EmployeeCount = dto.EmployeeCount.Value;
+            company.EmployeeCount = dto.EmployeeCount ?? company.EmployeeCount;
             company.CreatedDate = dto.CreatedDate;
             company.CategoryId = dto.CategoryId;
             company.CountryId = dto.CountryId;
             company.CityId = dto.CityId;
 
+
+            var numbers = new List<CompanyNumber>();
+            if (numbersDto is not null)
+            {
+                foreach (var numberDto in numbersDto)
+                {
+                    var number = new CompanyNumber
+                    {
+                        Number = numberDto.PhoneNumber,
+                        CompanyId = company.Id
+                    };
+                    numbers.Add(number);
+                }
+            }
+
+            await _context.CompanyNumbers.AddRangeAsync(numbers);
+            company.CompanyNumbers = numbers;
+
+            _context.Companies.Update(company);
+
             await _context.SaveChangesAsync();
         }
+
 
         public async Task<ICollection<CompanyListDto>> GetAllCompaniesAsync(string? searchTerm, int skip = 1, int take = 12)
         {
             var query = _context.Companies.AsQueryable();
 
-            if(!string.IsNullOrWhiteSpace(searchTerm))
+            if (!string.IsNullOrWhiteSpace(searchTerm))
             {
                 query = query.Where(c => c.CompanyName.ToLower().Contains(searchTerm.Trim().ToLower()));
             }

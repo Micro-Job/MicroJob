@@ -32,19 +32,20 @@ namespace JobCompany.API
                 });
 
                 opt.AddSecurityRequirement(new OpenApiSecurityRequirement
-        {
+                {
                 {
                     new OpenApiSecurityScheme
                     {
                         Reference = new OpenApiReference
                         {
-                            Type=ReferenceType.SecurityScheme,
-                            Id="Bearer"
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
                         }
                     },
-                    new string[]{}
+                    new string[] {}
                 }
-        });
+                });
+
             });
             builder.Services.AddDbContext<JobCompanyDbContext>(options =>
             options.UseSqlServer(builder.Configuration.GetConnectionString("MSSQL")));
@@ -58,7 +59,7 @@ namespace JobCompany.API
             builder.Services.AddAuth(builder.Configuration["Jwt:Issuer"]!, builder.Configuration["Jwt:Audience"]!, builder.Configuration["Jwt:SigningKey"]!);
             builder.Services.AddJobCompanyServices();
             builder.Services.AddMassTransitCompany(builder.Configuration);
-            
+
             builder.Services.AddCorsPolicy("http://localhost:3000");
 
             var app = builder.Build();
@@ -66,7 +67,10 @@ namespace JobCompany.API
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
-                app.UseSwaggerUI();
+                app.UseSwaggerUI(c =>
+                {
+                    c.ConfigObject.AdditionalItems.Add("persistAuthorization", "true");
+                });
             }
 
             app.UseHttpsRedirection();

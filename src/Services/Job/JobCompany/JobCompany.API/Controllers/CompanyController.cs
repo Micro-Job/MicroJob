@@ -1,4 +1,5 @@
 using JobCompany.Business.Dtos.CompanyDtos;
+using JobCompany.Business.Dtos.NumberDtos;
 using JobCompany.Business.Services.CompanyServices;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,9 +12,9 @@ namespace JobCompany.API.Controllers
         readonly ICompanyService _service = service;
 
         [HttpPut("[action]")]
-        public async Task<IActionResult> UpdateCompany(CompanyUpdateDto dto)
+        public async Task<IActionResult> UpdateCompany([FromBody] UpdateCompanyRequest request)
         {
-            await _service.UpdateCompanyAsync(dto);
+            await _service.UpdateCompanyAsync(request.Dto, request.NumbersDto);
             return Ok();
         }
 
