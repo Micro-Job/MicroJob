@@ -1,5 +1,6 @@
 using JobCompany.Business.Dtos.CompanyDtos;
 using JobCompany.Business.Dtos.NumberDtos;
+using JobCompany.Business.Exceptions.Common;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using MassTransit;
@@ -36,7 +37,7 @@ namespace JobCompany.Business.Services.CompanyServices
             var company = await _context.Companies
                 .Include(c => c.CompanyNumbers)
                 .FirstOrDefaultAsync(x => x.UserId == userGuid)
-                ?? throw new NotFoundException<Company>();
+                ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>();
 
             company.CompanyName = dto.CompanyName.Trim();
             company.CompanyInformation = dto.CompanyInformation.Trim();
@@ -48,29 +49,28 @@ namespace JobCompany.Business.Services.CompanyServices
             company.CountryId = dto.CountryId;
             company.CityId = dto.CityId;
 
-
-            var numbers = new List<CompanyNumber>();
             if (numbersDto is not null)
             {
                 foreach (var numberDto in numbersDto)
                 {
-                    var number = new CompanyNumber
+                    if (company.CompanyNumbers.Any(n => n.Number == numberDto.PhoneNumber))
+                    {
+                        throw new IsAlreadyExistException<CompanyNumber>($"Number {numberDto.PhoneNumber} already exists.");
+                    }
+
+                    var newNumber = new CompanyNumber
                     {
                         Number = numberDto.PhoneNumber,
                         CompanyId = company.Id
                     };
-                    numbers.Add(number);
+
+                    company.CompanyNumbers.Add(newNumber);
                 }
             }
 
-            await _context.CompanyNumbers.AddRangeAsync(numbers);
-            company.CompanyNumbers = numbers;
-
             _context.Companies.Update(company);
-
             await _context.SaveChangesAsync();
         }
-
 
         public async Task<ICollection<CompanyListDto>> GetAllCompaniesAsync(string? searchTerm, int skip = 1, int take = 12)
         {
@@ -120,7 +120,7 @@ namespace JobCompany.Business.Services.CompanyServices
                     Number = cn.Number,
                 }).ToList()
             }).FirstOrDefaultAsync()
-            ?? throw new NotFoundException<Company>();
+            ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>();
 
             var GuidUserId = Guid.Parse(company.UserId);
 
