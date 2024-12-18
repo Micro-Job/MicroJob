@@ -19,7 +19,6 @@ namespace Job.Business.Services.Vacancy
     public class VacancyService : IVacancyService
     {
         private readonly JobDbContext _context;
-        // private readonly Guid userGuid;
         private readonly IRequestClient<GetAllCompaniesRequest> _request;
         private readonly IRequestClient<GetUserSavedVacanciesRequest> _client;
         private readonly IRequestClient<GetAllVacanciesRequest> _vacClient;
@@ -41,7 +40,6 @@ namespace Job.Business.Services.Vacancy
             _request = request;
             _client = client;
             _contextAccessor = contextAccessor;
-            // userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value);
             _requestClient = requestClient;
             _vacClient = vacClient;
             _similarRequest = similarRequest;
