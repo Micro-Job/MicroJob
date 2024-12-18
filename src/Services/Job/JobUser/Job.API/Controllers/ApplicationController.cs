@@ -15,7 +15,7 @@ namespace Job.API.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetUserApplication([FromQuery] int skip, [FromQuery] int take)
+        public async Task<IActionResult> GetUserApplication([FromQuery] int skip = 1, [FromQuery] int take = 9)
         {
             return Ok(await _service.GetUserApplicationsAsync(skip, take));
         }
