@@ -291,7 +291,7 @@ namespace JobCompany.Business.Services.VacancyServices
             await _context.SaveChangesAsync();
         }
 
-        /// <summary> Şirkət profilində vakansiya axtarışı vakansiya title'sinə görə </summary>
+        /// <summary> Şirkət profilində vakansiya axtarışı vakansiya filterlere görə </summary>
 
         public async Task<ICollection<VacancyGetAllDto>> GetAllVacanciesAsync(string? titleName, string? categoryId, string? countryId, string? cityId, decimal? minSalary, decimal? maxSalary, int skip = 1, int take = 9)
         {
