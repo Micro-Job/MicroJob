@@ -55,7 +55,7 @@ namespace JobCompany.Business.Services.VacancyServices
             var vacancy = new Vacancy
             {
                 Id = Guid.NewGuid(),
-                CompanyName = vacancyDto.CompanyName.Trim(),
+                CompanyName = company.CompanyName,
                 CompanyId = company?.Id,
                 Title = vacancyDto.Title.Trim(),
                 CompanyLogo = companyLogoPath,
@@ -176,6 +176,11 @@ namespace JobCompany.Business.Services.VacancyServices
         public async Task<ICollection<VacancyGetByCompanyIdDto>> GetVacancyByCompanyIdAsync(string companyId, int skip = 1, int take = 9)
         {
             var companyGuid = Guid.Parse(companyId);
+
+            var isCompanyExist = await _context.Companies.AnyAsync(x => x.Id == companyGuid);
+
+            if (!isCompanyExist) throw new NotFoundException<Company>();
+
             var vacancies = await _context.Vacancies
             .Where(x => x.CompanyId == companyGuid && x.IsActive)
             .Select(x => new VacancyGetByCompanyIdDto

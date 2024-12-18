@@ -8,7 +8,6 @@ namespace JobCompany.Business.Dtos.VacancyDtos
 {
     public record CreateVacancyDto
     {
-        public string CompanyName { get; set; }
         public string Title { get; set; }
         public IFormFile? CompanyLogo { get; set; }
         public DateTime StartDate { get; set; }
@@ -37,10 +36,6 @@ namespace JobCompany.Business.Dtos.VacancyDtos
     {
         public CreateVacancyDtoValidator()
         {
-            RuleFor(x => x.CompanyName)
-                .NotEmpty().WithMessage("Company name cannot be empty.")
-                .MaximumLength(100).WithMessage("Company name must not exceed 100 characters.");
-
             RuleFor(x => x.Title)
                 .NotEmpty().WithMessage("Title cannot be empty.")
                 .MaximumLength(150).WithMessage("Title must not exceed 150 characters.");
