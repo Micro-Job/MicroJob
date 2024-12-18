@@ -151,7 +151,7 @@ namespace JobCompany.Business.Services.ApplicationServices
         {
             var applicationGuid = Guid.Parse(applicationId);
 
-            var application = await _context.Applications.Where(a => a.Id == applicationGuid && a.IsActive && a.UserId == userGuid)
+            var application = await _context.Applications.Where(a => a.Id == applicationGuid && a.IsActive)
             .Select(a => new ApplicationGetByIdDto
             {
                 VacancyId = a.VacancyId,
@@ -210,10 +210,10 @@ namespace JobCompany.Business.Services.ApplicationServices
         /// <summary> Daxil olmus muracietler -> Şirkət üçün bütün müraciətlərin gətirilməsi </summary>
         public async Task<ICollection<ApplicationInfoListDto>> GetAllApplicationAsync(int skip = 1, int take = 9)
         {
+            var company = await _context.Companies.FirstOrDefaultAsync(c => c.UserId == userGuid) ?? throw new NotFoundException<Company>();
             var applications = await _context.Applications
                 .Include(a => a.Vacancy)
-                .Include(a => a.Vacancy.Company)
-                .Where(a => a.Vacancy.Company.UserId == userGuid)
+                .Where(a => a.Vacancy.CompanyId == userGuid)
                 .Select(a => new ApplicationInfoDto
                 {
                     UserId = a.UserId,
