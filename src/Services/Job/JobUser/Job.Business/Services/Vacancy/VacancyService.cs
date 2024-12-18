@@ -53,7 +53,8 @@ namespace Job.Business.Services.Vacancy
         /// <summary> Userin vakansiya save etme toggle metodu </summary>
         public async Task ToggleSaveVacancyAsync(string vacancyId)
         {
-            Guid userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value);
+            Guid userGuid = GetUserId();
+
             Guid vacancyGuid = Guid.Parse(vacancyId);
 
             await EnsureVacancyExistsAsync(vacancyGuid);
@@ -187,7 +188,7 @@ namespace Job.Business.Services.Vacancy
         /// <summary> Oxsar vakansiylarin getirilmesi category'e gore </summary>
         public async Task<ICollection<SimilarVacancyDto>> SimilarVacanciesAsync(string vacancyId)
         {
-            Guid userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value);
+            Guid userGuid = GetUserId();
             var guidVacancyId = Guid.Parse(vacancyId);
 
             await EnsureVacancyExistsAsync(guidVacancyId);
@@ -250,5 +251,16 @@ namespace Job.Business.Services.Vacancy
 
             if (!response.Message.IsExist) throw new EntityNotFoundException("Company");
         }
+
+        private Guid GetUserId()
+        {
+            var userIdClaim = _contextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Sid)?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim))
+                throw new UnauthorizedAccessException("İstifadəçi giriş etməyib");
+
+            return Guid.Parse(userIdClaim);
+        }
+
     }
 }
