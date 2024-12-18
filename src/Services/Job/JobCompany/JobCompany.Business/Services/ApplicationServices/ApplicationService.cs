@@ -239,7 +239,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                     return group.Select(application => new ApplicationInfoListDto
                     {
                         FullName = $"{userData?.FirstName} {userData?.LastName}",
-                        ImageUrl = userData?.ProfileImage,
+                        ImageUrl = $"{_baseUrl}/{userData?.ProfileImage}",
                         Position = userResume?.Position,
                         CreatedDate = application.CreatedDate
                     });
