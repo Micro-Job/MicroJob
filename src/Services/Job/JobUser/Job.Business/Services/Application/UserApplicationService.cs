@@ -58,6 +58,7 @@ namespace Job.Business.Services.Application
             await _publishEndpoint.Publish(new VacancyApplicationEvent
             {
                 UserId = companyId,
+                SenderId = userGuid,
                 VacancyId = guidVac,
                 Content = $"İstifadəçi {userGuid} {guidVac} vakansiyasına müraciət etdi."
             });

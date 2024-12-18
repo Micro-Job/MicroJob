@@ -12,6 +12,7 @@ namespace JobCompany.Business.Consumers
             var newNotification = new Notification
             {
                 ReceiverId = context.Message.UserId,
+                SenderId = context.Message.SenderId,
                 Content = context.Message.Content,
                 IsSeen = false
             };

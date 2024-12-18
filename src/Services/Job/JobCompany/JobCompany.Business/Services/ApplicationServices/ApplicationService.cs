@@ -75,6 +75,7 @@ namespace JobCompany.Business.Services.ApplicationServices
             await _publishEndpoint.Publish(new UpdateUserApplicationStatusEvent
             {
                 UserId = existAppVacancy.UserId,
+                SenderId = userGuid,
                 Content = $"{existAppVacancy.Vacancy.Company.CompanyName} şirkətinin müraciət statusu dəyişdirildi: {existAppVacancy.Status.StatusName}"
             });
         }
