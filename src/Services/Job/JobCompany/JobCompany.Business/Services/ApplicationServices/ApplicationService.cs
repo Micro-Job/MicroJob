@@ -8,6 +8,7 @@ using MassTransit;
 using MassTransit.Initializers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Shared.Events;
 using Shared.Requests;
 using Shared.Responses;
@@ -22,11 +23,11 @@ namespace JobCompany.Business.Services.ApplicationServices
         private readonly Guid userGuid;
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly string _baseUrl;
-        readonly IRequestClient<GetUsersDataResponse> _client;
-        readonly IRequestClient<GetResumeDataResponse> _requestClient;
+        readonly IRequestClient<GetUsersDataRequest> _client;
+        readonly IRequestClient<GetResumeDataRequest> _requestClient;
         readonly IPublishEndpoint _publishEndpoint;
 
-        public ApplicationService(JobCompanyDbContext context, IRequestClient<GetUsersDataResponse> client, IRequestClient<GetResumeDataResponse> requestClient, IHttpContextAccessor contextAccessor, IPublishEndpoint publishEndpoint)
+        public ApplicationService(JobCompanyDbContext context, IRequestClient<GetUsersDataRequest> client, IRequestClient<GetResumeDataRequest> requestClient, IHttpContextAccessor contextAccessor, IPublishEndpoint publishEndpoint)
         {
             _context = context;
             _contextAccessor = contextAccessor;
@@ -68,6 +69,8 @@ namespace JobCompany.Business.Services.ApplicationServices
 
             existAppVacancy.StatusId = statusGuid;
             await _context.SaveChangesAsync();
+
+            await _context.Entry(existAppVacancy).Reference(x => x.Status).LoadAsync();
 
             await _publishEndpoint.Publish(new UpdateUserApplicationStatusEvent
             {
@@ -150,7 +153,7 @@ namespace JobCompany.Business.Services.ApplicationServices
         {
             var applicationGuid = Guid.Parse(applicationId);
 
-            var application = await _context.Applications.Where(a => a.Id == applicationGuid && a.IsActive && a.UserId == userGuid)
+            var application = await _context.Applications.Where(a => a.Id == applicationGuid && a.IsActive)
             .Select(a => new ApplicationGetByIdDto
             {
                 VacancyId = a.VacancyId,
@@ -209,9 +212,11 @@ namespace JobCompany.Business.Services.ApplicationServices
         /// <summary> Daxil olmus muracietler -> Şirkət üçün bütün müraciətlərin gətirilməsi </summary>
         public async Task<ICollection<ApplicationInfoListDto>> GetAllApplicationAsync(int skip = 1, int take = 9)
         {
+            var company = await _context.Companies.FirstOrDefaultAsync(c => c.UserId == userGuid) ?? throw new NotFoundException<Company>();
             var applications = await _context.Applications
                 .Include(a => a.Vacancy)
-                .Where(a => a.Vacancy.CompanyId == userGuid)
+                .ThenInclude(v => v.Company)
+                .Where(a => a.Vacancy.Company.UserId == userGuid)
                 .Select(a => new ApplicationInfoDto
                 {
                     UserId = a.UserId,
@@ -234,7 +239,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                     return group.Select(application => new ApplicationInfoListDto
                     {
                         FullName = $"{userData?.FirstName} {userData?.LastName}",
-                        ImageUrl = userData?.ProfileImage,
+                        ImageUrl = $"{_baseUrl}/{userData?.ProfileImage}",
                         Position = userResume?.Position,
                         CreatedDate = application.CreatedDate
                     });
@@ -283,8 +288,9 @@ namespace JobCompany.Business.Services.ApplicationServices
         {
             var query = _context.Applications
                 .Include(a => a.Vacancy)
+                .ThenInclude(v => v.Company)
                 .Include(a => a.Status)
-                .Where(a => a.Vacancy.CompanyId == userGuid)
+                .Where(a => a.Vacancy.Company.UserId == userGuid)
                 .AsNoTracking();
 
             var applications = await query

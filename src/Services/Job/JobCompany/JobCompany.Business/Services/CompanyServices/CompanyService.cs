@@ -7,6 +7,8 @@ using MassTransit;
 using MassTransit.Initializers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Shared.Exceptions;
 using Shared.Requests;
 using Shared.Responses;
 using System.Security.Claims;
@@ -16,21 +18,26 @@ namespace JobCompany.Business.Services.CompanyServices
     public class CompanyService : ICompanyService
     {
         private JobCompanyDbContext _context;
-        private readonly Guid userGuid;
+        readonly IConfiguration _configuration;
         readonly IRequestClient<GetAllCompaniesDataRequest> _client;
         private readonly IHttpContextAccessor _contextAccessor;
+        private readonly string? _baseUrl;
+        private readonly string? _authServiceBaseUrl;
 
 
-        public CompanyService(JobCompanyDbContext context, IRequestClient<GetAllCompaniesDataRequest> client, IHttpContextAccessor contextAccessor)
+        public CompanyService(JobCompanyDbContext context, IRequestClient<GetAllCompaniesDataRequest> client, IHttpContextAccessor contextAccessor, IConfiguration configuration)
         {
             _context = context;
             _client = client;
             _contextAccessor = contextAccessor;
-            userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid).Value);
+            _baseUrl = $"{_contextAccessor.HttpContext.Request.Scheme}://{_contextAccessor.HttpContext.Request.Host.Value}{_contextAccessor.HttpContext.Request.PathBase.Value}";
+            _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
+            _configuration = configuration;
         }
 
         public async Task UpdateCompanyAsync(CompanyUpdateDto dto, ICollection<CreateNumberDto>? numbersDto)
         {
+            Guid userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid).Value);
             var company = await _context.Companies
                 .Include(c => c.CompanyNumbers)
                 .FirstOrDefaultAsync(x => x.UserId == userGuid)
@@ -83,7 +90,7 @@ namespace JobCompany.Business.Services.CompanyServices
                 {
                     CompanyId = c.Id,
                     CompanyName = c.CompanyName,
-                    CompanyImage = c.CompanyLogo,
+                    CompanyImage = $"{_authServiceBaseUrl}/{c.CompanyLogo}",
                     CompanyVacancyCount = c.Vacancies.Count(v => v.IsActive)
                 })
             .Skip(Math.Max(0, (skip - 1) * take))

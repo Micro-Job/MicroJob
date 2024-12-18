@@ -12,25 +12,41 @@ namespace Job.Business.Consumers
 
         public async Task Consume(ConsumeContext<GetResumeDataRequest> context)
         {
-            var resume = await _context.Resumes
-                .Include(r => r.User)
-                .Where(r => context.Message.UserIds.Contains(r.UserId))
-                .Select(r => new
+            //var resume = await _context.Resumes
+            //    .Include(r => r.User)
+            //    .Where(r => context.Message.UserIds.Contains(r.UserId))
+            //    .Select(r => new
+            //    {
+            //        r.UserId,
+            //        r.Position
+            //    })
+            //    .FirstOrDefaultAsync();
+
+            //if (resume is null)
+            //{
+            //    await context.RespondAsync(new GetResumeDataResponse { Position = null});
+            //    return;
+            //}
+
+            //await context.RespondAsync(new GetResumeDataResponse
+            //{
+            //    Position = resume.Position
+            //});
+
+            var userIds = context.Message.UserIds;
+
+            var resumes = await _context.Resumes
+                .Where(r => userIds.Contains(r.UserId))
+                .Select(r => new GetResumeDataResponse
                 {
-                    r.UserId,
-                    r.Position
+                    UserId = r.UserId,
+                    Position = r.Position
                 })
-                .FirstOrDefaultAsync();
+                .ToListAsync();
 
-            if (resume is null)
+            await context.RespondAsync(new GetResumesDataResponse
             {
-                await context.RespondAsync<GetResumeDataResponse>(null);
-                return;
-            }
-
-            await context.RespondAsync(new GetResumeDataResponse
-            {
-                Position = resume.Position
+                Users = resumes
             });
         }
     }

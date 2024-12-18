@@ -25,7 +25,7 @@ namespace Job.API.Controllers
             return Ok();
         }
 
-        [HttpPost("[action]")]
+        [HttpPut("[action]")]
         public async Task<IActionResult> UpdateResume(ResumeUpdateDto resumeUpdateDto,
             ResumeUpdateListDto resumeUpdateListsDto)
         {
