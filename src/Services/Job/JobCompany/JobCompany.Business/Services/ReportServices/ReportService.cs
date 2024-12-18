@@ -16,12 +16,12 @@ namespace JobCompany.Business.Services.ReportServices
     public class ReportService : IReportService
     {
         private readonly JobCompanyDbContext _context;
-        private readonly IRequestClient<GetUsersDataResponse> _client;
+        private readonly IRequestClient<GetUsersDataRequest> _client;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly Guid _userGuid;
 
 
-        public ReportService(JobCompanyDbContext context, IRequestClient<GetUsersDataResponse> client, IHttpContextAccessor httpContextAccessor)
+        public ReportService(JobCompanyDbContext context, IRequestClient<GetUsersDataRequest> client, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
             _client = client;
