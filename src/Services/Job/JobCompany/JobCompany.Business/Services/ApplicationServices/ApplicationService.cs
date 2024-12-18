@@ -213,7 +213,8 @@ namespace JobCompany.Business.Services.ApplicationServices
             var company = await _context.Companies.FirstOrDefaultAsync(c => c.UserId == userGuid) ?? throw new NotFoundException<Company>();
             var applications = await _context.Applications
                 .Include(a => a.Vacancy)
-                .Where(a => a.Vacancy.CompanyId == userGuid)
+                .Include(a=>a.Vacancy.Company)
+                .Where(a => a.Vacancy.Company.UserId == userGuid)
                 .Select(a => new ApplicationInfoDto
                 {
                     UserId = a.UserId,
