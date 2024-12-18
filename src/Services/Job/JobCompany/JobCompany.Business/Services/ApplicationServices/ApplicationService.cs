@@ -24,10 +24,10 @@ namespace JobCompany.Business.Services.ApplicationServices
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly string _baseUrl;
         readonly IRequestClient<GetUsersDataRequest> _client;
-        readonly IRequestClient<GetResumeDataResponse> _requestClient;
+        readonly IRequestClient<GetResumeDataRequest> _requestClient;
         readonly IPublishEndpoint _publishEndpoint;
 
-        public ApplicationService(JobCompanyDbContext context, IRequestClient<GetUsersDataRequest> client, IRequestClient<GetResumeDataResponse> requestClient, IHttpContextAccessor contextAccessor, IPublishEndpoint publishEndpoint)
+        public ApplicationService(JobCompanyDbContext context, IRequestClient<GetUsersDataRequest> client, IRequestClient<GetResumeDataRequest> requestClient, IHttpContextAccessor contextAccessor, IPublishEndpoint publishEndpoint)
         {
             _context = context;
             _contextAccessor = contextAccessor;
@@ -212,7 +212,8 @@ namespace JobCompany.Business.Services.ApplicationServices
         {
             var applications = await _context.Applications
                 .Include(a => a.Vacancy)
-                .Where(a => a.Vacancy.CompanyId == userGuid)
+                .Include(a => a.Vacancy.Company)
+                .Where(a => a.Vacancy.Company.UserId == userGuid)
                 .Select(a => new ApplicationInfoDto
                 {
                     UserId = a.UserId,
