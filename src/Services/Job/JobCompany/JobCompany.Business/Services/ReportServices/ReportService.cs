@@ -1,12 +1,15 @@
 using System.Security.Claims;
 using JobCompany.Business.Dtos.ApplicationDtos;
 using JobCompany.Business.Dtos.ReportDtos;
+// using JobCompany.Business.Exceptions.Common;
+using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Shared.Requests;
 using Shared.Responses;
+using SharedLibrary.Exceptions;
 
 namespace JobCompany.Business.Services.ReportServices
 {
@@ -123,9 +126,10 @@ namespace JobCompany.Business.Services.ReportServices
         /// <summary> Vakansiyanin statistikasi /// </summary>
         public async Task<ApplicationStatisticsDto> GetApplicationStatisticsAsync(string periodTime)
         {
+            var company = await _context.Companies.FirstOrDefaultAsync(c => c.UserId == _userGuid) ?? throw new NotFoundException<Company>();
             var applications = await _context.Applications
-                .Where(a => a.UserId == _userGuid)
                 .Include(a => a.Vacancy)
+                .Where(a => a.Vacancy.CompanyId == company.Id)
                 .Select(a => new
                 {
                     a.VacancyId,
@@ -148,7 +152,8 @@ namespace JobCompany.Business.Services.ReportServices
                         .GroupBy(a => a.CreatedDate.ToString("yyyy-MM"))
                         .OrderByDescending(g => g.Key);
                     break;
-                case "3":                    groupedApplications = applications
+                case "3":
+                    groupedApplications = applications
                         .GroupBy(a => a.CreatedDate.ToString("yyyy"))
                         .OrderByDescending(g => g.Key);
                     break;
@@ -162,18 +167,19 @@ namespace JobCompany.Business.Services.ReportServices
             var currentPeriodCount = currentPeriodApplications?.Count() ?? 0;
             var previousPeriodCount = previousPeriodApplications?.Count() ?? 0;
 
+
             double percentageChange = previousPeriodCount > 0
                 ? (double)(currentPeriodCount - previousPeriodCount) / previousPeriodCount * 100
                 : 0;
 
-            var mostCommonCount = groupedApplications.Max(g => g.Count());
+            var mostCommonCount = groupedApplications.Any() ? groupedApplications.Max(g => g.Count()) : 0;
 
             var groupedStatistics = groupedApplications
                 .Select(g => new PeriodStatisticDto
                 {
                     Period = g.Key,
                     Value = g.Count(),
-                    IsHighlighted = g.Count() == mostCommonCount 
+                    IsHighlighted = g.Count() == mostCommonCount
                 })
                 .ToList();
 
