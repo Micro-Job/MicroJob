@@ -15,6 +15,10 @@ namespace Job.Business.Consumers
         public async Task Consume(ConsumeContext<GetVacancyInfoRequest> context)
         {
             var vacancyId = context.Message.Id;
+
+            await _context.Database.ExecuteSqlRawAsync(
+                   "UPDATE Vacancies SET ViewCount = ISNULL(ViewCount, 0) + 1 WHERE Id = {0}", vacancyId);
+
             var vacancy = await _context.Vacancies
                 .Include(v => v.Category)
                 .FirstOrDefaultAsync(x => x.Id == vacancyId)
@@ -35,9 +39,9 @@ namespace Job.Business.Consumers
                     : null,
                 WorkType = vacancy.WorkType,
                 Location = vacancy.Location,
-                ViewCount = vacancy.ViewCount,
                 Family = vacancy.Family,
-                Gender = vacancy.Gender
+                Gender = vacancy.Gender,
+                ViewCount = vacancy.ViewCount
             };
             await context.RespondAsync(response);
         }

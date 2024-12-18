@@ -12,7 +12,7 @@ namespace JobCompany.Core.Entites
         public DateTime StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public string? Location { get; set; }
-        public int? ViewCount { get; set; }
+        public int ViewCount { get; set; }
         public string? Email { get; set; }
         public WorkType? WorkType { get; set; }
         public decimal? MainSalary { get; set; }

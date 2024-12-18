@@ -1,4 +1,8 @@
-﻿using JobCompany.Business.Dtos.NumberDtos;
+﻿using JobCompany.Business.Dtos.CategoryDtos;
+using JobCompany.Business.Dtos.CityDtos;
+using JobCompany.Business.Dtos.CompanyDtos;
+using JobCompany.Business.Dtos.CountryDtos;
+using JobCompany.Business.Dtos.NumberDtos;
 using JobCompany.Business.Dtos.VacancyDtos;
 using JobCompany.Business.Services.ExamServices;
 using JobCompany.Core.Entites;
@@ -7,6 +11,8 @@ using MassTransit;
 using MassTransit.Initializers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using SharedLibrary.Dtos.CategoryDtos;
+using SharedLibrary.Dtos.CompanyDtos;
 using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.Events;
 using SharedLibrary.Exceptions;
@@ -231,6 +237,7 @@ namespace JobCompany.Business.Services.VacancyServices
                 Title = x.Title,
                 CompanyLogo = x.CompanyLogo,
                 StartDate = x.StartDate,
+                EndDate = x.EndDate,
                 Location = x.Location,
                 ViewCount = x.ViewCount,
                 WorkType = x.WorkType,
@@ -243,21 +250,34 @@ namespace JobCompany.Business.Services.VacancyServices
                 Family = x.Family,
                 Driver = x.Driver,
                 Citizenship = x.Citizenship,
-                VacancyNumbers = x.VacancyNumbers,
-
-                Country = new Country
+                VacancyNumbers = x.VacancyNumbers
+                .Select(vn => new VacancyNumberDto
                 {
-                    CountryName = x.Country.CountryName
+                    PhoneNumber = vn.Number,
+                })
+                .ToList(),
+
+                Country = new CountryDto
+                {
+                    Id = x.Country.Id,
+                    Name = x.Country.CountryName
                 },
 
-                Company = new Company
+                City = new CityNameDto
                 {
-                    CompanyName = x.CompanyName,
-                    CompanyInformation = x.Company.CompanyInformation
+                    CityName = x.City.CityName
                 },
 
-                Category = new Category
+                Company = new CompanyInfoDto
                 {
+                    Id = x.Company.Id,
+                    Name = x.CompanyName,
+                    Information = x.Company.CompanyInformation
+                },
+
+                Category = new CategoryListDto
+                {
+                    Id= x.Category.Id,
                     CategoryName = x.Category.CategoryName
                 }
             })
@@ -310,7 +330,6 @@ namespace JobCompany.Business.Services.VacancyServices
         }
 
         /// <summary> Şirkət profilində vakansiya axtarışı vakansiya title'sinə görə </summary>
-
         public async Task<ICollection<VacancyGetAllDto>> GetAllVacanciesAsync(string? searchText, int skip = 1, int take = 9)
         {
             var query = _context.Vacancies.Where(x => x.IsActive);
@@ -318,7 +337,7 @@ namespace JobCompany.Business.Services.VacancyServices
             if (!string.IsNullOrWhiteSpace(searchText))
             {
                 var search = searchText.ToLower();
-                query = query.Where(v => v.Title.Contains(search));
+                query = query.Where(v => v.Title.ToLower().Contains(search));
             }
 
             var vacancies = await query

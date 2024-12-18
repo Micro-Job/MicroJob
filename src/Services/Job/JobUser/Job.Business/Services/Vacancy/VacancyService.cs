@@ -202,6 +202,7 @@ namespace Job.Business.Services.Vacancy
 
             var allVacancies = response.Message.Vacancies.Select(v => new SimilarVacancyDto
             {
+                Id = v.Id,
                 CompanyName = v.CompanyName,
                 Title = v.Title,
                 CompanyLogo = v.CompanyPhoto,

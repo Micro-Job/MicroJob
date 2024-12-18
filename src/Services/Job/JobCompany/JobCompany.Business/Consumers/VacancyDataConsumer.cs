@@ -38,7 +38,7 @@ namespace JobCompany.Business.Consumers
                     CompanyPhoto = v.CompanyLogo,
                     MainSalary = v.MainSalary,
                     MaxSalary = v.MaxSalary,
-                    ViewCount = v.ViewCount ?? 0,
+                    ViewCount = v.ViewCount,
                     IsVip = v.IsVip,
                     WorkType = v.WorkType ?? SharedLibrary.Enums.WorkType.FullTime,
                 }).ToList()

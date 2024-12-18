@@ -5,7 +5,7 @@
         public Guid Id { get; set; }
         public Guid UserId { get; set; }
         public string CompanyName { get; set; }
-        public string? CompanyInformation { get; set; }
+        public string? CompanyInformation { get; set; } 
         public string? CompanyLocation { get; set; }
         public DateTime? CreatedDate { get; set; }
         public string? WebLink { get; set; }

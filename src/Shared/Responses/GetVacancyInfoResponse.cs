@@ -12,7 +12,7 @@ namespace SharedLibrary.Responses
         public CategoryDto? Category { get; set; }
         public WorkType? WorkType { get; set; }
         public string? Location { get; set; }
-        public int? ViewCount { get; set; }
+        public int ViewCount { get; set; }
         public FamilySituation Family { get; set; }  //temporary fix
         public Gender Gender { get; set; }           //temporary fix
     }

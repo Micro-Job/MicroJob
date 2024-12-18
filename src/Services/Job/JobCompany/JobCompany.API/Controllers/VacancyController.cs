@@ -59,7 +59,7 @@ namespace JobCompany.API.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetAllVacanciesAsync(string searchText)
+        public async Task<IActionResult> GetAllVacanciesAsync(string? searchText)
         {
             return Ok(await _vacancyService.GetAllVacanciesAsync(searchText));
         }

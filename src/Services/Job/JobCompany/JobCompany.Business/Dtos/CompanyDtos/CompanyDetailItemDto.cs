@@ -12,4 +12,4 @@ namespace JobCompany.Business.Dtos.CompanyDtos
         public string Email { get; set; }
         public string? WebLink { get; set; }
     }
-}
+}   

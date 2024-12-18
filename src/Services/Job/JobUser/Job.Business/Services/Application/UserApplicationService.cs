@@ -52,7 +52,7 @@ namespace Job.Business.Services.Application
             await _publishEndpoint.Publish(new UserApplicationEvent
             {
                 UserId = userGuid,
-                VacancyId = guidVac
+                VacancyId = guidVac,
             });
 
             await _publishEndpoint.Publish(new VacancyApplicationEvent

@@ -6,14 +6,9 @@ using Shared.Responses;
 
 namespace JobCompany.Business.Consumers
 {
-    public class SimilarVacanciesConsumer : IConsumer<SimilarVacanciesRequest>
+    public class SimilarVacanciesConsumer(JobCompanyDbContext context) : IConsumer<SimilarVacanciesRequest>
     {
-        private readonly JobCompanyDbContext _context;
-
-        public SimilarVacanciesConsumer(JobCompanyDbContext context)
-        {
-            _context = context;
-        }
+        private readonly JobCompanyDbContext _context = context;
 
         public async Task Consume(ConsumeContext<SimilarVacanciesRequest> context)
         {
@@ -31,6 +26,7 @@ namespace JobCompany.Business.Consumers
                         .Take(6)
                         .Select(sim => new SimilarVacancyResponse
                         {
+                            Id = sim.Id,
                             Title = sim.Title,
                             CompanyName = sim.Company.CompanyName,
                             CompanyLocation = sim.Company.CompanyLocation,
@@ -40,7 +36,8 @@ namespace JobCompany.Business.Consumers
                             MaxSalary = sim.MaxSalary,
                             ViewCount = sim.ViewCount,
                             IsVip = sim.IsVip,
-                            WorkType = sim.WorkType
+                            WorkType = sim.WorkType,
+                            CategoryId = sim.Category.Id
                         }).ToList()
                 })
                 .FirstOrDefaultAsync();
@@ -49,7 +46,7 @@ namespace JobCompany.Business.Consumers
             {
                 await context.RespondAsync(new SimilarVacanciesResponse
                 {
-                    Vacancies = new List<SimilarVacancyResponse>()
+                    Vacancies = []
                 });
                 return;
             }

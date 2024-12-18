@@ -1,13 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using SharedLibrary.Enums;
 
 namespace Shared.Dtos.VacancyDtos
 {
     public class SimilarVacancyDto
     {
+        public Guid Id { get; set; }
         public string CompanyName { get; set; }
         public string Title { get; set; }
         public string? CompanyLogo { get; set; }

@@ -7,11 +7,8 @@ using MassTransit;
 using MassTransit.Initializers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Shared.Exceptions;
 using Shared.Requests;
 using Shared.Responses;
-using SharedLibrary.Exceptions;
-using SharedLibrary.Responses;
 using System.Security.Claims;
 
 namespace JobCompany.Business.Services.CompanyServices
@@ -126,7 +123,7 @@ namespace JobCompany.Business.Services.CompanyServices
 
             var response = await GetAllCompaniesDataResponseAsync(GuidUserId);
             company.Email = response.Email;
-
+            company.PhoneNumber = response.PhoneNumber;
             return company;
         }
     }

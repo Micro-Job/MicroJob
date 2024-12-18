@@ -1,5 +1,3 @@
-using System.Security.Claims;
-using JobCompany.Business.Dtos.ApplicationDtos;
 using JobCompany.Business.Dtos.ReportDtos;
 using JobCompany.DAL.Contexts;
 using MassTransit;
@@ -7,18 +5,19 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Shared.Requests;
 using Shared.Responses;
+using System.Security.Claims;
 
 namespace JobCompany.Business.Services.ReportServices
 {
     public class ReportService : IReportService
     {
         private readonly JobCompanyDbContext _context;
-        private readonly IRequestClient<GetUsersDataResponse> _client;
+        private readonly IRequestClient<GetUsersDataRequest> _client;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly Guid _userGuid;
 
 
-        public ReportService(JobCompanyDbContext context, IRequestClient<GetUsersDataResponse> client, IHttpContextAccessor httpContextAccessor)
+        public ReportService(JobCompanyDbContext context, IRequestClient<GetUsersDataRequest> client, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
             _client = client;
@@ -148,7 +147,8 @@ namespace JobCompany.Business.Services.ReportServices
                         .GroupBy(a => a.CreatedDate.ToString("yyyy-MM"))
                         .OrderByDescending(g => g.Key);
                     break;
-                case "3":                    groupedApplications = applications
+                case "3":
+                    groupedApplications = applications
                         .GroupBy(a => a.CreatedDate.ToString("yyyy"))
                         .OrderByDescending(g => g.Key);
                     break;
@@ -173,7 +173,7 @@ namespace JobCompany.Business.Services.ReportServices
                 {
                     Period = g.Key,
                     Value = g.Count(),
-                    IsHighlighted = g.Count() == mostCommonCount 
+                    IsHighlighted = g.Count() == mostCommonCount
                 })
                 .ToList();
 

@@ -1,4 +1,8 @@
-﻿using JobCompany.Core.Entites;
+﻿using JobCompany.Business.Dtos.CategoryDtos;
+using JobCompany.Business.Dtos.CityDtos;
+using JobCompany.Business.Dtos.CompanyDtos;
+using JobCompany.Business.Dtos.CountryDtos;
+using JobCompany.Business.Dtos.NumberDtos;
 using JobCompany.Core.Enums;
 using SharedLibrary.Enums;
 
@@ -7,17 +11,13 @@ namespace JobCompany.Business.Dtos.VacancyDtos
     public record VacancyGetByIdDto
     {
         public Guid Id { get; set; }
-        public Company Company { get; set; }
         public string Title { get; set; }
         public string? CompanyLogo { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public string? Location { get; set; }
         public int? ViewCount { get; set; }
-        public Country Country { get; set; }
-        public City City { get; set; }
         //public string? Email { get; set; }
-        public ICollection<VacancyNumber>? VacancyNumbers { get; set; }
         public WorkType? WorkType { get; set; }
         public decimal? MainSalary { get; set; }
         public decimal? MaxSalary { get; set; }
@@ -29,6 +29,10 @@ namespace JobCompany.Business.Dtos.VacancyDtos
         public SharedLibrary.Enums.FamilySituation Family { get; set; }
         public Citizenship Citizenship { get; set; }
         public bool IsActive { get; set; }
-        public Category Category { get; set; }
+        public CompanyInfoDto Company { get; set; }
+        public CountryDto Country { get; set; }
+        public CityNameDto City { get; set; }
+        public CategoryListDto Category { get; set; }
+        public ICollection<VacancyNumberDto>? VacancyNumbers { get; set; }
     }
 }

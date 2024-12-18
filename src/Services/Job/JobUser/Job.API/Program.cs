@@ -1,12 +1,9 @@
 using FluentValidation.AspNetCore;
 using Job.Business;
-using Job.Business.Consumers;
 using Job.Business.Services.Resume;
 using Job.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using RabbitMQ.Client;
-using SharedLibrary.Middlewares;
 using SharedLibrary.ServiceRegistration;
 
 namespace Job.API
