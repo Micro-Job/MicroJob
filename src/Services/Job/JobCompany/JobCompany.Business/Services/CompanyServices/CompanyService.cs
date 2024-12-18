@@ -22,6 +22,7 @@ namespace JobCompany.Business.Services.CompanyServices
         private readonly Guid userGuid;
         readonly IRequestClient<GetAllCompaniesDataRequest> _client;
         private readonly IHttpContextAccessor _contextAccessor;
+        private readonly string? _baseUrl;
 
 
         public CompanyService(JobCompanyDbContext context, IRequestClient<GetAllCompaniesDataRequest> client, IHttpContextAccessor contextAccessor)
@@ -30,6 +31,7 @@ namespace JobCompany.Business.Services.CompanyServices
             _client = client;
             _contextAccessor = contextAccessor;
             userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid).Value);
+            _baseUrl = $"{_contextAccessor.HttpContext.Request.Scheme}://{_contextAccessor.HttpContext.Request.Host.Value}{_contextAccessor.HttpContext.Request.PathBase.Value}";
         }
 
         public async Task UpdateCompanyAsync(CompanyUpdateDto dto, ICollection<CreateNumberDto>? numbersDto)
@@ -86,7 +88,7 @@ namespace JobCompany.Business.Services.CompanyServices
                 {
                     CompanyId = c.Id,
                     CompanyName = c.CompanyName,
-                    CompanyImage = c.CompanyLogo,
+                    CompanyImage = $"{_baseUrl}/{c.CompanyLogo}",
                     CompanyVacancyCount = c.Vacancies.Count(v => v.IsActive)
                 })
             .Skip(Math.Max(0, (skip - 1) * take))

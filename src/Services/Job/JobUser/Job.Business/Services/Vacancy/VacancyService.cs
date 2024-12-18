@@ -19,7 +19,7 @@ namespace Job.Business.Services.Vacancy
     public class VacancyService : IVacancyService
     {
         private readonly JobDbContext _context;
-        private readonly Guid userGuid;
+        // private readonly Guid userGuid;
         private readonly IRequestClient<GetAllCompaniesRequest> _request;
         private readonly IRequestClient<GetUserSavedVacanciesRequest> _client;
         private readonly IRequestClient<GetAllVacanciesRequest> _vacClient;
@@ -41,7 +41,7 @@ namespace Job.Business.Services.Vacancy
             _request = request;
             _client = client;
             _contextAccessor = contextAccessor;
-            userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value);
+            // userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value);
             _requestClient = requestClient;
             _vacClient = vacClient;
             _similarRequest = similarRequest;
@@ -55,6 +55,7 @@ namespace Job.Business.Services.Vacancy
         /// <summary> Userin vakansiya save etme toggle metodu </summary>
         public async Task ToggleSaveVacancyAsync(string vacancyId)
         {
+            Guid userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value);
             Guid vacancyGuid = Guid.Parse(vacancyId);
 
             await EnsureVacancyExistsAsync(vacancyGuid);
@@ -79,6 +80,7 @@ namespace Job.Business.Services.Vacancy
         /// <summary> Userin bütün save etdiyi vakansiyalarin get allu </summary>
         public async Task<GetUserSavedVacanciesResponse> GetAllSavedVacancyAsync()
         {
+            Guid userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value);
             var savedVacanciesId = await _context.SavedVacancies
                 .Where(x => x.UserId == userGuid)
                 .Select(x => x.VacancyId)
@@ -155,10 +157,10 @@ namespace Job.Business.Services.Vacancy
         /// <summary> Butun vakansiyalarin getirilmesi - search ve filter</summary>
         public async Task<ICollection<AllVacanyDto>> GetAllVacanciesAsync(string? titleName, string? categoryId, string? countryId, string? cityId, bool? isActive, decimal? minSalary, decimal? maxSalary, int skip = 1, int take = 6)
         {
-            var userSkills = await _context.Resumes
-            .Where(r => r.UserId == userGuid)
-            .SelectMany(r => r.ResumeSkills)
-            .ToListAsync();
+            // var userSkills = await _context.Resumes
+            // .Where(r => r.UserId == userGuid)
+            // .SelectMany(r => r.ResumeSkills)
+            // .ToListAsync();
 
             var request = new GetAllVacanciesRequest
             {
@@ -187,6 +189,7 @@ namespace Job.Business.Services.Vacancy
         /// <summary> Oxsar vakansiylarin getirilmesi category'e gore </summary>
         public async Task<ICollection<SimilarVacancyDto>> SimilarVacanciesAsync(string vacancyId)
         {
+            Guid userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value);
             var guidVacancyId = Guid.Parse(vacancyId);
 
             await EnsureVacancyExistsAsync(guidVacancyId);
