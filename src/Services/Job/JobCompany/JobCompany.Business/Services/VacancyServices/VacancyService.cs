@@ -139,30 +139,7 @@ namespace JobCompany.Business.Services.VacancyServices
         {
             var query = _context.Vacancies.Where(x => x.Company.UserId == _userGuid).AsQueryable().AsNoTracking();
 
-            if (titleName != null)
-                query = query.Where(x => x.Title.ToLower().Contains(titleName.ToLower()));
-
-            if (IsActive != null)
-                query = query.Where(x => x.IsActive == IsActive);
-
-            if (minSalary != null && maxSalary != null)
-                query = query.Where(x => x.MainSalary >= 0 && x.MaxSalary <= maxSalary);
-
-            if (categoryId != null)
-            {
-                var categoryGuid = Guid.Parse(categoryId);
-                query = query.Where(x => x.CategoryId == categoryGuid);
-            }
-            if (countryId != null)
-            {
-                var countryGuid = Guid.Parse(countryId);
-                query = query.Where(x => x.CountryId == countryGuid);
-            }
-            if (cityId != null)
-            {
-                var cityGuid = Guid.Parse(cityId);
-                query = query.Where(x => x.CityId == cityGuid);
-            }
+            query = ApplyVacancyFilters(query, titleName, categoryId, countryId, cityId, IsActive, minSalary, maxSalary);
 
             var vacancies = await query.Select(x => new VacancyGetAllDto
             {
@@ -311,15 +288,11 @@ namespace JobCompany.Business.Services.VacancyServices
 
         /// <summary> Şirkət profilində vakansiya axtarışı vakansiya title'sinə görə </summary>
 
-        public async Task<ICollection<VacancyGetAllDto>> GetAllVacanciesAsync(string? searchText, int skip = 1, int take = 9)
+        public async Task<ICollection<VacancyGetAllDto>> GetAllVacanciesAsync(string? titleName, string? categoryId, string? countryId, string? cityId, decimal? minSalary, decimal? maxSalary, int skip = 1, int take = 9)
         {
-            var query = _context.Vacancies.Where(x => x.IsActive);
+            var query = _context.Vacancies.AsNoTracking();
 
-            if (!string.IsNullOrWhiteSpace(searchText))
-            {
-                var search = searchText.ToLower();
-                query = query.Where(v => v.Title.Contains(search));
-            }
+            query = ApplyVacancyFilters(query, titleName, categoryId, countryId, cityId, true, minSalary, maxSalary);
 
             var vacancies = await query
                 .Select(v => new VacancyGetAllDto
@@ -339,6 +312,39 @@ namespace JobCompany.Business.Services.VacancyServices
                 .ToListAsync();
 
             return vacancies;
+        }
+
+        private static IQueryable<Vacancy> ApplyVacancyFilters(IQueryable<Vacancy> query, string? titleName, string? categoryId, string? countryId,
+            string? cityId, bool? isActive, decimal? minSalary, decimal? maxSalary)
+        {
+            if (titleName != null)
+                query = query.Where(x => x.Title.ToLower().Contains(titleName.ToLower()));
+
+            if (isActive != null)
+                query = query.Where(x => x.IsActive == isActive);
+
+            if (minSalary != null && maxSalary != null)
+                query = query.Where(x => x.MainSalary >= minSalary && x.MaxSalary <= maxSalary);
+
+            if (categoryId != null)
+            {
+                var categoryGuid = Guid.Parse(categoryId);
+                query = query.Where(x => x.CategoryId == categoryGuid);
+            }
+
+            if (countryId != null)
+            {
+                var countryGuid = Guid.Parse(countryId);
+                query = query.Where(x => x.CountryId == countryGuid);
+            }
+
+            if (cityId != null)
+            {
+                var cityGuid = Guid.Parse(cityId);
+                query = query.Where(x => x.CityId == cityGuid);
+            }
+
+            return query;
         }
     }
 }
