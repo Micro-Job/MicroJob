@@ -132,7 +132,7 @@ namespace JobCompany.Business.Services.CompanyServices
 
             var response = await GetAllCompaniesDataResponseAsync(GuidUserId);
             company.Email = response.Email;
-
+            company.PhoneNumber = response.PhoneNumber;
             return company;
         }
     }
