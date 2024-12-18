@@ -8,6 +8,7 @@ using MassTransit;
 using MassTransit.Initializers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Shared.Events;
 using Shared.Requests;
 using Shared.Responses;
@@ -22,11 +23,11 @@ namespace JobCompany.Business.Services.ApplicationServices
         private readonly Guid userGuid;
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly string _baseUrl;
-        readonly IRequestClient<GetUsersDataResponse> _client;
+        readonly IRequestClient<GetUsersDataRequest> _client;
         readonly IRequestClient<GetResumeDataResponse> _requestClient;
         readonly IPublishEndpoint _publishEndpoint;
 
-        public ApplicationService(JobCompanyDbContext context, IRequestClient<GetUsersDataResponse> client, IRequestClient<GetResumeDataResponse> requestClient, IHttpContextAccessor contextAccessor, IPublishEndpoint publishEndpoint)
+        public ApplicationService(JobCompanyDbContext context, IRequestClient<GetUsersDataRequest> client, IRequestClient<GetResumeDataResponse> requestClient, IHttpContextAccessor contextAccessor, IPublishEndpoint publishEndpoint)
         {
             _context = context;
             _contextAccessor = contextAccessor;
@@ -284,8 +285,9 @@ namespace JobCompany.Business.Services.ApplicationServices
         {
             var query = _context.Applications
                 .Include(a => a.Vacancy)
+                .Include(a => a.Vacancy.Company)
                 .Include(a => a.Status)
-                .Where(a => a.Vacancy.CompanyId == userGuid)
+                .Where(a => a.Vacancy.Company.UserId == userGuid)
                 .AsNoTracking();
 
             var applications = await query
