@@ -70,6 +70,8 @@ namespace JobCompany.Business.Services.ApplicationServices
             existAppVacancy.StatusId = statusGuid;
             await _context.SaveChangesAsync();
 
+            await _context.Entry(existAppVacancy).Reference(x => x.Status).LoadAsync();
+
             await _publishEndpoint.Publish(new UpdateUserApplicationStatusEvent
             {
                 UserId = existAppVacancy.UserId,
@@ -213,7 +215,7 @@ namespace JobCompany.Business.Services.ApplicationServices
             var company = await _context.Companies.FirstOrDefaultAsync(c => c.UserId == userGuid) ?? throw new NotFoundException<Company>();
             var applications = await _context.Applications
                 .Include(a => a.Vacancy)
-                .Include(a=>a.Vacancy.Company)
+                .ThenInclude(v => v.Company)
                 .Where(a => a.Vacancy.Company.UserId == userGuid)
                 .Select(a => new ApplicationInfoDto
                 {
@@ -286,7 +288,7 @@ namespace JobCompany.Business.Services.ApplicationServices
         {
             var query = _context.Applications
                 .Include(a => a.Vacancy)
-                .Include(a => a.Vacancy.Company)
+                .ThenInclude(v => v.Company)
                 .Include(a => a.Status)
                 .Where(a => a.Vacancy.Company.UserId == userGuid)
                 .AsNoTracking();
