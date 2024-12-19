@@ -211,8 +211,9 @@ namespace JobCompany.Business.Services.VacancyServices
             var vacancyGuid = Guid.Parse(id);
 
             var vacancyEntity = await _context.Vacancies
-                .Include(x => x.Company)
+                .AsNoTracking() 
                 .Include(x => x.Category)
+                .Include(x => x.VacancyNumbers)
                 .FirstOrDefaultAsync(x => x.Id == vacancyGuid)
                 ?? throw new NotFoundException<Vacancy>();
 
@@ -238,9 +239,12 @@ namespace JobCompany.Business.Services.VacancyServices
                 Family = vacancyEntity.Family,
                 Driver = vacancyEntity.Driver,
                 Citizenship = vacancyEntity.Citizenship,
-                VacancyNumbers = vacancyEntity.VacancyNumbers,
-                CompanyName = vacancyEntity.Company.CompanyName,
-                CategoryName = vacancyEntity.Category.CategoryName
+                VacancyNumbers = vacancyEntity.VacancyNumbers.Select(vn => new VacancyNumberDto
+                {
+                    VacancyNumber = vn.Number,
+                }).ToList(),
+                CompanyName = vacancyEntity.CompanyName,
+                CategoryName = vacancyEntity.Category.CategoryName,
             };
             return vacancy;
         }
