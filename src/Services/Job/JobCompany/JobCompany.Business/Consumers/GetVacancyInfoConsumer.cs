@@ -22,22 +22,26 @@ namespace Job.Business.Consumers
 
             var response = new GetVacancyInfoResponse
             {
+                Id = vacancy.Id,
+                CompanyName = vacancy.Company.CompanyName,
+                Title = vacancy.Title,
+                CompanyLogo = vacancy.Company.CompanyLogo,
+                MainSalary = vacancy.MainSalary,
                 Requirement = vacancy.Requirement,
                 Description = vacancy.Description,
                 StartDate = vacancy.StartDate,
                 EndDate = vacancy.EndDate,
-                Category = vacancy.Category != null
-                    ? new CategoryDto
-                    {
-                        Id = vacancy.Category.Id,
-                        Name = vacancy.Category.CategoryName
-                    }
-                    : null,
+                CategoryName = vacancy.Category.CategoryName,
                 WorkType = vacancy.WorkType,
                 Location = vacancy.Location,
                 ViewCount = vacancy.ViewCount,
                 Family = vacancy.Family,
-                Gender = vacancy.Gender
+                Gender = vacancy.Gender,
+                Military = vacancy.Military,
+                Driver = vacancy.Driver,
+                Citizenship = vacancy.Citizenship,
+                IsActive = vacancy.IsActive,
+                // VacancyNumbers = vacancy.VacancyNumbers.Select(x => x.Vacancy.VacancyNumbers).ToList()
             };
             await context.RespondAsync(response);
         }

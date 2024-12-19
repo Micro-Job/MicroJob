@@ -1,4 +1,6 @@
-﻿using JobCompany.Business.Dtos.NumberDtos;
+﻿using JobCompany.Business.Dtos.CategoryDtos;
+using JobCompany.Business.Dtos.CompanyDtos;
+using JobCompany.Business.Dtos.NumberDtos;
 using JobCompany.Business.Dtos.VacancyDtos;
 using JobCompany.Business.Services.ExamServices;
 using JobCompany.Core.Entites;
@@ -207,47 +209,42 @@ namespace JobCompany.Business.Services.VacancyServices
         public async Task<VacancyGetByIdDto> GetByIdVacancyAsync(string id)
         {
             var vacancyGuid = Guid.Parse(id);
-            var vacancy = await _context.Vacancies
-            .Where(x => x.Id == vacancyGuid)
-            .Select(x => new VacancyGetByIdDto
+
+            var vacancyEntity = await _context.Vacancies
+                .Include(x => x.Company)
+                .Include(x => x.Category)
+                .FirstOrDefaultAsync(x => x.Id == vacancyGuid)
+                ?? throw new NotFoundException<Vacancy>();
+
+            vacancyEntity.ViewCount++;
+            await _context.SaveChangesAsync();
+
+            var vacancy = new VacancyGetByIdDto
             {
-                Id = x.Id,
-                Title = x.Title,
-                CompanyLogo = x.CompanyLogo,
-                StartDate = x.StartDate,
-                Location = x.Location,
-                ViewCount = x.ViewCount,
-                WorkType = x.WorkType,
-                MainSalary = x.MainSalary,
-                MaxSalary = x.MaxSalary,
-                Requirement = x.Requirement,
-                Description = x.Description,
-                Gender = x.Gender,
-                Military = x.Military,
-                Family = x.Family,
-                Driver = x.Driver,
-                Citizenship = x.Citizenship,
-                VacancyNumbers = x.VacancyNumbers,
-
-                Country = new Country
-                {
-                    CountryName = x.Country.CountryName
-                },
-
-                Company = new Company
-                {
-                    CompanyName = x.CompanyName,
-                    CompanyInformation = x.Company.CompanyInformation
-                },
-
-                Category = new Category
-                {
-                    CategoryName = x.Category.CategoryName
-                }
-            })
-            .FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>();
+                Id = vacancyEntity.Id,
+                Title = vacancyEntity.Title,
+                CompanyLogo = vacancyEntity.CompanyLogo,
+                StartDate = vacancyEntity.StartDate,
+                Location = vacancyEntity.Location,
+                ViewCount = vacancyEntity.ViewCount,
+                WorkType = vacancyEntity.WorkType,
+                MainSalary = vacancyEntity.MainSalary,
+                MaxSalary = vacancyEntity.MaxSalary,
+                Requirement = vacancyEntity.Requirement,
+                Description = vacancyEntity.Description,
+                Email = vacancyEntity.Email,
+                Gender = vacancyEntity.Gender,
+                Military = vacancyEntity.Military,
+                Family = vacancyEntity.Family,
+                Driver = vacancyEntity.Driver,
+                Citizenship = vacancyEntity.Citizenship,
+                VacancyNumbers = vacancyEntity.VacancyNumbers,
+                CompanyName = vacancyEntity.Company.CompanyName,
+                CategoryName = vacancyEntity.Category.CategoryName
+            };
             return vacancy;
         }
+
 
         /// <summary> vacancynin update olunması </summary>
         public async Task UpdateVacancyAsync(UpdateVacancyDto vacancyDto, ICollection<UpdateNumberDto>? numberDtos)
