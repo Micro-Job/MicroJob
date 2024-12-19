@@ -299,7 +299,6 @@ namespace JobCompany.Business.Services.VacancyServices
         public async Task<ICollection<VacancyGetAllDto>> GetAllVacanciesAsync(string? titleName, string? categoryId, string? countryId, string? cityId, decimal? minSalary, decimal? maxSalary, int skip = 1, int take = 9)
         {
             var query = _context.Vacancies.AsNoTracking();
-
             query = ApplyVacancyFilters(query, titleName, categoryId, countryId, cityId, true, minSalary, maxSalary);
 
             var vacancies = await query
