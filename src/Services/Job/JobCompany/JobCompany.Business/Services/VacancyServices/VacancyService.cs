@@ -76,6 +76,8 @@ namespace JobCompany.Business.Services.VacancyServices
                 Family = vacancyDto.Family,
                 Citizenship = vacancyDto.Citizenship,
                 CategoryId = vacancyDto.CategoryId,
+                IsActive = true,
+                ViewCount = 0
             };
 
             var numbers = new List<VacancyNumber>();
@@ -308,6 +310,7 @@ namespace JobCompany.Business.Services.VacancyServices
                     StartDate = v.StartDate,
                     Location = v.Location,
                     ViewCount = v.ViewCount,
+                    IsActive = v.IsActive,
                     WorkType = v.WorkType,
                     MainSalary = v.MainSalary,
                     MaxSalary = v.MaxSalary,
@@ -325,8 +328,11 @@ namespace JobCompany.Business.Services.VacancyServices
             if (titleName != null)
                 query = query.Where(x => x.Title.ToLower().Contains(titleName.ToLower()));
 
-            if (isActive != null)
-                query = query.Where(x => x.IsActive == isActive);
+            if (isActive == true)
+                query = query.Where(x => x.IsActive == true);
+
+            if (isActive == false)
+                query = query.Where(x => x.IsActive == false);
 
             if (minSalary != null && maxSalary != null)
                 query = query.Where(x => x.MainSalary >= minSalary && x.MaxSalary <= maxSalary);
