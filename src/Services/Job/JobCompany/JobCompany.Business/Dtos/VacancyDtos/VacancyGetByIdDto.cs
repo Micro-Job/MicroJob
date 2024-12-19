@@ -12,9 +12,9 @@ namespace JobCompany.Business.Dtos.VacancyDtos
         public string CompanyName { get; set; }
         public string Title { get; set; }
         public string? CompanyLogo { get; set; }
+        public string? Location { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime? EndDate { get; set; }
-        public string? Location { get; set; }
         public int? ViewCount { get; set; }
         // public Country Country { get; set; }
         // public City City { get; set; }
