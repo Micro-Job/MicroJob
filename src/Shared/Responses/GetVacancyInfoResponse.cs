@@ -1,4 +1,5 @@
-﻿using Shared.Enums;
+﻿using Shared.Dtos.VacancyDtos;
+using Shared.Enums;
 using SharedLibrary.Enums;
 
 namespace SharedLibrary.Responses
@@ -19,6 +20,7 @@ namespace SharedLibrary.Responses
         public decimal? MaxSalary { get; set; }
         public string Requirement { get; set; }
         public string Description { get; set; }
+        public List<NumberDto> VacancyNumbers { get; set; }
         public Gender Gender { get; set; }
         public Military Military { get; set; }
         public Driver Driver { get; set; }

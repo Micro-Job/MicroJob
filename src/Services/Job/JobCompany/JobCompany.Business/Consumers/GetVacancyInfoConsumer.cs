@@ -3,6 +3,7 @@ using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using Shared.Dtos.VacancyDtos;
 using SharedLibrary.Dtos.CategoryDtos;
 using SharedLibrary.Requests;
 using SharedLibrary.Responses;
@@ -17,6 +18,7 @@ namespace Job.Business.Consumers
             var vacancyId = context.Message.Id;
             var vacancy = await _context.Vacancies
                 .Include(v => v.Category)
+                .Include(v => v.VacancyNumbers)
                 .FirstOrDefaultAsync(x => x.Id == vacancyId)
                 ?? throw new NotFoundException<Vacancy>();
 
@@ -40,6 +42,7 @@ namespace Job.Business.Consumers
                 CompanyLogo = vacancy.CompanyLogo,
                 Requirement = vacancy.Requirement,
                 Description = vacancy.Description,
+                VacancyNumbers = vacancy.VacancyNumbers.Select(n => new NumberDto { VacancyNumber = n.Number }).ToList(),
                 StartDate = vacancy.StartDate,
                 EndDate = vacancy.EndDate,
                 CategoryName = vacancy.Category.CategoryName,
