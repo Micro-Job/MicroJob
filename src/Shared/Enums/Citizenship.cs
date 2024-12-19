@@ -1,4 +1,4 @@
-﻿namespace JobCompany.Core.Enums
+namespace Shared.Enums
 {
     public enum Citizenship : byte
     {
