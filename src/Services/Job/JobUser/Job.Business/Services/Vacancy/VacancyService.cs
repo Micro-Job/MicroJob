@@ -4,6 +4,7 @@ using Job.DAL.Contexts;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Shared.Dtos.VacancyDtos;
 using Shared.Requests;
 using Shared.Responses;
@@ -30,11 +31,13 @@ namespace Job.Business.Services.Vacancy
         private readonly IRequestClient<CheckVacancyRequest> _checkVacancyRequest;
         private readonly IRequestClient<CheckCompanyRequest> _checkCompanyRequest;
         private readonly IRequestClient<GetOtherVacanciesByCompanyRequest> _othVacRequest;
+        readonly IConfiguration _configuration;
+        private readonly string? _authServiceBaseUrl;
 
         public VacancyService(JobDbContext context, IRequestClient<GetAllCompaniesRequest> request, IRequestClient<GetUserSavedVacanciesRequest> client, IHttpContextAccessor contextAccessor,
             IRequestClient<UserRegisteredEvent> requestClient, IRequestClient<GetAllVacanciesRequest> vacClient, IRequestClient<SimilarVacanciesRequest> similarRequest,
             IRequestClient<GetVacancyInfoRequest> vacancyInforRequest, IRequestClient<GetAllVacanciesByCompanyIdDataRequest> vacancyByCompanyId, IRequestClient<CheckVacancyRequest> checkVacancyRequest,
-            IRequestClient<CheckCompanyRequest> checkCompanyRequest, IRequestClient<GetOtherVacanciesByCompanyRequest> othVacRequest)
+            IRequestClient<CheckCompanyRequest> checkCompanyRequest, IRequestClient<GetOtherVacanciesByCompanyRequest> othVacRequest, IConfiguration configuration)
         {
             _context = context;
             _request = request;
@@ -48,6 +51,8 @@ namespace Job.Business.Services.Vacancy
             _checkVacancyRequest = checkVacancyRequest;
             _checkCompanyRequest = checkCompanyRequest;
             _othVacRequest = othVacRequest;
+            _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
+            _configuration = configuration;
         }
 
         /// <summary> Userin vakansiya save etme toggle metodu </summary>
@@ -206,7 +211,7 @@ namespace Job.Business.Services.Vacancy
             {
                 CompanyName = v.CompanyName,
                 Title = v.Title,
-                CompanyLogo = v.CompanyPhoto,
+                CompanyLogo = $"{_authServiceBaseUrl}/{v.CompanyPhoto}",
                 StartDate = v.CreatedDate,
                 Location = v.CompanyLocation,
                 MainSalary = v.MainSalary,

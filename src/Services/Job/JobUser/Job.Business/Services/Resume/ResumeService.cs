@@ -214,7 +214,7 @@ namespace Job.Business.Services.Resume
         }
 
 
-        public async Task<ResumeDetailItemDto> GetByIdResumeAsync()
+        public async Task<ResumeDetailItemDto> GetOwnResumeAsync()
         {
             var resume = await _context.Resumes
                                             .Include(x => x.PhoneNumbers)

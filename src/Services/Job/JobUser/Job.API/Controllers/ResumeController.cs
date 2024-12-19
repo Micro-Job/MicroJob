@@ -34,9 +34,9 @@ namespace Job.API.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetByIdResume()
+        public async Task<IActionResult> GetOwnResume()
         {
-            return Ok(await _service.GetByIdResumeAsync());
+            return Ok(await _service.GetOwnResumeAsync());
         }
     }
 }

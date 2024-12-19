@@ -1,12 +1,25 @@
-﻿using Job.Business.Dtos.NotificationDtos;
+﻿using System.Security.Claims;
+using Job.Business.Dtos.NotificationDtos;
+using Job.Business.Exceptions.UserExceptions;
+using Job.Core.Entities;
 using Job.DAL.Contexts;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using SharedLibrary.Exceptions;
 
 namespace Job.Business.Services.Notification
 {
-    public class NotificationService(JobDbContext context) : INotificationService
+    public class NotificationService : INotificationService
     {
-        private readonly JobDbContext _context = context;
+        private readonly JobDbContext _context;
+        readonly IHttpContextAccessor _contextAccessor;
+        private readonly Guid userGuid;
+        public NotificationService(JobDbContext context, IHttpContextAccessor contextAccessor)
+        {
+            _context = context;
+            _contextAccessor = contextAccessor;
+            userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value ?? throw new UserIsNotLoggedInException());
+        }
 
         public async Task CreateNotificationAsync(NotificationDto notificationDto)
         {
@@ -24,26 +37,23 @@ namespace Job.Business.Services.Notification
             await _context.SaveChangesAsync();
         }
 
-        public async Task<List<NotificationByUserDto>> GetUserNotificationsAsync(Guid userId)
+        public async Task<List<Core.Entities.Notification>> GetUserNotificationsAsync()
         {
-
             var notifications = await _context.Notifications
-                .Where(n => n.ReceiverId == userId)
+                .Where(n => n.ReceiverId == userGuid)
                 .OrderByDescending(n => n.CreatedDate)
                 .ToListAsync();
-            return null;
+            return notifications;
         }
 
         public async Task MarkNotificationAsReadAsync(Guid notificationId)
         {
-            var notification = await _context.Notifications.FindAsync(notificationId);
+            var notification = await _context.Notifications.FindAsync(notificationId)
+            ?? throw new NotFoundException<Core.Entities.Notification>();
 
-            if (notification != null)
-            {
-                notification.IsSeen = true;
-                _context.Notifications.Update(notification);
-                await _context.SaveChangesAsync();
-            }
+            notification.IsSeen = true;
+            _context.Notifications.Update(notification);
+            await _context.SaveChangesAsync();
         }
     }
 }

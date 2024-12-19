@@ -1,6 +1,7 @@
 using JobCompany.DAL.Contexts;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Shared.Dtos.CompanyDtos;
 using Shared.Dtos.VacancyDtos;
 using Shared.Requests;
@@ -9,10 +10,14 @@ using Shared.Responses;
 public class GetAllVacanciesConsumer : IConsumer<GetAllVacanciesRequest>
 {
     private readonly JobCompanyDbContext _context;
+    readonly IConfiguration _configuration;
+    private readonly string? _authServiceBaseUrl;
 
-    public GetAllVacanciesConsumer(JobCompanyDbContext context)
+    public GetAllVacanciesConsumer(JobCompanyDbContext context, IConfiguration configuration)
     {
         _context = context;
+        _configuration = configuration;
+        _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
     }
 
     public async Task Consume(ConsumeContext<GetAllVacanciesRequest> context)
@@ -68,7 +73,7 @@ public class GetAllVacanciesConsumer : IConsumer<GetAllVacanciesRequest>
                 VacancyId = v.Id.ToString(),
                 Title = v.Title,
                 CompanyName = v.Company.CompanyName,
-                CompanyLogo = v.Company.CompanyLogo,
+                CompanyLogo = $"{_authServiceBaseUrl}/{v.Company.CompanyLogo}",
                 StartDate = v.StartDate,
                 Location = v.Location,
                 ViewCount = v.ViewCount,
