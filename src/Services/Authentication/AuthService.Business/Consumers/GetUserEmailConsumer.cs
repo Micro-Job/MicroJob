@@ -14,6 +14,9 @@ public class GetUserEmailConsumer(AppDbContext dbContext) : IConsumer<GetUserEma
         var user = await dbContext.Users.FindAsync(context.Message.UserId)
             ?? throw new NotFoundException<User>();
 
-        await context.RespondAsync(new GetUserEmailResponse { Email = user.Email });
+        await context.RespondAsync(new GetUserEmailResponse { 
+            Email = user.Email ,
+            MainPhoneNumber = user.MainPhoneNumber
+        });
     }
 }
