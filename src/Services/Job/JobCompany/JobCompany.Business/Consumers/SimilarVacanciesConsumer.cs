@@ -32,10 +32,10 @@ namespace JobCompany.Business.Consumers
                         .Select(sim => new SimilarVacancyResponse
                         {
                             Title = sim.Title,
-                            CompanyName = sim.Company.CompanyName,
-                            CompanyLocation = sim.Company.CompanyLocation,
+                            CompanyName = sim.CompanyName,
+                            CompanyLocation = sim.Location,
                             CreatedDate = sim.StartDate,
-                            CompanyPhoto = sim.Company.CompanyLogo,
+                            CompanyPhoto = sim.CompanyLogo,
                             MainSalary = sim.MainSalary,
                             MaxSalary = sim.MaxSalary,
                             ViewCount = sim.ViewCount,

@@ -1,24 +1,36 @@
 ﻿using JobCompany.DAL.Contexts;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Shared.Dtos.VacancyDtos;
 using SharedLibrary.Requests;
 using SharedLibrary.Responses;
 
 namespace JobCompany.Business.Consumers;
 
-public class GetOtherVacanciesByCompanyConsumer(JobCompanyDbContext dbContext) : IConsumer<GetOtherVacanciesByCompanyRequest>
+public class GetOtherVacanciesByCompanyConsumer : IConsumer<GetOtherVacanciesByCompanyRequest>
 {
+    private readonly JobCompanyDbContext _dbContext;
+    readonly IConfiguration _configuration;
+    private readonly string? _authServiceBaseUrl;
+
+    public GetOtherVacanciesByCompanyConsumer(JobCompanyDbContext dbContext, IConfiguration configuration)
+    {
+        _dbContext = dbContext;
+        _configuration = configuration;
+        _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
+    }
+
     public async Task Consume(ConsumeContext<GetOtherVacanciesByCompanyRequest> context)
     {
-        var vacancies = await dbContext.Vacancies
+        var vacancies = await _dbContext.Vacancies
             .Where(x => x.CompanyId == context.Message.CompanyId && x.Id != context.Message.CurrentVacancyId)
             .OrderByDescending(x => x.StartDate)
             .Include(x => x.Company)
             .AsNoTracking()
             .ToListAsync();
 
-        if(vacancies is null)
+        if (vacancies is null)
         {
             await context.RespondAsync(new GetOtherVacanciesByCompanyResponse
             {
@@ -32,9 +44,10 @@ public class GetOtherVacanciesByCompanyConsumer(JobCompanyDbContext dbContext) :
         {
             Vacancies = vacancies.Select(x => new AllVacanyDto
             {
-                CompanyName = x.Company.CompanyName,
-                CompanyLogo = x.Company.CompanyLogo,
-                Location = x.Company.CompanyLocation,
+                VacancyId = x.Id.ToString(),
+                CompanyName = x.CompanyName,
+                CompanyLogo = $"{_authServiceBaseUrl}/{x.CompanyLogo}",
+                Location = x.Location,
                 Title = x.Title,
                 WorkType = x.WorkType,
                 IsActive = x.IsActive,

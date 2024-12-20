@@ -82,12 +82,6 @@ public class GetAllVacanciesConsumer : IConsumer<GetAllVacanciesRequest>
                 IsVip = v.IsVip,
                 IsActive = v.IsActive,
                 CategoryId = v.CategoryId,
-                // Company = new CompanyDetailDto
-                // {
-                //     CompanyId = v.Company.Id,
-                //     CityId = v.Company.CityId,
-                //     CountryId = v.Company.CountryId,
-                // }
             })
             .ToListAsync();
 
