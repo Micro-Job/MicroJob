@@ -18,6 +18,7 @@ namespace Job.Business.Consumers
             var vacancyId = context.Message.Id;
             var vacancy = await _context.Vacancies
                 .Include(v => v.Category)
+                .Include(v=>v.Company)
                 .Include(v => v.VacancyNumbers)
                 .FirstOrDefaultAsync(x => x.Id == vacancyId)
                 ?? throw new NotFoundException<Vacancy>();
@@ -49,6 +50,7 @@ namespace Job.Business.Consumers
                 WorkType = vacancy.WorkType,
                 Location = vacancy.Location,
                 ViewCount = vacancy.ViewCount,
+                CompanyId = vacancy.Company.Id,
             };
             await context.RespondAsync(response);
         }

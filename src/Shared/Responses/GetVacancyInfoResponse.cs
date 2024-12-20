@@ -28,5 +28,6 @@ namespace SharedLibrary.Responses
         public Citizenship Citizenship { get; set; }
         public bool IsActive { get; set; }
         public string CategoryName { get; set; }   
+        public Guid? CompanyId { get; set; }
     }
 }
