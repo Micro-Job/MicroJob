@@ -196,11 +196,13 @@ namespace JobCompany.Business.Services.VacancyServices
 
             var vacancies = await _context.Vacancies
             .Where(x => x.CompanyId == companyGuid && x.IsActive)
+            .Include(x => x.Company)
             .Select(x => new VacancyGetByCompanyIdDto
             {
                 CompanyName = x.CompanyName,
                 Title = x.Title,
                 Location = x.Location,
+                CompanyLogo = $"{_authServiceBaseUrl}/{x.Company.CompanyLogo}",
                 WorkType = x.WorkType,
                 StartDate = x.StartDate,
                 ViewCount = x.ViewCount,
@@ -222,6 +224,7 @@ namespace JobCompany.Business.Services.VacancyServices
             var vacancyEntity = await _context.Vacancies
                 .AsNoTracking()
                 .Include(x => x.Category)
+                .Include(x => x.Company)
                 .Include(x => x.VacancyNumbers)
                 .FirstOrDefaultAsync(x => x.Id == vacancyGuid)
                 ?? throw new NotFoundException<Vacancy>();
@@ -233,7 +236,7 @@ namespace JobCompany.Business.Services.VacancyServices
             {
                 Id = vacancyEntity.Id,
                 Title = vacancyEntity.Title,
-                CompanyLogo = vacancyEntity.CompanyLogo,
+                CompanyLogo = $"{_authServiceBaseUrl}/{vacancyEntity.Company.CompanyLogo}",
                 StartDate = vacancyEntity.StartDate,
                 Location = vacancyEntity.Location,
                 ViewCount = vacancyEntity.ViewCount,

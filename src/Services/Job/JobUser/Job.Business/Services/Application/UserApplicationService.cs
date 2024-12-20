@@ -52,7 +52,8 @@ namespace Job.Business.Services.Application
             await _publishEndpoint.Publish(new UserApplicationEvent
             {
                 UserId = userGuid,
-                VacancyId = guidVac
+                VacancyId = guidVac,
+                CreatedDate = DateTime.Now,
             });
 
             await _publishEndpoint.Publish(new VacancyApplicationEvent
@@ -60,7 +61,7 @@ namespace Job.Business.Services.Application
                 UserId = companyId,
                 SenderId = userGuid,
                 VacancyId = guidVac,
-                Content = $"İstifadəçi {userGuid} {guidVac} vakansiyasına müraciət etdi."
+                Content = $"İstifadəçi {userGuid} {guidVac} vakansiyasına müraciət etdi.",
             });
         }
     }

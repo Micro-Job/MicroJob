@@ -47,7 +47,8 @@ namespace JobCompany.Business.Consumers
                 UserId = context.Message.UserId,
                 VacancyId = context.Message.VacancyId,
                 IsActive = true,
-                StatusId = status.Id
+                StatusId = status.Id,
+                CreatedDate = DateTime.Now
             };
             await _companyDb.Applications.AddAsync(newApp);
             await _companyDb.SaveChangesAsync();

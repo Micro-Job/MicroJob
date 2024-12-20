@@ -14,7 +14,7 @@ namespace JobCompany.Business.Consumers
                 ReceiverId = context.Message.UserId,
                 SenderId = context.Message.SenderId,
                 Content = context.Message.Content,
-                IsSeen = false
+                IsSeen = false,
             };
             _context.Notifications.Add(newNotification);
             return _context.SaveChangesAsync();
