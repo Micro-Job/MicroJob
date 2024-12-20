@@ -47,10 +47,8 @@ using SharedLibrary.Responses;
 
 namespace JobCompany.Business.Consumers;
 
-public class GetCompanyDetailByIdConsumer(JobCompanyDbContext jobCompanyDbContext, IRequestClient<GetUserEmailRequest> requestClient) : IConsumer<GetCompanyDetailByIdRequest>
+public class GetCompanyDetailByIdConsumer(JobCompanyDbContext _jobCompanyDbContext, IRequestClient<GetUserEmailRequest> _requestClient) : IConsumer<GetCompanyDetailByIdRequest>
 {
-    private readonly JobCompanyDbContext _jobCompanyDbContext = jobCompanyDbContext;
-    private readonly IRequestClient<GetUserEmailRequest> _requestClient = requestClient;
     public async Task Consume(ConsumeContext<GetCompanyDetailByIdRequest> context)
     {
         var company = await _jobCompanyDbContext.Companies.Include(x => x.CompanyNumbers).FirstOrDefaultAsync(x => x.Id == context.Message.CompanyId)
