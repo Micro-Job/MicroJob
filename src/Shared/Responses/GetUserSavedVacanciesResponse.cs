@@ -9,6 +9,7 @@ namespace SharedLibrary.Responses
 
     public class VacancyResponse
     {
+        public Guid Id { get; set; }
         public string Title { get; set; }
         public string CompanyName { get; set; }
         public string? CompanyLocation { get; set; }

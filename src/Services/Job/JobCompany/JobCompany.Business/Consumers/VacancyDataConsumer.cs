@@ -1,14 +1,24 @@
 using JobCompany.DAL.Contexts;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using SharedLibrary.Requests;
 using SharedLibrary.Responses;
 
 namespace JobCompany.Business.Consumers
 {
-    public class VacancyDataConsumer(JobCompanyDbContext context) : IConsumer<GetUserSavedVacanciesRequest>
+    public class VacancyDataConsumer : IConsumer<GetUserSavedVacanciesRequest>
     {
-        private readonly JobCompanyDbContext _context = context;
+        private readonly JobCompanyDbContext _context;
+        readonly IConfiguration _configuration;
+        private readonly string? _authServiceBaseUrl;
+
+        public VacancyDataConsumer(JobCompanyDbContext context, IConfiguration configuration)
+        {
+            _context = context;
+            _configuration = configuration;
+            _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
+        }
 
         public async Task Consume(ConsumeContext<GetUserSavedVacanciesRequest> context)
         {
@@ -31,11 +41,12 @@ namespace JobCompany.Business.Consumers
             {
                 Vacancies = vacancies.Select(v => new VacancyResponse
                 {
+                    Id = v.Id,
                     Title = v.Title,
                     CompanyName = v.CompanyName,
                     CompanyLocation = v.Location,
                     CreatedDate = v.StartDate,
-                    CompanyPhoto = v.CompanyLogo,
+                    CompanyPhoto = $"{_authServiceBaseUrl}/{v.CompanyLogo}",
                     MainSalary = v.MainSalary,
                     MaxSalary = v.MaxSalary,
                     ViewCount = v.ViewCount ?? 0,
