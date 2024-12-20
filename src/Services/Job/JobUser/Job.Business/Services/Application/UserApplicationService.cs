@@ -13,16 +13,19 @@ namespace Job.Business.Services.Application
         readonly IPublishEndpoint _publishEndpoint;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IRequestClient<GetUserApplicationsRequest> _userApplicationRequest;
-        private readonly IRequestClient<CheckVacancyRequest> _requestClient;
+        private readonly IRequestClient<CheckVacancyRequest> _requestClient; 
+        private readonly IRequestClient<GetUserDataRequest> _requestUser; 
         private readonly Guid userGuid;
 
-        public UserApplicationService(IPublishEndpoint publishEndpoint, IHttpContextAccessor httpContextAccessor, IRequestClient<GetUserApplicationsRequest> userApplicationRequest, IRequestClient<CheckVacancyRequest> requestClient)
+
+        public UserApplicationService(IPublishEndpoint publishEndpoint, IHttpContextAccessor httpContextAccessor, IRequestClient<GetUserApplicationsRequest> userApplicationRequest, IRequestClient<CheckVacancyRequest> requestClient, IRequestClient<GetUserDataRequest> requestUser)
         {
             _publishEndpoint = publishEndpoint;
             _httpContextAccessor = httpContextAccessor;
             _requestClient = requestClient;
             _userApplicationRequest = userApplicationRequest;
             userGuid = Guid.Parse(_httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value);
+            _requestUser = requestUser;
         }
 
         /// <summary> İstifadəçinin bütün müraciətlərini gətirir </summary>
@@ -41,9 +44,14 @@ namespace Job.Business.Services.Application
         {
             var guidVac = Guid.Parse(vacancyId);
 
+            var responseUser = await _requestUser.GetResponse<GetUserDataResponse>(new GetUserDataRequest
+            {
+                UserId = userGuid,
+            });
+
             var response = await _requestClient.GetResponse<CheckVacancyResponse>(new CheckVacancyRequest
             {
-                VacancyId = guidVac
+                VacancyId = guidVac,
             });
 
             if (!response.Message.IsExist) throw new EntityNotFoundException("Vacancy");
@@ -61,7 +69,7 @@ namespace Job.Business.Services.Application
                 UserId = companyId,
                 SenderId = userGuid,
                 VacancyId = guidVac,
-                Content = $"İstifadəçi {userGuid} {guidVac} vakansiyasına müraciət etdi.",
+                Content = $"İstifadəçi {responseUser.Message.FirstName} {responseUser.Message.LastName} {response.Message.VacancyName} vakansiyasına müraciət etdi.",
             });
         }
     }
