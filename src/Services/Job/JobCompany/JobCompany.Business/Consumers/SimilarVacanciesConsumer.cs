@@ -31,6 +31,7 @@ namespace JobCompany.Business.Consumers
                         .Take(6)
                         .Select(sim => new SimilarVacancyResponse
                         {
+                            Id =sim.Id,
                             Title = sim.Title,
                             CompanyName = sim.CompanyName,
                             CompanyLocation = sim.Location,

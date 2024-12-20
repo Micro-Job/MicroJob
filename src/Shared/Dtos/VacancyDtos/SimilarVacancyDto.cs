@@ -8,6 +8,7 @@ namespace Shared.Dtos.VacancyDtos
 {
     public class SimilarVacancyDto
     {
+        public Guid Id { get; set; }
         public string CompanyName { get; set; }
         public string Title { get; set; }
         public string? CompanyLogo { get; set; }
