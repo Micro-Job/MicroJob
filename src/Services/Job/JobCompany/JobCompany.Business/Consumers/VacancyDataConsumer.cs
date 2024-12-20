@@ -51,7 +51,7 @@ namespace JobCompany.Business.Consumers
                     MaxSalary = v.MaxSalary,
                     ViewCount = v.ViewCount ?? 0,
                     IsVip = v.IsVip,
-                    WorkType = v.WorkType ?? SharedLibrary.Enums.WorkType.FullTime,
+                    WorkType = v.WorkType,
                 }).ToList()
             };
 
