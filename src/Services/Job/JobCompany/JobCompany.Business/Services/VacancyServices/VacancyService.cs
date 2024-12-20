@@ -9,6 +9,7 @@ using MassTransit;
 using MassTransit.Initializers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.Events;
 using SharedLibrary.Exceptions;
@@ -26,8 +27,10 @@ namespace JobCompany.Business.Services.VacancyServices
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly IExamService _examService;
         private readonly IPublishEndpoint _publishEndpoint;
+        readonly IConfiguration _configuration;
+        private readonly string? _authServiceBaseUrl;
 
-        public VacancyService(JobCompanyDbContext context, IFileService fileService, IHttpContextAccessor contextAccessor, IExamService examService, IPublishEndpoint publishEndpoint)
+        public VacancyService(JobCompanyDbContext context, IFileService fileService, IHttpContextAccessor contextAccessor, IExamService examService, IPublishEndpoint publishEndpoint, IConfiguration configuration)
         {
             _context = context;
             _fileService = fileService;
@@ -35,6 +38,8 @@ namespace JobCompany.Business.Services.VacancyServices
             _userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value ?? throw new Exception("Istifadeci sisteme daxil olmayib."));
             _examService = examService;
             _publishEndpoint = publishEndpoint;
+            _configuration = configuration;
+            _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
         }
 
         /// <summary> vacancy yaradılması </summary>
@@ -141,7 +146,10 @@ namespace JobCompany.Business.Services.VacancyServices
         /// <summary> Şirkətin profilində bütün vakansiyalarını gətirmək(Filterlerle birlikde) </summary>
         public async Task<List<VacancyGetAllDto>> GetAllOwnVacanciesAsync(string? titleName, string? categoryId, string? countryId, string? cityId, bool? IsActive, decimal? minSalary, decimal? maxSalary, int skip = 1, int take = 6)
         {
-            var query = _context.Vacancies.Where(x => x.Company.UserId == _userGuid).AsQueryable().AsNoTracking();
+            var query = _context.Vacancies
+                .Where(x => x.Company.UserId == _userGuid)
+                .Include(x => x.Company)
+                .AsNoTracking();
 
             query = ApplyVacancyFilters(query, titleName, categoryId, countryId, cityId, IsActive, minSalary, maxSalary);
 
@@ -151,6 +159,7 @@ namespace JobCompany.Business.Services.VacancyServices
                 Title = x.Title,
                 StartDate = x.StartDate,
                 Location = x.Location,
+                CompanyLogo = $"{_authServiceBaseUrl}/{x.Company.CompanyLogo}",
                 ViewCount = x.ViewCount,
                 WorkType = x.WorkType,
                 MainSalary = x.MainSalary,
@@ -211,7 +220,7 @@ namespace JobCompany.Business.Services.VacancyServices
             var vacancyGuid = Guid.Parse(id);
 
             var vacancyEntity = await _context.Vacancies
-                .AsNoTracking() 
+                .AsNoTracking()
                 .Include(x => x.Category)
                 .Include(x => x.VacancyNumbers)
                 .FirstOrDefaultAsync(x => x.Id == vacancyGuid)

@@ -46,7 +46,7 @@ public class GetOtherVacanciesByCompanyConsumer : IConsumer<GetOtherVacanciesByC
             {
                 VacancyId = x.Id.ToString(),
                 CompanyName = x.CompanyName,
-                CompanyLogo = $"{_authServiceBaseUrl}/{x.CompanyLogo}",
+                CompanyLogo = $"{_authServiceBaseUrl}/{x.Company.CompanyLogo}",
                 Location = x.Location,
                 Title = x.Title,
                 WorkType = x.WorkType,
