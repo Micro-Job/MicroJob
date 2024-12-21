@@ -4,6 +4,7 @@ using Job.DAL.Contexts;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Shared.Dtos.VacancyDtos;
 using Shared.Requests;
 using Shared.Responses;
@@ -30,11 +31,13 @@ namespace Job.Business.Services.Vacancy
         private readonly IRequestClient<CheckVacancyRequest> _checkVacancyRequest;
         private readonly IRequestClient<CheckCompanyRequest> _checkCompanyRequest;
         private readonly IRequestClient<GetOtherVacanciesByCompanyRequest> _othVacRequest;
+        readonly IConfiguration _configuration;
+        private readonly string? _authServiceBaseUrl;
 
         public VacancyService(JobDbContext context, IRequestClient<GetAllCompaniesRequest> request, IRequestClient<GetUserSavedVacanciesRequest> client, IHttpContextAccessor contextAccessor,
             IRequestClient<UserRegisteredEvent> requestClient, IRequestClient<GetAllVacanciesRequest> vacClient, IRequestClient<SimilarVacanciesRequest> similarRequest,
             IRequestClient<GetVacancyInfoRequest> vacancyInforRequest, IRequestClient<GetAllVacanciesByCompanyIdDataRequest> vacancyByCompanyId, IRequestClient<CheckVacancyRequest> checkVacancyRequest,
-            IRequestClient<CheckCompanyRequest> checkCompanyRequest, IRequestClient<GetOtherVacanciesByCompanyRequest> othVacRequest)
+            IRequestClient<CheckCompanyRequest> checkCompanyRequest, IRequestClient<GetOtherVacanciesByCompanyRequest> othVacRequest, IConfiguration configuration)
         {
             _context = context;
             _request = request;
@@ -48,6 +51,8 @@ namespace Job.Business.Services.Vacancy
             _checkVacancyRequest = checkVacancyRequest;
             _checkCompanyRequest = checkCompanyRequest;
             _othVacRequest = othVacRequest;
+            _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
+            _configuration = configuration;
         }
 
         /// <summary> Userin vakansiya save etme toggle metodu </summary>
@@ -156,11 +161,6 @@ namespace Job.Business.Services.Vacancy
         /// <summary> Butun vakansiyalarin getirilmesi - search ve filter</summary>
         public async Task<ICollection<AllVacanyDto>> GetAllVacanciesAsync(string? titleName, string? categoryId, string? countryId, string? cityId, bool? isActive, decimal? minSalary, decimal? maxSalary, int skip = 1, int take = 6)
         {
-            // var userSkills = await _context.Resumes
-            // .Where(r => r.UserId == userGuid)
-            // .SelectMany(r => r.ResumeSkills)
-            // .ToListAsync();
-
             var request = new GetAllVacanciesRequest
             {
                 TitleName = titleName,
@@ -173,29 +173,48 @@ namespace Job.Business.Services.Vacancy
             };
 
             var response = await _vacClient.GetResponse<GetAllVacanciesResponse>(request);
-
             var vacancies = response.Message.Vacancies.AsQueryable();
+            var userGuid = _contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value;
 
+            var savedVacancies = userGuid == null ? new List<Guid>() : await _context.SavedVacancies
+                .Where(x => x.UserId == Guid.Parse(userGuid))
+                .Select(x => x.VacancyId)
+                .ToListAsync();
 
-            var pagedVacancies = vacancies
+            return vacancies
                 .Skip((skip - 1) * take)
                 .Take(take)
+                .Select(x => new AllVacanyDto
+                {
+                    VacancyId = x.VacancyId,
+                    CompanyName = x.CompanyName,
+                    Title = x.Title,
+                    CompanyLogo = x.CompanyLogo,
+                    StartDate = x.StartDate,
+                    Location = x.Location,
+                    MainSalary = x.MainSalary,
+                    ViewCount = x.ViewCount,
+                    WorkType = x.WorkType,
+                    IsVip = x.IsVip,
+                    IsActive = x.IsActive,
+                    CategoryId = x.CategoryId,
+                    IsSaved = userGuid != null && savedVacancies.Contains(Guid.Parse(x.VacancyId.ToString()))
+                })
                 .ToList();
-
-            return pagedVacancies;
         }
+
 
         /// <summary> Oxsar vakansiylarin getirilmesi category'e gore </summary>
         public async Task<ICollection<SimilarVacancyDto>> SimilarVacanciesAsync(string vacancyId)
         {
-            Guid userGuid = GetUserId();
+           var userGuid = _contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value;
             var guidVacancyId = Guid.Parse(vacancyId);
 
             await EnsureVacancyExistsAsync(guidVacancyId);
 
-            var savedVacancies = await _context.SavedVacancies
-                .Where(sv => sv.UserId == userGuid)
-                .Select(sv => sv.VacancyId)
+            var savedVacancies = userGuid == null ? new List<Guid>() : await _context.SavedVacancies
+                .Where(x => x.UserId == Guid.Parse(userGuid))
+                .Select(x => x.VacancyId)
                 .ToListAsync();
 
             var response = await _similarRequest.GetResponse<SimilarVacanciesResponse>(
@@ -207,7 +226,7 @@ namespace Job.Business.Services.Vacancy
                 Id = v.Id,
                 CompanyName = v.CompanyName,
                 Title = v.Title,
-                CompanyLogo = v.CompanyPhoto,
+                CompanyLogo = $"{_authServiceBaseUrl}/{v.CompanyPhoto}",
                 StartDate = v.CreatedDate,
                 Location = v.CompanyLocation,
                 MainSalary = v.MainSalary,
@@ -215,12 +234,12 @@ namespace Job.Business.Services.Vacancy
                 WorkType = v.WorkType,
                 IsVip = v.IsVip,
                 IsActive = v.IsActive,
-                CategoryId = v.CategoryId,
-                IsSaved = savedVacancies.Contains(v.Id)
+                IsSaved = userGuid != null && savedVacancies.Contains(Guid.Parse(v.Id.ToString()))
             }).ToList();
 
             return allVacancies;
         }
+
 
         public async Task<ICollection<AllVacanyDto>> GetAllVacanciesByCompanyId(string companyId)
         {

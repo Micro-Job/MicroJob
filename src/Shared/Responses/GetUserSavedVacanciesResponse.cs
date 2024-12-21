@@ -9,6 +9,7 @@ namespace SharedLibrary.Responses
 
     public class VacancyResponse
     {
+        public Guid Id { get; set; }
         public string Title { get; set; }
         public string CompanyName { get; set; }
         public string? CompanyLocation { get; set; }
@@ -18,6 +19,6 @@ namespace SharedLibrary.Responses
         public decimal? MaxSalary { get; set; }
         public int ViewCount { get; set; }
         public bool IsVip { get; set; }
-        public WorkType WorkType { get; set; }
+        public WorkType? WorkType { get; set; }
     }
 }

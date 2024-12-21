@@ -7,6 +7,7 @@ using JobCompany.Business.Services.CityServices;
 using JobCompany.Business.Services.CompanyServices;
 using JobCompany.Business.Services.CountryServices;
 using JobCompany.Business.Services.ExamServices;
+using JobCompany.Business.Services.NotificationServices;
 using JobCompany.Business.Services.QuestionServices;
 using JobCompany.Business.Services.ReportServices;
 using JobCompany.Business.Services.Skill;
@@ -39,6 +40,7 @@ namespace JobCompany.Business
             services.AddScoped<IExamService, ExamService>();
             services.AddScoped<IAnswerService, AnswerService>();
             services.AddScoped<ISkillService, SkillService>();
+            services.AddScoped<INotificationService, NotificationService>();
         }
 
         public static IServiceCollection AddMassTransitCompany(this IServiceCollection services, IConfiguration configuration)

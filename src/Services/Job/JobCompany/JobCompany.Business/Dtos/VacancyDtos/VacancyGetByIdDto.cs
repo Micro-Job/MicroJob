@@ -11,22 +11,27 @@ namespace JobCompany.Business.Dtos.VacancyDtos
     public record VacancyGetByIdDto
     {
         public Guid Id { get; set; }
+        public string CompanyName { get; set; }
         public string Title { get; set; }
         public string? CompanyLogo { get; set; }
+        public string? Location { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime? EndDate { get; set; }
-        public string? Location { get; set; }
         public int? ViewCount { get; set; }
-        //public string? Email { get; set; }
+        // public Country Country { get; set; }
+        // public City City { get; set; }
+        public string? Email { get; set; }
+        public ICollection<VacancyNumberDto>? VacancyNumbers { get; set; }
         public WorkType? WorkType { get; set; }
+        public WorkStyle? WorkStyle { get; set; }
         public decimal? MainSalary { get; set; }
         public decimal? MaxSalary { get; set; }
         public string Requirement { get; set; }
         public string Description { get; set; }
-        public SharedLibrary.Enums.Gender Gender { get; set; }
+        public Gender Gender { get; set; }
         public Military Military { get; set; }
         public Driver Driver { get; set; }
-        public SharedLibrary.Enums.FamilySituation Family { get; set; }
+        public FamilySituation Family { get; set; }
         public Citizenship Citizenship { get; set; }
         public bool IsActive { get; set; }
         public CompanyInfoDto Company { get; set; }

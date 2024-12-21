@@ -5,7 +5,7 @@ namespace Job.Business.Services.Notification
     public interface INotificationService
     {
         Task CreateNotificationAsync(NotificationDto notificationDto);
-        Task<List<NotificationByUserDto>> GetUserNotificationsAsync(Guid userId);
+        Task<List<Core.Entities.Notification>> GetUserNotificationsAsync();
         Task MarkNotificationAsReadAsync(Guid id);
     }
 }

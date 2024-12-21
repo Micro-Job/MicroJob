@@ -62,7 +62,9 @@ namespace Job.Business.Services.Resume
 
         }
 
-        public async Task CreateResumeAsync(ResumeCreateDto resumeCreateDto, ResumeCreateListsDto resumeCreateListsDto)
+        public async Task CreateResumeAsync(ResumeCreateDto resumeCreateDto,
+        //  ICollection<CertificateCreateDto>? Certificates,
+          ResumeCreateListsDto resumeCreateListsDto)
         {
             if (await _context.Resumes.AnyAsync(x => x.UserId == userGuid))
                 throw new IsAlreadyExistException<Core.Entities.Resume>();
@@ -116,9 +118,13 @@ namespace Job.Business.Services.Resume
             var experiences = await _experienceService.CreateBulkExperienceAsync(resumeCreateListsDto.ExperienceCreateDtos.Experiences, resume.Id);
             var languages = await _languageService.CreateBulkLanguageAsync(resumeCreateListsDto.LanguageCreateDtos.Languages, resume.Id);
 
-            var certificates = resumeCreateDto.Certificates != null
-                ? await _certificateService.CreateBulkCertificateAsync(resumeCreateDto.Certificates)
-                : [];
+            // var certificates = resumeCreateDto.Certificates != null
+            //     ? await _certificateService.CreateBulkCertificateAsync(resumeCreateDto.Certificates)
+            //     : [];
+
+            // var certificates = Certificates != null
+            //     ? await _certificateService.CreateBulkCertificateAsync(Certificates)
+            //     : [];
 
             var resumeSkills = resumeCreateDto.SkillIds != null
                 ? resumeCreateDto.SkillIds.Select(skillId => new ResumeSkill
@@ -132,7 +138,7 @@ namespace Job.Business.Services.Resume
             resume.Educations = educations;
             resume.Experiences = experiences;
             resume.Languages = languages;
-            resume.Certificates = certificates;
+            // resume.Certificates = certificates;
             resume.ResumeSkills = resumeSkills;
 
             await _context.SaveChangesAsync();
@@ -214,7 +220,7 @@ namespace Job.Business.Services.Resume
         }
 
 
-        public async Task<ResumeDetailItemDto> GetByIdResumeAsync()
+        public async Task<ResumeDetailItemDto> GetOwnResumeAsync()
         {
             var resume = await _context.Resumes
                                             .Include(x => x.PhoneNumbers)

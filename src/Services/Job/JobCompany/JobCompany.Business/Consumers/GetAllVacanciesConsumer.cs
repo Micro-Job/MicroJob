@@ -1,6 +1,7 @@
 using JobCompany.DAL.Contexts;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Shared.Dtos.CompanyDtos;
 using Shared.Dtos.VacancyDtos;
 using Shared.Requests;
@@ -62,20 +63,15 @@ public class GetAllVacanciesConsumer(JobCompanyDbContext context) : IConsumer<Ge
                 VacancyId = v.Id.ToString(),
                 Title = v.Title,
                 CompanyName = v.Company.CompanyName,
-                CompanyLogo = v.Company.CompanyLogo,
+                CompanyLogo = $"{_authServiceBaseUrl}/{v.Company.CompanyLogo}",
                 StartDate = v.StartDate,
                 Location = v.Location,
                 ViewCount = v.ViewCount,
                 MainSalary = v.MainSalary,
                 WorkType = v.WorkType,
                 IsVip = v.IsVip,
+                IsActive = v.IsActive,
                 CategoryId = v.CategoryId,
-                Company = new CompanyDetailDto
-                {
-                    CompanyId = v.Company.Id,
-                    CityId = v.Company.CityId,
-                    CountryId = v.Company.CountryId,
-                }
             })
             .ToListAsync();
 

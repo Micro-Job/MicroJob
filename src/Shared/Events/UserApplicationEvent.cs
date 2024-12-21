@@ -4,5 +4,6 @@ namespace Shared.Events
     {
         public Guid UserId { get; set; }
         public Guid VacancyId { get; set; }
+        public DateTime CreatedDate { get; set; }
     }
 }

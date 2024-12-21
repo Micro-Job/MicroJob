@@ -24,6 +24,6 @@ namespace Shared.Dtos.VacancyDtos
         public bool IsVip { get; set; }
         public bool IsActive { get; set; }
         public Guid? CategoryId { get; set; }
-        public CompanyDetailDto Company { get; set; }
+        // public CompanyDetailDto Company { get; set; }
     }
 }

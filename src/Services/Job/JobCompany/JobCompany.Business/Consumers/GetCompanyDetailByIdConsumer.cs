@@ -2,6 +2,8 @@
 using JobCompany.DAL.Contexts;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using Shared.Requests;
+using Shared.Responses;
 using SharedLibrary.Dtos.CompanyDtos;
 using SharedLibrary.Exceptions;
 using SharedLibrary.Requests;
@@ -9,18 +11,16 @@ using SharedLibrary.Responses;
 
 namespace JobCompany.Business.Consumers;
 
-public class GetCompanyDetailByIdConsumer(JobCompanyDbContext jobCompanyDbContext, IRequestClient<GetUserEmailRequest> requestClient) : IConsumer<GetCompanyDetailByIdRequest>
+public class GetCompanyDetailByIdConsumer(JobCompanyDbContext _jobCompanyDbContext, IRequestClient<GetAllCompaniesDataRequest> _requestClient) : IConsumer<GetCompanyDetailByIdRequest>
 {
-    private readonly JobCompanyDbContext _jobCompanyDbContext = jobCompanyDbContext;
-    private readonly IRequestClient<GetUserEmailRequest> _requestClient = requestClient;
     public async Task Consume(ConsumeContext<GetCompanyDetailByIdRequest> context)
     {
         var company = await _jobCompanyDbContext.Companies./*Include(x => x.CompanyNumbers).*/FirstOrDefaultAsync(x => x.Id == context.Message.CompanyId)
             ?? throw new NotFoundException<Company>();
 
-        GetUserEmailRequest userEmailRequest = new() { UserId = company.UserId };
+        GetAllCompaniesDataRequest userEmailRequest = new() { UserId = company.UserId };
 
-        var userEmailResponse = await _requestClient.GetResponse<GetUserEmailResponse>(userEmailRequest)
+        var userEmailResponse = await _requestClient.GetResponse<GetAllCompaniesDataResponse>(userEmailRequest)
             ?? throw new Exception("Failed to retrieve user email");
 
         await context.RespondAsync(new GetCompanyDetailByIdResponse
@@ -29,7 +29,8 @@ public class GetCompanyDetailByIdConsumer(JobCompanyDbContext jobCompanyDbContex
             CompanyLocation = company.CompanyLocation,
             WebLink = company.WebLink,
             CompanyNumbers = company.CompanyNumbers?.Select(x => new CompanyNumberDto { Number = x.Number }).ToList(),
-            Email = userEmailResponse.Message.Email
+            Email = userEmailResponse.Message.Email,
+            PhoneNumber = userEmailResponse.Message.PhoneNumber
         });
     }
 }

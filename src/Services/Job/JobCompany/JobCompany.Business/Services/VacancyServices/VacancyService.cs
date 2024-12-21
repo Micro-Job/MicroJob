@@ -30,8 +30,10 @@ namespace JobCompany.Business.Services.VacancyServices
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly IExamService _examService;
         private readonly IPublishEndpoint _publishEndpoint;
+        readonly IConfiguration _configuration;
+        private readonly string? _authServiceBaseUrl;
 
-        public VacancyService(JobCompanyDbContext context, IFileService fileService, IHttpContextAccessor contextAccessor, IExamService examService, IPublishEndpoint publishEndpoint)
+        public VacancyService(JobCompanyDbContext context, IFileService fileService, IHttpContextAccessor contextAccessor, IExamService examService, IPublishEndpoint publishEndpoint, IConfiguration configuration)
         {
             _context = context;
             _fileService = fileService;
@@ -39,6 +41,8 @@ namespace JobCompany.Business.Services.VacancyServices
             _userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value ?? throw new Exception("Istifadeci sisteme daxil olmayib."));
             _examService = examService;
             _publishEndpoint = publishEndpoint;
+            _configuration = configuration;
+            _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
         }
 
         /// <summary> vacancy yaradılması </summary>
@@ -72,6 +76,7 @@ namespace JobCompany.Business.Services.VacancyServices
                 CityId = vacancyDto.CityId,
                 Email = vacancyDto.Email,
                 WorkType = vacancyDto.WorkType,
+                WorkStyle = vacancyDto.WorkStyle,
                 MainSalary = vacancyDto.MainSalary,
                 MaxSalary = vacancyDto.MaxSalary,
                 Requirement = vacancyDto.Requirement,
@@ -82,6 +87,8 @@ namespace JobCompany.Business.Services.VacancyServices
                 Family = vacancyDto.Family,
                 Citizenship = vacancyDto.Citizenship,
                 CategoryId = vacancyDto.CategoryId,
+                IsActive = true,
+                ViewCount = 0
             };
 
             var numbers = new List<VacancyNumber>();
@@ -143,7 +150,10 @@ namespace JobCompany.Business.Services.VacancyServices
         /// <summary> Şirkətin profilində bütün vakansiyalarını gətirmək(Filterlerle birlikde) </summary>
         public async Task<List<VacancyGetAllDto>> GetAllOwnVacanciesAsync(string? titleName, string? categoryId, string? countryId, string? cityId, bool? IsActive, decimal? minSalary, decimal? maxSalary, int skip = 1, int take = 6)
         {
-            var query = _context.Vacancies.Where(x => x.Company.UserId == _userGuid).AsQueryable().AsNoTracking();
+            var query = _context.Vacancies
+                .Where(x => x.Company.UserId == _userGuid)
+                .Include(x => x.Company)
+                .AsNoTracking();
 
             query = ApplyVacancyFilters(query, titleName, categoryId, countryId, cityId, IsActive, minSalary, maxSalary);
 
@@ -153,8 +163,10 @@ namespace JobCompany.Business.Services.VacancyServices
                 Title = x.Title,
                 StartDate = x.StartDate,
                 Location = x.Location,
+                CompanyLogo = $"{_authServiceBaseUrl}/{x.Company.CompanyLogo}",
                 ViewCount = x.ViewCount,
                 WorkType = x.WorkType,
+                WorkStyle = x.WorkStyle,
                 MainSalary = x.MainSalary,
                 MaxSalary = x.MaxSalary,
                 IsActive = x.IsActive,
@@ -189,12 +201,15 @@ namespace JobCompany.Business.Services.VacancyServices
 
             var vacancies = await _context.Vacancies
             .Where(x => x.CompanyId == companyGuid && x.IsActive)
+            .Include(x => x.Company)
             .Select(x => new VacancyGetByCompanyIdDto
             {
                 CompanyName = x.CompanyName,
                 Title = x.Title,
                 Location = x.Location,
+                CompanyLogo = $"{_authServiceBaseUrl}/{x.Company.CompanyLogo}",
                 WorkType = x.WorkType,
+                WorkStyle = x.WorkStyle,
                 StartDate = x.StartDate,
                 ViewCount = x.ViewCount,
                 MainSalary = x.MainSalary,
@@ -211,9 +226,19 @@ namespace JobCompany.Business.Services.VacancyServices
         public async Task<VacancyGetByIdDto> GetByIdVacancyAsync(string id)
         {
             var vacancyGuid = Guid.Parse(id);
-            var vacancy = await _context.Vacancies
-            .Where(x => x.Id == vacancyGuid)
-            .Select(x => new VacancyGetByIdDto
+
+            var vacancyEntity = await _context.Vacancies
+                .AsNoTracking()
+                .Include(x => x.Category)
+                .Include(x => x.Company)
+                .Include(x => x.VacancyNumbers)
+                .FirstOrDefaultAsync(x => x.Id == vacancyGuid)
+                ?? throw new NotFoundException<Vacancy>();
+
+            vacancyEntity.ViewCount++;
+            await _context.SaveChangesAsync();
+
+            var vacancy = new VacancyGetByIdDto
             {
                 Id = x.Id,
                 Title = x.Title,
@@ -267,6 +292,7 @@ namespace JobCompany.Business.Services.VacancyServices
             return vacancy;
         }
 
+
         /// <summary> vacancynin update olunması </summary>
         public async Task UpdateVacancyAsync(UpdateVacancyDto vacancyDto, ICollection<UpdateNumberDto>? numberDtos)
         {
@@ -284,6 +310,7 @@ namespace JobCompany.Business.Services.VacancyServices
             existingVacancy.CityId = Guid.Parse(vacancyDto.CityId ?? throw new Exception());
             existingVacancy.Email = vacancyDto.Email;
             existingVacancy.WorkType = vacancyDto.WorkType;
+            existingVacancy.WorkStyle = vacancyDto.WorkStyle;
             existingVacancy.MainSalary = vacancyDto.MainSalary;
             existingVacancy.MaxSalary = vacancyDto.MaxSalary;
             existingVacancy.Requirement = vacancyDto.Requirement;
@@ -311,12 +338,11 @@ namespace JobCompany.Business.Services.VacancyServices
             await _context.SaveChangesAsync();
         }
 
-        /// <summary> Şirkət profilində vakansiya axtarışı vakansiya title'sinə görə </summary>
+        /// <summary> Şirkət profilində vakansiya axtarışı vakansiya filterlere görə </summary>
 
         public async Task<ICollection<VacancyGetAllDto>> GetAllVacanciesAsync(string? titleName, string? categoryId, string? countryId, string? cityId, decimal? minSalary, decimal? maxSalary, int skip = 1, int take = 9)
         {
             var query = _context.Vacancies.AsNoTracking();
-
             query = ApplyVacancyFilters(query, titleName, categoryId, countryId, cityId, true, minSalary, maxSalary);
 
             var vacancies = await query
@@ -328,7 +354,9 @@ namespace JobCompany.Business.Services.VacancyServices
                     StartDate = v.StartDate,
                     Location = v.Location,
                     ViewCount = v.ViewCount,
+                    IsActive = v.IsActive,
                     WorkType = v.WorkType,
+                    WorkStyle = v.WorkStyle,
                     MainSalary = v.MainSalary,
                     MaxSalary = v.MaxSalary,
                 })
@@ -345,8 +373,11 @@ namespace JobCompany.Business.Services.VacancyServices
             if (titleName != null)
                 query = query.Where(x => x.Title.ToLower().Contains(titleName.ToLower()));
 
-            if (isActive != null)
-                query = query.Where(x => x.IsActive == isActive);
+            if (isActive == true)
+                query = query.Where(x => x.IsActive == true);
+
+            if (isActive == false)
+                query = query.Where(x => x.IsActive == false);
 
             if (minSalary != null && maxSalary != null)
                 query = query.Where(x => x.MainSalary >= minSalary && x.MaxSalary <= maxSalary);

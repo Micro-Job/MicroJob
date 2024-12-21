@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using JobCompany.Core.Enums;
 using Microsoft.AspNetCore.Http;
+using Shared.Enums;
 using SharedLibrary.Enums;
 
 namespace JobCompany.Business.Dtos.VacancyDtos
@@ -19,6 +20,7 @@ namespace JobCompany.Business.Dtos.VacancyDtos
         public string? CityId { get; set; }
         public string? Email { get; set; }
         public WorkType? WorkType { get; set; }
+        public WorkStyle? WorkStyle { get; set; }
         public decimal? MainSalary { get; set; }
         public decimal? MaxSalary { get; set; }
         public string Requirement { get; set; }

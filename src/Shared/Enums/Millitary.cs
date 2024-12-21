@@ -1,4 +1,5 @@
-﻿namespace JobCompany.Core.Enums
+
+namespace Shared.Enums
 {
     public enum Military : byte
     {

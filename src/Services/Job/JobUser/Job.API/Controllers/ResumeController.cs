@@ -1,3 +1,4 @@
+using Job.Business.Dtos.CertificateDtos;
 using Job.Business.Dtos.ResumeDtos;
 using Job.Business.Services.Resume;
 using Microsoft.AspNetCore.Authorization;
@@ -15,11 +16,13 @@ namespace Job.API.Controllers
         [HttpPost("[action]")]
         public async Task<IActionResult> CreateResume(
             ResumeCreateDto resumeCreateDto,
+            // ICollection<CertificateCreateDto>? Certificates,
             ResumeCreateListsDto resumeCreateListsDto
         )
         {
             await _service.CreateResumeAsync(
                 resumeCreateDto,
+                // Certificates,
                 resumeCreateListsDto
             );
             return Ok();
@@ -34,9 +37,9 @@ namespace Job.API.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetByIdResume()
+        public async Task<IActionResult> GetOwnResume()
         {
-            return Ok(await _service.GetByIdResumeAsync());
+            return Ok(await _service.GetOwnResumeAsync());
         }
     }
 }
