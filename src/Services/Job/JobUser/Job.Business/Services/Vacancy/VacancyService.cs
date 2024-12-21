@@ -9,7 +9,6 @@ using Shared.Dtos.VacancyDtos;
 using Shared.Requests;
 using Shared.Responses;
 using SharedLibrary.Dtos.CompanyDtos;
-using SharedLibrary.Dtos.VacancyDtos;
 using SharedLibrary.Events;
 using SharedLibrary.Requests;
 using SharedLibrary.Responses;
@@ -207,7 +206,7 @@ namespace Job.Business.Services.Vacancy
         /// <summary> Oxsar vakansiylarin getirilmesi category'e gore </summary>
         public async Task<ICollection<SimilarVacancyDto>> SimilarVacanciesAsync(string vacancyId)
         {
-           var userGuid = _contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value;
+            var userGuid = _contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value;
             var guidVacancyId = Guid.Parse(vacancyId);
 
             await EnsureVacancyExistsAsync(guidVacancyId);

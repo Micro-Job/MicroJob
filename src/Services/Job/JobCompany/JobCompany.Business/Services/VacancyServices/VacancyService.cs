@@ -1,7 +1,5 @@
 ﻿using JobCompany.Business.Dtos.CategoryDtos;
-using JobCompany.Business.Dtos.CityDtos;
 using JobCompany.Business.Dtos.CompanyDtos;
-using JobCompany.Business.Dtos.CountryDtos;
 using JobCompany.Business.Dtos.NumberDtos;
 using JobCompany.Business.Dtos.VacancyDtos;
 using JobCompany.Business.Services.ExamServices;
@@ -11,8 +9,7 @@ using MassTransit;
 using MassTransit.Initializers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using SharedLibrary.Dtos.CategoryDtos;
-using SharedLibrary.Dtos.CompanyDtos;
+using Microsoft.Extensions.Configuration;
 using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.Events;
 using SharedLibrary.Exceptions;
@@ -76,7 +73,6 @@ namespace JobCompany.Business.Services.VacancyServices
                 CityId = vacancyDto.CityId,
                 Email = vacancyDto.Email,
                 WorkType = vacancyDto.WorkType,
-                WorkStyle = vacancyDto.WorkStyle,
                 MainSalary = vacancyDto.MainSalary,
                 MaxSalary = vacancyDto.MaxSalary,
                 Requirement = vacancyDto.Requirement,
@@ -166,7 +162,6 @@ namespace JobCompany.Business.Services.VacancyServices
                 CompanyLogo = $"{_authServiceBaseUrl}/{x.Company.CompanyLogo}",
                 ViewCount = x.ViewCount,
                 WorkType = x.WorkType,
-                WorkStyle = x.WorkStyle,
                 MainSalary = x.MainSalary,
                 MaxSalary = x.MaxSalary,
                 IsActive = x.IsActive,
@@ -209,7 +204,6 @@ namespace JobCompany.Business.Services.VacancyServices
                 Location = x.Location,
                 CompanyLogo = $"{_authServiceBaseUrl}/{x.Company.CompanyLogo}",
                 WorkType = x.WorkType,
-                WorkStyle = x.WorkStyle,
                 StartDate = x.StartDate,
                 ViewCount = x.ViewCount,
                 MainSalary = x.MainSalary,
@@ -240,55 +234,30 @@ namespace JobCompany.Business.Services.VacancyServices
 
             var vacancy = new VacancyGetByIdDto
             {
-                Id = x.Id,
-                Title = x.Title,
-                CompanyLogo = x.CompanyLogo,
-                StartDate = x.StartDate,
-                EndDate = x.EndDate,
-                Location = x.Location,
-                ViewCount = x.ViewCount,
-                WorkType = x.WorkType,
-                MainSalary = x.MainSalary,
-                MaxSalary = x.MaxSalary,
-                Requirement = x.Requirement,
-                Description = x.Description,
-                Gender = x.Gender,
-                Military = x.Military,
-                Family = x.Family,
-                Driver = x.Driver,
-                Citizenship = x.Citizenship,
-                VacancyNumbers = x.VacancyNumbers
-                .Select(vn => new VacancyNumberDto
+                Id = vacancyEntity.Id,
+                Title = vacancyEntity.Title,
+                CompanyLogo = $"{_authServiceBaseUrl}/{vacancyEntity.Company.CompanyLogo}",
+                StartDate = vacancyEntity.StartDate,
+                Location = vacancyEntity.Location,
+                ViewCount = vacancyEntity.ViewCount,
+                WorkType = vacancyEntity.WorkType,
+                MainSalary = vacancyEntity.MainSalary,
+                MaxSalary = vacancyEntity.MaxSalary,
+                Requirement = vacancyEntity.Requirement,
+                Description = vacancyEntity.Description,
+                Email = vacancyEntity.Email,
+                Gender = vacancyEntity.Gender,
+                Military = vacancyEntity.Military,
+                Family = vacancyEntity.Family,
+                Driver = vacancyEntity.Driver,
+                Citizenship = vacancyEntity.Citizenship,
+                VacancyNumbers = vacancyEntity.VacancyNumbers.Select(vn => new VacancyNumberDto
                 {
-                    PhoneNumber = vn.Number,
-                })
-                .ToList(),
-
-                Country = new CountryDto
-                {
-                    Id = x.Country.Id,
-                    Name = x.Country.CountryName
-                },
-
-                City = new CityNameDto
-                {
-                    CityName = x.City.CityName
-                },
-
-                Company = new CompanyInfoDto
-                {
-                    Id = x.Company.Id,
-                    Name = x.CompanyName,
-                    Information = x.Company.CompanyInformation
-                },
-
-                Category = new CategoryListDto
-                {
-                    Id= x.Category.Id,
-                    CategoryName = x.Category.CategoryName
-                }
-            })
-            .FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>();
+                    VacancyNumber = vn.Number,
+                }).ToList(),
+                CompanyName = vacancyEntity.CompanyName,
+                CategoryName = vacancyEntity.Category.CategoryName,
+            };
             return vacancy;
         }
 
@@ -310,7 +279,6 @@ namespace JobCompany.Business.Services.VacancyServices
             existingVacancy.CityId = Guid.Parse(vacancyDto.CityId ?? throw new Exception());
             existingVacancy.Email = vacancyDto.Email;
             existingVacancy.WorkType = vacancyDto.WorkType;
-            existingVacancy.WorkStyle = vacancyDto.WorkStyle;
             existingVacancy.MainSalary = vacancyDto.MainSalary;
             existingVacancy.MaxSalary = vacancyDto.MaxSalary;
             existingVacancy.Requirement = vacancyDto.Requirement;
@@ -356,7 +324,6 @@ namespace JobCompany.Business.Services.VacancyServices
                     ViewCount = v.ViewCount,
                     IsActive = v.IsActive,
                     WorkType = v.WorkType,
-                    WorkStyle = v.WorkStyle,
                     MainSalary = v.MainSalary,
                     MaxSalary = v.MaxSalary,
                 })

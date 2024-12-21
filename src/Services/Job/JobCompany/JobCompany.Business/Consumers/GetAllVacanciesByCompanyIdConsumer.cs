@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using JobCompany.DAL.Contexts;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +17,7 @@ namespace JobCompany.Business.Consumers
         {
             var vacancies = await _context.Vacancies
             .Where(x => x.CompanyId == context.Message.CompanyId)
+            .Include(x => x.Company)
             .ToListAsync();
 
             if (vacancies is null)

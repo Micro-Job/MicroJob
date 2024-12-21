@@ -15,7 +15,7 @@ public class GetCompanyDetailByIdConsumer(JobCompanyDbContext _jobCompanyDbConte
 {
     public async Task Consume(ConsumeContext<GetCompanyDetailByIdRequest> context)
     {
-        var company = await _jobCompanyDbContext.Companies./*Include(x => x.CompanyNumbers).*/FirstOrDefaultAsync(x => x.Id == context.Message.CompanyId)
+        var company = await _jobCompanyDbContext.Companies.Include(x => x.CompanyNumbers).FirstOrDefaultAsync(x => x.Id == context.Message.CompanyId)
             ?? throw new NotFoundException<Company>();
 
         GetAllCompaniesDataRequest userEmailRequest = new() { UserId = company.UserId };

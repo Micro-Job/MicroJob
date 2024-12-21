@@ -1,4 +1,4 @@
-using JobCompany.DAL.Contexts;
+﻿using JobCompany.DAL.Contexts;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -7,21 +7,30 @@ using Shared.Dtos.VacancyDtos;
 using Shared.Requests;
 using Shared.Responses;
 
-namespace JobCompany.Business.Consumers;
-public class GetAllVacanciesConsumer(JobCompanyDbContext context) : IConsumer<GetAllVacanciesRequest>
+public class GetAllVacanciesConsumer : IConsumer<GetAllVacanciesRequest>
 {
-    private readonly JobCompanyDbContext _context = context;
+    private readonly JobCompanyDbContext _context;
+    readonly IConfiguration _configuration;
+    private readonly string? _authServiceBaseUrl;
+
+    public GetAllVacanciesConsumer(JobCompanyDbContext context, IConfiguration configuration)
+    {
+        _context = context;
+        _configuration = configuration;
+        _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
+    }
 
     public async Task Consume(ConsumeContext<GetAllVacanciesRequest> context)
     {
         var request = context.Message;
 
         var query = _context.Vacancies
+            .Include(v => v.Company)
             .AsNoTracking();
 
         if (!string.IsNullOrWhiteSpace(request.TitleName))
         {
-            query = query.Where(v => v.Title.Contains(request.TitleName, StringComparison.OrdinalIgnoreCase));
+            query = query.Where(v => EF.Functions.Like(v.Title, $"%{request.TitleName}%"));
         }
 
         if (request.IsActive.HasValue)
@@ -58,6 +67,7 @@ public class GetAllVacanciesConsumer(JobCompanyDbContext context) : IConsumer<Ge
         }
 
         var vacancies = await query
+            // .Include(q => q.Skills)
             .Select(v => new AllVacanyDto
             {
                 VacancyId = v.Id.ToString(),

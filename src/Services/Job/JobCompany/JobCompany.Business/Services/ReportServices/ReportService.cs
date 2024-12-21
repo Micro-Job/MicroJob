@@ -1,3 +1,5 @@
+using System.Security.Claims;
+using JobCompany.Business.Dtos.ApplicationDtos;
 using JobCompany.Business.Dtos.ReportDtos;
 // using JobCompany.Business.Exceptions.Common;
 using JobCompany.Core.Entites;
@@ -7,7 +9,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Shared.Requests;
 using Shared.Responses;
-using System.Security.Claims;
 using SharedLibrary.Exceptions;
 
 namespace JobCompany.Business.Services.ReportServices
@@ -18,6 +19,7 @@ namespace JobCompany.Business.Services.ReportServices
         private readonly IRequestClient<GetUsersDataRequest> _client;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly Guid _userGuid;
+
 
         public ReportService(JobCompanyDbContext context, IRequestClient<GetUsersDataRequest> client, IHttpContextAccessor httpContextAccessor)
         {

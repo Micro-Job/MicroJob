@@ -1,7 +1,12 @@
-﻿namespace JobCompany.Business.Dtos.NumberDtos
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace JobCompany.Business.Dtos.VacancyDtos
 {
-    public record VacancyNumberDto
+    public class VacancyNumberDto
     {
-        public string PhoneNumber { get; set; }
+        public string VacancyNumber { get; set; }
     }
 }

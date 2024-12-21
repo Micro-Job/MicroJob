@@ -1,4 +1,4 @@
-using JobCompany.Business.Dtos.NotificationDtos;
+﻿using JobCompany.Business.Dtos.NotificationDtos;
 
 namespace JobCompany.Business.Services.NotificationServices
 {

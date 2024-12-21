@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\JobUser\Job.DAL\Job.DAL.csproj" />
     <ProjectReference Include="..\JobCompany.DAL\JobCompany.DAL.csproj" />
   </ItemGroup>
 

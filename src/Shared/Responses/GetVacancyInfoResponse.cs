@@ -13,12 +13,6 @@ namespace SharedLibrary.Responses
         public string? Location { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime? EndDate { get; set; }
-        public CategoryDto? Category { get; set; }
-        public WorkType? WorkType { get; set; }
-        public string? Location { get; set; }
-        public int ViewCount { get; set; }
-        public FamilySituation Family { get; set; }  //temporary fix
-        public Gender Gender { get; set; }           //temporary fix
         public int? ViewCount { get; set; }
         public string? Email { get; set; }
         public WorkType? WorkType { get; set; }
@@ -33,7 +27,7 @@ namespace SharedLibrary.Responses
         public FamilySituation Family { get; set; }
         public Citizenship Citizenship { get; set; }
         public bool IsActive { get; set; }
-        public string CategoryName { get; set; }   
+        public string CategoryName { get; set; }
         public Guid? CompanyId { get; set; }
     }
 }
