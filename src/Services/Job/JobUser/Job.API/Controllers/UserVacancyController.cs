@@ -11,7 +11,7 @@ namespace Job.API.Controllers
     public class UserVacancyController(IVacancyService _vacancyService) : ControllerBase
     {
         [HttpPost("[action]")]
-        [AuthorizeRole(UserRole.EmployeeUser)]
+        [AuthorizeRole(UserRole.SimpleUser)]
         public async Task<IActionResult> ToggleSaveVacancy(string vacancyId)
         {
             await _vacancyService.ToggleSaveVacancyAsync(vacancyId);
@@ -19,17 +19,19 @@ namespace Job.API.Controllers
         }
 
         [HttpGet("[action]")]
-        [AuthorizeRole(UserRole.EmployeeUser)]
+        [AuthorizeRole(UserRole.SimpleUser)]
         public async Task<IActionResult> GetAllSavedVacancy()
         {
             return Ok(await _vacancyService.GetAllSavedVacancyAsync());
         }
+
 
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllCompanies()
         {
             return Ok(await _vacancyService.GetAllCompaniesAsync());
         }
+
 
         [HttpGet("[action]")]
         public async Task<IActionResult> GetVacancyInfo(Guid vacancyId)
@@ -50,6 +52,7 @@ namespace Job.API.Controllers
             var data = await _vacancyService.SimilarVacanciesAsync(vacancyId);
             return Ok(data);
         }
+
 
         [HttpGet("[action]")]
         public async Task<IActionResult> GetOtherVacanciesByCompanyAsync(string companyId, string currentVacancyId)

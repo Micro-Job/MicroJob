@@ -7,7 +7,7 @@ namespace JobCompany.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [AuthorizeRole(UserRole.CompanyUser)]
+    [AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser)]
     public class ApplicationController(IApplicationService service) : ControllerBase
     {
         [HttpPost("[action]")]
@@ -20,7 +20,7 @@ namespace JobCompany.API.Controllers
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllApplication(int skip = 1, int take = 9)
         {
-            return Ok(await service.GetAllApplicationAsync(skip,take));
+            return Ok(await service.GetAllApplicationAsync(skip, take));
         }
 
         [HttpGet("[action]")]

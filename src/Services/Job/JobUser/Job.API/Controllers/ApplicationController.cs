@@ -7,7 +7,7 @@ namespace Job.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [AuthorizeRole(UserRole.EmployeeUser)]
+    [AuthorizeRole(UserRole.SimpleUser)]
     public class ApplicationController(IUserApplicationService service) : ControllerBase
     {
         [HttpGet("[action]")]

@@ -7,7 +7,7 @@ namespace JobCompany.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [AuthorizeRole(UserRole.CompanyUser)]
+    [AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser)]
     public class NotificationController(INotificationService service) : ControllerBase
     {
         [HttpGet("[action]")]

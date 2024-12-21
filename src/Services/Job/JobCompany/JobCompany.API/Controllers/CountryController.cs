@@ -8,7 +8,7 @@ namespace JobCompany.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [AuthorizeRole(UserRole.CompanyUser)]
+    [AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser)]
     public class CountryController(ICountryService service) : ControllerBase
     {
         [HttpPost("[action]")]
@@ -25,7 +25,6 @@ namespace JobCompany.API.Controllers
             return Ok();
         }
 
-        [AllowAnonymous]
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllCountries()
         {

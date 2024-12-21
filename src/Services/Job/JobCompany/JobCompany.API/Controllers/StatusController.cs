@@ -8,7 +8,7 @@ namespace JobCompany.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [AuthorizeRole(UserRole.CompanyUser)]
+    [AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser)]
     public class StatusController(IStatusService _statusService) : ControllerBase
     {
         [HttpPost("[action]")]

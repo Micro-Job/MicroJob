@@ -10,7 +10,7 @@ namespace JobCompany.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [AuthorizeRole(UserRole.CompanyUser)]
+    [AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser)]
     public class VacancyController(IVacancyService vacancyService) : ControllerBase
     {
         [HttpPost("[action]")]

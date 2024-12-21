@@ -11,7 +11,7 @@ namespace JobCompany.API.Controllers
     public class ExamController(IExamService examService) : ControllerBase
     {
         [HttpPost("[action]")]
-        [AuthorizeRole(UserRole.CompanyUser)]
+        [AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser)]
         public async Task<IActionResult> CreateExam(CreateExamDto dto)
         {
             await examService.CreateExamAsync(dto);
@@ -19,7 +19,7 @@ namespace JobCompany.API.Controllers
         }
 
         [HttpGet]
-        [AuthorizeRole(UserRole.CompanyUser | UserRole.EmployeeUser)]
+        [AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser)]
         public async Task<IActionResult> GetExamById(string examId, byte step)
         {
             var data = await examService.GetExamByIdAsync(examId, step);

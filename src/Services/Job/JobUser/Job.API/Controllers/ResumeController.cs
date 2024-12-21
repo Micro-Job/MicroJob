@@ -10,7 +10,7 @@ namespace Job.API.Controllers
     
     [ApiController]
     [Route("api/[controller]")]
-    [AuthorizeRole(UserRole.EmployeeUser)]
+    [AuthorizeRole(UserRole.SimpleUser)]
     public class ResumeController(IResumeService service) : ControllerBase
     {
         [HttpPost("[action]")]
