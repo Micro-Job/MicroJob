@@ -1,25 +1,25 @@
-using Job.Business.Dtos.CertificateDtos;
 using Job.Business.Dtos.ResumeDtos;
 using Job.Business.Services.Resume;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SharedLibrary.Attributes;
+using SharedLibrary.Enums;
 
 namespace Job.API.Controllers
 {
+    
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
+    [AuthorizeRole(UserRole.EmployeeUser)]
     public class ResumeController(IResumeService service) : ControllerBase
     {
-        readonly IResumeService _service = service;
-
         [HttpPost("[action]")]
         public async Task<IActionResult> CreateResume(
             ResumeCreateDto resumeCreateDto,
             ResumeCreateListsDto resumeCreateListsDto
         )
         {
-            await _service.CreateResumeAsync(
+            await service.CreateResumeAsync(
                 resumeCreateDto,
                 resumeCreateListsDto
             );
@@ -30,14 +30,14 @@ namespace Job.API.Controllers
         public async Task<IActionResult> UpdateResume(ResumeUpdateDto resumeUpdateDto,
             ResumeUpdateListDto resumeUpdateListsDto)
         {
-            await _service.UpdateResumeAsync(resumeUpdateDto, resumeUpdateListsDto);
+            await service.UpdateResumeAsync(resumeUpdateDto, resumeUpdateListsDto);
             return Ok();
         }
 
         [HttpGet("[action]")]
         public async Task<IActionResult> GetOwnResume()
         {
-            return Ok(await _service.GetOwnResumeAsync());
+            return Ok(await service.GetOwnResumeAsync());
         }
     }
 }

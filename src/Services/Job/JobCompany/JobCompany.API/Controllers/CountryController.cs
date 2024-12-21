@@ -1,38 +1,41 @@
 using JobCompany.Business.Services.CountryServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SharedLibrary.Attributes;
+using SharedLibrary.Enums;
 
 namespace JobCompany.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [AuthorizeRole(UserRole.CompanyUser)]
     public class CountryController(ICountryService service) : ControllerBase
     {
-        readonly ICountryService _service = service;
-
         [HttpPost("[action]")]
         public async Task<IActionResult> CreateCountry([FromBody] string countryName)
         {
-            await _service.CreateCountryAsync(countryName);
+            await service.CreateCountryAsync(countryName);
             return Ok();
         }
 
         [HttpPut("[action]/{id}")]
         public async Task<IActionResult> UpdateCountry([FromRoute] string id, [FromBody] string? countryName)
         {
-            await _service.UpdateCountryAsync(id, countryName);
+            await service.UpdateCountryAsync(id, countryName);
             return Ok();
         }
 
+        [AllowAnonymous]
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllCountries()
         {
-            return Ok(await _service.GetAllCountryAsync());
+            return Ok(await service.GetAllCountryAsync());
         }
 
         [HttpDelete("[action]/{id}")]
         public async Task<IActionResult> DeleteCountry(string id)
         {
-            await _service.DeleteCountryAsync(id);
+            await service.DeleteCountryAsync(id);
             return Ok();
         }
     }

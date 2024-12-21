@@ -1,67 +1,73 @@
 ﻿using JobCompany.Business.Dtos.NumberDtos;
 using JobCompany.Business.Dtos.VacancyDtos;
 using JobCompany.Business.Services.VacancyServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SharedLibrary.Attributes;
+using SharedLibrary.Enums;
 
 namespace JobCompany.API.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
+    [AuthorizeRole(UserRole.CompanyUser)]
     public class VacancyController(IVacancyService vacancyService) : ControllerBase
     {
-        private readonly IVacancyService _vacancyService = vacancyService;
-
         [HttpPost("[action]")]
         public async Task<IActionResult> CreateVacancy(CreateVacancyDto vacancyDto, ICollection<CreateNumberDto>? numberDtos)
         {
-            await _vacancyService.CreateVacancyAsync(vacancyDto, numberDtos);
+            await vacancyService.CreateVacancyAsync(vacancyDto, numberDtos);
             return Ok();
         }
 
         [HttpPut("[action]")]
         public async Task<IActionResult> UpdateVacancy(UpdateVacancyDto vacancyDto, ICollection<UpdateNumberDto>? numberDtos)
         {
-            await _vacancyService.UpdateVacancyAsync(vacancyDto, numberDtos);
+            await vacancyService.UpdateVacancyAsync(vacancyDto, numberDtos);
             return Ok();
         }
 
         [HttpDelete("[action]")]
         public async Task<IActionResult> Delete(List<string> ids)
         {
-            await _vacancyService.DeleteAsync(ids);
+            await vacancyService.DeleteAsync(ids);
             return Ok();
         }
 
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllOwnVacanciesAsync(string? titleName, string? categoryId, string? countryId, string? cityId, bool? IsActive, decimal? minSalary, decimal? maxSalary, int skip = 1, int take = 6)
         {
-            var data = await _vacancyService.GetAllOwnVacanciesAsync(titleName, categoryId, countryId, cityId, IsActive, minSalary, maxSalary, skip, take);
+            var data = await vacancyService.GetAllOwnVacanciesAsync(titleName, categoryId, countryId, cityId, IsActive, minSalary, maxSalary, skip, take);
             return Ok(data);
         }
 
+        [AllowAnonymous]
         [HttpGet("[action]/{id}")]
         public async Task<IActionResult> GetByIdVacancy(string id)
         {
-            var data = await _vacancyService.GetByIdVacancyAsync(id);
+            var data = await vacancyService.GetByIdVacancyAsync(id);
             return Ok(data);
         }
 
+        [AllowAnonymous]
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllVacanciesForApp()
         {
-            return Ok(await _vacancyService.GetAllVacanciesForAppAsync());
+            return Ok(await vacancyService.GetAllVacanciesForAppAsync());
         }
 
+        [AllowAnonymous]
         [HttpGet("[action]")]
         public async Task<IActionResult> GetVacancyByCompanyIdAsync(string companyId)
         {
-            return Ok(await _vacancyService.GetVacancyByCompanyIdAsync(companyId));
+            return Ok(await vacancyService.GetVacancyByCompanyIdAsync(companyId));
         }
 
+        [AllowAnonymous]
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllVacanciesAsync(string? titleName, string? categoryId, string? countryId, string? cityId, decimal? minSalary, decimal? maxSalary, int skip = 1, int take = 9)
         {
-            return Ok(await _vacancyService.GetAllVacanciesAsync(titleName, categoryId, countryId, cityId, minSalary, maxSalary, skip, take));
+            return Ok(await vacancyService.GetAllVacanciesAsync(titleName, categoryId, countryId, cityId, minSalary, maxSalary, skip, take));
         }
     }
 }

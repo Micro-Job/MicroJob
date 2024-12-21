@@ -1,26 +1,28 @@
 ﻿using JobCompany.Business.Dtos.ExamDtos;
 using JobCompany.Business.Services.ExamServices;
 using Microsoft.AspNetCore.Mvc;
+using SharedLibrary.Attributes;
+using SharedLibrary.Enums;
 
 namespace JobCompany.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ExamController(IExamService examServices) : ControllerBase
+    public class ExamController(IExamService examService) : ControllerBase
     {
-        private readonly IExamService _examServices = examServices;
-
         [HttpPost("[action]")]
+        [AuthorizeRole(UserRole.CompanyUser)]
         public async Task<IActionResult> CreateExam(CreateExamDto dto)
         {
-            await _examServices.CreateExamAsync(dto);
+            await examService.CreateExamAsync(dto);
             return Ok();
         }
 
         [HttpGet]
+        [AuthorizeRole(UserRole.CompanyUser | UserRole.EmployeeUser)]
         public async Task<IActionResult> GetExamById(string examId, byte step)
         {
-            var data = await _examServices.GetExamByIdAsync(examId, step);
+            var data = await examService.GetExamByIdAsync(examId, step);
             return Ok(data);
         }
     }

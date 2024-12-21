@@ -1,13 +1,17 @@
 ﻿using Job.Business.Services.Vacancy;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SharedLibrary.Attributes;
+using SharedLibrary.Enums;
 
 namespace Job.API.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class UserVacancyController(IVacancyService _vacancyService) : ControllerBase
     {
         [HttpPost("[action]")]
+        [AuthorizeRole(UserRole.EmployeeUser)]
         public async Task<IActionResult> ToggleSaveVacancy(string vacancyId)
         {
             await _vacancyService.ToggleSaveVacancyAsync(vacancyId);
@@ -15,6 +19,7 @@ namespace Job.API.Controllers
         }
 
         [HttpGet("[action]")]
+        [AuthorizeRole(UserRole.EmployeeUser)]
         public async Task<IActionResult> GetAllSavedVacancy()
         {
             return Ok(await _vacancyService.GetAllSavedVacancyAsync());

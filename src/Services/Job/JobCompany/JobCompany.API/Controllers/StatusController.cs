@@ -1,11 +1,14 @@
 ﻿using JobCompany.Business.Dtos.StatusDtos;
 using JobCompany.Business.Services.StatusServices;
 using Microsoft.AspNetCore.Mvc;
+using SharedLibrary.Attributes;
+using SharedLibrary.Enums;
 
 namespace JobCompany.API.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
+    [AuthorizeRole(UserRole.CompanyUser)]
     public class StatusController(IStatusService _statusService) : ControllerBase
     {
         [HttpPost("[action]")]
