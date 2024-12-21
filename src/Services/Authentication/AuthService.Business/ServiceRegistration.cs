@@ -35,6 +35,7 @@ namespace AuthService.Business
                 x.AddConsumer<GetUserMiniDataConsumer>();
                 x.AddConsumer<GetUsersDataConsumer>();
                 x.AddConsumer<GetUserEmailConsumer>(); 
+                x.AddConsumer<GetUserPhotoConsumer>(); 
 
                 x.SetKebabCaseEndpointNameFormatter();
                 x.UsingRabbitMq((context, cfg) =>

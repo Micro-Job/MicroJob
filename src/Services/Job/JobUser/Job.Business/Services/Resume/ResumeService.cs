@@ -4,6 +4,7 @@ using Job.Business.Dtos.ExperienceDtos;
 using Job.Business.Dtos.LanguageDtos;
 using Job.Business.Dtos.NumberDtos;
 using Job.Business.Dtos.ResumeDtos;
+using Job.Business.Dtos.SkillDtos;
 using Job.Business.Exceptions.Common;
 using Job.Business.Exceptions.UserExceptions;
 using Job.Business.Services.Certificate;
@@ -14,9 +15,13 @@ using Job.Business.Services.Number;
 using Job.Business.Services.User;
 using Job.Core.Entities;
 using Job.DAL.Contexts;
+using MassTransit;
 using MassTransit.Initializers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Shared.Requests;
+using Shared.Responses;
 using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.ExternalServices.FileService;
 using SharedLibrary.Statics;
@@ -37,6 +42,9 @@ namespace Job.Business.Services.Resume
         readonly IHttpContextAccessor _contextAccessor;
         private readonly Guid userGuid;
         private readonly string? _baseUrl;
+        private readonly IRequestClient<GetResumeUserPhotoRequest> _resumeUser;
+        readonly IConfiguration _configuration;
+        private readonly string? _authServiceBaseUrl;
 
         public ResumeService(JobDbContext context,
             IFileService fileService,
@@ -46,7 +54,9 @@ namespace Job.Business.Services.Resume
             ILanguageService languageService,
             ICertificateService certificateService,
             IHttpContextAccessor httpContextAccess,
-            IUserInformationService userInformationService)
+            IUserInformationService userInformationService,
+            IRequestClient<GetResumeUserPhotoRequest> resumeUser,
+            IConfiguration configuration)
         {
             _context = context;
             _fileService = fileService;
@@ -59,7 +69,9 @@ namespace Job.Business.Services.Resume
             _contextAccessor = httpContextAccess;
             userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value ?? throw new UserIsNotLoggedInException());
             _baseUrl = $"{_contextAccessor.HttpContext.Request.Scheme}://{_contextAccessor.HttpContext.Request.Host.Value}{_contextAccessor.HttpContext.Request.PathBase.Value}";
-
+            _resumeUser = resumeUser;
+            _configuration = configuration;
+            _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
         }
 
         public async Task CreateResumeAsync(ResumeCreateDto resumeCreateDto,
@@ -223,6 +235,8 @@ namespace Job.Business.Services.Resume
                                             .Include(x => x.Certificates)
                                             .Include(x => x.Experiences)
                                             .Include(x => x.Languages)
+                                            .Include(x => x.ResumeSkills)
+                                            .ThenInclude(rs => rs.Skill)
                                             .FirstOrDefaultAsync(x => x.UserId == userGuid) ??
                                             throw new NotFoundException<Core.Entities.Resume>();
 
@@ -232,6 +246,11 @@ namespace Job.Business.Services.Resume
                 x.LastName,
             });
 
+            var response = await _resumeUser.GetResponse<GetResumeUserPhotoResponse>(new GetResumeUserPhotoRequest
+            {
+                UserId = resume.UserId
+            });
+
             var resumeDetail = new ResumeDetailItemDto
             {
                 UserId = resume.UserId,
@@ -239,7 +258,7 @@ namespace Job.Business.Services.Resume
                 LastName = userFullName.LastName,
                 FatherName = resume.FatherName,
                 Position = resume.Position,
-                UserPhoto = $"{_baseUrl}/{resume.UserPhoto}",
+                UserPhoto = $"{_authServiceBaseUrl}/{response.Message.ProfileImage}",
                 IsDriver = resume.IsDriver,
                 IsMarried = resume.IsMarried,
                 IsCitizen = resume.IsCitizen,
@@ -247,6 +266,10 @@ namespace Job.Business.Services.Resume
                 Adress = resume.Adress,
                 BirthDay = resume.BirthDay,
                 ResumeEmail = resume.ResumeEmail,
+                Skills = resume.ResumeSkills.Select(s => new SkillGetByIdDto
+                {
+                    Skill = s.Skill.Name
+                }).ToList(),
 
                 PhoneNumbers = resume.PhoneNumbers.Select(p => new NumberGetByIdDto
                 {
