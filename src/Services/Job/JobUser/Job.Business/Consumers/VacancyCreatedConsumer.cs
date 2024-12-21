@@ -21,7 +21,7 @@ namespace Job.Business.Consumers
 
         public VacancyCreatedConsumer(IServiceProvider serviceProvider, IConnectionFactory connectionFactory)
         {
-            _serviceProvider = serviceProvider;
+            _serviceProvider = serviceProvider; 
 
             _connection = connectionFactory.CreateConnection();
             _channel = _connection.CreateModel();
@@ -90,7 +90,7 @@ namespace Job.Business.Consumers
         {
             _channel.Close();
             _connection.Close();
-            base.Dispose();
+            base.Dispose(); 
         }
     }
 }

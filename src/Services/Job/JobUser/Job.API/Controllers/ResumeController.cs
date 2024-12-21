@@ -16,13 +16,11 @@ namespace Job.API.Controllers
         [HttpPost("[action]")]
         public async Task<IActionResult> CreateResume(
             ResumeCreateDto resumeCreateDto,
-            // ICollection<CertificateCreateDto>? Certificates,
             ResumeCreateListsDto resumeCreateListsDto
         )
         {
             await _service.CreateResumeAsync(
                 resumeCreateDto,
-                // Certificates,
                 resumeCreateListsDto
             );
             return Ok();
