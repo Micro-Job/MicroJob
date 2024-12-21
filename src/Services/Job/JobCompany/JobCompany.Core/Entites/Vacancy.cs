@@ -1,5 +1,4 @@
 ﻿using JobCompany.Core.Entites.Base;
-using JobCompany.Core.Enums;
 using Shared.Enums;
 using SharedLibrary.Enums;
 
@@ -16,14 +15,15 @@ namespace JobCompany.Core.Entites
         public int? ViewCount { get; set; }
         public string? Email { get; set; }
         public WorkType? WorkType { get; set; }
+        public WorkStyle? WorkStyle { get; set; }
         public decimal? MainSalary { get; set; }
         public decimal? MaxSalary { get; set; }
         public string Requirement { get; set; }
         public string? Description { get; set; }
-        public SharedLibrary.Enums.Gender Gender { get; set; }
+        public Gender Gender { get; set; }
         public Military Military { get; set; }
         public Driver Driver { get; set; }
-        public SharedLibrary.Enums.FamilySituation Family { get; set; }
+        public FamilySituation Family { get; set; }
         public Citizenship Citizenship { get; set; }
         public bool IsActive { get; set; }
         public bool IsVip { get; set; }

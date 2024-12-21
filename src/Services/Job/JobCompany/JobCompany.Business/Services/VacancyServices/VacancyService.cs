@@ -73,6 +73,7 @@ namespace JobCompany.Business.Services.VacancyServices
                 CityId = vacancyDto.CityId,
                 Email = vacancyDto.Email,
                 WorkType = vacancyDto.WorkType,
+                WorkStyle = vacancyDto.WorkStyle,
                 MainSalary = vacancyDto.MainSalary,
                 MaxSalary = vacancyDto.MaxSalary,
                 Requirement = vacancyDto.Requirement,
@@ -162,6 +163,7 @@ namespace JobCompany.Business.Services.VacancyServices
                 CompanyLogo = $"{_authServiceBaseUrl}/{x.Company.CompanyLogo}",
                 ViewCount = x.ViewCount,
                 WorkType = x.WorkType,
+                WorkStyle = x.WorkStyle,
                 MainSalary = x.MainSalary,
                 MaxSalary = x.MaxSalary,
                 IsActive = x.IsActive,
@@ -204,6 +206,7 @@ namespace JobCompany.Business.Services.VacancyServices
                 Location = x.Location,
                 CompanyLogo = $"{_authServiceBaseUrl}/{x.Company.CompanyLogo}",
                 WorkType = x.WorkType,
+                WorkStyle = x.WorkStyle,
                 StartDate = x.StartDate,
                 ViewCount = x.ViewCount,
                 MainSalary = x.MainSalary,
@@ -241,6 +244,7 @@ namespace JobCompany.Business.Services.VacancyServices
                 Location = vacancyEntity.Location,
                 ViewCount = vacancyEntity.ViewCount,
                 WorkType = vacancyEntity.WorkType,
+                WorkStyle = vacancyEntity.WorkStyle,
                 MainSalary = vacancyEntity.MainSalary,
                 MaxSalary = vacancyEntity.MaxSalary,
                 Requirement = vacancyEntity.Requirement,
@@ -279,6 +283,7 @@ namespace JobCompany.Business.Services.VacancyServices
             existingVacancy.CityId = Guid.Parse(vacancyDto.CityId ?? throw new Exception());
             existingVacancy.Email = vacancyDto.Email;
             existingVacancy.WorkType = vacancyDto.WorkType;
+            existingVacancy.WorkStyle = vacancyDto.WorkStyle;
             existingVacancy.MainSalary = vacancyDto.MainSalary;
             existingVacancy.MaxSalary = vacancyDto.MaxSalary;
             existingVacancy.Requirement = vacancyDto.Requirement;
@@ -324,6 +329,7 @@ namespace JobCompany.Business.Services.VacancyServices
                     ViewCount = v.ViewCount,
                     IsActive = v.IsActive,
                     WorkType = v.WorkType,
+                    WorkStyle = v.WorkStyle,
                     MainSalary = v.MainSalary,
                     MaxSalary = v.MaxSalary,
                 })
