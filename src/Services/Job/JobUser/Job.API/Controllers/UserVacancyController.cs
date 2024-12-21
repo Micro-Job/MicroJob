@@ -29,7 +29,7 @@ namespace Job.API.Controllers
         [HttpGet("[action]")]
         public async Task<IActionResult> GetVacancyInfo(Guid vacancyId)
         {
-            var data = await _vacancyService.GetVacancyInfoAsync(vacancyId);
+            var data = await _vacancyService.GetVacancyInfoAsync(vacancyId); 
             return Ok(data);
         }
 

@@ -6,26 +6,21 @@ using Shared.Dtos.VacancyDtos;
 using Shared.Requests;
 using Shared.Responses;
 
-public class GetAllVacanciesConsumer : IConsumer<GetAllVacanciesRequest>
+namespace JobCompany.Business.Consumers;
+public class GetAllVacanciesConsumer(JobCompanyDbContext context) : IConsumer<GetAllVacanciesRequest>
 {
-    private readonly JobCompanyDbContext _context;
-
-    public GetAllVacanciesConsumer(JobCompanyDbContext context)
-    {
-        _context = context;
-    }
+    private readonly JobCompanyDbContext _context = context;
 
     public async Task Consume(ConsumeContext<GetAllVacanciesRequest> context)
     {
         var request = context.Message;
 
         var query = _context.Vacancies
-            .Include(v => v.Company)
             .AsNoTracking();
 
         if (!string.IsNullOrWhiteSpace(request.TitleName))
         {
-            query = query.Where(v => EF.Functions.Like(v.Title, $"%{request.TitleName}%"));
+            query = query.Where(v => v.Title.Contains(request.TitleName, StringComparison.OrdinalIgnoreCase));
         }
 
         if (request.IsActive.HasValue)
@@ -62,7 +57,6 @@ public class GetAllVacanciesConsumer : IConsumer<GetAllVacanciesRequest>
         }
 
         var vacancies = await query
-            // .Include(q => q.Skills)
             .Select(v => new AllVacanyDto
             {
                 VacancyId = v.Id.ToString(),

@@ -5,7 +5,7 @@ using SharedLibrary.Events;
 
 namespace JobCompany.Business.Consumers
 {
-    internal class CompanyRegisteredConsumer(JobCompanyDbContext _context) : IConsumer<CompanyRegisteredEvent>
+    public class CompanyRegisteredConsumer(JobCompanyDbContext _context) : IConsumer<CompanyRegisteredEvent>
     {
         public async Task Consume(ConsumeContext<CompanyRegisteredEvent> context)
         {

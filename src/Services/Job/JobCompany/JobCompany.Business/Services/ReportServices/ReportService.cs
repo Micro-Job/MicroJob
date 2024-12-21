@@ -19,7 +19,6 @@ namespace JobCompany.Business.Services.ReportServices
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly Guid _userGuid;
 
-
         public ReportService(JobCompanyDbContext context, IRequestClient<GetUsersDataRequest> client, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;

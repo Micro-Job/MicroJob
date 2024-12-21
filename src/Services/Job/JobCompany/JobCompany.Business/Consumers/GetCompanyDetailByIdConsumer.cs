@@ -15,7 +15,7 @@ public class GetCompanyDetailByIdConsumer(JobCompanyDbContext jobCompanyDbContex
     private readonly IRequestClient<GetUserEmailRequest> _requestClient = requestClient;
     public async Task Consume(ConsumeContext<GetCompanyDetailByIdRequest> context)
     {
-        var company = await _jobCompanyDbContext.Companies.Include(x => x.CompanyNumbers).FirstOrDefaultAsync(x => x.Id == context.Message.CompanyId)
+        var company = await _jobCompanyDbContext.Companies./*Include(x => x.CompanyNumbers).*/FirstOrDefaultAsync(x => x.Id == context.Message.CompanyId)
             ?? throw new NotFoundException<Company>();
 
         GetUserEmailRequest userEmailRequest = new() { UserId = company.UserId };
