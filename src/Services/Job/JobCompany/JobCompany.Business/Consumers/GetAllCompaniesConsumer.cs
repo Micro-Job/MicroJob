@@ -27,6 +27,7 @@ namespace JobCompany.Business.Consumers
             var companies = await _context.Companies.Select(x => new CompanyDto
             {
                 CompanyId = x.Id,
+                CompanyUserId = x.UserId,
                 CompanyName = x.CompanyName,
                 CompanyImage = $"{_authServiceBaseUrl}/{x.CompanyLogo}",
                 CompanyVacancyCount = x.Vacancies.Count

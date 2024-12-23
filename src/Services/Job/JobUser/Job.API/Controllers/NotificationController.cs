@@ -11,9 +11,9 @@ namespace Job.API.Controllers
     public class NotificationController(INotificationService service) : ControllerBase
     {
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetUserNotifications()
+        public async Task<IActionResult> GetUserNotifications([FromQuery] int skip = 1, [FromQuery] int take = 6)
         {
-            var notifications = await service.GetUserNotificationsAsync();
+            var notifications = await service.GetUserNotificationsAsync(skip, take);
             return Ok(notifications);
         }
 

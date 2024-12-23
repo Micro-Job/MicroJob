@@ -1,11 +1,14 @@
-﻿using System.Security.Claims;
-using Job.Business.Dtos.NotificationDtos;
+﻿using Job.Business.Dtos.NotificationDtos;
 using Job.Business.Exceptions.UserExceptions;
-using Job.Core.Entities;
 using Job.DAL.Contexts;
+using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Shared.Responses;
 using SharedLibrary.Exceptions;
+using SharedLibrary.Requests;
+using SharedLibrary.Responses;
+using System.Security.Claims;
 
 namespace Job.Business.Services.Notification
 {
@@ -13,11 +16,13 @@ namespace Job.Business.Services.Notification
     {
         private readonly JobDbContext _context;
         readonly IHttpContextAccessor _contextAccessor;
+        private readonly IRequestClient<GetAllCompaniesRequest> _getCompaniesClient;
         private readonly Guid userGuid;
-        public NotificationService(JobDbContext context, IHttpContextAccessor contextAccessor)
+        public NotificationService(JobDbContext context, IHttpContextAccessor contextAccessor, IRequestClient<GetAllCompaniesRequest> getCompaniesClient)
         {
             _context = context;
             _contextAccessor = contextAccessor;
+            _getCompaniesClient = getCompaniesClient;
             userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value ?? throw new UserIsNotLoggedInException());
         }
 
@@ -37,13 +42,35 @@ namespace Job.Business.Services.Notification
             await _context.SaveChangesAsync();
         }
 
-        public async Task<List<Core.Entities.Notification>> GetUserNotificationsAsync()
+        public async Task<List<NotificationListDto>> GetUserNotificationsAsync(int skip = 1, int take = 6)
         {
+            var companies = await GetAllCompaniesData();
+
+            var companyDictionary = companies.Companies.ToDictionary(x => x.CompanyUserId, x => x);
+
             var notifications = await _context.Notifications
                 .Where(n => n.ReceiverId == userGuid)
                 .OrderByDescending(n => n.CreatedDate)
+                .Skip(Math.Max(0, (skip - 1) * take))
                 .ToListAsync();
-            return notifications;
+
+            var notificationDtos = notifications.Select(n =>
+            {
+                companyDictionary.TryGetValue(n.SenderId, out var company);
+
+                return new NotificationListDto
+                {
+                    ReceiverId = n.ReceiverId,
+                    SenderId = n.SenderId,
+                    CompanyName = company?.CompanyName,
+                    CompanyLogo = company?.CompanyImage,
+                    CreatedDate = n.CreatedDate,
+                    Content = n.Content,
+                    IsSeen = n.IsSeen
+                };
+            }).ToList();
+
+            return notificationDtos;
         }
 
         public async Task MarkNotificationAsReadAsync(Guid notificationId)
@@ -52,8 +79,17 @@ namespace Job.Business.Services.Notification
             ?? throw new NotFoundException<Core.Entities.Notification>();
 
             notification.IsSeen = true;
-            _context.Notifications.Update(notification);
+
             await _context.SaveChangesAsync();
+        }
+
+        private async Task<GetAllCompaniesResponse> GetAllCompaniesData()
+        {
+            var request = new GetAllCompaniesRequest();
+
+            var response = await _getCompaniesClient.GetResponse<GetAllCompaniesResponse>(request);
+
+            return response.Message;
         }
     }
 }
