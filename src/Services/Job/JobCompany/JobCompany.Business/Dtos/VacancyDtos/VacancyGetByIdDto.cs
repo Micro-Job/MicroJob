@@ -1,6 +1,7 @@
 ﻿using JobCompany.Business.Dtos.CategoryDtos;
 using JobCompany.Business.Dtos.CompanyDtos;
 using JobCompany.Business.Dtos.NumberDtos;
+using JobCompany.Business.Dtos.SkillDtos;
 using JobCompany.Core.Entites;
 using Shared.Enums;
 using SharedLibrary.Enums;
@@ -31,6 +32,7 @@ namespace JobCompany.Business.Dtos.VacancyDtos
         public Driver Driver { get; set; }
         public FamilySituation Family { get; set; }
         public Citizenship Citizenship { get; set; }
+        public ICollection<SkillDto> Skills { get; set; }
         public bool IsActive { get; set; }
         public string CategoryName { get; set; }
     }

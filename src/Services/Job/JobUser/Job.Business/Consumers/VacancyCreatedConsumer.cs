@@ -1,96 +1,49 @@
-﻿using Job.Business.Dtos.NotificationDtos;
-using Job.Business.Services.Notification;
-using Job.Core.Entities;
+﻿using Job.Core.Entities;
 using Job.DAL.Contexts;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
+using MassTransit;
 using SharedLibrary.Events;
-using System.Text;
-using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 
 namespace Job.Business.Consumers
 {
-    public class VacancyCreatedConsumer : BackgroundService
+    public class VacancyCreatedConsumer : IConsumer<VacancyCreatedEvent>
     {
-        private readonly IConnection _connection;
-        private readonly IModel _channel;
-        private readonly IServiceProvider _serviceProvider;
+        private readonly JobDbContext _context;
 
-        public VacancyCreatedConsumer(IServiceProvider serviceProvider, IConnectionFactory connectionFactory)
+        public VacancyCreatedConsumer(JobDbContext context)
         {
-            _serviceProvider = serviceProvider; 
-
-            _connection = connectionFactory.CreateConnection();
-            _channel = _connection.CreateModel();
-            _channel.QueueDeclare(queue: "vacancy-created-queue",
-                durable: true,
-                exclusive: false,
-                autoDelete: false,
-                arguments: null);
+            _context = context;
         }
 
-        protected override Task ExecuteAsync(CancellationToken stoppingToken)
+        public async Task Consume(ConsumeContext<VacancyCreatedEvent> context)
         {
-            stoppingToken.ThrowIfCancellationRequested();
+            var eventMessage = context.Message;
 
-            var consumer = new EventingBasicConsumer(_channel);
-            consumer.Received += async (model, ea) =>
-            {
-                var body = ea.Body.ToArray();
-                var message = Encoding.UTF8.GetString(body);
-                var vacancyCreatedEvent = JsonSerializer.Deserialize<VacancyCreatedEvent>(message);
-
-                if (vacancyCreatedEvent != null)
-                {
-                    await ProcessVacancyCreatedEventAsync(vacancyCreatedEvent);
-                }
-
-                _channel.BasicAck(ea.DeliveryTag, false);
-            };
-
-            _channel.BasicConsume(queue: "vacancy-created-queue", autoAck: false, consumer: consumer);
-
-            return Task.CompletedTask;
-        }
-
-        private async Task ProcessVacancyCreatedEventAsync(VacancyCreatedEvent vacancyCreatedEvent)
-        {
-            using var scope = _serviceProvider.CreateScope();
-            var context = scope.ServiceProvider.GetRequiredService<JobDbContext>();
-
-            var matchingUsers = await context.Resumes
-                .Where(r => r.ResumeSkills.Any(rs => vacancyCreatedEvent.SkillIds.Contains(rs.SkillId)))
+            var resumes = await _context.Resumes
+                .Include(r => r.ResumeSkills)  
+                .Where(r => r.ResumeSkills.Any(rs => eventMessage.SkillIds.Contains(rs.SkillId))) 
                 .ToListAsync();
 
-            foreach (var resume in matchingUsers)
+            var notifications = new List<Notification>();
+
+            foreach (var resume in resumes)
             {
-                await SendNotificationAsync(resume, vacancyCreatedEvent);
+                var newNotification = new Notification
+                {
+                    ReceiverId = resume.UserId,  
+                    SenderId = eventMessage.SenderId, 
+                    Content = eventMessage.Content, 
+                    IsSeen = false 
+                };
+
+                notifications.Add(newNotification);  
             }
-        }
 
-        private async Task SendNotificationAsync(Resume resume, VacancyCreatedEvent vacancyEvent)
-        {
-            using var scope = _serviceProvider.CreateScope();
-            var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
-
-            var notificationDto = new NotificationDto
+            if (notifications.Any())
             {
-                ReceiverId = resume.UserId,
-                SenderId = vacancyEvent.CreatedById,
-                Content = $"{vacancyEvent.Title} - vakansiyası sizin bacarıqlarınıza uyğundur."
-            };
-
-            await notificationService.CreateNotificationAsync(notificationDto);
-        }
-
-        public override void Dispose()
-        {
-            _channel.Close();
-            _connection.Close();
-            base.Dispose(); 
+                await _context.Notifications.AddRangeAsync(notifications);
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }

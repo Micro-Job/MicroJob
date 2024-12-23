@@ -16,6 +16,7 @@ namespace JobCompany.DAL.Contexts
         public DbSet<Company> Companies { get; set; }
         public DbSet<CompanyNumber> CompanyNumbers { get; set; }
         public DbSet<VacancyNumber> VacancyNumbers { get; set; }
+        public DbSet<VacancySkill> VacancySkills { get; set; }
         public DbSet<Country> Countries { get; set; }
         public DbSet<Status> Statuses { get; set; }
         public DbSet<Vacancy> Vacancies { get; set; }

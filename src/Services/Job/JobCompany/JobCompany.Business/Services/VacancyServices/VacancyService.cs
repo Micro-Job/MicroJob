@@ -1,6 +1,7 @@
 ﻿using JobCompany.Business.Dtos.CategoryDtos;
 using JobCompany.Business.Dtos.CompanyDtos;
 using JobCompany.Business.Dtos.NumberDtos;
+using JobCompany.Business.Dtos.SkillDtos;
 using JobCompany.Business.Dtos.VacancyDtos;
 using JobCompany.Business.Services.ExamServices;
 using JobCompany.Core.Entites;
@@ -110,18 +111,18 @@ namespace JobCompany.Business.Services.VacancyServices
                     SkillId = skillId,
                     VacancyId = vacancy.Id
                 }).ToList() : [];
-            vacancy.Skills = vacancySkills;
+            vacancy.VacancySkills = vacancySkills;
 
             await _context.Vacancies.AddAsync(vacancy);
             await _context.SaveChangesAsync();
 
-            var vacancyCreatedEvent = new VacancyCreatedEvent
+            var skillIds = vacancySkills.Select(vs => vs.SkillId).ToList();
+            await _publishEndpoint.Publish(new VacancyCreatedEvent
             {
-                VacancyId = vacancy.Id,
-                SkillIds = vacancyDto.SkillIds ?? [],
-                CreatedById = vacancy.Company.UserId
-            };
-            await _publishEndpoint.Publish(vacancyCreatedEvent);
+                SenderId = _userGuid,
+                SkillIds = skillIds,
+                Content = $"Sizin resume skillərinizə uyğun yeni vakansiya yaradıldı: {vacancy.Title}",
+            });
         }
 
         public async Task DeleteAsync(List<string> ids)
@@ -226,6 +227,8 @@ namespace JobCompany.Business.Services.VacancyServices
                 .Include(x => x.Category)
                 .Include(x => x.Company)
                 .Include(x => x.VacancyNumbers)
+                .Include(x => x.VacancySkills)
+                .ThenInclude(vc => vc.Skill)
                 .FirstOrDefaultAsync(x => x.Id == vacancyGuid)
                 ?? throw new NotFoundException<Vacancy>();
 
@@ -254,6 +257,12 @@ namespace JobCompany.Business.Services.VacancyServices
                 VacancyNumbers = vacancyEntity.VacancyNumbers.Select(vn => new VacancyNumberDto
                 {
                     VacancyNumber = vn.Number,
+                }).ToList(),
+                Skills = vacancyEntity.VacancySkills
+                .Where(s => s.Skill != null)
+                .Select(s => new SkillDto
+                {
+                    Name = s.Skill.Name,
                 }).ToList(),
                 CompanyName = vacancyEntity.CompanyName,
                 CategoryName = vacancyEntity.Category.CategoryName,

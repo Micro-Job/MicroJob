@@ -2,9 +2,8 @@
 {
     public class VacancyCreatedEvent
     {
-        public Guid VacancyId { get; set; }
-        public string Title {  get; set; }
+        public Guid SenderId { get; set; }
         public List<Guid> SkillIds { get; set; }
-        public Guid CreatedById { get; set; }
+        public string Content { get; set; }
     }
 }
