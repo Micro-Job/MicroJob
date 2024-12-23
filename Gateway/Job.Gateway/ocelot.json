@@ -1,7 +1,7 @@
 {
   "Routes": [
     {
-      "DownstreamPathTemplate": "/api/auth/{everything}",
+      "DownstreamPathTemplate": "/api/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -13,19 +13,7 @@
       "UpstreamHttpMethod": [ "POST", "GET", "PUT", "DELETE" ]
     },
     {
-      "DownstreamPathTemplate": "/api/user/{everything}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 5001
-        }
-      ],
-      "UpstreamPathTemplate": "/user/{everything}",
-      "UpstreamHttpMethod": [ "POST", "GET", "PUT", "DELETE" ]
-    },
-    {
-      "DownstreamPathTemplate": "/api/job/{everything}",
+      "DownstreamPathTemplate": "/api/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -37,7 +25,7 @@
       "UpstreamHttpMethod": [ "POST", "GET", "PUT", "DELETE" ]
     },
     {
-      "DownstreamPathTemplate": "/api/jobcompany/{everything}",
+      "DownstreamPathTemplate": "/api/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -48,18 +36,6 @@
       "UpstreamPathTemplate": "/jobcompany/{everything}",
       "UpstreamHttpMethod": [ "POST", "GET", "PUT", "DELETE" ]
     },
-    {
-      "DownstreamPathTemplate": "/api/uservacancy/{everything}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 5002
-        }
-      ],
-      "UpstreamPathTemplate": "/uservacancy/{everything}",
-      "UpstreamHttpMethod": [ "POST", "GET", "PUT", "DELETE" ]
-    }
   ],
   "GlobalConfiguration": {
     "BaseUrl": "http://localhost:5000"
