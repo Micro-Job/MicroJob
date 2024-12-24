@@ -1,6 +1,7 @@
 using Job.Business.Dtos.CertificateDtos;
 using Job.Business.Exceptions.Common;
 using Job.DAL.Contexts;
+using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.ExternalServices.FileService;
 using SharedLibrary.Statics;
@@ -9,14 +10,11 @@ namespace Job.Business.Services.Certificate
 {
     public class CertificateService(JobDbContext context, IFileService fileService) : ICertificateService
     {
-        readonly JobDbContext _context = context;
-        readonly IFileService _fileService = fileService;
-
         public async Task<ICollection<Core.Entities.Certificate>> CreateBulkCertificateAsync(ICollection<CertificateCreateDto> dtos)
         {
             var certificatesToAdd = dtos.Select(async dto =>
             {
-                FileDto fileResult = await _fileService.UploadAsync(FilePaths.document, dto.CertificateFile);
+                FileDto fileResult = await fileService.UploadAsync(FilePaths.document, dto.CertificateFile);
 
                 return new Core.Entities.Certificate
                 {
@@ -27,49 +25,61 @@ namespace Job.Business.Services.Certificate
             }).ToList();
 
             var certificates = await Task.WhenAll(certificatesToAdd);
-            await _context.Certificates.AddRangeAsync(certificates);
+            await context.Certificates.AddRangeAsync(certificates);
 
             return [.. certificates];
         }
 
         public async Task CreateCertificateAsync(CertificateCreateDto dto)
         {
-            FileDto fileResult = await _fileService.UploadAsync(FilePaths.document, dto.CertificateFile);
+            FileDto fileResult = await fileService.UploadAsync(FilePaths.document, dto.CertificateFile);
             var certificate = new Core.Entities.Certificate
             {
                 CertificateName = dto.CertificateName,
                 CertificateFile = $"{fileResult.FilePath}/{fileResult.FileName}",
                 GivenOrganization = dto.GivenOrganization
             };
-            await _context.Certificates.AddAsync(certificate);
+            await context.Certificates.AddAsync(certificate);
         }
 
         public async Task<ICollection<Core.Entities.Certificate>> UpdateBulkCertificateAsync(ICollection<CertificateUpdateDto> dtos)
         {
+            Guid parsedId;
+            
             var updatedCertificates = new List<Core.Entities.Certificate>();
 
             foreach (var dto in dtos)
             {
-                var certificate = await _context.Certificates.FindAsync(dto.Id)
-                    ?? throw new NotFoundException<Core.Entities.Certificate>();
+                await UpdateCertificateAsync(dto);
+                
+                parsedId = Guid.Parse(dto.Id);
 
-                certificate.CertificateName = dto.CertificateName;
-                certificate.GivenOrganization = dto.GivenOrganization;
+                var certificate = await context.Certificates.FirstOrDefaultAsync(x => x.Id == parsedId);
 
-                updatedCertificates.Add(certificate);
+                if (certificate != null) updatedCertificates.Add(certificate);
             }
 
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
+
             return updatedCertificates;
         }
 
-
         public async Task UpdateCertificateAsync(CertificateUpdateDto dto)
         {
-            var certificate = await _context.Certificates.FindAsync(dto.Id)
+            var parsedId = Guid.Parse(dto.Id);
+            
+            var certificate = await context.Certificates.FirstOrDefaultAsync(x => x.Id == parsedId)
                 ?? throw new NotFoundException<Core.Entities.Certificate>();
+
+            fileService.DeleteFile(certificate.CertificateFile);
+
+            FileDto fileResult = await fileService.UploadAsync(FilePaths.document, dto.CertificateFile);
+
             certificate.CertificateName = dto.CertificateName;
             certificate.GivenOrganization = dto.GivenOrganization;
+            certificate.CertificateFile = $"{fileResult.FilePath}/{fileResult.FileName}";
+
+            await context.SaveChangesAsync();
         }
     }
 }
