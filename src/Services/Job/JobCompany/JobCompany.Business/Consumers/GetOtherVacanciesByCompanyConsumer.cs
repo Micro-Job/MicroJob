@@ -23,20 +23,26 @@ public class GetOtherVacanciesByCompanyConsumer : IConsumer<GetOtherVacanciesByC
 
     public async Task Consume(ConsumeContext<GetOtherVacanciesByCompanyRequest> context)
     {
-        var vacancies = await _dbContext.Vacancies
-            .Where(x => x.CompanyId == context.Message.CompanyId && x.Id != context.Message.CurrentVacancyId)
+        var vacanciesQuery = _dbContext.Vacancies
+            .Where(x => x.CompanyId == context.Message.CompanyId);
+
+        if (context.Message.CurrentVacancyId.HasValue)
+        {
+            vacanciesQuery = vacanciesQuery.Where(x => x.Id != context.Message.CurrentVacancyId);
+        }
+
+        var vacancies = await vacanciesQuery
             .OrderByDescending(x => x.StartDate)
             .Include(x => x.Company)
             .AsNoTracking()
             .ToListAsync();
 
-        if (vacancies is null)
+        if (vacancies is null || !vacancies.Any())
         {
             await context.RespondAsync(new GetOtherVacanciesByCompanyResponse
             {
-                Vacancies = []
+                Vacancies = new List<AllVacanyDto>()
             });
-
             return;
         }
 
@@ -58,7 +64,6 @@ public class GetOtherVacanciesByCompanyConsumer : IConsumer<GetOtherVacanciesByC
                 StartDate = x.StartDate,
             }).ToList()
         };
-
         await context.RespondAsync(response);
     }
 }

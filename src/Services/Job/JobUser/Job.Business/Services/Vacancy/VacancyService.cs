@@ -126,14 +126,17 @@ namespace Job.Business.Services.Vacancy
         /// <param name="companyId"></param>
         /// <param name="currentVacancyId"></param>
         /// <returns></returns>
-        public async Task<ICollection<AllVacanyDto>> GetOtherVacanciesByCompanyAsync(string companyId, string currentVacancyId)
+        public async Task<ICollection<AllVacanyDto>> GetOtherVacanciesByCompanyAsync(string companyId, string? currentVacancyId)
         {
             var guidCompanyId = Guid.Parse(companyId);
-            var guidVacancyId = Guid.Parse(currentVacancyId);
+            Guid? guidVacancyId = string.IsNullOrEmpty(currentVacancyId) ? (Guid?)null : Guid.Parse(currentVacancyId);
 
             await EnsureCompanyExistsAsync(guidCompanyId);
 
-            await EnsureVacancyExistsAsync(guidVacancyId);
+            if (guidVacancyId.HasValue)
+            {
+                await EnsureVacancyExistsAsync(guidVacancyId.Value);
+            }
 
             var request = new GetOtherVacanciesByCompanyRequest
             {
@@ -143,8 +146,9 @@ namespace Job.Business.Services.Vacancy
 
             var response = await _othVacRequest.GetResponse<GetOtherVacanciesByCompanyResponse>(request);
 
-            return response.Message.Vacancies ?? [];
+            return response.Message.Vacancies ?? new List<AllVacanyDto>();
         }
+
 
         /// <summary>
         /// Vacancy detail-də şirket haqqında
