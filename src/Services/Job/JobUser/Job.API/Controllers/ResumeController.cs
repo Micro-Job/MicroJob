@@ -1,6 +1,5 @@
 using Job.Business.Dtos.ResumeDtos;
 using Job.Business.Services.Resume;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SharedLibrary.Attributes;
 using SharedLibrary.Enums;
@@ -14,21 +13,16 @@ namespace Job.API.Controllers
     public class ResumeController(IResumeService service) : ControllerBase
     {
         [HttpPost("[action]")]
-        public async Task<IActionResult> CreateResume(
-            ResumeCreateDto resumeCreateDto,
-            ResumeCreateListsDto resumeCreateListsDto
-        )
+        public async Task<IActionResult> CreateResume([FromForm] ResumeCreateDto resumeCreateDto, 
+            [FromForm] ResumeCreateListsDto resumeCreateListsDto)
         {
-            await service.CreateResumeAsync(
-                resumeCreateDto,
-                resumeCreateListsDto
-            );
+            await service.CreateResumeAsync(resumeCreateDto, resumeCreateListsDto);
             return Ok();
         }
 
         [HttpPut("[action]")]
-        public async Task<IActionResult> UpdateResume(ResumeUpdateDto resumeUpdateDto,
-            ResumeUpdateListDto resumeUpdateListsDto)
+        public async Task<IActionResult> UpdateResume([FromForm] ResumeUpdateDto resumeUpdateDto,
+            [FromForm] ResumeUpdateListDto resumeUpdateListsDto)
         {
             await service.UpdateResumeAsync(resumeUpdateDto, resumeUpdateListsDto);
             return Ok();

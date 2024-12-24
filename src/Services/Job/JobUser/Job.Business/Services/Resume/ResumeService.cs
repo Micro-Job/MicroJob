@@ -67,15 +67,14 @@ namespace Job.Business.Services.Resume
             _certificateService = certificateService;
             _userInformationService = userInformationService;
             _contextAccessor = httpContextAccess;
-            userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value ?? throw new UserIsNotLoggedInException());
+            userGuid = Guid.Parse(_contextAccessor?.HttpContext?.User.FindFirst(ClaimTypes.Sid)?.Value ?? throw new UserIsNotLoggedInException());
             _baseUrl = $"{_contextAccessor.HttpContext.Request.Scheme}://{_contextAccessor.HttpContext.Request.Host.Value}{_contextAccessor.HttpContext.Request.PathBase.Value}";
             _resumeUser = resumeUser;
             _configuration = configuration;
             _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
         }
 
-        public async Task CreateResumeAsync(ResumeCreateDto resumeCreateDto,
-          ResumeCreateListsDto resumeCreateListsDto)
+        public async Task CreateResumeAsync(ResumeCreateDto resumeCreateDto, ResumeCreateListsDto resumeCreateListsDto)
         {
             if (await _context.Resumes.AnyAsync(x => x.UserId == userGuid))
                 throw new IsAlreadyExistException<Core.Entities.Resume>();
@@ -84,7 +83,7 @@ namespace Job.Business.Services.Resume
                 ? await _fileService.UploadAsync(FilePaths.document, resumeCreateDto.UserPhoto)
                 : new FileDto();
 
-            string email = resumeCreateDto.IsMainEmail
+            string? email = resumeCreateDto.IsMainEmail
                 ? await _userInformationService.GetUserDataAsync(userGuid).Select(x => x.Email)
                 : resumeCreateDto.ResumeEmail;
 
@@ -151,79 +150,106 @@ namespace Job.Business.Services.Resume
             await _context.SaveChangesAsync();
         }
 
-        public async Task UpdateResumeAsync(ResumeUpdateDto resumeUpdateDto, ResumeUpdateListDto resumeUpdateListsDto)
+        public async Task UpdateResumeAsync(ResumeUpdateDto updateDto, ResumeUpdateListDto updateListsDto)
         {
-            var resume = await _context.Resumes
-                .Include(x => x.PhoneNumbers)
-                .Include(x => x.Educations)
-                .Include(x => x.Certificates)
-                .Include(x => x.Experiences)
-                .Include(x => x.Languages)
-                .FirstOrDefaultAsync(x => x.UserId == userGuid) ??
-                throw new NotFoundException<Core.Entities.Resume>();
+            var resume = await GetResumeByUserIdAsync(userGuid);
 
-            resume.FatherName = resumeUpdateDto.FatherName;
-            resume.Position = resumeUpdateDto.Position;
-            resume.IsDriver = resumeUpdateDto.IsDriver;
-            resume.IsMarried = resumeUpdateDto.IsMarried;
-            resume.IsCitizen = resumeUpdateDto.IsCitizen;
-            resume.IsPublic = resumeUpdateDto.IsPublic;
-            resume.Gender = resumeUpdateDto.Gender;
-            resume.Adress = resumeUpdateDto.Adress;
-            resume.BirthDay = resumeUpdateDto.BirthDay;
+            UpdateResumePersonalInfo(resume, updateDto);
 
-            if (resumeUpdateDto.UserPhoto != null)
+            if (updateDto.UserPhoto != null) UpdateUserPhotoAsync(resume, updateDto.UserPhoto);
+
+            await UpdateResumeEmailAsync(resume, updateDto);
+
+            await UpdatePhoneNumbersAsync(resume, updateListsDto, updateDto.IsMainNumber);
+
+            resume.Educations = await _educationService.UpdateBulkEducationAsync(updateListsDto.EducationUpdateDtos.Educations, resume.Id);
+            resume.Experiences = await _experienceService.UpdateBulkExperienceAsync(updateListsDto.ExperienceUpdateDtos.Experiences, resume.Id);
+            resume.Languages = await _languageService.UpdateBulkLanguageAsync(updateListsDto.LanguageUpdateDtos.Languages, resume.Id);
+            resume.Certificates = await UpdateCertificatesAsync(updateDto.Certificates ?? []);
+
+            UpdateResumeSkills(resume, updateDto.SkillIds);
+
+            await _context.SaveChangesAsync();
+        }
+
+        private async Task<Core.Entities.Resume> GetResumeByUserIdAsync(Guid userGuid)
+        {
+            return await _context.Resumes
+                .Include(r => r.PhoneNumbers)
+                .Include(r => r.Educations)
+                .Include(r => r.Certificates)
+                .Include(r => r.Experiences)
+                .Include(r => r.Languages)
+                .FirstOrDefaultAsync(r => r.UserId == userGuid)
+                ?? throw new NotFoundException<Core.Entities.Resume>();
+        }
+
+        private static void UpdateResumePersonalInfo(Core.Entities.Resume resume, ResumeUpdateDto updateDto)
+        {
+            resume.FatherName = updateDto.FatherName;
+            resume.Position = updateDto.Position;
+            resume.IsDriver = updateDto.IsDriver;
+            resume.IsMarried = updateDto.IsMarried;
+            resume.IsCitizen = updateDto.IsCitizen;
+            resume.IsPublic = updateDto.IsPublic;
+            resume.Gender = updateDto.Gender;
+            resume.Adress = updateDto.Adress;
+            resume.BirthDay = updateDto.BirthDay;
+        }
+
+        private async void UpdateUserPhotoAsync(Core.Entities.Resume resume, IFormFile userPhoto)
+        {
+            if (!string.IsNullOrEmpty(resume.UserPhoto))
             {
-                FileDto fileResult = await _fileService.UploadAsync(FilePaths.document, resumeUpdateDto.UserPhoto);
-                resume.UserPhoto = $"{fileResult.FilePath}/{fileResult.FileName}";
+                _fileService.DeleteFile(resume.UserPhoto);
             }
 
-            string email = resumeUpdateDto.IsMainEmail
-                ? await _userInformationService.GetUserDataAsync(userGuid).Select(x => x.Email)
-                : resumeUpdateDto.ResumeEmail;
-            resume.ResumeEmail = email;
+            var fileResult = await _fileService.UploadAsync(FilePaths.document, userPhoto);
+            resume.UserPhoto = $"{fileResult.FilePath}/{fileResult.FileName}";
+        }
 
-            if (!resumeUpdateDto.IsMainNumber)
+        private async Task UpdateResumeEmailAsync(Core.Entities.Resume resume, ResumeUpdateDto updateDto)
+        {
+            resume.ResumeEmail = updateDto.IsMainEmail
+                ? (await _userInformationService.GetUserDataAsync(userGuid)).Email
+                : updateDto.ResumeEmail;
+        }
+
+        private async Task UpdatePhoneNumbersAsync(Core.Entities.Resume resume, ResumeUpdateListDto updateListsDto, bool isMainNumber)
+        {
+            if (isMainNumber)
             {
-                _context.Numbers.RemoveRange(resume.PhoneNumbers);
-                var numbers = await _numberService.UpdateBulkNumberAsync(resumeUpdateListsDto.NumberUpdateDtos.PhoneNumbers, resume.Id);
-                resume.PhoneNumbers = numbers;
+                var mainNumber = new List<Core.Entities.Number>
+                {
+                    new() {
+                        PhoneNumber = _userInformationService.GetUserDataAsync(userGuid).Result.MainPhoneNumber,
+                        ResumeId = resume.Id
+                    }
+                };
+
+                resume.PhoneNumbers = mainNumber;
             }
             else
             {
-                var mainNumber = await _userInformationService.GetUserDataAsync(userGuid).Select(x => new Core.Entities.Number
-                {
-                    PhoneNumber = x.MainPhoneNumber,
-                    ResumeId = resume.Id
-                });
-                resume.PhoneNumbers = new List<Core.Entities.Number> { mainNumber };
+                _context.Numbers.RemoveRange(resume.PhoneNumbers);
+                resume.PhoneNumbers = await _numberService.UpdateBulkNumberAsync(updateListsDto.NumberUpdateDtos.PhoneNumbers, resume.Id);
             }
+        }
 
-            var educations = await _educationService.UpdateBulkEducationAsync(resumeUpdateListsDto.EducationUpdateDtos.Educations, resume.Id);
-            resume.Educations = educations;
+        private async Task<ICollection<Core.Entities.Certificate>> UpdateCertificatesAsync(ICollection<CertificateUpdateDto> certificatesDto)
+        {
+            return certificatesDto != null
+                ? await _certificateService.UpdateBulkCertificateAsync(certificatesDto)
+                : [];
+        }
 
-            var experiences = await _experienceService.UpdateBulkExperienceAsync(resumeUpdateListsDto.ExperienceUpdateDtos.Experiences, resume.Id);
-            resume.Experiences = experiences;
-
-            var languages = await _languageService.UpdateBulkLanguageAsync(resumeUpdateListsDto.LanguageUpdateDtos.Languages, resume.Id);
-            resume.Languages = languages;
-
-            var certificates = resumeUpdateDto.Certificates != null
-                ? await _certificateService.UpdateBulkCertificateAsync(resumeUpdateDto.Certificates)
-                : new List<Core.Entities.Certificate>();
-            resume.Certificates = certificates;
-
-            var resumeSkills = resumeUpdateDto.SkillIds != null
-                ? resumeUpdateDto.SkillIds.Select(skillId => new ResumeSkill
-                {
-                    SkillId = skillId,
-                    ResumeId = resume.Id
-                }).ToList()
-                : new List<ResumeSkill>();
-            resume.ResumeSkills = resumeSkills;
-
-            _context.Resumes.Update(resume);
-            await _context.SaveChangesAsync();
+        private static void UpdateResumeSkills(Core.Entities.Resume resume, IEnumerable<Guid>? skillIds)
+        {
+            resume.ResumeSkills = skillIds?.Select(skillId => new ResumeSkill
+            {
+                SkillId = skillId,
+                ResumeId = resume.Id
+            }).ToList() ?? [];
         }
 
         public async Task<ResumeDetailItemDto> GetOwnResumeAsync()
@@ -280,12 +306,8 @@ namespace Job.Business.Services.Resume
                                                 CertificateFile = c.CertificateFile
                                             }).ToList()
                                         })
-                                        .FirstOrDefaultAsync();
-
-            if (resume == null)
-            {
-                throw new NotFoundException<Core.Entities.Resume>();
-            }
+                                        .FirstOrDefaultAsync()
+                                        ?? throw new NotFoundException<Core.Entities.Resume>();
 
             var userFullName = await _userInformationService.GetUserDataAsync(userGuid);
             resume.FirstName = userFullName.FirstName;
@@ -300,6 +322,5 @@ namespace Job.Business.Services.Resume
 
             return resume;
         }
-
     }
 }
