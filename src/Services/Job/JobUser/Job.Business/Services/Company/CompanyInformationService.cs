@@ -7,9 +7,11 @@ namespace Job.Business.Services.Company
 {
     public class CompanyInformationService(IRequestClient<GetAllCompaniesRequest> _client, IRequestClient<GetCompanyDetailByIdRequest> getDetailClient) : ICompanyInformationService
     {
-        public async Task<ICollection<CompanyDto>> GetCompaniesDataAsync()
+        public async Task<ICollection<CompanyDto>> GetCompaniesDataAsync(string? searchTerm)
         {
-            var response = await _client.GetResponse<GetAllCompaniesResponse>(new GetAllCompaniesRequest());
+            var response = await _client.GetResponse<GetAllCompaniesResponse>(new GetAllCompaniesRequest{
+                SearchTerm = searchTerm
+            });
             return response.Message.Companies;
         }
 

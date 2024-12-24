@@ -24,7 +24,16 @@ namespace JobCompany.Business.Consumers
 
         public async Task Consume(ConsumeContext<GetAllCompaniesRequest> context)
         {
-            var companies = await _context.Companies.Select(x => new CompanyDto
+            var searchTerm = context.Message.SearchTerm?.ToLower() ?? string.Empty; 
+
+            var companiesQuery = _context.Companies.AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                companiesQuery = companiesQuery.Where(x => x.CompanyName.ToLower().Contains(searchTerm));
+            }
+
+            var companies = await companiesQuery.Select(x => new CompanyDto
             {
                 CompanyId = x.Id,
                 CompanyUserId = x.UserId,

@@ -95,9 +95,12 @@ namespace Job.Business.Services.Vacancy
         }
 
         /// <summary> Bütün şirkətlərin get allu </summary>
-        public async Task<ICollection<CompanyDto>> GetAllCompaniesAsync()
+        public async Task<ICollection<CompanyDto>> GetAllCompaniesAsync(string? searchTerm)
         {
-            var response = await _request.GetResponse<GetAllCompaniesResponse>(new GetAllCompaniesRequest());
+            var response = await _request.GetResponse<GetAllCompaniesResponse>(new GetAllCompaniesRequest
+            {
+                SearchTerm = searchTerm,
+            });
 
             return response.Message.Companies;
         }

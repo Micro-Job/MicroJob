@@ -27,9 +27,9 @@ namespace Job.API.Controllers
 
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetAllCompanies()
+        public async Task<IActionResult> GetAllCompanies(string? searchTerm)
         {
-            return Ok(await _vacancyService.GetAllCompaniesAsync());
+            return Ok(await _vacancyService.GetAllCompaniesAsync(searchTerm));
         }
 
 
