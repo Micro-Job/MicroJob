@@ -197,6 +197,7 @@ namespace Job.Business.Services.Vacancy
                     IsVip = x.IsVip,
                     IsActive = x.IsActive,
                     CategoryId = x.CategoryId,
+                    WorkStyle = x.WorkStyle,
                     IsSaved = userGuid != null && savedVacancies.Contains(Guid.Parse(x.VacancyId.ToString()))
                 })
                 .ToList();
