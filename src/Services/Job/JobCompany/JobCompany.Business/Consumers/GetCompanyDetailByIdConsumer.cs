@@ -2,6 +2,7 @@
 using JobCompany.DAL.Contexts;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Shared.Requests;
 using Shared.Responses;
 using SharedLibrary.Dtos.CompanyDtos;
@@ -11,8 +12,19 @@ using SharedLibrary.Responses;
 
 namespace JobCompany.Business.Consumers;
 
-public class GetCompanyDetailByIdConsumer(JobCompanyDbContext _jobCompanyDbContext, IRequestClient<GetAllCompaniesDataRequest> _requestClient) : IConsumer<GetCompanyDetailByIdRequest>
+public class GetCompanyDetailByIdConsumer : IConsumer<GetCompanyDetailByIdRequest>
 {
+    private readonly JobCompanyDbContext _jobCompanyDbContext;
+    private readonly IRequestClient<GetAllCompaniesDataRequest> _requestClient;
+    readonly IConfiguration _configuration;
+    private readonly string? _authServiceBaseUrl;
+    public GetCompanyDetailByIdConsumer(JobCompanyDbContext jobCompanyDbContext, IRequestClient<GetAllCompaniesDataRequest> requestClient, IConfiguration configuration)
+    {
+        _jobCompanyDbContext = jobCompanyDbContext;
+        _requestClient = requestClient;
+        _configuration = configuration;
+        _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
+    }
     public async Task Consume(ConsumeContext<GetCompanyDetailByIdRequest> context)
     {
         var company = await _jobCompanyDbContext.Companies.Include(x => x.CompanyNumbers).FirstOrDefaultAsync(x => x.Id == context.Message.CompanyId)
@@ -27,6 +39,8 @@ public class GetCompanyDetailByIdConsumer(JobCompanyDbContext _jobCompanyDbConte
         {
             CompanyInformation = company.CompanyInformation,
             CompanyLocation = company.CompanyLocation,
+            CompanyName = company.CompanyName,
+            CompanyLogo = $"{_authServiceBaseUrl}/{company.CompanyLogo}",
             WebLink = company.WebLink,
             CompanyNumbers = company.CompanyNumbers?.Select(x => new CompanyNumberDto { Number = x.Number }).ToList(),
             Email = userEmailResponse.Message.Email,
