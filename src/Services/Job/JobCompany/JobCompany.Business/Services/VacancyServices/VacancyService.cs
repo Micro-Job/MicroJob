@@ -223,52 +223,59 @@ namespace JobCompany.Business.Services.VacancyServices
             var vacancyGuid = Guid.Parse(id);
 
             var vacancyEntity = await _context.Vacancies
-                .AsNoTracking()
-                .Include(x => x.Category)
-                .Include(x => x.Company)
-                .Include(x => x.VacancyNumbers)
-                .Include(x => x.VacancySkills)
-                .ThenInclude(vc => vc.Skill)
-                .FirstOrDefaultAsync(x => x.Id == vacancyGuid)
+                .AsNoTracking() 
+                .Where(x => x.Id == vacancyGuid)
+                .Select(x => new
+                {
+                    Vacancy = x,
+                    x.Category,
+                    x.Company,
+                    VacancyNumbers = x.VacancyNumbers.Select(vn => vn.Number).ToList(),
+                    Skills = x.VacancySkills
+                        .Where(vc => vc.Skill != null)
+                        .Select(vc => vc.Skill.Name).ToList()
+                })
+                .FirstOrDefaultAsync()
                 ?? throw new NotFoundException<Vacancy>();
 
-            vacancyEntity.ViewCount++;
-            await _context.SaveChangesAsync();
+            vacancyEntity.Vacancy.ViewCount++;
 
             var vacancy = new VacancyGetByIdDto
             {
-                Id = vacancyEntity.Id,
-                Title = vacancyEntity.Title,
+                Id = vacancyEntity.Vacancy.Id,
+                Title = vacancyEntity.Vacancy.Title,
                 CompanyLogo = $"{_authServiceBaseUrl}/{vacancyEntity.Company.CompanyLogo}",
-                StartDate = vacancyEntity.StartDate,
-                Location = vacancyEntity.Location,
-                ViewCount = vacancyEntity.ViewCount,
-                WorkType = vacancyEntity.WorkType,
-                MainSalary = vacancyEntity.MainSalary,
-                MaxSalary = vacancyEntity.MaxSalary,
-                Requirement = vacancyEntity.Requirement,
-                Description = vacancyEntity.Description,
-                Email = vacancyEntity.Email,
-                Gender = vacancyEntity.Gender,
-                Military = vacancyEntity.Military,
-                Family = vacancyEntity.Family,
-                Driver = vacancyEntity.Driver,
-                Citizenship = vacancyEntity.Citizenship,
+                StartDate = vacancyEntity.Vacancy.StartDate,
+                Location = vacancyEntity.Vacancy.Location,
+                ViewCount = vacancyEntity.Vacancy.ViewCount,
+                WorkType = vacancyEntity.Vacancy.WorkType,
+                MainSalary = vacancyEntity.Vacancy.MainSalary,
+                MaxSalary = vacancyEntity.Vacancy.MaxSalary,
+                Requirement = vacancyEntity.Vacancy.Requirement,
+                Description = vacancyEntity.Vacancy.Description,
+                Email = vacancyEntity.Vacancy.Email,
+                Gender = vacancyEntity.Vacancy.Gender,
+                Military = vacancyEntity.Vacancy.Military,
+                Family = vacancyEntity.Vacancy.Family,
+                Driver = vacancyEntity.Vacancy.Driver,
+                Citizenship = vacancyEntity.Vacancy.Citizenship,
                 VacancyNumbers = vacancyEntity.VacancyNumbers.Select(vn => new VacancyNumberDto
                 {
-                    VacancyNumber = vn.Number,
+                    VacancyNumber = vn
                 }).ToList(),
-                Skills = vacancyEntity.VacancySkills
-                .Where(s => s.Skill != null)
-                .Select(s => new SkillDto
+                Skills = vacancyEntity.Skills.Select(skill => new SkillDto
                 {
-                    Name = s.Skill.Name,
+                    Name = skill
                 }).ToList(),
-                CompanyName = vacancyEntity.CompanyName,
+                CompanyName = vacancyEntity.Vacancy.CompanyName,
                 CategoryName = vacancyEntity.Category.CategoryName,
             };
+
+            await _context.SaveChangesAsync();
+
             return vacancy;
         }
+
 
 
         /// <summary> vacancynin update olunması </summary>
