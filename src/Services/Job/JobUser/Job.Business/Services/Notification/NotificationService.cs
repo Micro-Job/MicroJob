@@ -46,7 +46,9 @@ namespace Job.Business.Services.Notification
         {
             var companies = await GetAllCompaniesData();
 
-            var companyDictionary = companies.Companies.ToDictionary(x => x.CompanyUserId, x => x);
+            var companyDictionary = companies.Companies
+                .GroupBy(x => x.CompanyUserId)
+                .ToDictionary(g => g.Key, g => g.First());
 
             var notifications = await _context.Notifications
                 .Where(n => n.ReceiverId == userGuid)
