@@ -117,6 +117,8 @@ namespace JobCompany.Business.Services.CompanyServices
             {
                 CompanyInformation = x.CompanyInformation,
                 CompanyLocation = x.CompanyLocation,
+                CompanyName = x.CompanyName,
+                CompanyLogo = $"{_authServiceBaseUrl}/{x.CompanyLogo}",
                 WebLink = x.WebLink,
                 UserId = x.UserId.ToString(),
                 CompanyNumbers = x.CompanyNumbers.Select(cn => new CompanyNumberDto
