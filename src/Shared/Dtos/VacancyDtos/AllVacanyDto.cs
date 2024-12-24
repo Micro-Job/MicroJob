@@ -20,6 +20,7 @@ namespace Shared.Dtos.VacancyDtos
         public int? ViewCount { get; set; }
         public decimal? MainSalary { get; set; }
         public WorkType? WorkType { get; set; }
+        public WorkStyle? WorkStyle { get; set; }
         public bool IsSaved { get; set; }
         public bool IsVip { get; set; }
         public bool IsActive { get; set; }

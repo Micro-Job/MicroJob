@@ -51,7 +51,7 @@ namespace Job.Business.Services.Certificate
             foreach (var dto in dtos)
             {
                 var certificate = await _context.Certificates.FindAsync(dto.Id)
-                    ?? throw new NotFoundException<Core.Entities.Certificate>(); 
+                    ?? throw new NotFoundException<Core.Entities.Certificate>();
 
                 certificate.CertificateName = dto.CertificateName;
                 certificate.GivenOrganization = dto.GivenOrganization;

@@ -7,7 +7,7 @@ using SharedLibrary.Enums;
 
 namespace Job.API.Controllers
 {
-    
+
     [ApiController]
     [Route("api/[controller]")]
     [AuthorizeRole(UserRole.SimpleUser)]
