@@ -69,6 +69,7 @@ namespace Job.Business.Services.Application
                 UserId = companyId,
                 SenderId = userGuid,
                 VacancyId = guidVac,
+                InformationId = userGuid,
                 Content = $"İstifadəçi {responseUser.Message.FirstName} {responseUser.Message.LastName} {response.Message.VacancyName} vakansiyasına müraciət etdi.",
             });
         }

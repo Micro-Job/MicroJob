@@ -121,6 +121,7 @@ namespace JobCompany.Business.Services.VacancyServices
             {
                 SenderId = _userGuid,
                 SkillIds = skillIds,
+                InformationId = vacancy.Id,
                 Content = $"Sizin resume skillərinizə uyğun yeni vakansiya yaradıldı: {vacancy.Title}",
             });
         }

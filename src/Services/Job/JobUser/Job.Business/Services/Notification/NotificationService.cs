@@ -34,6 +34,7 @@ namespace Job.Business.Services.Notification
                 ReceiverId = notificationDto.ReceiverId,
                 SenderId = notificationDto.SenderId,
                 CreatedDate = DateTime.Now,
+                InformationId = notificationDto.InformationId,
                 Content = notificationDto.Content,
                 IsSeen = false
             };
@@ -66,6 +67,7 @@ namespace Job.Business.Services.Notification
                     SenderId = n.SenderId,
                     CompanyName = company?.CompanyName,
                     CompanyLogo = company?.CompanyImage,
+                    InformationId = n.InformationId,
                     CreatedDate = n.CreatedDate,
                     Content = n.Content,
                     IsSeen = n.IsSeen

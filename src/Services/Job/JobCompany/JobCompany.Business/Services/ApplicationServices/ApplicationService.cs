@@ -80,6 +80,7 @@ namespace JobCompany.Business.Services.ApplicationServices
             });
         }
 
+
         /// <summary> Müraciətlərin statusu ilə birlikdə gətirilməsi </summary>
         public async Task<List<StatusListDtoWithApps>> GetAllApplicationWithStatusAsync(string vacancyId)
         {

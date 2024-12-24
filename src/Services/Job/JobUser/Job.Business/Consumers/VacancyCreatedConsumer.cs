@@ -33,6 +33,7 @@ namespace Job.Business.Consumers
                     ReceiverId = resume.UserId,  
                     SenderId = eventMessage.SenderId, 
                     Content = eventMessage.Content, 
+                    InformationId = eventMessage.InformationId,
                     IsSeen = false 
                 };
 

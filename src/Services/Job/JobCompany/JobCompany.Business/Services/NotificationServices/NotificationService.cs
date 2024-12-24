@@ -40,6 +40,7 @@ namespace JobCompany.Business.Services.NotificationServices
                     Id = n.Id,
                     ReceiverId = n.ReceiverId,
                     SenderId = n.SenderId,
+                    InformationId = n.InformationId,
                     CreatedDate = n.CreatedDate,
                     Content = n.Content,
                     IsSeen = n.IsSeen

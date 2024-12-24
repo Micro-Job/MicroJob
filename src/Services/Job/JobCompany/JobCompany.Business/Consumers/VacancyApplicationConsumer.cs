@@ -7,17 +7,18 @@ namespace JobCompany.Business.Consumers
 {
     public class VacancyApplicationConsumer(JobCompanyDbContext _context) : IConsumer<VacancyApplicationEvent>
     {
-        public Task Consume(ConsumeContext<VacancyApplicationEvent> context)
+        public async Task Consume(ConsumeContext<VacancyApplicationEvent> context)
         {
             var newNotification = new Notification
             {
                 ReceiverId = context.Message.UserId,
                 SenderId = context.Message.SenderId,
                 Content = context.Message.Content,
+                InformationId = context.Message.InformationId,
                 IsSeen = false,
             };
-            _context.Notifications.Add(newNotification);
-            return _context.SaveChangesAsync();
+            await _context.Notifications.AddAsync(newNotification);
+            await _context.SaveChangesAsync();
         }
     }
 }
