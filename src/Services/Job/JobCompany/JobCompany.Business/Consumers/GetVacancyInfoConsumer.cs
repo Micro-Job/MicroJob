@@ -28,40 +28,41 @@ namespace Job.Business.Consumers
         {
             var vacancyId = context.Message.Id;
             var vacancy = await _context.Vacancies
-                .Include(v => v.Category)
-                .Include(v => v.Company)
-                .Include(v => v.VacancyNumbers)
-                .FirstOrDefaultAsync(x => x.Id == vacancyId)
-                ?? throw new NotFoundException<Vacancy>();
-
-            vacancy.ViewCount++;
-            await _context.SaveChangesAsync();
+                .Where(x => x.Id == vacancyId)
+                .Select(v => new
+                {
+                    Vacancy = v,
+                    v.Category,
+                    v.Company,
+                    VacancyNumbers = v.VacancyNumbers.Select(n => n.Number).ToList()
+                })
+                .FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>();
 
             var response = new GetVacancyInfoResponse
             {
-                Id = vacancy.Id,
-                MainSalary = vacancy.MainSalary,
-                MaxSalary = vacancy.MaxSalary,
-                Email = vacancy.Email,
-                Military = vacancy.Military,
-                Driver = vacancy.Driver,
-                Citizenship = vacancy.Citizenship,
-                IsActive = vacancy.IsActive,
-                Gender = vacancy.Gender,
-                Family = vacancy.Family,
-                CompanyName = vacancy.CompanyName,
-                Title = vacancy.Title,
+                Id = vacancy.Vacancy.Id,
+                MainSalary = vacancy.Vacancy.MainSalary,
+                MaxSalary = vacancy.Vacancy.MaxSalary,
+                Email = vacancy.Vacancy.Email,
+                Military = vacancy.Vacancy.Military,
+                Driver = vacancy.Vacancy.Driver,
+                Citizenship = vacancy.Vacancy.Citizenship,
+                IsActive = vacancy.Vacancy.IsActive,
+                Gender = vacancy.Vacancy.Gender,
+                Family = vacancy.Vacancy.Family,
+                CompanyName = vacancy.Vacancy.CompanyName,
+                Title = vacancy.Vacancy.Title,
                 CompanyLogo = $"{_authServiceBaseUrl}/{vacancy.Company.CompanyLogo}",
-                Requirement = vacancy.Requirement,
-                Description = vacancy.Description,
-                VacancyNumbers = vacancy.VacancyNumbers.Select(n => new NumberDto { VacancyNumber = n.Number }).ToList(),
-                StartDate = vacancy.StartDate,
-                EndDate = vacancy.EndDate,
+                Requirement = vacancy.Vacancy.Requirement,
+                Description = vacancy.Vacancy.Description,
+                VacancyNumbers = vacancy.VacancyNumbers.Select(n => new NumberDto { VacancyNumber = n }).ToList(),
+                StartDate = vacancy.Vacancy.StartDate,
+                EndDate = vacancy.Vacancy.EndDate,
                 CategoryName = vacancy.Category.CategoryName,
-                WorkType = vacancy.WorkType,
-                Location = vacancy.Location,
-                ViewCount = vacancy.ViewCount,
-                CompanyId = vacancy.Company.Id,
+                WorkType = vacancy.Vacancy.WorkType,
+                Location = vacancy.Vacancy.Location,
+                ViewCount = vacancy.Vacancy.ViewCount,
+                CompanyId = vacancy.Company.Id
             };
             await context.RespondAsync(response);
         }
