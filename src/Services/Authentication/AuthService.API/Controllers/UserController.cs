@@ -30,5 +30,12 @@ namespace AuthService.API.Controllers
             await userService.UpdateUserProfileImageAsync(dto);
             return Ok();
         }
+
+        [HttpPut("[action]")]
+        public async Task<IActionResult> UpdateUserJobStatusAsync(UserJobStatusUpdateDto dto)
+        {
+            await userService.UpdateUserJobStatusAsync(dto);
+            return Ok();
+        }
     }
 }

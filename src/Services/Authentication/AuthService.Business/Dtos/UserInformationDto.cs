@@ -11,6 +11,6 @@ namespace AuthService.Business.Dtos
         public string MainPhoneNumber { get; set; }
         public string? Image { get; set; }
         public UserRole UserRole { get; set; }
-        //public UserStatusDto Status { get; set; }
+        public JobStatus JobStatus { get; set; }
     }
 }

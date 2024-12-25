@@ -43,7 +43,8 @@ namespace AuthService.Business.Services.UserServices
                     Email = x.Email,
                     MainPhoneNumber = x.MainPhoneNumber,
                     Image = x.Image != null ? $"{_currentUser.BaseUrl}/{x.Image}" : null,
-                    UserRole = x.UserRole
+                    UserRole = x.UserRole,
+                    JobStatus = x.JobStatus
                 })
                 ?? throw new UserNotFoundException();
 
@@ -78,7 +79,6 @@ namespace AuthService.Business.Services.UserServices
             user.LastName = dto.LastName.Trim();
             user.Email = dto.Email.Trim();
             user.MainPhoneNumber = dto.MainPhoneNumber.Trim();
-            user.JobStatus = dto.JobStatus;
             await _context.SaveChangesAsync();
 
             return new UserUpdateResponseDto
@@ -120,5 +120,16 @@ namespace AuthService.Business.Services.UserServices
             };
         }
 
+        /// <summary> İstifadəçinin iş statusunun update olunması </summary>
+        public async Task UpdateUserJobStatusAsync(UserJobStatusUpdateDto dto)
+        {
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.Id == _currentUserGuid)
+                ?? throw new UserNotFoundException();
+            
+            user.JobStatus = dto.JobStatus;
+            
+            await _context.SaveChangesAsync();
+        }
     }
 }
