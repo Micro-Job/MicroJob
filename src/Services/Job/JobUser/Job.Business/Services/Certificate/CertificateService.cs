@@ -12,46 +12,43 @@ namespace Job.Business.Services.Certificate
     {
         public async Task<ICollection<Core.Entities.Certificate>> CreateBulkCertificateAsync(ICollection<CertificateCreateDto> dtos)
         {
-            var certificatesToAdd = dtos.Select(async dto =>
+            var certificatesToAdd = new List<Core.Entities.Certificate>();
+
+            foreach (var dto in dtos)
             {
-                FileDto fileResult = await fileService.UploadAsync(FilePaths.document, dto.CertificateFile);
+                var certificate = await CreateCertificateAsync(dto);
+                certificatesToAdd.Add(certificate);
+            }
 
-                return new Core.Entities.Certificate
-                {
-                    CertificateName = dto.CertificateName,
-                    CertificateFile = $"{fileResult.FilePath}/{fileResult.FileName}",
-                    GivenOrganization = dto.GivenOrganization
-                };
-            }).ToList();
-
-            var certificates = await Task.WhenAll(certificatesToAdd);
-            await context.Certificates.AddRangeAsync(certificates);
-
-            return [.. certificates];
+            return certificatesToAdd;
         }
 
-        public async Task CreateCertificateAsync(CertificateCreateDto dto)
+        public async Task<Core.Entities.Certificate> CreateCertificateAsync(CertificateCreateDto dto)
         {
             FileDto fileResult = await fileService.UploadAsync(FilePaths.document, dto.CertificateFile);
+
             var certificate = new Core.Entities.Certificate
             {
                 CertificateName = dto.CertificateName,
                 CertificateFile = $"{fileResult.FilePath}/{fileResult.FileName}",
                 GivenOrganization = dto.GivenOrganization
             };
+
             await context.Certificates.AddAsync(certificate);
+            return certificate;
         }
+
 
         public async Task<ICollection<Core.Entities.Certificate>> UpdateBulkCertificateAsync(ICollection<CertificateUpdateDto> dtos)
         {
             Guid parsedId;
-            
+
             var updatedCertificates = new List<Core.Entities.Certificate>();
 
             foreach (var dto in dtos)
             {
                 await UpdateCertificateAsync(dto);
-                
+
                 parsedId = Guid.Parse(dto.Id);
 
                 var certificate = await context.Certificates.FirstOrDefaultAsync(x => x.Id == parsedId);
@@ -67,7 +64,7 @@ namespace Job.Business.Services.Certificate
         public async Task UpdateCertificateAsync(CertificateUpdateDto dto)
         {
             var parsedId = Guid.Parse(dto.Id);
-            
+
             var certificate = await context.Certificates.FirstOrDefaultAsync(x => x.Id == parsedId)
                 ?? throw new NotFoundException<Core.Entities.Certificate>();
 
