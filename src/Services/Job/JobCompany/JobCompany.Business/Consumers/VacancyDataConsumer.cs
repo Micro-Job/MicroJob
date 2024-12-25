@@ -52,6 +52,7 @@ namespace JobCompany.Business.Consumers
                     ViewCount = v.ViewCount,
                     IsVip = v.IsVip,
                     WorkType = v.WorkType,
+                    IsSaved = true
                 }).ToList()
             };
 

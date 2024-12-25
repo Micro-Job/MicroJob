@@ -19,6 +19,7 @@ namespace SharedLibrary.Responses
         public decimal? MaxSalary { get; set; }
         public int ViewCount { get; set; }
         public bool IsVip { get; set; }
+        public bool IsSaved { get; set; }
         public WorkType? WorkType { get; set; }
     }
 }
