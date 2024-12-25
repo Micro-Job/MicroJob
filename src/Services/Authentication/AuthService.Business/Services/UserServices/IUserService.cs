@@ -1,4 +1,5 @@
 ﻿using AuthService.Business.Dtos;
+using AuthService.Core.Enums;
 
 namespace AuthService.Business.Services.UserServices
 {
@@ -7,6 +8,6 @@ namespace AuthService.Business.Services.UserServices
         Task<UserInformationDto> GetUserInformationAsync();
         Task<UserUpdateResponseDto> UpdateUserInformationAsync(UserUpdateDto dto);
         Task<UserProfileImageUpdateResponseDto> UpdateUserProfileImageAsync(UserProfileImageUpdateDto dto);
-        Task UpdateUserJobStatusAsync(UserJobStatusUpdateDto dto);
+        Task<JobStatus> UpdateUserJobStatusAsync(UserJobStatusUpdateDto dto);
     }
 }

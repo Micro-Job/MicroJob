@@ -33,8 +33,8 @@ namespace AuthService.API.Controllers
         [HttpPut("[action]")]
         public async Task<IActionResult> UpdateUserJobStatusAsync(UserJobStatusUpdateDto dto)
         {
-            await userService.UpdateUserJobStatusAsync(dto);
-            return Ok();
+            var data = await userService.UpdateUserJobStatusAsync(dto);
+            return Ok(data);
         }
     }
 }

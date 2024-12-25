@@ -2,6 +2,7 @@
 using AuthService.Business.Exceptions.UserException;
 using AuthService.Business.Services.CurrentUser;
 using AuthService.Core.Entities;
+using AuthService.Core.Enums;
 using AuthService.DAL.Contexts;
 using MassTransit;
 using MassTransit.Initializers;
@@ -121,15 +122,17 @@ namespace AuthService.Business.Services.UserServices
         }
 
         /// <summary> İstifadəçinin iş statusunun update olunması </summary>
-        public async Task UpdateUserJobStatusAsync(UserJobStatusUpdateDto dto)
+        public async Task<JobStatus> UpdateUserJobStatusAsync(UserJobStatusUpdateDto dto)
         {
             var user = await _context.Users
                 .FirstOrDefaultAsync(u => u.Id == _currentUserGuid)
                 ?? throw new UserNotFoundException();
-            
+
             user.JobStatus = dto.JobStatus;
-            
+
             await _context.SaveChangesAsync();
+
+            return user.JobStatus;
         }
     }
 }
