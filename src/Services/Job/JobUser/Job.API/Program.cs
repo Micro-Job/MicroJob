@@ -71,6 +71,8 @@ namespace Job.API
 
                 x.AddConsumer<UpdateUserApplicationStatusConsumer>(); 
 
+                x.AddConsumer<GetResumeDataConsumer>();
+
                 x.UsingRabbitMq((context, cfg) =>
                 {
                     cfg.Host(configuration["RabbitMQ:ConnectionString"]);
@@ -82,7 +84,12 @@ namespace Job.API
 
                     cfg.ReceiveEndpoint("user-notification-queue", e =>
                     {
-                        e.ConfigureConsumer<UpdateUserApplicationStatusConsumer>(context); // Yeni consumer
+                        e.ConfigureConsumer<UpdateUserApplicationStatusConsumer>(context); 
+                    });
+
+                    cfg.ReceiveEndpoint("get-resume-data-queue" , e =>
+                    {
+                        e.ConfigureConsumer<GetResumeDataConsumer>(context);
                     });
                 });
             });

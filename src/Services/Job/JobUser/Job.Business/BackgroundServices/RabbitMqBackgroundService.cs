@@ -39,7 +39,16 @@ namespace Job.Business.BackgroundServices
                     {
                         using var scope = _serviceProvider.CreateScope();
                         var dbContext = scope.ServiceProvider.GetRequiredService<JobDbContext>();
-                        var consumer = new UpdateUserApplicationStatusConsumer(dbContext); 
+                        var consumer = new UpdateUserApplicationStatusConsumer(dbContext);
+
+                        e.Consumer(() => consumer);
+                    });
+
+                    cfg.ReceiveEndpoint("get-resume-data-queue", e =>
+                    {
+                        using var scope = _serviceProvider.CreateScope();
+                        var dbContext = scope.ServiceProvider.GetRequiredService<JobDbContext>();
+                        var consumer = new GetResumeDataConsumer(dbContext);
 
                         e.Consumer(() => consumer);
                     });
@@ -47,7 +56,7 @@ namespace Job.Business.BackgroundServices
 
                 await busControl.StartAsync(stoppingToken);
 
-                await Task.Delay(Timeout.Infinite, stoppingToken); 
+                await Task.Delay(Timeout.Infinite, stoppingToken);
             }
             catch (TaskCanceledException)
             {

@@ -2,7 +2,7 @@
 
 public enum JobStatus : byte
 {
-    SeekingEmployment = 1,       // İş axtarıram
+    NotLookingForAJob = 1,       // İş axtarmıram
     OpenToOffers = 2,            // Təklifləri nəzərdən keçirirəm
     ActivelySeekingJob = 3       // Aktiv iş axtarıram
 }
