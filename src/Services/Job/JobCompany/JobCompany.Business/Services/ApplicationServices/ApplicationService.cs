@@ -76,6 +76,7 @@ namespace JobCompany.Business.Services.ApplicationServices
             {
                 UserId = existAppVacancy.UserId,
                 SenderId = userGuid,
+                InformationId = existAppVacancy.VacancyId,
                 Content = $"{existAppVacancy.Vacancy.Company.CompanyName} şirkətinin müraciət statusu dəyişdirildi: {existAppVacancy.Status.StatusName}"
             });
         }

@@ -68,15 +68,27 @@ namespace Job.API
             // MassTransit ve RabbitMQ yapılandırması
             builder.Services.AddMassTransit(x =>
             {
+                // İlk Consumer'ı ekle
                 x.AddConsumer<VacancyCreatedConsumer>();
 
+                // İkinci Consumer'ı ekle
+                x.AddConsumer<UpdateUserApplicationStatusConsumer>(); // Yeni consumer
+
+                // RabbitMQ yapılandırması
                 x.UsingRabbitMq((context, cfg) =>
                 {
                     cfg.Host(configuration["RabbitMQ:ConnectionString"]);
 
+                    // İlk Queue: vacancy-created-queue
                     cfg.ReceiveEndpoint("vacancy-created-queue", e =>
                     {
                         e.ConfigureConsumer<VacancyCreatedConsumer>(context);
+                    });
+
+                    // İkinci Queue: user-notification-queue
+                    cfg.ReceiveEndpoint("user-notification-queue", e =>
+                    {
+                        e.ConfigureConsumer<UpdateUserApplicationStatusConsumer>(context); // Yeni consumer
                     });
                 });
             });
