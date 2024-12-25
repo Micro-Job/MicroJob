@@ -20,8 +20,7 @@ namespace AuthService.API.Controllers
         [HttpPut("[action]")]
         public async Task<IActionResult> UpdateUserInformationAsync(UserUpdateDto dto)
         {
-            await userService.UpdateUserInformationAsync(dto);
-            return Ok();
+            return Ok(await userService.UpdateUserInformationAsync(dto));
         }
 
         [HttpPut("[action]")]
