@@ -8,6 +8,7 @@ using MassTransit;
 using MassTransit.Initializers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Shared.Events;
 using Shared.Requests;
@@ -26,8 +27,10 @@ namespace JobCompany.Business.Services.ApplicationServices
         readonly IRequestClient<GetUsersDataRequest> _client;
         readonly IRequestClient<GetResumeDataRequest> _requestClient;
         readonly IPublishEndpoint _publishEndpoint;
+        readonly IConfiguration _configuration;
+        private readonly string? _authServiceBaseUrl;
 
-        public ApplicationService(JobCompanyDbContext context, IRequestClient<GetUsersDataRequest> client, IRequestClient<GetResumeDataRequest> requestClient, IHttpContextAccessor contextAccessor, IPublishEndpoint publishEndpoint)
+        public ApplicationService(JobCompanyDbContext context, IRequestClient<GetUsersDataRequest> client, IRequestClient<GetResumeDataRequest> requestClient, IHttpContextAccessor contextAccessor, IPublishEndpoint publishEndpoint, IConfiguration configuration)
         {
             _context = context;
             _contextAccessor = contextAccessor;
@@ -36,6 +39,8 @@ namespace JobCompany.Business.Services.ApplicationServices
             _baseUrl = $"{_contextAccessor.HttpContext.Request.Scheme}://{_contextAccessor.HttpContext.Request.Host.Value}{_contextAccessor.HttpContext.Request.PathBase.Value}";
             userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid).Value);
             _publishEndpoint = publishEndpoint;
+            _configuration = configuration;
+            _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
         }
 
         /// <summary> Yaradılan müraciətin geri alınması </summary>
@@ -242,7 +247,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                     return group.Select(application => new ApplicationInfoListDto
                     {
                         FullName = $"{userData?.FirstName} {userData?.LastName}",
-                        ImageUrl = $"{_baseUrl}/{userData?.ProfileImage}",
+                        ImageUrl = $"{_authServiceBaseUrl}/{userData?.ProfileImage}",
                         Position = userResume?.Position,
                         CreatedDate = application.CreatedDate
                     });
