@@ -1,5 +1,7 @@
-﻿using JobCompany.Business.Dtos.ExamDtos;
+﻿using System.Security.Claims;
+using JobCompany.Business.Dtos.ExamDtos;
 using JobCompany.Business.Exceptions.Common;
+using JobCompany.Business.Exceptions.UserExceptions;
 using JobCompany.Business.Services.QuestionServices;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
@@ -11,26 +13,49 @@ using SharedLibrary.Statics;
 
 namespace JobCompany.Business.Services.ExamServices
 {
-    public class ExamService(JobCompanyDbContext context, IFileService fileService, IQuestionService questionService, IHttpContextAccessor contextAccessor) : IExamService
+    public class ExamService(JobCompanyDbContext context, IFileService fileService, IQuestionService questionService, IHttpContextAccessor _contextAccessor) : IExamService
     {
         private readonly JobCompanyDbContext _context = context;
         private readonly IQuestionService _questionService = questionService;
+        private readonly Guid userGuid = Guid.Parse(_contextAccessor?.HttpContext?.User.FindFirst(ClaimTypes.Sid)?.Value ?? throw new UserIsNotLoggedInException());
         public async Task<Guid> CreateExamAsync(CreateExamDto dto)
         {
-            var exam = new Exam
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            
+            try
             {
-                IntroDescription = dto.IntroDescription,
-                LastDescription = dto.LastDescription,
-            };
-            await _context.Exams.AddAsync(exam);
-            var examId = exam.Id.ToString();
+                var exam = new Exam
+                {
+                    Title = dto.Title,
+                    IntroDescription = dto.IntroDescription,
+                    LastDescription = dto.LastDescription,
+                    Result = dto.Result,
+                    // CompanyId = 
+                    IsTemplate = dto.IsTemplate
+                };
 
-            var questions = await _questionService.CreateBulkQuestionAsync(dto.Questions, examId);
-            exam.Questions = questions;
+                await _context.Exams.AddAsync(exam);
 
-            await _context.SaveChangesAsync();
-            return exam.Id;
+                await _context.SaveChangesAsync();
+
+                var examId = exam.Id.ToString();
+
+                var questions = await _questionService.CreateBulkQuestionAsync(dto.Questions, examId);
+                exam.Questions = questions;
+
+                await _context.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+
+                return exam.Id;
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
+
 
         public async Task<GetExamByIdDto> GetExamByIdAsync(string examId, byte step)
         {

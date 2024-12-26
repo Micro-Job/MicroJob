@@ -4,6 +4,7 @@ using JobCompany.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JobCompany.DAL.Migrations
 {
     [DbContext(typeof(JobCompanyDbContext))]
-    partial class JobCompanyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241226090626_UpdatedQuestionExperienceTable")]
+    partial class UpdatedQuestionExperienceTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -280,11 +283,10 @@ namespace JobCompany.DAL.Migrations
 
             modelBuilder.Entity("JobCompany.Core.Entites.Question", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<Guid>("ExamId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("ExamId")
+                    b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Image")
@@ -301,9 +303,7 @@ namespace JobCompany.DAL.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("nvarchar(64)");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("ExamId");
+                    b.HasKey("ExamId");
 
                     b.ToTable("Questions");
                 });

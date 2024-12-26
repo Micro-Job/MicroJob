@@ -8,7 +8,8 @@ namespace JobCompany.Infrastructure.Configurations.ExamConfigurations
     {
         public void Configure(EntityTypeBuilder<Answer> builder)
         {
-            builder.HasKey(a => a.QuestionId);
+            builder.HasKey(a => a.Id);
+
             builder.Property(a => a.Text)
                    .HasMaxLength(1024);
 

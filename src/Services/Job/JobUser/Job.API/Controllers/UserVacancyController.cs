@@ -55,9 +55,9 @@ namespace Job.API.Controllers
 
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetOtherVacanciesByCompanyAsync(string companyId, string? currentVacancyId)
+        public async Task<IActionResult> GetOtherVacanciesByCompanyAsync(string companyId, string? currentVacancyId, int skip = 1, int take = 6)
         {
-            return Ok(await _vacancyService.GetOtherVacanciesByCompanyAsync(companyId, currentVacancyId));
+            return Ok(await _vacancyService.GetOtherVacanciesByCompanyAsync(companyId, currentVacancyId,skip,take));
         }
     }
 }

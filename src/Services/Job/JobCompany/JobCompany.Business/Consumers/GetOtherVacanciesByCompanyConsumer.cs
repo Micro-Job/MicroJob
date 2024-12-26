@@ -35,6 +35,8 @@ public class GetOtherVacanciesByCompanyConsumer : IConsumer<GetOtherVacanciesByC
             .OrderByDescending(x => x.StartDate)
             .Include(x => x.Company)
             .AsNoTracking()
+            .Skip(Math.Max(0, (context.Message.Skip - 1) * context.Message.Take))
+            .Take(context.Message.Take)
             .ToListAsync();
 
         if (vacancies is null || !vacancies.Any())

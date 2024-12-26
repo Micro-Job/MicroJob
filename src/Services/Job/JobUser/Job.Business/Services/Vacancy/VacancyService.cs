@@ -129,7 +129,7 @@ namespace Job.Business.Services.Vacancy
         /// <param name="companyId"></param>
         /// <param name="currentVacancyId"></param>
         /// <returns></returns>
-        public async Task<ICollection<AllVacanyDto>> GetOtherVacanciesByCompanyAsync(string companyId, string? currentVacancyId)
+        public async Task<ICollection<AllVacanyDto>> GetOtherVacanciesByCompanyAsync(string companyId, string? currentVacancyId, int skip = 1, int take = 6)
         {
             var guidCompanyId = Guid.Parse(companyId);
             Guid? guidVacancyId = string.IsNullOrEmpty(currentVacancyId) ? (Guid?)null : Guid.Parse(currentVacancyId);
@@ -144,7 +144,9 @@ namespace Job.Business.Services.Vacancy
             var request = new GetOtherVacanciesByCompanyRequest
             {
                 CompanyId = guidCompanyId,
-                CurrentVacancyId = guidVacancyId
+                CurrentVacancyId = guidVacancyId,
+                Skip = skip,
+                Take = take
             };
 
             var response = await _othVacRequest.GetResponse<GetOtherVacanciesByCompanyResponse>(request);
