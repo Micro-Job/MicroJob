@@ -81,7 +81,7 @@ namespace Job.Business.Services.Vacancy
         }
 
         /// <summary> Userin bütün save etdiyi vakansiyalarin get allu </summary>
-        public async Task<GetUserSavedVacanciesResponse> GetAllSavedVacancyAsync()
+        public async Task<List<VacancyResponse>> GetAllSavedVacancyAsync()
         {
             Guid userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value);
             var savedVacanciesId = await _context.SavedVacancies
@@ -91,7 +91,7 @@ namespace Job.Business.Services.Vacancy
 
             var datas = await GetUserSavedVacancyDataAsync(savedVacanciesId);
 
-            return datas;
+            return datas.Vacancies;
         }
 
         /// <summary> Bütün şirkətlərin get allu </summary>

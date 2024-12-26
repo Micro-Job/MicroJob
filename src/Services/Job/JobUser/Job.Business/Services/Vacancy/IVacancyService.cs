@@ -7,7 +7,7 @@ namespace Job.Business.Services.Vacancy
     public interface IVacancyService
     {
         Task ToggleSaveVacancyAsync(string vacancyId);
-        Task<GetUserSavedVacanciesResponse> GetAllSavedVacancyAsync();
+        Task<List<VacancyResponse>> GetAllSavedVacancyAsync();
         Task<ICollection<CompanyDto>> GetAllCompaniesAsync(string? searchTerm);
         Task<ICollection<AllVacanyDto>> GetOtherVacanciesByCompanyAsync(string companyId, string currentVacancyId);
         Task<GetVacancyInfoResponse> GetVacancyInfoAsync(Guid vacancyId);
