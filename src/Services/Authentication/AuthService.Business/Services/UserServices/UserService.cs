@@ -89,7 +89,6 @@ namespace AuthService.Business.Services.UserServices
                 LastName = user.LastName,
                 Email = user.Email,
                 MainPhoneNumber = user.MainPhoneNumber,
-                Image = user.Image,
                 JobStatus = user.JobStatus
             };
         }
