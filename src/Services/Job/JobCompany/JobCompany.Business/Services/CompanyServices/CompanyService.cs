@@ -35,9 +35,10 @@ namespace JobCompany.Business.Services.CompanyServices
             _configuration = configuration;
         }
 
-        public async Task UpdateCompanyAsync(CompanyUpdateDto dto, ICollection<CreateNumberDto>? numbersDto)
+        public async Task UpdateCompanyAsync(CompanyUpdateDto dto, ICollection<UpdateNumberDto>? numbersDto)
         {
             Guid userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid).Value);
+
             var company = await _context.Companies
                 .Include(c => c.CompanyNumbers)
                 .FirstOrDefaultAsync(x => x.UserId == userGuid)
@@ -55,26 +56,37 @@ namespace JobCompany.Business.Services.CompanyServices
 
             if (numbersDto is not null)
             {
-                foreach (var numberDto in numbersDto)
+                var numbersDtoDict = numbersDto.ToDictionary(n => n.Id, n => n.PhoneNumber);
+
+                var existingNumbers = company.CompanyNumbers.ToDictionary(n => n.Id.ToString(), n => n);
+
+                foreach (var kvp in existingNumbers)
                 {
-                    if (company.CompanyNumbers.Any(n => n.Number == numberDto.PhoneNumber))
+                    if (!numbersDtoDict.ContainsKey(kvp.Key))
                     {
-                        throw new IsAlreadyExistException<CompanyNumber>($"Number {numberDto.PhoneNumber} already exists.");
+                        company.CompanyNumbers.Remove(kvp.Value);
                     }
-
-                    var newNumber = new CompanyNumber
+                    else
                     {
-                        Number = numberDto.PhoneNumber,
-                        CompanyId = company.Id
-                    };
+                        kvp.Value.Number = numbersDtoDict[kvp.Key];
+                        numbersDtoDict.Remove(kvp.Key); 
+                    }
+                }
 
-                    company.CompanyNumbers.Add(newNumber);
+                foreach (var newNumber in numbersDtoDict)
+                {
+                    company.CompanyNumbers.Add(new CompanyNumber
+                    {
+                        Number = newNumber.Value,
+                        CompanyId = company.Id
+                    });
                 }
             }
 
             _context.Companies.Update(company);
             await _context.SaveChangesAsync();
         }
+
 
         public async Task<ICollection<CompanyListDto>> GetAllCompaniesAsync(string? searchTerm, int skip = 1, int take = 12)
         {
@@ -123,6 +135,7 @@ namespace JobCompany.Business.Services.CompanyServices
                 UserId = x.UserId.ToString(),
                 CompanyNumbers = x.CompanyNumbers.Select(cn => new CompanyNumberDto
                 {
+                    Id = cn.Id,
                     Number = cn.Number,
                 }).ToList()
             }).FirstOrDefaultAsync()

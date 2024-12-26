@@ -9,6 +9,6 @@ namespace JobCompany.Business.Dtos.CompanyDtos
     public record UpdateCompanyRequest
     {
         public CompanyUpdateDto Dto { get; set; }
-        public ICollection<CreateNumberDto>? NumbersDto { get; set; }
+        public ICollection<UpdateNumberDto>? numbersDto {get;set;}
     }
 }
