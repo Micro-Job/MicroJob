@@ -38,6 +38,9 @@ namespace Job.Business.Consumers
                 })
                 .FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>();
 
+            vacancy.Vacancy.ViewCount++;
+            await _context.SaveChangesAsync();
+
             var response = new GetVacancyInfoResponse
             {
                 Id = vacancy.Vacancy.Id,
