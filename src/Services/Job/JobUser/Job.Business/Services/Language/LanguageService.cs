@@ -7,64 +7,71 @@ namespace Job.Business.Services.Language
 {
     public class LanguageService(JobDbContext context) : ILanguageService
     {
-        readonly JobDbContext _context = context;
-
         public async Task<ICollection<Core.Entities.Language>> CreateBulkLanguageAsync(ICollection<LanguageCreateDto> dtos, Guid resumeId)
         {
-            var languagesToAdd = dtos.Select(dto => new Core.Entities.Language
+            var languagesToAdd = dtos.Select(dto => MapLanguageDtoToEntityForCreate(dto, resumeId)).ToList();
+
+            await context.Languages.AddRangeAsync(languagesToAdd);
+            await context.SaveChangesAsync();
+
+            return languagesToAdd;
+        }
+
+        public async Task CreateLanguageAsync(LanguageCreateDto dto, Guid resumeId, bool saveChanges = true)
+        {
+            var language = MapLanguageDtoToEntityForCreate(dto, resumeId);
+
+            await context.Languages.AddAsync(language);
+
+            if (saveChanges) await context.SaveChangesAsync();
+        }
+
+        public async Task<ICollection<Core.Entities.Language>> UpdateBulkLanguageAsync(ICollection<LanguageUpdateDto> dtos, Guid resumeId)
+        {
+            foreach (var dto in dtos)
             {
+                await UpdateLanguageAsync(dto, resumeId, false);
+            }
+
+            await context.SaveChangesAsync();
+
+            var updatedLanguages = dtos.Select(dto => new Core.Entities.Language
+            {
+                Id = Guid.Parse(dto.Id),
                 ResumeId = resumeId,
                 LanguageName = dto.LanguageName,
                 LanguageLevel = dto.LanguageLevel
             }).ToList();
 
-            await _context.Languages.AddRangeAsync(languagesToAdd);
-            await _context.SaveChangesAsync();
-            return languagesToAdd;
+            return updatedLanguages;
         }
 
-        public async Task CreateLanguageAsync(LanguageCreateDto dto)
+        public async Task UpdateLanguageAsync(LanguageUpdateDto dto, Guid resumeId, bool saveChanges = true)
         {
-            var language = new Core.Entities.Language
+            var parsedId = Guid.Parse(dto.Id);
+
+            var language = await context.Languages
+                .FirstOrDefaultAsync(x => x.Id == parsedId && x.ResumeId == resumeId)
+                ?? throw new NotFoundException<Core.Entities.Language>();
+
+            MapLanguageDtoToEntityForUpdate(language, dto);
+
+            if (saveChanges) await context.SaveChangesAsync();
+        }
+
+        
+        private static Core.Entities.Language MapLanguageDtoToEntityForCreate(LanguageCreateDto dto, Guid resumeId)
+        {
+            return new Core.Entities.Language
             {
+                ResumeId = resumeId,
                 LanguageName = dto.LanguageName,
                 LanguageLevel = dto.LanguageLevel
             };
-            await _context.Languages.AddAsync(language);
         }
 
-        public async Task<ICollection<Core.Entities.Language>> UpdateBulkLanguageAsync(ICollection<LanguageUpdateDto> dtos, Guid resumeId)
+        private static void MapLanguageDtoToEntityForUpdate(Core.Entities.Language language, LanguageUpdateDto dto)
         {
-            var languagesToUpdate = new List<Core.Entities.Language>();
-
-            foreach (var dto in dtos)
-            {
-                var langId = Guid.Parse(dto.Id);
-                var language = await _context.Languages
-                    .FirstOrDefaultAsync(l => l.ResumeId == resumeId && l.Id == langId);
-
-                if (language == null)
-                {
-                    throw new NotFoundException<Core.Entities.Language>();
-                }
-
-                language.LanguageName = dto.LanguageName;
-                language.LanguageLevel = dto.LanguageLevel;
-
-                languagesToUpdate.Add(language);
-            }
-
-            _context.Languages.UpdateRange(languagesToUpdate);
-            await _context.SaveChangesAsync();
-
-            return languagesToUpdate;
-        }
-
-
-        public async Task UpdateLanguageAsync(LanguageUpdateDto dto)
-        {
-            var language = await _context.Languages.FindAsync(dto.Id)
-                ?? throw new NotFoundException<Core.Entities.Language>();
             language.LanguageName = dto.LanguageName;
             language.LanguageLevel = dto.LanguageLevel;
         }

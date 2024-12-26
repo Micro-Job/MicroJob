@@ -81,7 +81,7 @@ namespace Job.Business.Services.Vacancy
         }
 
         /// <summary> Userin bütün save etdiyi vakansiyalarin get allu </summary>
-        public async Task<GetUserSavedVacanciesResponse> GetAllSavedVacancyAsync()
+        public async Task<List<VacancyResponse>> GetAllSavedVacancyAsync()
         {
             Guid userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value);
             var savedVacanciesId = await _context.SavedVacancies
@@ -91,7 +91,7 @@ namespace Job.Business.Services.Vacancy
 
             var datas = await GetUserSavedVacancyDataAsync(savedVacanciesId);
 
-            return datas;
+            return datas.Vacancies;
         }
 
         /// <summary> Bütün şirkətlərin get allu </summary>
@@ -164,6 +164,19 @@ namespace Job.Business.Services.Vacancy
         {
             var request = new GetVacancyInfoRequest { Id = vacancyId };
             var response = await _vacancyInforRequest.GetResponse<GetVacancyInfoResponse>(request);
+
+            var userGuid = _contextAccessor?.HttpContext?.User.FindFirst(ClaimTypes.Sid)?.Value;
+
+            var savedVacancies = userGuid == null
+                ? []
+                : await _context.SavedVacancies
+                    .Where(x => x.UserId == Guid.Parse(userGuid))
+                    .AsNoTracking()
+                    .Select(x => x.VacancyId)
+                    .ToListAsync();
+
+            response.Message.IsSaved = userGuid != null && savedVacancies.Contains(vacancyId);
+
             return response.Message;
         }
         /// <summary> Butun vakansiyalarin getirilmesi - search ve filter</summary>
