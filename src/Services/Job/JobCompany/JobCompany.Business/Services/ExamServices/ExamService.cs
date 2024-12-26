@@ -1,5 +1,7 @@
 ﻿using System.Security.Claims;
+using JobCompany.Business.Dtos.AnswerDtos;
 using JobCompany.Business.Dtos.ExamDtos;
+using JobCompany.Business.Dtos.QuestionDtos;
 using JobCompany.Business.Exceptions.Common;
 using JobCompany.Business.Exceptions.UserExceptions;
 using JobCompany.Business.Services.QuestionServices;
@@ -22,7 +24,7 @@ namespace JobCompany.Business.Services.ExamServices
         public async Task<Guid> CreateExamAsync(CreateExamDto dto)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
-            var company = await _context.Companies.FirstOrDefaultAsync(a => a.UserId == userGuid) 
+            var company = await _context.Companies.FirstOrDefaultAsync(a => a.UserId == userGuid)
             ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>();
             try
             {
@@ -62,27 +64,26 @@ namespace JobCompany.Business.Services.ExamServices
         public async Task<GetExamByIdDto> GetExamByIdAsync(string examId, byte step)
         {
             var examGuid = Guid.Parse(examId);
-            var exam = await _context.Exams.FirstOrDefaultAsync(e => e.Id == examGuid)
+            var exam = await _context.Exams.Include(e => e.Questions).ThenInclude(q => q.Answers).FirstOrDefaultAsync(e => e.Id == examGuid)
                 ?? throw new SharedLibrary.Exceptions.NotFoundException<Exam>();
             var examDto = new GetExamByIdDto
             {
-                IntroDescription = step == 1 ? exam.IntroDescription : null,
+                IntroDescription = exam.IntroDescription,
                 CurrentStep = step,
                 LastDescription = exam.LastDescription,
                 Result = exam.Result,
-                Questions = step == 2
-            ? exam.Questions.Select(q => new Question
-            {
-                Id = q.Id,
-                Title = q.Title,
-                QuestionType = q.QuestionType,
-                Answers = q.Answers?.Select(a => new Answer
+                Questions = exam.Questions.Select(q => new QuestionDetailDto
                 {
-                    Id = a.Id,
-                    Text = a.Text
+                    Title = q.Title,
+                    Image = q.Image,
+                    QuestionType = q.QuestionType,
+                    IsRequired = q.IsRequired,
+                    Answers = q.Answers.Select(a => new AnswerDetailDto
+                    {
+                        Text = a.Text,
+                        IsCorrect = a.IsCorrect,
+                    }).ToList()
                 }).ToList()
-            }).ToList()
-            : null
             };
             return examDto;
         }
