@@ -8,6 +8,7 @@ using JobCompany.DAL.Contexts;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Dtos.FileDtos;
+using SharedLibrary.Exceptions;
 using SharedLibrary.ExternalServices.FileService;
 using SharedLibrary.Statics;
 
@@ -21,7 +22,8 @@ namespace JobCompany.Business.Services.ExamServices
         public async Task<Guid> CreateExamAsync(CreateExamDto dto)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
-            
+            var company = await _context.Companies.FirstOrDefaultAsync(a => a.UserId == userGuid) 
+            ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>();
             try
             {
                 var exam = new Exam
@@ -30,7 +32,7 @@ namespace JobCompany.Business.Services.ExamServices
                     IntroDescription = dto.IntroDescription,
                     LastDescription = dto.LastDescription,
                     Result = dto.Result,
-                    // CompanyId = 
+                    CompanyId = company.Id,
                     IsTemplate = dto.IsTemplate
                 };
 
@@ -61,7 +63,7 @@ namespace JobCompany.Business.Services.ExamServices
         {
             var examGuid = Guid.Parse(examId);
             var exam = await _context.Exams.FirstOrDefaultAsync(e => e.Id == examGuid)
-                ?? throw new NotFoundException<Exam>();
+                ?? throw new SharedLibrary.Exceptions.NotFoundException<Exam>();
             var examDto = new GetExamByIdDto
             {
                 IntroDescription = step == 1 ? exam.IntroDescription : null,
