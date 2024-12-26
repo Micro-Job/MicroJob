@@ -52,6 +52,15 @@ namespace Job.Business.BackgroundServices
 
                         e.Consumer(() => consumer);
                     });
+
+                    cfg.ReceiveEndpoint("user-registered-queue", e =>
+                    {
+                        using var scope = _serviceProvider.CreateScope();
+                        var dbContext = scope.ServiceProvider.GetRequiredService<JobDbContext>();
+                        var consumer = new UserRegisteredConsumer(dbContext);
+
+                        e.Consumer(() => consumer);
+                    });
                 });
 
                 await busControl.StartAsync(stoppingToken);

@@ -25,15 +25,15 @@ namespace JobCompany.Business.Services.QuestionServices
         /// <summary> Question yaradılması tekli method + answers </summary>
         public async Task CreateQuestionAsync(QuestionCreateDto dto, CreateListAnswersDto dtos)
         {
-            FileDto fileResult = dto.Image != null
-                ? await _fileService.UploadAsync(FilePaths.document, dto.Image)
-                : new FileDto();
+            // FileDto fileResult = dto.Image != null
+            //     ? await _fileService.UploadAsync(FilePaths.document, dto.Image)
+            //     : new FileDto();
 
 
             var question = new Question
             {
                 Title = dto.Title,
-                Image = dto.Image != null ? $"{fileResult.FilePath}/{fileResult.FileName}" : null,
+                // Image = dto.Image != null ? $"{fileResult.FilePath}/{fileResult.FileName}" : null,
                 QuestionType = dto.QuestionType,
                 IsRequired = dto.IsRequired,
             };
@@ -54,15 +54,15 @@ namespace JobCompany.Business.Services.QuestionServices
 
             var tasks = dtos.Select(async dto =>
             {
-                FileDto fileResult = dto.Image != null
-                    ? await _fileService.UploadAsync(FilePaths.document, dto.Image)
-                    : new FileDto();
+                // FileDto fileResult = dto.Image != null
+                //     ? await _fileService.UploadAsync(FilePaths.document, dto.Image)
+                //     : new FileDto();
 
                 var question = new Question
                 {
                     ExamId = guidExam,
                     Title = dto.Title,
-                    Image = dto.Image != null ? $"{fileResult.FilePath}/{fileResult.FileName}" : null,
+                    // Image = dto.Image != null ? $"{fileResult.FilePath}/{fileResult.FileName}" : null,
                     QuestionType = dto.QuestionType,
                     IsRequired = dto.IsRequired
                 };

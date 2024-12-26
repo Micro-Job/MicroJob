@@ -67,11 +67,11 @@ namespace Job.API
 
             builder.Services.AddMassTransit(x =>
             {
+                // Add consumers for each queue
                 x.AddConsumer<VacancyCreatedConsumer>();
-
-                x.AddConsumer<UpdateUserApplicationStatusConsumer>(); 
-
+                x.AddConsumer<UpdateUserApplicationStatusConsumer>();
                 x.AddConsumer<GetResumeDataConsumer>();
+                x.AddConsumer<UserRegisteredConsumer>();  
 
                 x.UsingRabbitMq((context, cfg) =>
                 {
@@ -84,12 +84,17 @@ namespace Job.API
 
                     cfg.ReceiveEndpoint("user-notification-queue", e =>
                     {
-                        e.ConfigureConsumer<UpdateUserApplicationStatusConsumer>(context); 
+                        e.ConfigureConsumer<UpdateUserApplicationStatusConsumer>(context);
                     });
 
-                    cfg.ReceiveEndpoint("get-resume-data-queue" , e =>
+                    cfg.ReceiveEndpoint("get-resume-data-queue", e =>
                     {
                         e.ConfigureConsumer<GetResumeDataConsumer>(context);
+                    });
+
+                    cfg.ReceiveEndpoint("user-registered-queue", e =>
+                    {
+                        e.ConfigureConsumer<UserRegisteredConsumer>(context); 
                     });
                 });
             });
