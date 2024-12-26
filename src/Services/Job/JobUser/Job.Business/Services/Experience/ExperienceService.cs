@@ -26,20 +26,23 @@ public class ExperienceService(JobDbContext context) : IExperienceService
         if (saveChanges) await context.SaveChangesAsync();
     }
 
-
     public async Task<ICollection<Core.Entities.Experience>> UpdateBulkExperienceAsync(ICollection<ExperienceUpdateDto> dtos, Guid resumeId)
     {
+        var experiencesToUpdate = new List<Core.Entities.Experience>();
+
         foreach (var dto in dtos)
         {
-            await UpdateExperienceAsync(dto, resumeId, false);
+            var experience = await UpdateExperienceAsync(dto, resumeId, saveChanges: false);
+
+            experiencesToUpdate.Add(experience);
         }
 
         await context.SaveChangesAsync();
 
-        return dtos.Select(dto => new Core.Entities.Experience { Id = Guid.Parse(dto.Id) }).ToList();
+        return experiencesToUpdate; 
     }
 
-    public async Task UpdateExperienceAsync(ExperienceUpdateDto dto, Guid resumeId, bool saveChanges = true)
+    public async Task<Core.Entities.Experience> UpdateExperienceAsync(ExperienceUpdateDto dto, Guid resumeId, bool saveChanges = true)
     {
         var experience = await context.Experiences
             .FirstOrDefaultAsync(e => e.ResumeId == resumeId && e.OrganizationName == dto.OrganizationName)
@@ -48,6 +51,8 @@ public class ExperienceService(JobDbContext context) : IExperienceService
         MapExperienceDtoToEntityForUpdate(experience, dto);
 
         if (saveChanges) await context.SaveChangesAsync();
+
+        return experience;
     }
 
 

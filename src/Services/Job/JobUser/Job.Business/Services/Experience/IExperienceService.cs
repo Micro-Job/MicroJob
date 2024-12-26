@@ -6,7 +6,7 @@ namespace Job.Business.Services.Experience
     {
         Task CreateExperienceAsync(ExperienceCreateDto dto, Guid resumeId, bool saveChanges = true);
         Task<ICollection<Core.Entities.Experience>> CreateBulkExperienceAsync(ICollection<ExperienceCreateDto> dtos,Guid resumeId);
-        Task UpdateExperienceAsync(ExperienceUpdateDto dto, Guid resumeId, bool saveChanges = true);
+        Task<Core.Entities.Experience> UpdateExperienceAsync(ExperienceUpdateDto dto, Guid resumeId, bool saveChanges = true);
         Task<ICollection<Core.Entities.Experience>> UpdateBulkExperienceAsync(ICollection<ExperienceUpdateDto> dtos,Guid resumeId);
     }
 }
