@@ -7,6 +7,7 @@ namespace JobCompany.Business.Dtos.VacancyDtos
         public Guid Id { get; set; }
         public string Title { get; set; }
         public string? CompanyLogo { get; set; }
+        public string? CompanyName { get; set; }
         public DateTime StartDate { get; set; }
         public string? Location { get; set; }
         public int? ViewCount { get; set; }

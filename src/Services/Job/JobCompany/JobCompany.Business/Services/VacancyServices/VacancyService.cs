@@ -224,7 +224,7 @@ namespace JobCompany.Business.Services.VacancyServices
             var vacancyGuid = Guid.Parse(id);
 
             var vacancyEntity = await _context.Vacancies
-                .AsNoTracking() 
+                .AsNoTracking()
                 .Where(x => x.Id == vacancyGuid)
                 .Select(x => new
                 {
@@ -335,7 +335,8 @@ namespace JobCompany.Business.Services.VacancyServices
                 {
                     Id = v.Id,
                     Title = v.Title,
-                    CompanyLogo = v.CompanyLogo,
+                    CompanyLogo = $"{_authServiceBaseUrl}/{v.CompanyLogo}",
+                    CompanyName = v.CompanyName,
                     StartDate = v.StartDate,
                     Location = v.Location,
                     ViewCount = v.ViewCount,

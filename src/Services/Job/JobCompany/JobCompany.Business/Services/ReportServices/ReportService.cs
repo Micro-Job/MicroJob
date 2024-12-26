@@ -139,28 +139,29 @@ namespace JobCompany.Business.Services.ReportServices
                 .ToListAsync();
 
             IEnumerable<IGrouping<string, dynamic>> groupedApplications;
-
             switch (periodTime)
             {
-                case "1":
+                case "1": 
                     groupedApplications = applications
-                        .GroupBy(a => $"{a.CreatedDate.Year}-{GetWeekNumber(a.CreatedDate)}")
+                        .GroupBy(a => $"{a.CreatedDate.Year} - Week {GetWeekNumber(a.CreatedDate)}")
                         .OrderByDescending(g => g.Key);
                     break;
-                case "2":
+
+                case "2": 
                     groupedApplications = applications
-                        .GroupBy(a => a.CreatedDate.ToString("yyyy-MM"))
+                        .GroupBy(a => $"{a.CreatedDate.ToString("MMMM yyyy")}") 
                         .OrderByDescending(g => g.Key);
                     break;
+
                 case "3":
                     groupedApplications = applications
-                        .GroupBy(a => a.CreatedDate.ToString("yyyy"))
+                        .GroupBy(a => a.CreatedDate.ToString("yyyy")) 
                         .OrderByDescending(g => g.Key);
                     break;
+
                 default:
                     throw new ArgumentException("Invalid period time");
             }
-
             var currentPeriodApplications = groupedApplications.FirstOrDefault();
             var previousPeriodApplications = groupedApplications.Skip(1).FirstOrDefault();
 
@@ -194,7 +195,7 @@ namespace JobCompany.Business.Services.ReportServices
 
             var vacancyStatisticsDto = new ApplicationStatisticsDto
             {
-                TotalApplications = applicationDetails.Count,
+                TotalApplications = applications.Count,
                 PercentageChange = new PercentageChangeDto
                 {
                     Value = percentageChange,
