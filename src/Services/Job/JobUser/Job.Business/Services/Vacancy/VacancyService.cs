@@ -151,6 +151,21 @@ namespace Job.Business.Services.Vacancy
 
             var response = await _othVacRequest.GetResponse<GetOtherVacanciesByCompanyResponse>(request);
 
+            var userGuid = _contextAccessor?.HttpContext?.User.FindFirst(ClaimTypes.Sid)?.Value;
+
+            var savedVacancies = userGuid == null
+                ? []
+                : await _context.SavedVacancies
+                    .Where(x => x.UserId == Guid.Parse(userGuid))
+                    .AsNoTracking()
+                    .Select(x => x.VacancyId)
+                    .ToListAsync();
+
+            foreach (var vacancy in response.Message.Vacancies)
+            {
+                vacancy.IsSaved = userGuid != null && savedVacancies.Contains(Guid.Parse(vacancy.VacancyId));
+            }
+
             return response.Message.Vacancies ?? new List<AllVacanyDto>();
         }
 
