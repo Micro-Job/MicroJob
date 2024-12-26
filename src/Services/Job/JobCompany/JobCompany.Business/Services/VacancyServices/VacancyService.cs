@@ -239,7 +239,7 @@ namespace JobCompany.Business.Services.VacancyServices
                 .FirstOrDefaultAsync()
                 ?? throw new NotFoundException<Vacancy>();
 
-            vacancyEntity.Vacancy.ViewCount++;
+            //vacancyEntity.Vacancy.ViewCount++;
 
             var vacancy = new VacancyGetByIdDto
             {
