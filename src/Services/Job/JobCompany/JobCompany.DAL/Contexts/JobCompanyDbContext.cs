@@ -25,6 +25,7 @@ namespace JobCompany.DAL.Contexts
         public DbSet<Exam> Exams { get; set; }
         public DbSet<Answer> Answers { get; set; }
         public DbSet<Skill> Skills { get; set; }
+        public DbSet<ExamQuestion> ExamQuestions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

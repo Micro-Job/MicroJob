@@ -19,6 +19,8 @@ namespace Job.DAL.Contexts
         public DbSet<Skill> Skills { get; set; }
         public DbSet<ResumeSkill> ResumeSkills { get; set; }
         public DbSet<Notification> Notifications { get; set; }
+        public DbSet<UserAnswer> UserAnswers { get; set; }
+        public DbSet<UserExam> UserExams { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
