@@ -57,7 +57,7 @@ namespace Job.Business.Services.Vacancy
         /// <summary> Userin vakansiya save etme toggle metodu </summary>
         public async Task ToggleSaveVacancyAsync(string vacancyId)
         {
-            Guid userGuid = GetUserId();
+            Guid? userGuid = GetUserId();
 
             Guid vacancyGuid = Guid.Parse(vacancyId);
 
@@ -83,7 +83,7 @@ namespace Job.Business.Services.Vacancy
         /// <summary> Userin bütün save etdiyi vakansiyalarin get allu </summary>
         public async Task<List<VacancyResponse>> GetAllSavedVacancyAsync()
         {
-            Guid userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value);
+            Guid? userGuid = GetUserId();
             var savedVacanciesId = await _context.SavedVacancies
                 .Where(x => x.UserId == userGuid)
                 .Select(x => x.VacancyId)
@@ -132,14 +132,12 @@ namespace Job.Business.Services.Vacancy
         public async Task<ICollection<AllVacanyDto>> GetOtherVacanciesByCompanyAsync(string companyId, string? currentVacancyId, int skip = 1, int take = 6)
         {
             var guidCompanyId = Guid.Parse(companyId);
-            Guid? guidVacancyId = string.IsNullOrEmpty(currentVacancyId) ? (Guid?)null : Guid.Parse(currentVacancyId);
+            Guid? guidVacancyId = string.IsNullOrEmpty(currentVacancyId) ? null : Guid.Parse(currentVacancyId);
 
             await EnsureCompanyExistsAsync(guidCompanyId);
 
             if (guidVacancyId.HasValue)
-            {
                 await EnsureVacancyExistsAsync(guidVacancyId.Value);
-            }
 
             var request = new GetOtherVacanciesByCompanyRequest
             {
@@ -151,22 +149,15 @@ namespace Job.Business.Services.Vacancy
 
             var response = await _othVacRequest.GetResponse<GetOtherVacanciesByCompanyResponse>(request);
 
-            var userGuid = _contextAccessor?.HttpContext?.User.FindFirst(ClaimTypes.Sid)?.Value;
+            var userGuid = GetUserId();
 
-            var savedVacancies = userGuid == null
-                ? []
-                : await _context.SavedVacancies
-                    .Where(x => x.UserId == Guid.Parse(userGuid))
-                    .AsNoTracking()
-                    .Select(x => x.VacancyId)
-                    .ToListAsync();
-
-            foreach (var vacancy in response.Message.Vacancies)
+            if (userGuid.HasValue)
             {
-                vacancy.IsSaved = userGuid != null && savedVacancies.Contains(Guid.Parse(vacancy.VacancyId));
+                var savedVacancies = await GetSavedVacanciesAsync(userGuid.Value);
+                MarkSavedVacancies(response.Message.Vacancies, savedVacancies);
             }
 
-            return response.Message.Vacancies ?? new List<AllVacanyDto>();
+            return response.Message.Vacancies;
         }
 
 
@@ -180,12 +171,12 @@ namespace Job.Business.Services.Vacancy
             var request = new GetVacancyInfoRequest { Id = vacancyId };
             var response = await _vacancyInforRequest.GetResponse<GetVacancyInfoResponse>(request);
 
-            var userGuid = _contextAccessor?.HttpContext?.User.FindFirst(ClaimTypes.Sid)?.Value;
+            var userGuid = GetUserId();
 
             var savedVacancies = userGuid == null
                 ? []
                 : await _context.SavedVacancies
-                    .Where(x => x.UserId == Guid.Parse(userGuid))
+                    .Where(x => x.UserId == userGuid)
                     .AsNoTracking()
                     .Select(x => x.VacancyId)
                     .ToListAsync();
@@ -210,10 +201,10 @@ namespace Job.Business.Services.Vacancy
 
             var response = await _vacClient.GetResponse<GetAllVacanciesResponse>(request);
             var vacancies = response.Message.Vacancies.AsQueryable();
-            var userGuid = _contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value;
+            var userGuid = GetUserId();
 
             var savedVacancies = userGuid == null ? new List<Guid>() : await _context.SavedVacancies
-                .Where(x => x.UserId == Guid.Parse(userGuid))
+                .Where(x => x.UserId == userGuid)
                 .Select(x => x.VacancyId)
                 .ToListAsync();
 
@@ -244,13 +235,13 @@ namespace Job.Business.Services.Vacancy
         /// <summary> Oxsar vakansiylarin getirilmesi category'e gore </summary>
         public async Task<ICollection<SimilarVacancyDto>> SimilarVacanciesAsync(string vacancyId)
         {
-            var userGuid = _contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value;
+            var userGuid = GetUserId();
             var guidVacancyId = Guid.Parse(vacancyId);
 
             await EnsureVacancyExistsAsync(guidVacancyId);
 
             var savedVacancies = userGuid == null ? new List<Guid>() : await _context.SavedVacancies
-                .Where(x => x.UserId == Guid.Parse(userGuid))
+                .Where(x => x.UserId == userGuid)
                 .Select(x => x.VacancyId)
                 .ToListAsync();
 
@@ -309,15 +300,30 @@ namespace Job.Business.Services.Vacancy
             if (!response.Message.IsExist) throw new EntityNotFoundException("Company");
         }
 
-        private Guid GetUserId()
+        private Guid? GetUserId()
         {
             var userIdClaim = _contextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Sid)?.Value;
 
-            if (string.IsNullOrEmpty(userIdClaim))
-                throw new UnauthorizedAccessException("İstifadəçi giriş etməyib");
+            if (string.IsNullOrEmpty(userIdClaim)) return null;
 
             return Guid.Parse(userIdClaim);
         }
 
+        private static void MarkSavedVacancies(ICollection<AllVacanyDto> vacancies, ICollection<Guid> savedVacancies)
+        {
+            foreach (var vacancy in vacancies)
+            {
+                vacancy.IsSaved = savedVacancies.Contains(Guid.Parse(vacancy.VacancyId));
+            }
+        }
+
+        private async Task<ICollection<Guid>> GetSavedVacanciesAsync(Guid userId)
+        {
+            return await _context.SavedVacancies
+                .Where(x => x.UserId == userId)
+                .AsNoTracking()
+                .Select(x => x.VacancyId)
+                .ToListAsync();
+        }
     }
 }
