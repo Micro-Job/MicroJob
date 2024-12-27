@@ -40,8 +40,18 @@ namespace JobCompany.Business.Services.ExamServices
 
                 var examId = exam.Id.ToString();
 
-                // var questions = await _questionService.CreateBulkQuestionAsync(dto.Questions, examId);
+                var questions = await _questionService.CreateBulkQuestionAsync(dto.Questions, examId);
 
+                foreach (var question in questions)
+                {
+                    var examQuestion = new ExamQuestion
+                    {
+                        ExamId = exam.Id,
+                        QuestionId = question.Id
+                    };
+
+                    await _context.ExamQuestions.AddAsync(examQuestion);
+                }
 
                 await _context.SaveChangesAsync();
 
