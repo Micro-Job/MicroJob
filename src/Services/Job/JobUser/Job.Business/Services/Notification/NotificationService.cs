@@ -63,6 +63,7 @@ namespace Job.Business.Services.Notification
 
                 return new NotificationListDto
                 {
+                    Id = n.Id,
                     ReceiverId = n.ReceiverId,
                     SenderId = n.SenderId,
                     CompanyName = company?.CompanyName,

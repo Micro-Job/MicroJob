@@ -60,7 +60,7 @@ namespace JobCompany.Business.Services.QuestionServices
 
                 var question = new Question
                 {
-                    ExamId = guidExam,
+                    // ExamId = guidExam,
                     Title = dto.Title,
                     // Image = dto.Image != null ? $"{fileResult.FilePath}/{fileResult.FileName}" : null,
                     QuestionType = dto.QuestionType,

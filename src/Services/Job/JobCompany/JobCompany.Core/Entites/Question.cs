@@ -9,8 +9,7 @@ namespace JobCompany.Core.Entites
         public string? Image { get; set; }
         public QuestionType QuestionType { get; set; }
         public bool IsRequired { get; set; }
-        public Exam Exam { get; set; }
-        public Guid ExamId { get; set; }
         public ICollection<Answer>? Answers { get; set; }
+        public ICollection<ExamQuestion> ExamQuestions { get; set; }
     }
 }

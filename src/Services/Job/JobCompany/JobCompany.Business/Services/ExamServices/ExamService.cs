@@ -2,17 +2,13 @@
 using JobCompany.Business.Dtos.AnswerDtos;
 using JobCompany.Business.Dtos.ExamDtos;
 using JobCompany.Business.Dtos.QuestionDtos;
-using JobCompany.Business.Exceptions.Common;
 using JobCompany.Business.Exceptions.UserExceptions;
 using JobCompany.Business.Services.QuestionServices;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using SharedLibrary.Dtos.FileDtos;
-using SharedLibrary.Exceptions;
 using SharedLibrary.ExternalServices.FileService;
-using SharedLibrary.Statics;
 
 namespace JobCompany.Business.Services.ExamServices
 {
@@ -45,7 +41,7 @@ namespace JobCompany.Business.Services.ExamServices
                 var examId = exam.Id.ToString();
 
                 var questions = await _questionService.CreateBulkQuestionAsync(dto.Questions, examId);
-                exam.Questions = questions;
+                // exam.Questions = questions;
 
                 await _context.SaveChangesAsync();
 
@@ -64,27 +60,37 @@ namespace JobCompany.Business.Services.ExamServices
         public async Task<GetExamByIdDto> GetExamByIdAsync(string examId, byte step)
         {
             var examGuid = Guid.Parse(examId);
-            var exam = await _context.Exams.Include(e => e.Questions).ThenInclude(q => q.Answers).FirstOrDefaultAsync(e => e.Id == examGuid)
+
+            var exam = await _context.Exams
+                // .Include(e => e.Questions)
+                // .ThenInclude(q => q.Answers)
+                .FirstOrDefaultAsync(e => e.Id == examGuid)
                 ?? throw new SharedLibrary.Exceptions.NotFoundException<Exam>();
+
+            // var orderedQuestions = exam.Questions.OrderBy(q => q.Id).ToList();
+
+            // var stepQuestion = orderedQuestions.Skip(step - 1).Take(1).ToList();
+
             var examDto = new GetExamByIdDto
             {
                 IntroDescription = exam.IntroDescription,
                 CurrentStep = step,
                 LastDescription = exam.LastDescription,
                 Result = exam.Result,
-                Questions = exam.Questions.Select(q => new QuestionDetailDto
-                {
-                    Title = q.Title,
-                    Image = q.Image,
-                    QuestionType = q.QuestionType,
-                    IsRequired = q.IsRequired,
-                    Answers = q.Answers.Select(a => new AnswerDetailDto
-                    {
-                        Text = a.Text,
-                        IsCorrect = a.IsCorrect,
-                    }).ToList()
-                }).ToList()
+                // Questions = stepQuestion.Select(q => new QuestionDetailDto
+                // {
+                //     Title = q.Title,
+                //     Image = q.Image,
+                //     QuestionType = q.QuestionType,
+                //     IsRequired = q.IsRequired,
+                //     Answers = q.Answers.Select(a => new AnswerDetailDto
+                //     {
+                //         Text = a.Text,
+                //         IsCorrect = a.IsCorrect,
+                //     }).ToList()
+                // }).ToList()
             };
+
             return examDto;
         }
     }

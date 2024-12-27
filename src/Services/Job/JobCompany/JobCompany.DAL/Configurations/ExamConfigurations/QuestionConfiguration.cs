@@ -20,15 +20,14 @@ namespace JobCompany.Infrastructure.Configurations.ExamConfigurations
                      builder.Property(q => q.IsRequired)
                             .IsRequired();
 
-                     builder.HasOne(q => q.Exam)
-                            .WithMany(e => e.Questions)
-                            .HasForeignKey(q => q.ExamId)
-                            .OnDelete(DeleteBehavior.Restrict);
-
                      builder.HasMany(q => q.Answers)
                             .WithOne(a => a.Question)
                             .HasForeignKey(a => a.QuestionId)
                             .OnDelete(DeleteBehavior.Cascade);
+                     builder.HasMany(e => e.ExamQuestions)
+                            .WithOne(eq => eq.Question)
+                            .HasForeignKey(eq => eq.QuestionId)
+                            .OnDelete(DeleteBehavior.Cascade); 
               }
        }
 }
