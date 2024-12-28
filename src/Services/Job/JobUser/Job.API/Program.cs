@@ -71,7 +71,8 @@ namespace Job.API
                 x.AddConsumer<VacancyCreatedConsumer>();
                 x.AddConsumer<UpdateUserApplicationStatusConsumer>();
                 x.AddConsumer<GetResumeDataConsumer>();
-                x.AddConsumer<UserRegisteredConsumer>();  
+                x.AddConsumer<UserRegisteredConsumer>();
+                x.AddConsumer<VacancyUpdatedConsumer>();
 
                 x.UsingRabbitMq((context, cfg) =>
                 {
@@ -94,7 +95,12 @@ namespace Job.API
 
                     cfg.ReceiveEndpoint("user-registered-queue", e =>
                     {
-                        e.ConfigureConsumer<UserRegisteredConsumer>(context); 
+                        e.ConfigureConsumer<UserRegisteredConsumer>(context);
+                    });
+
+                    cfg.ReceiveEndpoint("vacancy-updated-queue", e =>
+                    {
+                        e.ConfigureConsumer<VacancyUpdatedConsumer>(context);
                     });
                 });
             });

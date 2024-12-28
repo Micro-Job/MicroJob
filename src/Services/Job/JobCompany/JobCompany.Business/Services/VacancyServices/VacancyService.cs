@@ -11,6 +11,7 @@ using MassTransit.Initializers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Shared.Events;
 using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.Events;
 using SharedLibrary.Exceptions;
@@ -74,6 +75,7 @@ namespace JobCompany.Business.Services.VacancyServices
                 CityId = vacancyDto.CityId,
                 Email = vacancyDto.Email,
                 WorkType = vacancyDto.WorkType,
+                WorkStyle = vacancyDto.WorkStyle,
                 MainSalary = vacancyDto.MainSalary,
                 MaxSalary = vacancyDto.MaxSalary,
                 Requirement = vacancyDto.Requirement,
@@ -162,8 +164,10 @@ namespace JobCompany.Business.Services.VacancyServices
                 StartDate = x.StartDate,
                 Location = x.Location,
                 CompanyLogo = $"{_authServiceBaseUrl}/{x.Company.CompanyLogo}",
+                CompanyName = x.CompanyName,
                 ViewCount = x.ViewCount,
                 WorkType = x.WorkType,
+                WorkStyle = x.WorkStyle,
                 MainSalary = x.MainSalary,
                 MaxSalary = x.MaxSalary,
                 IsActive = x.IsActive,
@@ -238,7 +242,7 @@ namespace JobCompany.Business.Services.VacancyServices
                     CompanyLogo = $"{_authServiceBaseUrl}/{x.Company.CompanyLogo}",
                     StartDate = x.StartDate,
                     Location = x.Location,
-                    ViewCount = x.ViewCount, 
+                    ViewCount = x.ViewCount,
                     WorkType = x.WorkType,
                     MainSalary = x.MainSalary,
                     MaxSalary = x.MaxSalary,
@@ -269,10 +273,7 @@ namespace JobCompany.Business.Services.VacancyServices
             return vacancyDto;
         }
 
-        //TODO : burada update edilen vakansiyanin menim companyimin vakansiyasidir mi bu yoxlanis olmalidir.
-        //Burada if icindeki hisse islemeyecek existingVacancy.VacancyNumbers.Cunki burada include yoxdur
-        //Elave olaraq burada update olundugu zaman muraciet edenlere notification getmelidir
-        /// <summary> vacancynin update olunması </summary>
+        /// <summary> vacancynin update olunması usere notification </summary>
         public async Task UpdateVacancyAsync(UpdateVacancyDto vacancyDto, ICollection<UpdateNumberDto>? numberDtos)
         {
             var vacancyGuid = Guid.Parse(vacancyDto.Id);
@@ -289,6 +290,7 @@ namespace JobCompany.Business.Services.VacancyServices
             existingVacancy.CityId = Guid.Parse(vacancyDto.CityId ?? throw new Exception());
             existingVacancy.Email = vacancyDto.Email;
             existingVacancy.WorkType = vacancyDto.WorkType;
+            existingVacancy.WorkStyle = vacancyDto.WorkStyle;
             existingVacancy.MainSalary = vacancyDto.MainSalary;
             existingVacancy.MaxSalary = vacancyDto.MaxSalary;
             existingVacancy.Requirement = vacancyDto.Requirement;
@@ -312,8 +314,20 @@ namespace JobCompany.Business.Services.VacancyServices
                     }
                 }
             }
-            _context.Vacancies.Update(existingVacancy);
             await _context.SaveChangesAsync();
+
+            var userIds = await _context.Applications
+                    .Where(a => a.VacancyId == vacancyGuid)
+                    .Select(a => a.UserId)
+                    .ToListAsync();
+
+            await _publishEndpoint.Publish(new VacancyUpdatedEvent
+            {
+                InformationId = vacancyGuid,
+                SenderId = _userGuid,
+                UserIds = userIds,
+                Content = $"Vakansiya yeniləndi: {existingVacancy.Title}"
+            });
         }
 
         /// <summary> Şirkət profilində vakansiya axtarışı vakansiya filterlere görə </summary>
@@ -335,6 +349,7 @@ namespace JobCompany.Business.Services.VacancyServices
                     ViewCount = v.ViewCount,
                     IsActive = v.IsActive,
                     WorkType = v.WorkType,
+                    WorkStyle = v.WorkStyle,
                     MainSalary = v.MainSalary,
                     MaxSalary = v.MaxSalary,
                 })

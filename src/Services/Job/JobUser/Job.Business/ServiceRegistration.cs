@@ -46,6 +46,7 @@ namespace Job.Business
                 x.AddConsumer<GetResumeDataConsumer>();
                 x.AddConsumer<UpdateUserApplicationStatusConsumer>();
                 x.AddConsumer<VacancyCreatedConsumer>();
+                x.AddConsumer<VacancyUpdatedConsumer>();
 
                 x.SetKebabCaseEndpointNameFormatter();
 

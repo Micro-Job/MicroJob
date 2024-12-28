@@ -29,7 +29,7 @@ namespace JobCompany.Business.Dtos.VacancyDtos
         public FamilySituation Family { get; set; }
         public Citizenship Citizenship { get; set; }
         public Guid CategoryId { get; set; }
-        public string? TemplateId { get; set; }
+        // public string? ExamId { get; set; }
         public CreateExamDto? Exam { get; set; }
         public List<Guid>? SkillIds { get; set; }
     }

@@ -61,6 +61,15 @@ namespace Job.Business.BackgroundServices
 
                         e.Consumer(() => consumer);
                     });
+
+                    cfg.ReceiveEndpoint("vacancy-updated-queue", e =>
+                    {
+                        using var scope = _serviceProvider.CreateScope();
+                        var dbContext = scope.ServiceProvider.GetRequiredService<JobDbContext>();
+                        var consumer = new VacancyUpdatedConsumer(dbContext);
+
+                        e.Consumer(() => consumer);
+                    });
                 });
 
                 await busControl.StartAsync(stoppingToken);
