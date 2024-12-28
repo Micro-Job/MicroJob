@@ -45,7 +45,7 @@ namespace JobCompany.Business.Services.StatusServices
         {
             var statusGuid = Guid.Parse(statusId);
 
-            var existStatus = await _context.Statuses.FirstOrDefaultAsync(x => x.Id == statusGuid)
+            var existStatus = await _context.Statuses.FirstOrDefaultAsync(x => x.Id == statusGuid && x.Company.UserId == userGuid)
                 ?? throw new SharedLibrary.Exceptions.NotFoundException<Status>();
 
             if (existStatus.IsDefault == true) throw new StatusPermissionException();

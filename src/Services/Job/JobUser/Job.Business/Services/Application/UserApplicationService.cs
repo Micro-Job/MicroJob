@@ -2,6 +2,7 @@ using Job.Business.Exceptions.Common;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Shared.Events;
+using SharedLibrary.Dtos.ApplicationDtos;
 using SharedLibrary.Requests;
 using SharedLibrary.Responses;
 using System.Security.Claims;
@@ -29,13 +30,13 @@ namespace Job.Business.Services.Application
         }
 
         /// <summary> İstifadəçinin bütün müraciətlərini gətirir </summary>
-        public async Task<GetUserApplicationsResponse> GetUserApplicationsAsync(int skip, int take)
+        public async Task<ICollection<ApplicationDto>> GetUserApplicationsAsync(int skip, int take)
         {
             GetUserApplicationsRequest request = new() { UserId = userGuid, Skip = skip, Take = take };
 
             var response = await _userApplicationRequest.GetResponse<GetUserApplicationsResponse>(request);
 
-            return response.Message;
+            return response.Message.UserApplications;
         }
 
         /// <summary> Eventle userin application yaratmasi  ve 
