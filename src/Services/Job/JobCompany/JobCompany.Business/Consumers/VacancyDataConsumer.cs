@@ -23,16 +23,22 @@ namespace JobCompany.Business.Consumers
         public async Task Consume(ConsumeContext<GetUserSavedVacanciesRequest> context)
         {
             var vacancyIds = context.Message.VacancyIds;
+            var totalCount = await _context.Vacancies
+            .Where(v => vacancyIds.Contains(v.Id))
+            .CountAsync();
 
             var vacancies = await _context.Vacancies
                 .Where(v => vacancyIds.Contains(v.Id))
-                .AsNoTracking().ToListAsync();
+                .AsNoTracking()
+                .Skip(Math.Max(0, (context.Message.Skip - 1) * context.Message.Take))
+                .Take(context.Message.Take)
+                .ToListAsync();
 
-            if (vacancies == null || vacancies.Count == 0)
+            if (vacancies == null)
             {
                 await context.RespondAsync(new GetUserSavedVacanciesResponse
                 {
-                    Vacancies = []
+                    Vacancies = new List<VacancyResponse>()
                 });
                 return;
             }
@@ -52,11 +58,12 @@ namespace JobCompany.Business.Consumers
                     ViewCount = v.ViewCount,
                     IsVip = v.IsVip,
                     WorkType = v.WorkType,
-                    IsSaved = true
-                }).ToList()
+                    IsSaved = true,
+                    TotalCount = totalCount
+                }).ToList(),
             };
-
             await context.RespondAsync(response);
         }
+
     }
 }

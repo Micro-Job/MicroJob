@@ -81,7 +81,7 @@ namespace Job.Business.Services.Vacancy
         }
 
         /// <summary> Userin bütün save etdiyi vakansiyalarin get allu </summary>
-        public async Task<List<VacancyResponse>> GetAllSavedVacancyAsync()
+        public async Task<List<VacancyResponse>> GetAllSavedVacancyAsync(int skip, int take)
         {
             Guid? userGuid = GetUserId();
             var savedVacanciesId = await _context.SavedVacancies
@@ -89,10 +89,11 @@ namespace Job.Business.Services.Vacancy
                 .Select(x => x.VacancyId)
                 .ToListAsync();
 
-            var datas = await GetUserSavedVacancyDataAsync(savedVacanciesId);
+            var datas = await GetUserSavedVacancyDataAsync(savedVacanciesId, skip, take);
 
             return datas.Vacancies;
         }
+
 
         /// <summary> Bütün şirkətlərin get allu </summary>
         public async Task<ICollection<CompanyDto>> GetAllCompaniesAsync(string? searchTerm)
@@ -106,7 +107,7 @@ namespace Job.Business.Services.Vacancy
         }
 
         /// <summary> Consumer metodu -  Vacancy idlerine göre saved olunan vakansiyalarin datasi </summary>
-        private async Task<GetUserSavedVacanciesResponse> GetUserSavedVacancyDataAsync(List<Guid> vacancyIds)
+        private async Task<GetUserSavedVacanciesResponse> GetUserSavedVacancyDataAsync(List<Guid> vacancyIds, int skip, int take)
         {
             if (vacancyIds == null || vacancyIds.Count == 0)
             {
@@ -117,11 +118,17 @@ namespace Job.Business.Services.Vacancy
             }
 
             var response = await _client.GetResponse<GetUserSavedVacanciesResponse>(
-                new GetUserSavedVacanciesRequest { VacancyIds = vacancyIds }
+                new GetUserSavedVacanciesRequest
+                {
+                    VacancyIds = vacancyIds,
+                    Skip = skip,
+                    Take = take
+                }
             );
 
             return response.Message;
         }
+
 
         /// <summary>
         /// Şirkətə aid olan digər vakansiyaların gətirilməsi

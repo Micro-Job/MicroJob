@@ -20,9 +20,9 @@ namespace Job.API.Controllers
 
         [HttpGet("[action]")]
         [AuthorizeRole(UserRole.SimpleUser)]
-        public async Task<IActionResult> GetAllSavedVacancy()
+        public async Task<IActionResult> GetAllSavedVacancy(int skip = 1, int take = 6)
         {
-            return Ok(await _vacancyService.GetAllSavedVacancyAsync());
+            return Ok(await _vacancyService.GetAllSavedVacancyAsync(skip,take));
         }
 
 

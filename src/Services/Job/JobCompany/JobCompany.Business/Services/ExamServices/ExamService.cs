@@ -72,14 +72,13 @@ namespace JobCompany.Business.Services.ExamServices
             var examGuid = Guid.Parse(examId);
 
             var exam = await _context.Exams
-                // .Include(e => e.Questions)
-                // .ThenInclude(q => q.Answers)
+                .Include(e => e.ExamQuestions)
                 .FirstOrDefaultAsync(e => e.Id == examGuid)
                 ?? throw new SharedLibrary.Exceptions.NotFoundException<Exam>();
 
-            // var orderedQuestions = exam.Questions.OrderBy(q => q.Id).ToList();
+            var orderedQuestions = exam.ExamQuestions.OrderBy(q => q.Id).ToList();
 
-            // var stepQuestion = orderedQuestions.Skip(step - 1).Take(1).ToList();
+            var stepQuestion = orderedQuestions.Skip(step - 1).Take(1).ToList();
 
             var examDto = new GetExamByIdDto
             {
@@ -87,20 +86,8 @@ namespace JobCompany.Business.Services.ExamServices
                 CurrentStep = step,
                 LastDescription = exam.LastDescription,
                 Result = exam.Result,
-                // Questions = stepQuestion.Select(q => new QuestionDetailDto
-                // {
-                //     Title = q.Title,
-                //     Image = q.Image,
-                //     QuestionType = q.QuestionType,
-                //     IsRequired = q.IsRequired,
-                //     Answers = q.Answers.Select(a => new AnswerDetailDto
-                //     {
-                //         Text = a.Text,
-                //         IsCorrect = a.IsCorrect,
-                //     }).ToList()
-                // }).ToList()
             };
-
+            
             return examDto;
         }
     }
