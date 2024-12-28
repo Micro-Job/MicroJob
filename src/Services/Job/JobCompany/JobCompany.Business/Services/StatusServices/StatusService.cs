@@ -24,8 +24,12 @@ namespace JobCompany.Business.Services.StatusServices
 
         public async Task CreateStatusAsync(CreateStatusDto dto)
         {
-            //deyisilmelidi
-            var companyId = _context.Companies.FirstOrDefaultAsync(x => x.UserId == userGuid).Result.Id;
+            var companyId = await _context.Companies
+                .Where(x => x.UserId == userGuid)
+                .Select(x => x.Id)
+                .FirstOrDefaultAsync();
+
+            if (companyId == Guid.Empty) throw new SharedLibrary.Exceptions.NotFoundException<Company>();
 
             var newStatus = new Status
             {
@@ -39,8 +43,8 @@ namespace JobCompany.Business.Services.StatusServices
             await _context.Statuses.AddAsync(newStatus);
             await _context.SaveChangesAsync();
         }
-        //TODO : Burada status silindiyi zaman ilk once yoxlamaliyiq ki bu sildiyi status ozunundur mu.Belke basqa bir company-nin statusunu silir.
-        //2cisi burada tam olaraq baxmadim boyuk ehtimal burada relationda DeleteBehavior.Resctrict verilib yeni eger bu statusla bagli application varsa sile bilmesin yeni bele bir exception qaytarmaliyiq
+
+
         public async Task DeleteStatusAsync(string statusId)
         {
             var statusGuid = Guid.Parse(statusId);
@@ -51,29 +55,33 @@ namespace JobCompany.Business.Services.StatusServices
                 ?? throw new SharedLibrary.Exceptions.NotFoundException<Status>();
 
             if (existStatus.IsDefault == true) throw new StatusPermissionException();
-            // var isLinked = await _context.Applications.AnyAsync(a => a.StatusId == statusGuid);
-            // if (isLinked) throw new StatusPermissionException("Cannot delete status as it is linked to other applications.");
+            var isLinked = await _context.Applications.AnyAsync(a => a.StatusId == statusGuid);
+            if (isLinked) throw new StatusPermissionException("Bu status başqa müraciətlərdə istifadə olunur.");
 
             _context.Statuses.Remove(existStatus);
             await _context.SaveChangesAsync();
         }
 
-        //TODO : Burada notificationdaki kimi yene sql-e 2 defe gedilir birbasa statusdan gedile biler.2cisi
-        //bu metodu isletmedim ama oxudugum qederile islemeyecek.Cunki sertde deyilib ki defaultu true olan ve 
-        //companyId si bu olan bu ola bilmez cunki defaultu biz yaradiriq ve burada demisik ki companyIdsi olan amma bizim olan
+
         public async Task<List<StatusListDto>> GetAllStatusesAsync()
         {
-            var company = await _context.Companies.FirstOrDefaultAsync(x => x.UserId == userGuid);
+            var companyId = await _context.Companies
+                .Where(x => x.UserId == userGuid)
+                .Select(x => x.Id)
+                .FirstOrDefaultAsync();
 
-            var allStatus = await _context.Statuses.Where(x => x.IsDefault == true && x.CompanyId == company.Id)
-            .Select(x => new StatusListDto
+            if (companyId == Guid.Empty) throw new SharedLibrary.Exceptions.NotFoundException<Company>();
+
+            var statuses = await _context.Statuses
+            .Where(s => s.CompanyId == companyId)
+            .ToListAsync();
+
+            return statuses.Select(s => new StatusListDto
             {
-                StatusId = x.Id,
-                StatusName = x.StatusName,
-                StatusColor = x.StatusColor,
-            }).ToListAsync();
-
-            return allStatus;
+                StatusId = s.Id,
+                StatusName = s.StatusName,
+                StatusColor = s.StatusColor
+            }).ToList();
         }
     }
 }

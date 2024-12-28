@@ -44,7 +44,7 @@ namespace JobCompany.Business.Services.VacancyServices
         }
 
         /// <summary> vacancy yaradılması </summary>
-        /// vacancy yaradilan zaman exam yaradılması eger templateİd secilirsen exam oradan alinir
+        /// vacancy yaradilan zaman exam yaradılması
         public async Task CreateVacancyAsync(CreateVacancyDto vacancyDto, ICollection<CreateNumberDto>? numberDto)
         {
             string? companyLogoPath = null;
@@ -88,22 +88,20 @@ namespace JobCompany.Business.Services.VacancyServices
                 ViewCount = 0
             };
 
+
+            // ?? TODO : burada eger numbers yoxdursa bos yere numbers AddRange olunur bunu ifin icinde etmek lazimdir bu vacancyNumberse de aiddir ??
             var numbers = new List<VacancyNumber>();
-            if (numberDto is not null)
+            if (numberDto != null)
             {
-                foreach (var numberCreateDto in numberDto)
+                numbers = numberDto.Select(numberCreateDto => new VacancyNumber
                 {
-                    var number = new VacancyNumber
-                    {
-                        Number = numberCreateDto.PhoneNumber,
-                        VacancyId = vacancy?.Id
-                    };
-                    numbers.Add(number);
-                }
+                    Number = numberCreateDto.PhoneNumber,
+                    VacancyId = vacancy.Id
+                }).ToList();
+
+                await _context.VacancyNumbers.AddRangeAsync(numbers);
+                vacancy.VacancyNumbers = numbers;
             }
-            //TODO : burada eger numbers yoxdursa bos yere numbers AddRange olunur bunu ifin icinde etmek lazimdir bu vacancyNumberse de aiddir
-            await _context.VacancyNumbers.AddRangeAsync(numbers);
-            vacancy.VacancyNumbers = numbers;
 
             var vacancySkills = vacancyDto.SkillIds != null
                 ? vacancyDto.SkillIds.Select(skillId => new VacancySkill
@@ -115,16 +113,17 @@ namespace JobCompany.Business.Services.VacancyServices
 
             await _context.Vacancies.AddAsync(vacancy);
             await _context.SaveChangesAsync();
-            //Burada yoxlanis olmalidir ki vacancy yaraderken umumi olaraq skillIds yoxdursa niye bu event islesin ve burada bir daha
-            // skillIds deyere bir sey yaratmaga(Select etmeye) ehtiyyac yoxdur cunki onsta bunlar sizin elinizde var dto-da
-            var skillIds = vacancySkills.Select(vs => vs.SkillId).ToList();
-            await _publishEndpoint.Publish(new VacancyCreatedEvent
+
+            if (vacancyDto.SkillIds != null)
             {
-                SenderId = _userGuid,
-                SkillIds = skillIds,
-                InformationId = vacancy.Id,
-                Content = $"Sizin resume skillərinizə uyğun yeni vakansiya yaradıldı: {vacancy.Title}",
-            });
+                await _publishEndpoint.Publish(new VacancyCreatedEvent
+                {
+                    SenderId = _userGuid,
+                    SkillIds = vacancyDto.SkillIds,
+                    InformationId = vacancy.Id,
+                    Content = $"Sizin resume skillərinizə uyğun yeni vakansiya yaradıldı: {vacancy.Title}",
+                });
+            }
         }
 
         public async Task DeleteAsync(List<string> ids)
@@ -219,70 +218,56 @@ namespace JobCompany.Business.Services.VacancyServices
             return vacancies;
         }
 
-        //TODO : bu metod umumi olaraq islemeyecek mence.Test elemedim amma gorduyum qederile deyirem.Yene de siz yoxlayarsiniz
-        //Burda niye savechanges var. eger viewCounta gore etmisinizse o hisse commentdedir.Lap commentden cixartsaniz 
-        //bele islemeyecek cunki burada AsNoTracking yazilib yeni sizin changesleriviz tracking olunmur.
-        //Elave olaraq duzeltmek isteseniz include etmeyin.Cunki burda sql-den getirirsiniz daha sonra c#-da return etmek ucun 
-        //VacancyGetByIdDto yaradirsiniz.Ele sql-den getirerken select etseniz daha suretli isleyeceksiniz
         /// <summary> vacanciya id'sinə görə vacancyın gətirilməsi </summary>
         public async Task<VacancyGetByIdDto> GetByIdVacancyAsync(string id)
         {
             var vacancyGuid = Guid.Parse(id);
-
-            var vacancyEntity = await _context.Vacancies
-                .AsNoTracking()
+            var vacancy = await _context.Vacancies
                 .Where(x => x.Id == vacancyGuid)
-                .Select(x => new
+                .FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>();
+
+            vacancy.ViewCount++;
+            await _context.SaveChangesAsync();
+
+            var vacancyDto = await _context.Vacancies
+                .Where(x => x.Id == vacancyGuid)
+                .Select(x => new VacancyGetByIdDto
                 {
-                    Vacancy = x,
-                    x.Category,
-                    x.Company,
-                    VacancyNumbers = x.VacancyNumbers.Select(vn => vn.Number).ToList(),
+                    Id = x.Id,
+                    Title = x.Title,
+                    CompanyLogo = $"{_authServiceBaseUrl}/{x.Company.CompanyLogo}",
+                    StartDate = x.StartDate,
+                    Location = x.Location,
+                    ViewCount = x.ViewCount, 
+                    WorkType = x.WorkType,
+                    MainSalary = x.MainSalary,
+                    MaxSalary = x.MaxSalary,
+                    Requirement = x.Requirement,
+                    Description = x.Description,
+                    Email = x.Email,
+                    Gender = x.Gender,
+                    Military = x.Military,
+                    Family = x.Family,
+                    Driver = x.Driver,
+                    Citizenship = x.Citizenship,
+                    VacancyNumbers = x.VacancyNumbers.Select(vn => new VacancyNumberDto
+                    {
+                        VacancyNumber = vn.Number
+                    }).ToList(),
                     Skills = x.VacancySkills
                         .Where(vc => vc.Skill != null)
-                        .Select(vc => vc.Skill.Name).ToList()
+                        .Select(vc => new SkillDto
+                        {
+                            Name = vc.Skill.Name
+                        }).ToList(),
+                    CompanyName = x.CompanyName,
+                    CategoryName = x.Category.CategoryName
                 })
                 .FirstOrDefaultAsync()
                 ?? throw new NotFoundException<Vacancy>();
 
-            //vacancyEntity.Vacancy.ViewCount++;
-
-            var vacancy = new VacancyGetByIdDto
-            {
-                Id = vacancyEntity.Vacancy.Id,
-                Title = vacancyEntity.Vacancy.Title,
-                CompanyLogo = $"{_authServiceBaseUrl}/{vacancyEntity.Company.CompanyLogo}",
-                StartDate = vacancyEntity.Vacancy.StartDate,
-                Location = vacancyEntity.Vacancy.Location,
-                ViewCount = vacancyEntity.Vacancy.ViewCount,
-                WorkType = vacancyEntity.Vacancy.WorkType,
-                MainSalary = vacancyEntity.Vacancy.MainSalary,
-                MaxSalary = vacancyEntity.Vacancy.MaxSalary,
-                Requirement = vacancyEntity.Vacancy.Requirement,
-                Description = vacancyEntity.Vacancy.Description,
-                Email = vacancyEntity.Vacancy.Email,
-                Gender = vacancyEntity.Vacancy.Gender,
-                Military = vacancyEntity.Vacancy.Military,
-                Family = vacancyEntity.Vacancy.Family,
-                Driver = vacancyEntity.Vacancy.Driver,
-                Citizenship = vacancyEntity.Vacancy.Citizenship,
-                VacancyNumbers = vacancyEntity.VacancyNumbers.Select(vn => new VacancyNumberDto
-                {
-                    VacancyNumber = vn
-                }).ToList(),
-                Skills = vacancyEntity.Skills.Select(skill => new SkillDto
-                {
-                    Name = skill
-                }).ToList(),
-                CompanyName = vacancyEntity.Vacancy.CompanyName,
-                CategoryName = vacancyEntity.Category.CategoryName,
-            };
-
-            await _context.SaveChangesAsync();
-
-            return vacancy;
+            return vacancyDto;
         }
-
 
         //TODO : burada update edilen vakansiyanin menim companyimin vakansiyasidir mi bu yoxlanis olmalidir.
         //Burada if icindeki hisse islemeyecek existingVacancy.VacancyNumbers.Cunki burada include yoxdur
