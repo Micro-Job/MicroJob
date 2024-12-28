@@ -45,10 +45,14 @@ namespace JobCompany.Business.Services.StatusServices
         {
             var statusGuid = Guid.Parse(statusId);
 
-            var existStatus = await _context.Statuses.FirstOrDefaultAsync(x => x.Id == statusGuid && x.Company.UserId == userGuid)
+            var existStatus = await _context.Statuses
+                .Include(s => s.Company)
+                .FirstOrDefaultAsync(x => x.Id == statusGuid && x.Company.UserId == userGuid)
                 ?? throw new SharedLibrary.Exceptions.NotFoundException<Status>();
 
             if (existStatus.IsDefault == true) throw new StatusPermissionException();
+            // var isLinked = await _context.Applications.AnyAsync(a => a.StatusId == statusGuid);
+            // if (isLinked) throw new StatusPermissionException("Cannot delete status as it is linked to other applications.");
 
             _context.Statuses.Remove(existStatus);
             await _context.SaveChangesAsync();

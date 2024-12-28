@@ -1,6 +1,7 @@
 ﻿using JobCompany.DAL.Contexts;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using SharedLibrary.Dtos.ApplicationDtos;
 using SharedLibrary.Enums;
 using SharedLibrary.Requests;
@@ -8,15 +9,25 @@ using SharedLibrary.Responses;
 
 namespace JobCompany.Business.Consumers;
 
-public class GetUserApplicationsConsumer(JobCompanyDbContext jobCompanyDbContext) : IConsumer<GetUserApplicationsRequest>
+public class GetUserApplicationsConsumer : IConsumer<GetUserApplicationsRequest>
 {
+    private readonly JobCompanyDbContext _jobCompanyDbContext;
+    readonly IConfiguration _configuration;
+    private readonly string? _authServiceBaseUrl;
+    public GetUserApplicationsConsumer(JobCompanyDbContext jobCompanyDbContext, IConfiguration configuration)
+    {
+        _jobCompanyDbContext = jobCompanyDbContext;
+        _configuration = configuration;
+        _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
+    }
     public async Task Consume(ConsumeContext<GetUserApplicationsRequest> context)
     {
         var userId = context.Message.UserId;
 
-        var query = jobCompanyDbContext.Applications
+        var query = _jobCompanyDbContext.Applications
                            .Where(a => a.UserId == userId)
                            .Include(a => a.Vacancy)
+                           .ThenInclude(a => a.Company)
                            .Include(a => a.Status);
 
         var applications = await query
@@ -39,15 +50,16 @@ public class GetUserApplicationsConsumer(JobCompanyDbContext jobCompanyDbContext
             UserApplications = applications.Select(a => new ApplicationDto
             {
                 VacancyId = a.VacancyId,
-                VacancyTitle = a.Vacancy.Title,
+                title = a.Vacancy.Title,
                 CompanyName = a.Vacancy.CompanyName,
+                companyLogo = $"{_authServiceBaseUrl}/{a.Vacancy.Company.CompanyLogo}",
                 CompanyId = a.Vacancy.CompanyId,
                 WorkType = Enum.GetName(typeof(WorkType), a.Vacancy.WorkType),
                 IsActive = a.Vacancy.IsActive,
                 StatusName = a.Status?.StatusName,
                 StatusColor = a.Status?.StatusColor,
                 ViewCount = a.Vacancy.ViewCount,
-                CreatedDate = a.CreatedDate
+                startDate = a.CreatedDate
             }).ToList()
         };
 
