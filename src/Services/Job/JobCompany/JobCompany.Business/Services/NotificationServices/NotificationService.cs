@@ -28,15 +28,18 @@ namespace JobCompany.Business.Services.NotificationServices
             userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value ?? throw new UserIsNotLoggedInException());
         }
 
-        //TODO : bu her 2 metoda da aiddir.1)Neye gore 2 defe sql-e gedirik direkt olaraq notification icinden getmirik companye?
-        //Elave olaraq yox eger getmek olmadigi hallarda selectle isleyek cunki bize lazim olan sey yalnizca id-dir.Burda ise her sey gelir company ile bagli
+
         public async Task<List<NotificationDto>> GetUserNotificationsAsync()
         {
-            var company = await _context.Companies.FirstOrDefaultAsync(x => x.UserId == userGuid)
-                ?? throw new NotFoundException<Company>();
+            var companyId = await _context.Companies
+                .Where(x => x.UserId == userGuid)
+                .Select(x => x.Id)
+                .FirstOrDefaultAsync();
+
+            if (companyId == Guid.Empty) throw new NotFoundException<Company>();
 
             var notifications = await _context.Notifications
-                .Where(n => n.ReceiverId == company.Id)
+                .Where(n => n.ReceiverId == companyId)
                 .OrderByDescending(n => n.CreatedDate)
                 .Select(n => new NotificationDto
                 {
@@ -55,10 +58,14 @@ namespace JobCompany.Business.Services.NotificationServices
 
         public async Task MarkNotificationAsReadAsync(Guid id)
         {
-            var company = await _context.Companies.FirstOrDefaultAsync(x => x.UserId == userGuid)
-                ?? throw new NotFoundException<Company>();
+            var companyId = await _context.Companies
+                .Where(x => x.UserId == userGuid)
+                .Select(x => x.Id)
+                .FirstOrDefaultAsync();
 
-            var notification = await _context.Notifications.FirstOrDefaultAsync(x => x.Id == id && x.ReceiverId == company.Id)
+            if (companyId == Guid.Empty) throw new NotFoundException<Company>();
+
+            var notification = await _context.Notifications.FirstOrDefaultAsync(x => x.Id == id && x.ReceiverId == companyId)
                 ?? throw new NotFoundException<Notification>();
 
             notification.IsSeen = true;
