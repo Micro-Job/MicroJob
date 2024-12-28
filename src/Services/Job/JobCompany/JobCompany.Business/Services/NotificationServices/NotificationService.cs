@@ -27,6 +27,9 @@ namespace JobCompany.Business.Services.NotificationServices
             _contextAccessor = contextAccessor;
             userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value ?? throw new UserIsNotLoggedInException());
         }
+
+        //TODO : bu her 2 metoda da aiddir.1)Neye gore 2 defe sql-e gedirik direkt olaraq notification icinden getmirik companye?
+        //Elave olaraq yox eger getmek olmadigi hallarda selectle isleyek cunki bize lazim olan sey yalnizca id-dir.Burda ise her sey gelir company ile bagli
         public async Task<List<NotificationDto>> GetUserNotificationsAsync()
         {
             var company = await _context.Companies.FirstOrDefaultAsync(x => x.UserId == userGuid)

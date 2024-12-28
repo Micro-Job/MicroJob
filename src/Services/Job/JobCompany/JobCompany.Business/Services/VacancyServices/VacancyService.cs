@@ -101,7 +101,7 @@ namespace JobCompany.Business.Services.VacancyServices
                     numbers.Add(number);
                 }
             }
-
+            //TODO : burada eger numbers yoxdursa bos yere numbers AddRange olunur bunu ifin icinde etmek lazimdir bu vacancyNumberse de aiddir
             await _context.VacancyNumbers.AddRangeAsync(numbers);
             vacancy.VacancyNumbers = numbers;
 
@@ -115,7 +115,8 @@ namespace JobCompany.Business.Services.VacancyServices
 
             await _context.Vacancies.AddAsync(vacancy);
             await _context.SaveChangesAsync();
-
+            //Burada yoxlanis olmalidir ki vacancy yaraderken umumi olaraq skillIds yoxdursa niye bu event islesin ve burada bir daha
+            // skillIds deyere bir sey yaratmaga(Select etmeye) ehtiyyac yoxdur cunki onsta bunlar sizin elinizde var dto-da
             var skillIds = vacancySkills.Select(vs => vs.SkillId).ToList();
             await _publishEndpoint.Publish(new VacancyCreatedEvent
             {
@@ -218,6 +219,11 @@ namespace JobCompany.Business.Services.VacancyServices
             return vacancies;
         }
 
+        //TODO : bu metod umumi olaraq islemeyecek mence.Test elemedim amma gorduyum qederile deyirem.Yene de siz yoxlayarsiniz
+        //Burda niye savechanges var. eger viewCounta gore etmisinizse o hisse commentdedir.Lap commentden cixartsaniz 
+        //bele islemeyecek cunki burada AsNoTracking yazilib yeni sizin changesleriviz tracking olunmur.
+        //Elave olaraq duzeltmek isteseniz include etmeyin.Cunki burda sql-den getirirsiniz daha sonra c#-da return etmek ucun 
+        //VacancyGetByIdDto yaradirsiniz.Ele sql-den getirerken select etseniz daha suretli isleyeceksiniz
         /// <summary> vacanciya id'sinə görə vacancyın gətirilməsi </summary>
         public async Task<VacancyGetByIdDto> GetByIdVacancyAsync(string id)
         {
@@ -278,7 +284,9 @@ namespace JobCompany.Business.Services.VacancyServices
         }
 
 
-
+        //TODO : burada update edilen vakansiyanin menim companyimin vakansiyasidir mi bu yoxlanis olmalidir.
+        //Burada if icindeki hisse islemeyecek existingVacancy.VacancyNumbers.Cunki burada include yoxdur
+        //Elave olaraq burada update olundugu zaman muraciet edenlere notification getmelidir
         /// <summary> vacancynin update olunması </summary>
         public async Task UpdateVacancyAsync(UpdateVacancyDto vacancyDto, ICollection<UpdateNumberDto>? numberDtos)
         {

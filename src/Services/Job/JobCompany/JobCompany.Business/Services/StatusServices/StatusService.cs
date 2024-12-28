@@ -39,7 +39,8 @@ namespace JobCompany.Business.Services.StatusServices
             await _context.Statuses.AddAsync(newStatus);
             await _context.SaveChangesAsync();
         }
-
+        //TODO : Burada status silindiyi zaman ilk once yoxlamaliyiq ki bu sildiyi status ozunundur mu.Belke basqa bir company-nin statusunu silir.
+        //2cisi burada tam olaraq baxmadim boyuk ehtimal burada relationda DeleteBehavior.Resctrict verilib yeni eger bu statusla bagli application varsa sile bilmesin yeni bele bir exception qaytarmaliyiq
         public async Task DeleteStatusAsync(string statusId)
         {
             var statusGuid = Guid.Parse(statusId);
@@ -53,6 +54,9 @@ namespace JobCompany.Business.Services.StatusServices
             await _context.SaveChangesAsync();
         }
 
+        //TODO : Burada notificationdaki kimi yene sql-e 2 defe gedilir birbasa statusdan gedile biler.2cisi
+        //bu metodu isletmedim ama oxudugum qederile islemeyecek.Cunki sertde deyilib ki defaultu true olan ve 
+        //companyId si bu olan bu ola bilmez cunki defaultu biz yaradiriq ve burada demisik ki companyIdsi olan amma bizim olan
         public async Task<List<StatusListDto>> GetAllStatusesAsync()
         {
             var company = await _context.Companies.FirstOrDefaultAsync(x => x.UserId == userGuid);
