@@ -21,6 +21,6 @@ namespace SharedLibrary.Responses
         public bool IsVip { get; set; }
         public bool IsSaved { get; set; }
         public WorkType? WorkType { get; set; }
-        public int TotalCount { get; set; }
+        // public int TotalCount { get; set; }
     }
 }

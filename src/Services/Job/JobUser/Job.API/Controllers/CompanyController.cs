@@ -8,9 +8,9 @@ namespace Job.API.Controllers
     public class CompanyController(ICompanyInformationService service) : ControllerBase
     {
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetCompaniesDataAsync(string? searchTerm)
+        public async Task<IActionResult> GetCompaniesDataAsync(string? searchTerm,int skip=1,int take=6)
         {
-            return Ok(await service.GetCompaniesDataAsync(searchTerm));
+            return Ok(await service.GetCompaniesDataAsync(searchTerm,skip,take));
         }
 
         [HttpGet("[action]/{id}")]

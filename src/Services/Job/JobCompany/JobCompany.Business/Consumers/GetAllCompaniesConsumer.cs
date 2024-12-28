@@ -24,9 +24,11 @@ namespace JobCompany.Business.Consumers
 
         public async Task Consume(ConsumeContext<GetAllCompaniesRequest> context)
         {
-            var searchTerm = context.Message.SearchTerm?.ToLower() ?? string.Empty; 
+            var searchTerm = context.Message.SearchTerm?.ToLower() ?? string.Empty;
 
-            var companiesQuery = _context.Companies.AsQueryable();
+            var companiesQuery = _context.Companies
+                .Skip(Math.Max(0, (context.Message.Skip - 1) * context.Message.Take))
+                .Take(context.Message.Take).AsQueryable();
 
             if (!string.IsNullOrEmpty(searchTerm))
             {
