@@ -227,11 +227,9 @@ namespace JobCompany.Business.Services.VacancyServices
         {
             var vacancyGuid = Guid.Parse(id);
             var vacancy = await _context.Vacancies
+                .AsNoTracking()
                 .Where(x => x.Id == vacancyGuid)
                 .FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>();
-
-            vacancy.ViewCount++;
-            await _context.SaveChangesAsync();
 
             var vacancyDto = await _context.Vacancies
                 .Where(x => x.Id == vacancyGuid)

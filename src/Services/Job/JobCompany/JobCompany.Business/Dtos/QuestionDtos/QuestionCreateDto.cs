@@ -8,7 +8,7 @@ namespace JobCompany.Business.Dtos.QuestionDtos
     public record QuestionCreateDto
     {
         public string Title { get; set; }
-        // public IFormFile? Image { get; set; }
+        public IFormFile? Image { get; set; }
         public QuestionType QuestionType { get; set; }
         public bool IsRequired { get; set; }
         public ICollection<CreateAnswerDto>? Answers { get; set; }

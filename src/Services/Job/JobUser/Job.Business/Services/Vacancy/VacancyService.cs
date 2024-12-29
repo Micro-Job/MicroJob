@@ -160,7 +160,7 @@ namespace Job.Business.Services.Vacancy
 
             if (userGuid.HasValue)
             {
-                var savedVacancies = await GetSavedVacanciesAsync(userGuid.Value);
+                var savedVacancies = await FetchUserSavedVacancyIdsAsync(userGuid.Value);
                 MarkSavedVacancies(response.Message.Vacancies, savedVacancies);
             }
 
@@ -324,7 +324,7 @@ namespace Job.Business.Services.Vacancy
             }
         }
 
-        private async Task<ICollection<Guid>> GetSavedVacanciesAsync(Guid userId)
+        private async Task<ICollection<Guid>> FetchUserSavedVacancyIdsAsync(Guid userId)
         {
             return await _context.SavedVacancies
                 .Where(x => x.UserId == userId)
