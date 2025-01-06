@@ -1,4 +1,5 @@
-﻿namespace SharedLibrary.Dtos.ApplicationDtos;
+﻿using SharedLibrary.Enums;
+namespace SharedLibrary.Dtos.ApplicationDtos;
 
 public class ApplicationDto
 {
