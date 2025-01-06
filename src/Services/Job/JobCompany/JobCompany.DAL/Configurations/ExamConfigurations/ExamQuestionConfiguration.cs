@@ -1,12 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using JobCompany.Core.Entites;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace JobCompany.Infrastructure.Configurations.ExamConfigurations
+namespace JobCompany.DAL.Configurations.ExamConfigurations
 {
     public class ExamQuestionConfiguration : IEntityTypeConfiguration<ExamQuestion>
     {

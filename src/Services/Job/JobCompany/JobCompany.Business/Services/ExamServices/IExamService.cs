@@ -8,5 +8,6 @@ namespace JobCompany.Business.Services.ExamServices
         Task<Guid> CreateExamAsync(CreateExamDto dto);
         Task<GetExamByIdDto> GetExamByIdAsync(string examId);
         Task<GetQuestionByStepDto> GetExamQuestionByStepAsync(string examId, int step);
+        Task DeleteExamAsync(string examId);
     }
 }

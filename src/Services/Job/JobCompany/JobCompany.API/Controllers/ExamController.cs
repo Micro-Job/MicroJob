@@ -29,5 +29,12 @@ namespace JobCompany.API.Controllers
         {
             return Ok(await examService.GetExamQuestionByStepAsync(examId, step));            
         }
+
+        [HttpDelete("[action]")]
+        public async Task<IActionResult> DeleteExam(string examId)
+        {
+            await examService.DeleteExamAsync(examId);
+            return Ok();
+        }
     }
 }
