@@ -258,6 +258,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                 .Where(a => a.Vacancy.Company.UserId == userGuid)
                 .Select(a => new ApplicationInfoDto
                 {
+                    ApplicationId = a.Id,
                     UserId = a.UserId,
                     CreatedDate = a.CreatedDate,
                 })
@@ -281,6 +282,7 @@ namespace JobCompany.Business.Services.ApplicationServices
 
                     return group.Select(application => new ApplicationInfoListDto
                     {
+                        ApplicationId = application.ApplicationId,
                         FullName = $"{userData?.FirstName} {userData?.LastName}",
                         ImageUrl = $"{_authServiceBaseUrl}/{userData?.ProfileImage}",
                         Position = userResume?.Position,
@@ -321,6 +323,7 @@ namespace JobCompany.Business.Services.ApplicationServices
 
                     return new AllApplicationListDto()
                     {
+                        ApplicationId = a.Id,
                         FirstName = user.FirstName,
                         LastName = user.LastName,
                         Email = user.Email,

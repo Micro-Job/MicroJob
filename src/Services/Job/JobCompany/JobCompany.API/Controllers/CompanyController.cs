@@ -19,9 +19,13 @@ namespace JobCompany.API.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetAllCompanies([FromQuery] string? searchTerm = null)
+        public async Task<IActionResult> GetAllCompanies(
+            [FromQuery] string? searchTerm = null,
+            int skip = 1,
+            int take = 6
+        )
         {
-            return Ok(await service.GetAllCompaniesAsync(searchTerm));
+            return Ok(await service.GetAllCompaniesAsync(searchTerm, skip, take));
         }
 
         [HttpGet("[action]")]

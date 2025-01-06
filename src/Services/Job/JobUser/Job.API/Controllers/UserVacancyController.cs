@@ -22,16 +22,8 @@ namespace Job.API.Controllers
         [AuthorizeRole(UserRole.SimpleUser)]
         public async Task<IActionResult> GetAllSavedVacancy(int skip = 1, int take = 6)
         {
-            return Ok(await _vacancyService.GetAllSavedVacancyAsync(skip,take));
+            return Ok(await _vacancyService.GetAllSavedVacancyAsync(skip, take));
         }
-
-
-        [HttpGet("[action]")]
-        public async Task<IActionResult> GetAllCompanies(string? searchTerm)
-        {
-            return Ok(await _vacancyService.GetAllCompaniesAsync(searchTerm));
-        }
-
 
         [HttpGet("[action]")]
         public async Task<IActionResult> GetVacancyInfo(Guid vacancyId)
@@ -41,9 +33,31 @@ namespace Job.API.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetAllVacancies(string? titleName, string? categoryId, string? countryId, string? cityId, bool? isActive, decimal? minSalary, decimal? maxSalary, int skip = 1, int take = 6)
+        public async Task<IActionResult> GetAllVacancies(
+            string? titleName,
+            string? categoryId,
+            string? countryId,
+            string? cityId,
+            bool? isActive,
+            decimal? minSalary,
+            decimal? maxSalary,
+            int skip = 1,
+            int take = 6
+        )
         {
-            return Ok(await _vacancyService.GetAllVacanciesAsync(titleName, categoryId, countryId, cityId, isActive, minSalary, maxSalary, skip, take));
+            return Ok(
+                await _vacancyService.GetAllVacanciesAsync(
+                    titleName,
+                    categoryId,
+                    countryId,
+                    cityId,
+                    isActive,
+                    minSalary,
+                    maxSalary,
+                    skip,
+                    take
+                )
+            );
         }
 
         [HttpGet("[action]")]
@@ -53,11 +67,22 @@ namespace Job.API.Controllers
             return Ok(data);
         }
 
-
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetOtherVacanciesByCompanyAsync(string companyId, string? currentVacancyId, int skip = 1, int take = 6)
+        public async Task<IActionResult> GetOtherVacanciesByCompanyAsync(
+            string companyId,
+            string? currentVacancyId,
+            int skip = 1,
+            int take = 6
+        )
         {
-            return Ok(await _vacancyService.GetOtherVacanciesByCompanyAsync(companyId, currentVacancyId,skip,take));
+            return Ok(
+                await _vacancyService.GetOtherVacanciesByCompanyAsync(
+                    companyId,
+                    currentVacancyId,
+                    skip,
+                    take
+                )
+            );
         }
     }
 }

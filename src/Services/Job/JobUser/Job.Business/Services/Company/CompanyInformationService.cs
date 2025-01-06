@@ -5,15 +5,25 @@ using SharedLibrary.Responses;
 
 namespace Job.Business.Services.Company
 {
-    public class CompanyInformationService(IRequestClient<GetAllCompaniesRequest> _client, IRequestClient<GetCompanyDetailByIdRequest> getDetailClient) : ICompanyInformationService
+    public class CompanyInformationService(
+        IRequestClient<GetAllCompaniesRequest> _client,
+        IRequestClient<GetCompanyDetailByIdRequest> getDetailClient
+    ) : ICompanyInformationService
     {
-        public async Task<ICollection<CompanyDto>> GetCompaniesDataAsync(string? searchTerm,int skip,int take)
+        public async Task<ICollection<CompanyDto>> GetCompaniesDataAsync(
+            string? searchTerm,
+            int skip,
+            int take
+        )
         {
-            var response = await _client.GetResponse<GetAllCompaniesResponse>(new GetAllCompaniesRequest{
-                SearchTerm = searchTerm,
-                Skip = skip,
-                Take = take,
-            });
+            var response = await _client.GetResponse<GetAllCompaniesResponse>(
+                new GetAllCompaniesRequest
+                {
+                    SearchTerm = searchTerm,
+                    Skip = skip,
+                    Take = take,
+                }
+            );
             return response.Message.Companies;
         }
 

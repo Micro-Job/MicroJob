@@ -1,4 +1,5 @@
-﻿using Job.Business.Dtos.NotificationDtos;
+﻿using System.Security.Claims;
+using Job.Business.Dtos.NotificationDtos;
 using Job.Business.Exceptions.UserExceptions;
 using Job.DAL.Contexts;
 using MassTransit;
@@ -8,7 +9,6 @@ using Shared.Responses;
 using SharedLibrary.Exceptions;
 using SharedLibrary.Requests;
 using SharedLibrary.Responses;
-using System.Security.Claims;
 
 namespace Job.Business.Services.Notification
 {
@@ -18,12 +18,20 @@ namespace Job.Business.Services.Notification
         readonly IHttpContextAccessor _contextAccessor;
         private readonly IRequestClient<GetAllCompaniesRequest> _getCompaniesClient;
         private readonly Guid userGuid;
-        public NotificationService(JobDbContext context, IHttpContextAccessor contextAccessor, IRequestClient<GetAllCompaniesRequest> getCompaniesClient)
+
+        public NotificationService(
+            JobDbContext context,
+            IHttpContextAccessor contextAccessor,
+            IRequestClient<GetAllCompaniesRequest> getCompaniesClient
+        )
         {
             _context = context;
             _contextAccessor = contextAccessor;
             _getCompaniesClient = getCompaniesClient;
-            userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value ?? throw new UserIsNotLoggedInException());
+            userGuid = Guid.Parse(
+                _contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value
+                    ?? throw new UserIsNotLoggedInException()
+            );
         }
 
         public async Task CreateNotificationAsync(NotificationDto notificationDto)
@@ -36,52 +44,58 @@ namespace Job.Business.Services.Notification
                 CreatedDate = DateTime.Now,
                 InformationId = notificationDto.InformationId,
                 Content = notificationDto.Content,
-                IsSeen = false
+                IsSeen = false,
             };
 
             await _context.Notifications.AddAsync(notification);
             await _context.SaveChangesAsync();
         }
 
-        public async Task<List<NotificationListDto>> GetUserNotificationsAsync(int skip = 1, int take = 6)
+        public async Task<List<NotificationListDto>> GetUserNotificationsAsync(
+            int skip = 1,
+            int take = 6
+        )
         {
             var companies = await GetAllCompaniesData();
 
-            var companyDictionary = companies.Companies
-                .GroupBy(x => x.CompanyUserId)
+            var companyDictionary = companies
+                .Companies.GroupBy(x => x.CompanyUserId)
                 .ToDictionary(g => g.Key, g => g.First());
 
-            var notifications = await _context.Notifications
-                .Where(n => n.ReceiverId == userGuid)
+            var notifications = await _context
+                .Notifications.Where(n => n.ReceiverId == userGuid)
                 .OrderByDescending(n => n.CreatedDate)
                 .Skip(Math.Max(0, (skip - 1) * take))
                 .ToListAsync();
 
-            var notificationDtos = notifications.Select(n =>
-            {
-                companyDictionary.TryGetValue(n.SenderId, out var company);
-
-                return new NotificationListDto
+            var notificationDtos = notifications
+                .Select(n =>
                 {
-                    Id = n.Id,
-                    ReceiverId = n.ReceiverId,
-                    SenderId = n.SenderId,
-                    CompanyName = company?.CompanyName,
-                    CompanyLogo = company?.CompanyImage,
-                    InformationId = n.InformationId,
-                    CreatedDate = n.CreatedDate,
-                    Content = n.Content,
-                    IsSeen = n.IsSeen
-                };
-            }).ToList();
+                    companyDictionary.TryGetValue(n.SenderId, out var company);
+
+                    return new NotificationListDto
+                    {
+                        Id = n.Id,
+                        ReceiverId = n.ReceiverId,
+                        SenderId = n.SenderId,
+                        // CompanyName = company?.CompanyName,
+                        // CompanyLogo = company?.CompanyImage,
+                        InformationId = n.InformationId,
+                        CreatedDate = n.CreatedDate,
+                        Content = n.Content,
+                        IsSeen = n.IsSeen,
+                    };
+                })
+                .ToList();
 
             return notificationDtos;
         }
 
         public async Task MarkNotificationAsReadAsync(Guid notificationId)
         {
-            var notification = await _context.Notifications.FindAsync(notificationId)
-            ?? throw new NotFoundException<Core.Entities.Notification>();
+            var notification =
+                await _context.Notifications.FindAsync(notificationId)
+                ?? throw new NotFoundException<Core.Entities.Notification>();
 
             notification.IsSeen = true;
 

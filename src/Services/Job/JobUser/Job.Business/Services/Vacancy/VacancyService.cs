@@ -1,4 +1,5 @@
-﻿using Job.Business.Exceptions.Common;
+﻿using System.Security.Claims;
+using Job.Business.Exceptions.Common;
 using Job.Core.Entities;
 using Job.DAL.Contexts;
 using MassTransit;
@@ -12,7 +13,6 @@ using SharedLibrary.Dtos.CompanyDtos;
 using SharedLibrary.Events;
 using SharedLibrary.Requests;
 using SharedLibrary.Responses;
-using System.Security.Claims;
 
 namespace Job.Business.Services.Vacancy
 {
@@ -33,10 +33,21 @@ namespace Job.Business.Services.Vacancy
         readonly IConfiguration _configuration;
         private readonly string? _authServiceBaseUrl;
 
-        public VacancyService(JobDbContext context, IRequestClient<GetAllCompaniesRequest> request, IRequestClient<GetUserSavedVacanciesRequest> client, IHttpContextAccessor contextAccessor,
-            IRequestClient<UserRegisteredEvent> requestClient, IRequestClient<GetAllVacanciesRequest> vacClient, IRequestClient<SimilarVacanciesRequest> similarRequest,
-            IRequestClient<GetVacancyInfoRequest> vacancyInforRequest, IRequestClient<GetAllVacanciesByCompanyIdDataRequest> vacancyByCompanyId, IRequestClient<CheckVacancyRequest> checkVacancyRequest,
-            IRequestClient<CheckCompanyRequest> checkCompanyRequest, IRequestClient<GetOtherVacanciesByCompanyRequest> othVacRequest, IConfiguration configuration)
+        public VacancyService(
+            JobDbContext context,
+            IRequestClient<GetAllCompaniesRequest> request,
+            IRequestClient<GetUserSavedVacanciesRequest> client,
+            IHttpContextAccessor contextAccessor,
+            IRequestClient<UserRegisteredEvent> requestClient,
+            IRequestClient<GetAllVacanciesRequest> vacClient,
+            IRequestClient<SimilarVacanciesRequest> similarRequest,
+            IRequestClient<GetVacancyInfoRequest> vacancyInforRequest,
+            IRequestClient<GetAllVacanciesByCompanyIdDataRequest> vacancyByCompanyId,
+            IRequestClient<CheckVacancyRequest> checkVacancyRequest,
+            IRequestClient<CheckCompanyRequest> checkCompanyRequest,
+            IRequestClient<GetOtherVacanciesByCompanyRequest> othVacRequest,
+            IConfiguration configuration
+        )
         {
             _context = context;
             _request = request;
@@ -63,7 +74,9 @@ namespace Job.Business.Services.Vacancy
 
             await EnsureVacancyExistsAsync(vacancyGuid);
 
-            var vacancyCheck = await _context.SavedVacancies.FirstOrDefaultAsync(x => x.VacancyId == vacancyGuid);
+            var vacancyCheck = await _context.SavedVacancies.FirstOrDefaultAsync(x =>
+                x.VacancyId == vacancyGuid
+            );
 
             if (vacancyCheck != null)
             {
@@ -71,11 +84,9 @@ namespace Job.Business.Services.Vacancy
             }
             else
             {
-                await _context.SavedVacancies.AddAsync(new SavedVacancy
-                {
-                    UserId = userGuid,
-                    VacancyId = vacancyGuid,
-                });
+                await _context.SavedVacancies.AddAsync(
+                    new SavedVacancy { UserId = userGuid, VacancyId = vacancyGuid }
+                );
             }
             await _context.SaveChangesAsync();
         }
@@ -84,8 +95,8 @@ namespace Job.Business.Services.Vacancy
         public async Task<List<VacancyResponse>> GetAllSavedVacancyAsync(int skip, int take)
         {
             Guid? userGuid = GetUserId();
-            var savedVacanciesId = await _context.SavedVacancies
-                .Where(x => x.UserId == userGuid)
+            var savedVacanciesId = await _context
+                .SavedVacancies.Where(x => x.UserId == userGuid)
                 .Select(x => x.VacancyId)
                 .ToListAsync();
 
@@ -94,27 +105,16 @@ namespace Job.Business.Services.Vacancy
             return datas.Vacancies;
         }
 
-
-        /// <summary> Bütün şirkətlərin get allu </summary>
-        public async Task<ICollection<CompanyDto>> GetAllCompaniesAsync(string? searchTerm)
-        {
-            var response = await _request.GetResponse<GetAllCompaniesResponse>(new GetAllCompaniesRequest
-            {
-                SearchTerm = searchTerm,
-            });
-
-            return response.Message.Companies;
-        }
-
         /// <summary> Consumer metodu -  Vacancy idlerine göre saved olunan vakansiyalarin datasi </summary>
-        private async Task<GetUserSavedVacanciesResponse> GetUserSavedVacancyDataAsync(List<Guid> vacancyIds, int skip, int take)
+        private async Task<GetUserSavedVacanciesResponse> GetUserSavedVacancyDataAsync(
+            List<Guid> vacancyIds,
+            int skip,
+            int take
+        )
         {
             if (vacancyIds == null || vacancyIds.Count == 0)
             {
-                return new GetUserSavedVacanciesResponse
-                {
-                    Vacancies = []
-                };
+                return new GetUserSavedVacanciesResponse { Vacancies = [] };
             }
 
             var response = await _client.GetResponse<GetUserSavedVacanciesResponse>(
@@ -122,13 +122,12 @@ namespace Job.Business.Services.Vacancy
                 {
                     VacancyIds = vacancyIds,
                     Skip = skip,
-                    Take = take
+                    Take = take,
                 }
             );
 
             return response.Message;
         }
-
 
         /// <summary>
         /// Şirkətə aid olan digər vakansiyaların gətirilməsi
@@ -136,10 +135,17 @@ namespace Job.Business.Services.Vacancy
         /// <param name="companyId"></param>
         /// <param name="currentVacancyId"></param>
         /// <returns></returns>
-        public async Task<ICollection<AllVacanyDto>> GetOtherVacanciesByCompanyAsync(string companyId, string? currentVacancyId, int skip = 1, int take = 6)
+        public async Task<ICollection<AllVacanyDto>> GetOtherVacanciesByCompanyAsync(
+            string companyId,
+            string? currentVacancyId,
+            int skip = 1,
+            int take = 6
+        )
         {
             var guidCompanyId = Guid.Parse(companyId);
-            Guid? guidVacancyId = string.IsNullOrEmpty(currentVacancyId) ? null : Guid.Parse(currentVacancyId);
+            Guid? guidVacancyId = string.IsNullOrEmpty(currentVacancyId)
+                ? null
+                : Guid.Parse(currentVacancyId);
 
             await EnsureCompanyExistsAsync(guidCompanyId);
 
@@ -151,10 +157,12 @@ namespace Job.Business.Services.Vacancy
                 CompanyId = guidCompanyId,
                 CurrentVacancyId = guidVacancyId,
                 Skip = skip,
-                Take = take
+                Take = take,
             };
 
-            var response = await _othVacRequest.GetResponse<GetOtherVacanciesByCompanyResponse>(request);
+            var response = await _othVacRequest.GetResponse<GetOtherVacanciesByCompanyResponse>(
+                request
+            );
 
             var userGuid = GetUserId();
 
@@ -166,7 +174,6 @@ namespace Job.Business.Services.Vacancy
 
             return response.Message.Vacancies;
         }
-
 
         /// <summary>
         /// Vacancy detail-də şirket haqqında
@@ -180,20 +187,32 @@ namespace Job.Business.Services.Vacancy
 
             var userGuid = GetUserId();
 
-            var savedVacancies = userGuid == null
-                ? []
-                : await _context.SavedVacancies
-                    .Where(x => x.UserId == userGuid)
-                    .AsNoTracking()
-                    .Select(x => x.VacancyId)
-                    .ToListAsync();
+            var savedVacancies =
+                userGuid == null
+                    ? []
+                    : await _context
+                        .SavedVacancies.Where(x => x.UserId == userGuid)
+                        .AsNoTracking()
+                        .Select(x => x.VacancyId)
+                        .ToListAsync();
 
             response.Message.IsSaved = userGuid != null && savedVacancies.Contains(vacancyId);
 
             return response.Message;
         }
+
         /// <summary> Butun vakansiyalarin getirilmesi - search ve filter</summary>
-        public async Task<ICollection<AllVacanyDto>> GetAllVacanciesAsync(string? titleName, string? categoryId, string? countryId, string? cityId, bool? isActive, decimal? minSalary, decimal? maxSalary, int skip = 1, int take = 6)
+        public async Task<ICollection<AllVacanyDto>> GetAllVacanciesAsync(
+            string? titleName,
+            string? categoryId,
+            string? countryId,
+            string? cityId,
+            bool? isActive,
+            decimal? minSalary,
+            decimal? maxSalary,
+            int skip = 1,
+            int take = 6
+        )
         {
             var request = new GetAllVacanciesRequest
             {
@@ -210,10 +229,13 @@ namespace Job.Business.Services.Vacancy
             var vacancies = response.Message.Vacancies.AsQueryable();
             var userGuid = GetUserId();
 
-            var savedVacancies = userGuid == null ? new List<Guid>() : await _context.SavedVacancies
-                .Where(x => x.UserId == userGuid)
-                .Select(x => x.VacancyId)
-                .ToListAsync();
+            var savedVacancies =
+                userGuid == null
+                    ? new List<Guid>()
+                    : await _context
+                        .SavedVacancies.Where(x => x.UserId == userGuid)
+                        .Select(x => x.VacancyId)
+                        .ToListAsync();
 
             return vacancies
                 .Skip((skip - 1) * take)
@@ -233,11 +255,12 @@ namespace Job.Business.Services.Vacancy
                     IsActive = x.IsActive,
                     CategoryId = x.CategoryId,
                     WorkStyle = x.WorkStyle,
-                    IsSaved = userGuid != null && savedVacancies.Contains(Guid.Parse(x.VacancyId.ToString()))
+                    IsSaved =
+                        userGuid != null
+                        && savedVacancies.Contains(Guid.Parse(x.VacancyId.ToString())),
                 })
                 .ToList();
         }
-
 
         /// <summary> Oxsar vakansiylarin getirilmesi category'e gore </summary>
         public async Task<ICollection<SimilarVacancyDto>> SimilarVacanciesAsync(string vacancyId)
@@ -247,76 +270,86 @@ namespace Job.Business.Services.Vacancy
 
             await EnsureVacancyExistsAsync(guidVacancyId);
 
-            var savedVacancies = userGuid == null ? new List<Guid>() : await _context.SavedVacancies
-                .Where(x => x.UserId == userGuid)
-                .Select(x => x.VacancyId)
-                .ToListAsync();
+            var savedVacancies =
+                userGuid == null
+                    ? new List<Guid>()
+                    : await _context
+                        .SavedVacancies.Where(x => x.UserId == userGuid)
+                        .Select(x => x.VacancyId)
+                        .ToListAsync();
 
             var response = await _similarRequest.GetResponse<SimilarVacanciesResponse>(
                 new SimilarVacanciesRequest { VacancyId = vacancyId }
             );
 
-            var allVacancies = response.Message.Vacancies.Select(v => new SimilarVacancyDto
-            {
-                Id = v.Id,
-                CompanyName = v.CompanyName,
-                Title = v.Title,
-                CompanyLogo = $"{_authServiceBaseUrl}/{v.CompanyPhoto}",
-                StartDate = v.CreatedDate,
-                Location = v.CompanyLocation,
-                MainSalary = v.MainSalary,
-                ViewCount = v.ViewCount,
-                WorkType = v.WorkType,
-                IsVip = v.IsVip,
-                IsActive = v.IsActive,
-                IsSaved = userGuid != null && savedVacancies.Contains(Guid.Parse(v.Id.ToString()))
-            }).ToList();
+            var allVacancies = response
+                .Message.Vacancies.Select(v => new SimilarVacancyDto
+                {
+                    Id = v.Id,
+                    CompanyName = v.CompanyName,
+                    Title = v.Title,
+                    CompanyLogo = $"{_authServiceBaseUrl}/{v.CompanyPhoto}",
+                    StartDate = v.CreatedDate,
+                    Location = v.CompanyLocation,
+                    MainSalary = v.MainSalary,
+                    ViewCount = v.ViewCount,
+                    WorkType = v.WorkType,
+                    IsVip = v.IsVip,
+                    IsActive = v.IsActive,
+                    IsSaved =
+                        userGuid != null && savedVacancies.Contains(Guid.Parse(v.Id.ToString())),
+                })
+                .ToList();
 
             return allVacancies;
         }
-
 
         public async Task<ICollection<AllVacanyDto>> GetAllVacanciesByCompanyId(string companyId)
         {
             var guidCompanyId = Guid.Parse(companyId);
 
-            var response = await _vacancyByCompanyId.GetResponse<GetAllVacanciesByCompanyIdDataResponse>(
-                new GetAllVacanciesByCompanyIdDataRequest { CompanyId = guidCompanyId }
-            );
+            var response =
+                await _vacancyByCompanyId.GetResponse<GetAllVacanciesByCompanyIdDataResponse>(
+                    new GetAllVacanciesByCompanyIdDataRequest { CompanyId = guidCompanyId }
+                );
 
             return response.Message.Vacancies;
         }
 
         private async Task EnsureVacancyExistsAsync(Guid vacancyId)
         {
-            var response = await _checkVacancyRequest.GetResponse<CheckVacancyResponse>(new CheckVacancyRequest
-            {
-                VacancyId = vacancyId
-            });
+            var response = await _checkVacancyRequest.GetResponse<CheckVacancyResponse>(
+                new CheckVacancyRequest { VacancyId = vacancyId }
+            );
 
-            if (!response.Message.IsExist) throw new EntityNotFoundException("Vacancy");
+            if (!response.Message.IsExist)
+                throw new EntityNotFoundException("Vacancy");
         }
 
         private async Task EnsureCompanyExistsAsync(Guid companyId)
         {
-            var response = await _checkCompanyRequest.GetResponse<CheckCompanyResponse>(new CheckCompanyRequest
-            {
-                CompanyId = companyId
-            });
+            var response = await _checkCompanyRequest.GetResponse<CheckCompanyResponse>(
+                new CheckCompanyRequest { CompanyId = companyId }
+            );
 
-            if (!response.Message.IsExist) throw new EntityNotFoundException("Company");
+            if (!response.Message.IsExist)
+                throw new EntityNotFoundException("Company");
         }
 
         private Guid? GetUserId()
         {
             var userIdClaim = _contextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Sid)?.Value;
 
-            if (string.IsNullOrEmpty(userIdClaim)) return null;
+            if (string.IsNullOrEmpty(userIdClaim))
+                return null;
 
             return Guid.Parse(userIdClaim);
         }
 
-        private static void MarkSavedVacancies(ICollection<AllVacanyDto> vacancies, ICollection<Guid> savedVacancies)
+        private static void MarkSavedVacancies(
+            ICollection<AllVacanyDto> vacancies,
+            ICollection<Guid> savedVacancies
+        )
         {
             foreach (var vacancy in vacancies)
             {
@@ -326,8 +359,8 @@ namespace Job.Business.Services.Vacancy
 
         private async Task<ICollection<Guid>> FetchUserSavedVacancyIdsAsync(Guid userId)
         {
-            return await _context.SavedVacancies
-                .Where(x => x.UserId == userId)
+            return await _context
+                .SavedVacancies.Where(x => x.UserId == userId)
                 .AsNoTracking()
                 .Select(x => x.VacancyId)
                 .ToListAsync();
