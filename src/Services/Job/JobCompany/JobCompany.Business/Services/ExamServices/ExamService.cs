@@ -1,27 +1,27 @@
-﻿using System.Security.Claims;
-using JobCompany.Business.Dtos.AnswerDtos;
+﻿using JobCompany.Business.Dtos.AnswerDtos;
 using JobCompany.Business.Dtos.ExamDtos;
 using JobCompany.Business.Dtos.QuestionDtos;
-using JobCompany.Business.Exceptions.UserExceptions;
 using JobCompany.Business.Services.QuestionServices;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
+using MassTransit.Initializers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using SharedLibrary.ExternalServices.FileService;
+using System.Security.Claims;
 
 namespace JobCompany.Business.Services.ExamServices
 {
-    public class ExamService(JobCompanyDbContext context, IFileService fileService, IQuestionService questionService, IHttpContextAccessor _contextAccessor) : IExamService
+    public class ExamService(JobCompanyDbContext _context, IQuestionService _questionService, IHttpContextAccessor _contextAccessor) : IExamService
     {
-        private readonly JobCompanyDbContext _context = context;
-        private readonly IQuestionService _questionService = questionService;
-        private readonly Guid userGuid = Guid.Parse(_contextAccessor?.HttpContext?.User.FindFirst(ClaimTypes.Sid)?.Value ?? throw new UserIsNotLoggedInException());
+        private readonly Guid userGuid = Guid.Parse(_contextAccessor?.HttpContext?.User.FindFirst(ClaimTypes.Sid)?.Value!);
+
         public async Task<Guid> CreateExamAsync(CreateExamDto dto)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
+
             var company = await _context.Companies.FirstOrDefaultAsync(a => a.UserId == userGuid)
-            ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>();
+                ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>();
+
             try
             {
                 var exam = new Exam
@@ -66,29 +66,54 @@ namespace JobCompany.Business.Services.ExamServices
             }
         }
 
-
-        public async Task<GetExamByIdDto> GetExamByIdAsync(string examId, byte step)
+        public async Task<GetExamByIdDto> GetExamByIdAsync(string examId)
         {
             var examGuid = Guid.Parse(examId);
 
-            var exam = await _context.Exams
-                .Include(e => e.ExamQuestions)
-                .FirstOrDefaultAsync(e => e.Id == examGuid)
-                ?? throw new SharedLibrary.Exceptions.NotFoundException<Exam>();
+            return await _context.Exams
+             .AsNoTracking()
+             .Select(e => new GetExamByIdDto
+             {
+                 Id = e.Id,
+                 Title = e.Title,
+                 IntroDescription = e.IntroDescription,
+                 LastDescription = e.LastDescription,
+                 Duration = e.Duration,
+             })
+             .FirstOrDefaultAsync(e => e.Id == examGuid)
+             ?? throw new SharedLibrary.Exceptions.NotFoundException<Exam>();
+        }
 
-            var orderedQuestions = exam.ExamQuestions.OrderBy(q => q.Id).ToList();
+        public async Task<GetQuestionByStepDto> GetExamQuestionByStepAsync(string examId, int step)
+        {
+            var examGuid = Guid.Parse(examId);
 
-            var stepQuestion = orderedQuestions.Skip(step - 1).Take(1).ToList();
+            var question = await _context.Exams
+                .Where(e => e.Id == examGuid)
+                .SelectMany(e => e.ExamQuestions)
+                .Skip(step - 1)
+                .Select(eq => new GetQuestionByStepDto
+                {
+                    CurrentStep = step,
+                    TotalSteps = eq.Exam.ExamQuestions.Count,
+                    Question = new QuestionDetailDto
+                    {
+                        Id = eq.Question.Id,
+                        Title = eq.Question.Title,
+                        Image = eq.Question.Image,
+                        QuestionType = eq.Question.QuestionType,
+                        IsRequired = eq.Question.IsRequired,
+                        Answers = eq.Question.Answers.Select(a => new AnswerDetailDto
+                        {
+                            Id = a.Id,
+                            Text = a.Text,
+                        }).ToList()
+                    }
+                })
+                .FirstOrDefaultAsync()
+                ?? throw new SharedLibrary.Exceptions.NotFoundException<Question>();
 
-            var examDto = new GetExamByIdDto
-            {
-                IntroDescription = exam.IntroDescription,
-                CurrentStep = step,
-                LastDescription = exam.LastDescription,
-                Result = exam.Result,
-            };
-            
-            return examDto;
+            return question;
         }
     }
 }

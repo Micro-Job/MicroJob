@@ -21,4 +21,8 @@
     <ProjectReference Include="..\JobCompany.Business\JobCompany.Business.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\Files\Documents\" />
+  </ItemGroup>
+
 </Project>

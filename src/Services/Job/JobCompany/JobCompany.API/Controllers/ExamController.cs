@@ -1,4 +1,5 @@
 ﻿using JobCompany.Business.Dtos.ExamDtos;
+using JobCompany.Business.Dtos.QuestionDtos;
 using JobCompany.Business.Services.ExamServices;
 using Microsoft.AspNetCore.Mvc;
 using SharedLibrary.Attributes;
@@ -6,24 +7,27 @@ using SharedLibrary.Enums;
 
 namespace JobCompany.API.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
+    [AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser)]
     public class ExamController(IExamService examService) : ControllerBase
     {
         [HttpPost("[action]")]
-        [AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser)]
-        public async Task<IActionResult> CreateExam(CreateExamDto dto)
+        public async Task<IActionResult> CreateExam([FromForm] CreateExamDto dto)
         {
-            await examService.CreateExamAsync(dto);
-            return Ok();
+            return Ok(await examService.CreateExamAsync(dto));
         }
 
-        [HttpGet]
-        [AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser)]
-        public async Task<IActionResult> GetExamById(string examId, byte step)
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetExamById(string examId)
         {
-            var data = await examService.GetExamByIdAsync(examId, step);
-            return Ok(data);
+            return Ok(await examService.GetExamByIdAsync(examId));
+        }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetExamQuestionByStep(string examId, int step)
+        {
+            return Ok(await examService.GetExamQuestionByStepAsync(examId, step));            
         }
     }
 }
