@@ -43,7 +43,10 @@ namespace JobCompany.Business
             services.AddScoped<INotificationService, NotificationService>();
         }
 
-        public static IServiceCollection AddMassTransitCompany(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddMassTransitCompany(
+            this IServiceCollection services,
+            IConfiguration configuration
+        )
         {
             var rabbitMqConfig = configuration.GetSection("RabbitMQ");
             services.AddMassTransit(x =>
@@ -62,20 +65,25 @@ namespace JobCompany.Business
                 x.AddConsumer<CheckVacancyConsumer>();
                 x.AddConsumer<CheckCompanyConsumer>();
                 x.AddConsumer<GetOtherVacanciesByCompanyConsumer>();
+                x.AddConsumer<GetApplicationDetailConsumer>();
                 x.SetKebabCaseEndpointNameFormatter();
 
-                x.UsingRabbitMq((context, cfg) =>
-                {
-                    var rabbitMqConnectionString = configuration["RabbitMQ:ConnectionString"];
-                    if (string.IsNullOrEmpty(rabbitMqConnectionString))
+                x.UsingRabbitMq(
+                    (context, cfg) =>
                     {
-                        throw new InvalidOperationException("RabbitMQ Connection String is missing.");
+                        var rabbitMqConnectionString = configuration["RabbitMQ:ConnectionString"];
+                        if (string.IsNullOrEmpty(rabbitMqConnectionString))
+                        {
+                            throw new InvalidOperationException(
+                                "RabbitMQ Connection String is missing."
+                            );
+                        }
+
+                        cfg.Host(rabbitMqConnectionString);
+
+                        cfg.ConfigureEndpoints(context);
                     }
-
-                    cfg.Host(rabbitMqConnectionString);
-
-                    cfg.ConfigureEndpoints(context);
-                });
+                );
             });
 
             return services;

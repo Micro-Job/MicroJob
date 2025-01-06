@@ -4,6 +4,8 @@ using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Shared.Dtos.ApplicationDtos;
 using Shared.Events;
+using Shared.Requests;
+using Shared.Responses;
 using SharedLibrary.Dtos.ApplicationDtos;
 using SharedLibrary.Requests;
 using SharedLibrary.Responses;
@@ -17,6 +19,7 @@ namespace Job.Business.Services.Application
         private readonly IRequestClient<GetUserApplicationsRequest> _userApplicationRequest;
         private readonly IRequestClient<CheckVacancyRequest> _requestClient;
         private readonly IRequestClient<GetUserDataRequest> _requestUser;
+        private readonly IRequestClient<GetApplicationDetailRequest> _requestApplicationDetail;
         private readonly Guid userGuid;
 
         public UserApplicationService(
@@ -24,7 +27,8 @@ namespace Job.Business.Services.Application
             IHttpContextAccessor httpContextAccessor,
             IRequestClient<GetUserApplicationsRequest> userApplicationRequest,
             IRequestClient<CheckVacancyRequest> requestClient,
-            IRequestClient<GetUserDataRequest> requestUser
+            IRequestClient<GetUserDataRequest> requestUser,
+            IRequestClient<GetApplicationDetailRequest> requestApplicationDetail
         )
         {
             _publishEndpoint = publishEndpoint;
@@ -35,6 +39,7 @@ namespace Job.Business.Services.Application
                 _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value
             );
             _requestUser = requestUser;
+            _requestApplicationDetail = requestApplicationDetail;
         }
 
         /// <summary> İstifadəçinin bütün müraciətlərini gətirir </summary>
@@ -94,9 +99,15 @@ namespace Job.Business.Services.Application
             );
         }
 
-        public Task<ApplicationDetailDto> GetUserApplicationByIdAsync(string id)
+        public async Task<GetApplicationDetailResponse> GetUserApplicationByIdAsync(
+            string applicationId
+        )
         {
-            throw new NotImplementedException();
+            var response =
+                await _requestApplicationDetail.GetResponse<GetApplicationDetailResponse>(
+                    new GetApplicationDetailRequest { ApplicationId = applicationId }
+                );
+            return response.Message;
         }
     }
 }

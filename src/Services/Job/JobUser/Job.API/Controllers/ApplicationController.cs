@@ -11,7 +11,10 @@ namespace Job.API.Controllers
     public class ApplicationController(IUserApplicationService service) : ControllerBase
     {
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetUserApplication([FromQuery] int skip = 1, [FromQuery] int take = 9)
+        public async Task<IActionResult> GetUserApplication(
+            [FromQuery] int skip = 1,
+            [FromQuery] int take = 9
+        )
         {
             return Ok(await service.GetUserApplicationsAsync(skip, take));
         }
@@ -21,6 +24,12 @@ namespace Job.API.Controllers
         {
             await service.CreateUserApplicationAsync(vacancyId);
             return Ok();
+        }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetUserApplicationByIdAsync(string applicationId)
+        {
+            return Ok(await service.GetUserApplicationByIdAsync(applicationId));
         }
     }
 }

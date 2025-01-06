@@ -1,8 +1,10 @@
 ﻿using SharedLibrary.Enums;
+
 namespace SharedLibrary.Dtos.ApplicationDtos;
 
 public class ApplicationDto
 {
+    public Guid ApplicationId { get; set; }
     public Guid VacancyId { get; set; }
     public string title { get; set; }
     public Guid? CompanyId { get; set; }

@@ -4,5 +4,5 @@ namespace SharedLibrary.Responses;
 
 public class GetUserApplicationsResponse
 {
-    public List<ApplicationDto> UserApplications { get; set; } 
+    public List<ApplicationDto> UserApplications { get; set; }
 }
