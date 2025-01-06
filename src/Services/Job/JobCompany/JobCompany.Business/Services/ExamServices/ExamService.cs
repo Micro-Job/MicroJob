@@ -115,5 +115,18 @@ namespace JobCompany.Business.Services.ExamServices
 
             return question;
         }
+
+        public async Task DeleteExamAsync(string examId)
+        {
+            var examGuid = Guid.Parse(examId);
+
+            var exam = await _context.Exams
+                .FirstOrDefaultAsync(e => e.Id == examGuid && e.Company.UserId == userGuid)
+                ?? throw new SharedLibrary.Exceptions.NotFoundException<Exam>();
+
+            _context.Exams.Remove(exam);
+
+            await _context.SaveChangesAsync();
+        }
     }
 }
