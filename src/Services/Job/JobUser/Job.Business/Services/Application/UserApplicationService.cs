@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Job.Business.Exceptions.ApplicationExceptions;
 using Job.Business.Exceptions.Common;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
@@ -70,12 +71,15 @@ namespace Job.Business.Services.Application
             );
 
             var response = await _requestClient.GetResponse<CheckVacancyResponse>(
-                new CheckVacancyRequest { VacancyId = guidVac }
+                new CheckVacancyRequest { VacancyId = guidVac, UserId = userGuid }
             );
 
             if (!response.Message.IsExist)
                 throw new EntityNotFoundException("Vacancy");
             var companyId = response.Message.CompanyId;
+
+            if (response.Message.IsUserApplied)
+                throw new ApplicationIsAlreadyExistException();
 
             await _publishEndpoint.Publish(
                 new UserApplicationEvent

@@ -27,33 +27,42 @@ namespace Job.API
             builder.Services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "MyAPI", Version = "v1" });
-                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-                {
-                    In = ParameterLocation.Header,
-                    Description = "Please enter token",
-                    Name = "Authorization",
-                    Type = SecuritySchemeType.Http,
-                    BearerFormat = "JWT",
-                    Scheme = "bearer"
-                });
-
-                c.AddSecurityRequirement(new OpenApiSecurityRequirement
-                {
+                c.AddSecurityDefinition(
+                    "Bearer",
+                    new OpenApiSecurityScheme
                     {
-                        new OpenApiSecurityScheme
-                        {
-                            Reference = new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer"
-                            }
-                        },
-                        new string[] { }
+                        In = ParameterLocation.Header,
+                        Description = "Please enter token",
+                        Name = "Authorization",
+                        Type = SecuritySchemeType.Http,
+                        BearerFormat = "JWT",
+                        Scheme = "bearer",
                     }
-                });
+                );
+
+                c.AddSecurityRequirement(
+                    new OpenApiSecurityRequirement
+                    {
+                        {
+                            new OpenApiSecurityScheme
+                            {
+                                Reference = new OpenApiReference
+                                {
+                                    Type = ReferenceType.SecurityScheme,
+                                    Id = "Bearer",
+                                },
+                            },
+                            new string[] { }
+                        },
+                    }
+                );
             });
 
-            builder.Services.AddAuth(configuration["Jwt:Issuer"]!, configuration["Jwt:Audience"]!, configuration["Jwt:SigningKey"]!);
+            builder.Services.AddAuth(
+                configuration["Jwt:Issuer"]!,
+                configuration["Jwt:Audience"]!,
+                configuration["Jwt:SigningKey"]!
+            );
 
             builder.Services.AddDbContext<JobDbContext>(opt =>
             {
@@ -74,35 +83,52 @@ namespace Job.API
                 x.AddConsumer<UserRegisteredConsumer>();
                 x.AddConsumer<VacancyUpdatedConsumer>();
 
-                x.UsingRabbitMq((context, cfg) =>
-                {
-                    cfg.Host(configuration["RabbitMQ:ConnectionString"]);
-
-                    cfg.ReceiveEndpoint("vacancy-created-queue", e =>
+                x.UsingRabbitMq(
+                    (context, cfg) =>
                     {
-                        e.ConfigureConsumer<VacancyCreatedConsumer>(context);
-                    });
+                        cfg.Host(configuration["RabbitMQ:ConnectionString"]);
 
-                    cfg.ReceiveEndpoint("user-notification-queue", e =>
-                    {
-                        e.ConfigureConsumer<UpdateUserApplicationStatusConsumer>(context);
-                    });
+                        cfg.ReceiveEndpoint(
+                            "vacancy-created-queue",
+                            e =>
+                            {
+                                e.ConfigureConsumer<VacancyCreatedConsumer>(context);
+                            }
+                        );
 
-                    cfg.ReceiveEndpoint("get-resume-data-queue", e =>
-                    {
-                        e.ConfigureConsumer<GetResumeDataConsumer>(context);
-                    });
+                        cfg.ReceiveEndpoint(
+                            "user-notification-queue",
+                            e =>
+                            {
+                                e.ConfigureConsumer<UpdateUserApplicationStatusConsumer>(context);
+                            }
+                        );
 
-                    cfg.ReceiveEndpoint("user-registered-queue", e =>
-                    {
-                        e.ConfigureConsumer<UserRegisteredConsumer>(context);
-                    });
+                        cfg.ReceiveEndpoint(
+                            "get-resume-data-queue",
+                            e =>
+                            {
+                                e.ConfigureConsumer<GetResumeDataConsumer>(context);
+                            }
+                        );
 
-                    cfg.ReceiveEndpoint("vacancy-updated-queue", e =>
-                    {
-                        e.ConfigureConsumer<VacancyUpdatedConsumer>(context);
-                    });
-                });
+                        cfg.ReceiveEndpoint(
+                            "user-registered-queue",
+                            e =>
+                            {
+                                e.ConfigureConsumer<UserRegisteredConsumer>(context);
+                            }
+                        );
+
+                        cfg.ReceiveEndpoint(
+                            "vacancy-updated-queue",
+                            e =>
+                            {
+                                e.ConfigureConsumer<VacancyUpdatedConsumer>(context);
+                            }
+                        );
+                    }
+                );
             });
 
             builder.Services.AddHostedService<RabbitMqBackgroundService>();
@@ -113,13 +139,21 @@ namespace Job.API
             // CORS policy with multiple allowed origins
             builder.Services.AddCors(options =>
             {
-                options.AddPolicy("_myAllowSpecificOrigins", policy =>
-                {
-                    policy.WithOrigins("http://localhost:3000", "http://localhost:3001", "http://localhost:3002")
-                          .AllowAnyMethod()
-                          .AllowAnyHeader()
-                          .AllowCredentials();
-                });
+                options.AddPolicy(
+                    "_myAllowSpecificOrigins",
+                    policy =>
+                    {
+                        policy
+                            .WithOrigins(
+                                "http://localhost:3000",
+                                "http://localhost:3001",
+                                "http://localhost:3002"
+                            )
+                            .AllowAnyMethod()
+                            .AllowAnyHeader()
+                            .AllowCredentials();
+                    }
+                );
             });
 
             var app = builder.Build();
@@ -136,7 +170,7 @@ namespace Job.API
 
             app.UseHttpsRedirection();
             app.UseAuthorization();
-            app.UseCustomExceptionHandler();
+            // app.UseCustomExceptionHandler();
             app.UseCors("_myAllowSpecificOrigins");
 
             app.MapControllers();

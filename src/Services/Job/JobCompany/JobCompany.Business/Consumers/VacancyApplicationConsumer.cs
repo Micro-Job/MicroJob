@@ -5,7 +5,8 @@ using Shared.Events;
 
 namespace JobCompany.Business.Consumers
 {
-    public class VacancyApplicationConsumer(JobCompanyDbContext _context) : IConsumer<VacancyApplicationEvent>
+    public class VacancyApplicationConsumer(JobCompanyDbContext _context)
+        : IConsumer<VacancyApplicationEvent>
     {
         public async Task Consume(ConsumeContext<VacancyApplicationEvent> context)
         {

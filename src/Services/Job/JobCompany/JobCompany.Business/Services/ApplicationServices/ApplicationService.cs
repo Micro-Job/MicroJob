@@ -1,4 +1,5 @@
-﻿using JobCompany.Business.Dtos.ApplicationDtos;
+﻿using System.Security.Claims;
+using JobCompany.Business.Dtos.ApplicationDtos;
 using JobCompany.Business.Dtos.StatusDtos;
 using JobCompany.Business.Exceptions.ApplicationExceptions;
 using JobCompany.Business.Exceptions.VacancyExceptions;
@@ -14,7 +15,6 @@ using Shared.Events;
 using Shared.Requests;
 using Shared.Responses;
 using SharedLibrary.Exceptions;
-using System.Security.Claims;
 
 namespace JobCompany.Business.Services.ApplicationServices
 {
@@ -30,14 +30,24 @@ namespace JobCompany.Business.Services.ApplicationServices
         readonly IConfiguration _configuration;
         private readonly string? _authServiceBaseUrl;
 
-        public ApplicationService(JobCompanyDbContext context, IRequestClient<GetUsersDataRequest> client, IRequestClient<GetResumeDataRequest> requestClient, IHttpContextAccessor contextAccessor, IPublishEndpoint publishEndpoint, IConfiguration configuration)
+        public ApplicationService(
+            JobCompanyDbContext context,
+            IRequestClient<GetUsersDataRequest> client,
+            IRequestClient<GetResumeDataRequest> requestClient,
+            IHttpContextAccessor contextAccessor,
+            IPublishEndpoint publishEndpoint,
+            IConfiguration configuration
+        )
         {
             _context = context;
             _contextAccessor = contextAccessor;
             _client = client;
             _requestClient = requestClient;
-            _baseUrl = $"{_contextAccessor.HttpContext.Request.Scheme}://{_contextAccessor.HttpContext.Request.Host.Value}{_contextAccessor.HttpContext.Request.PathBase.Value}";
-            userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid).Value);
+            _baseUrl =
+                $"{_contextAccessor.HttpContext.Request.Scheme}://{_contextAccessor.HttpContext.Request.Host.Value}{_contextAccessor.HttpContext.Request.PathBase.Value}";
+            userGuid = Guid.Parse(
+                _contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid).Value
+            );
             _publishEndpoint = publishEndpoint;
             _configuration = configuration;
             _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
@@ -48,153 +58,175 @@ namespace JobCompany.Business.Services.ApplicationServices
         {
             var applicationGuid = Guid.Parse(applicationId);
 
-            var existApplication = await _context.Applications.FirstOrDefaultAsync(x => x.Id == applicationGuid && x.UserId == userGuid)
-            ?? throw new NotFoundException<Application>();
-            if (existApplication.IsActive == false) throw new ApplicationStatusIsDeactiveException();
+            var existApplication =
+                await _context.Applications.FirstOrDefaultAsync(x =>
+                    x.Id == applicationGuid && x.UserId == userGuid
+                ) ?? throw new NotFoundException<Application>();
+            if (existApplication.IsActive == false)
+                throw new ApplicationStatusIsDeactiveException();
             existApplication.IsActive = false;
             await _context.SaveChangesAsync();
         }
+
         /// <summary>
         /// Müraciətin statusunun dəyişilməsi ve eventle usere bildiris publishi
         /// </summary>
         /// <param name="">Company name'ni where selectle aldim include elemedim </param>
         /// <returns> </returns>
-        /// 
+        ///
         ///TODO : include baxmaq lazimdir
         public async Task ChangeApplicationStatusAsync(string applicationId, string statusId)
         {
             var statusGuid = Guid.Parse(statusId);
             var applicationGuid = Guid.Parse(applicationId);
 
-            var existAppVacancy = await _context.Applications
-                .Include(x => x.Vacancy)
-                .ThenInclude(v => v.Company)
-                .FirstOrDefaultAsync(x => x.Id == applicationGuid && x.Vacancy.Company.UserId == userGuid)
-                ?? throw new NotFoundException<Application>("Müraciət mövcud deyil!");
+            var existAppVacancy =
+                await _context
+                    .Applications.Include(x => x.Vacancy)
+                    .ThenInclude(v => v.Company)
+                    .FirstOrDefaultAsync(x =>
+                        x.Id == applicationGuid && x.Vacancy.Company.UserId == userGuid
+                    ) ?? throw new NotFoundException<Application>("Müraciət mövcud deyil!");
 
             existAppVacancy.StatusId = statusGuid;
             await _context.SaveChangesAsync();
 
             await _context.Entry(existAppVacancy).Reference(x => x.Status).LoadAsync();
 
-            await _publishEndpoint.Publish(new UpdateUserApplicationStatusEvent
-            {
-                UserId = existAppVacancy.UserId,
-                SenderId = userGuid,
-                InformationId = existAppVacancy.VacancyId,
-                Content = $"{existAppVacancy.Vacancy.Company.CompanyName} şirkətinin müraciət statusu dəyişdirildi: {existAppVacancy.Status.StatusName}"
-            });
+            await _publishEndpoint.Publish(
+                new UpdateUserApplicationStatusEvent
+                {
+                    UserId = existAppVacancy.UserId,
+                    SenderId = userGuid,
+                    InformationId = existAppVacancy.VacancyId,
+                    Content =
+                        $"{existAppVacancy.Vacancy.Company.CompanyName} şirkətinin müraciət statusu dəyişdirildi: {existAppVacancy.Status.StatusName}",
+                }
+            );
         }
 
-
         /// <summary> Müraciətlərin statusu ilə birlikdə gətirilməsi </summary>
-        public async Task<List<StatusListDtoWithApps>> GetAllApplicationWithStatusAsync(string vacancyId)
+        public async Task<List<StatusListDtoWithApps>> GetAllApplicationWithStatusAsync(
+            string vacancyId
+        )
         {
             var vacancyGuid = Guid.Parse(vacancyId);
 
-            var statuses = await _context.Statuses.Where(x => x.Company.UserId == userGuid || x.IsDefault == true).ToListAsync();
+            var statuses = await _context
+                .Statuses.Where(x => x.Company.UserId == userGuid || x.IsDefault == true)
+                .ToListAsync();
 
-            var applications = await _context.Applications.Where(x => x.VacancyId == vacancyGuid && x.IsActive == true).ToListAsync();
+            var applications = await _context
+                .Applications.Where(x => x.VacancyId == vacancyGuid && x.IsActive == true)
+                .ToListAsync();
 
-            var groupedData = statuses.Select(status => new StatusListDtoWithApps
-            {
-                StatusId = status.Id,
-                StatusName = status.StatusName,
-                StatusColor = status.StatusColor,
-                IsDefault = status.IsDefault,
-                Applications = applications
-            .Where(app => app.StatusId == status.Id)
-                .Select(app => new ApplicationListDto
+            var groupedData = statuses
+                .Select(status => new StatusListDtoWithApps
                 {
-                    ApplicationId = app.Id,
-                    UserId = app.UserId,
-                    VacancyId = app.VacancyId,
-                    IsActive = app.IsActive
-                }).Take(5).ToList()
-            }).ToList();
+                    StatusId = status.Id,
+                    StatusName = status.StatusName,
+                    StatusColor = status.StatusColor,
+                    IsDefault = status.IsDefault,
+                    Applications = applications
+                        .Where(app => app.StatusId == status.Id)
+                        .Select(app => new ApplicationListDto
+                        {
+                            ApplicationId = app.Id,
+                            UserId = app.UserId,
+                            VacancyId = app.VacancyId,
+                            IsActive = app.IsActive,
+                        })
+                        .Take(5)
+                        .ToList(),
+                })
+                .ToList();
 
             return groupedData;
         }
 
         /// <summary> vacancy ve statusa görə müraciətlərin gətirilməsi </summary>
         //bu metodun return-ü olmalıdır - tam deyil!!!!!!!!!!!!
-        public async Task GetAllApplicationWithStatusAsync(string vacancyId, string statusId, int skip = 1, int take = 5)
+        public async Task GetAllApplicationWithStatusAsync(
+            string vacancyId,
+            string statusId,
+            int skip = 1,
+            int take = 5
+        )
         {
             var vacancyGuid = Guid.Parse(vacancyId);
             var statusGuid = Guid.Parse(statusId);
 
-            var applications = await _context.Applications.Where(x => x.VacancyId == vacancyGuid && x.StatusId == statusGuid).Select(x => new
-            {
-                x.StatusId,
-                x.UserId,
-            })
-            .Skip(Math.Max(0, (skip - 1) * take))
-            .Take(take)
-            .ToListAsync();
+            var applications = await _context
+                .Applications.Where(x => x.VacancyId == vacancyGuid && x.StatusId == statusGuid)
+                .Select(x => new { x.StatusId, x.UserId })
+                .Skip(Math.Max(0, (skip - 1) * take))
+                .Take(take)
+                .ToListAsync();
         }
 
         /// <summary> Userin müraciətlərinin gətirilməsi </summary>
-        public async Task<List<ApplicationUserListDto>> GetUserApplicationAsync(int skip = 1, int take = 9)
+        public async Task<List<ApplicationUserListDto>> GetUserApplicationAsync(
+            int skip = 1,
+            int take = 9
+        )
         {
-            var userApps = await _context.Applications.Where(x => x.UserId == userGuid).Select(x => new ApplicationUserListDto
-            {
-                CompanyName = x.Vacancy.Company.CompanyName,
-                CreatedDate = x.CreatedDate,
-                MainSalary = x.Vacancy.MainSalary,
-                MaxSalary = x.Vacancy.MaxSalary,
-                StatusColor = x.Status.StatusColor,
-                StatusName = x.Status.StatusName,
-                VacancyId = x.VacancyId,
-                VacancyImage = $"{_baseUrl}/{x.Vacancy.CompanyLogo}",
-                VacancyTitle = x.Vacancy.Title,
-                ViewCount = x.Vacancy.ViewCount
-            })
-            .Skip(Math.Max(0, (skip - 1) * take))
-            .Take(take)
-            .ToListAsync();
+            var userApps = await _context
+                .Applications.Where(x => x.UserId == userGuid)
+                .Select(x => new ApplicationUserListDto
+                {
+                    CompanyName = x.Vacancy.Company.CompanyName,
+                    CreatedDate = x.CreatedDate,
+                    MainSalary = x.Vacancy.MainSalary,
+                    MaxSalary = x.Vacancy.MaxSalary,
+                    StatusColor = x.Status.StatusColor,
+                    StatusName = x.Status.StatusName,
+                    VacancyId = x.VacancyId,
+                    VacancyImage = $"{_baseUrl}/{x.Vacancy.CompanyLogo}",
+                    VacancyTitle = x.Vacancy.Title,
+                    ViewCount = x.Vacancy.ViewCount,
+                })
+                .Skip(Math.Max(0, (skip - 1) * take))
+                .Take(take)
+                .ToListAsync();
 
             return userApps;
         }
 
-        /// <summary> Id'yə görə müraciətin gətirilməsi </summary>  
+        /// <summary> Id'yə görə müraciətin gətirilməsi </summary>
         public async Task<ApplicationGetByIdDto> GetApplicationByIdAsync(string applicationId)
         {
             var applicationGuid = Guid.Parse(applicationId);
 
-            var application = await _context.Applications.Where(a => a.Id == applicationGuid && a.IsActive)
-            .Select(a => new ApplicationGetByIdDto
-            {
-                VacancyId = a.VacancyId,
-                VacancyImage = a.Vacancy.CompanyLogo,
-                VacancyTitle = a.Vacancy.Title,
-                CompanyName = a.Vacancy.CompanyName,
-                CreatedDate = a.CreatedDate,
-                Description = a.Vacancy.Description,
-                StatusName = a.Status.StatusName,
-                StatusColor = a.Status.StatusColor,
-                Steps = _context.Statuses
-                    .OrderBy(s => s.Order)
-                    .Select(s => s.StatusName)
-                    .ToList()
-            })
-            .FirstOrDefaultAsync() ?? throw new NotFoundException<Application>();
+            var application =
+                await _context
+                    .Applications.Where(a => a.Id == applicationGuid && a.IsActive)
+                    .Select(a => new ApplicationGetByIdDto
+                    {
+                        VacancyId = a.VacancyId,
+                        VacancyImage = a.Vacancy.CompanyLogo,
+                        VacancyTitle = a.Vacancy.Title,
+                        CompanyName = a.Vacancy.CompanyName,
+                        CreatedDate = a.CreatedDate,
+                        Description = a.Vacancy.Description,
+                        StatusName = a.Status.StatusName,
+                        StatusColor = a.Status.StatusColor,
+                        Steps = _context
+                            .Statuses.OrderBy(s => s.Order)
+                            .Select(s => s.StatusName)
+                            .ToList(),
+                    })
+                    .FirstOrDefaultAsync() ?? throw new NotFoundException<Application>();
             return application;
         }
 
         /// <summary> Consumer metodu - user idlərinə görə user datalarının gətirilməsi </summary>
         private async Task<GetUsersDataResponse> GetUserDataResponseAsync(List<Guid> userIds)
         {
-            var request = new GetUsersDataRequest
-            {
-                UserIds = userIds
-            };
+            var request = new GetUsersDataRequest { UserIds = userIds };
 
             var response = await _client.GetResponse<GetUsersDataResponse>(request);
 
-            var userDataResponse = new GetUsersDataResponse
-            {
-                Users = response.Message.Users
-            };
+            var userDataResponse = new GetUsersDataResponse { Users = response.Message.Users };
 
             return userDataResponse;
         }
@@ -202,33 +234,32 @@ namespace JobCompany.Business.Services.ApplicationServices
         /// <summary> Consumer metodu - Useridlere görə resumelerin getirilmesi </summary>
         private async Task<GetResumesDataResponse> GetResumeDataResponseAsync(List<Guid> userIds)
         {
-            var request = new GetResumeDataRequest
-            {
-                UserIds = userIds
-            };
+            var request = new GetResumeDataRequest { UserIds = userIds };
 
             var response = await _requestClient.GetResponse<GetResumesDataResponse>(request);
 
-            var userDataResponse = new GetResumesDataResponse
-            {
-                Users = response.Message.Users
-            };
+            var userDataResponse = new GetResumesDataResponse { Users = response.Message.Users };
 
             return userDataResponse;
         }
 
         /// <summary> Daxil olmus muracietler -> Şirkət üçün bütün müraciətlərin gətirilməsi </summary>
-        public async Task<ICollection<ApplicationInfoListDto>> GetAllApplicationAsync(int skip = 1, int take = 9)
+        public async Task<ICollection<ApplicationInfoListDto>> GetAllApplicationAsync(
+            int skip = 1,
+            int take = 9
+        )
         {
-            var company = await _context.Companies.FirstOrDefaultAsync(c => c.UserId == userGuid) ?? throw new NotFoundException<Company>();
-            var applications = await _context.Applications
-                .Include(a => a.Vacancy)
+            var company =
+                await _context.Companies.FirstOrDefaultAsync(c => c.UserId == userGuid)
+                ?? throw new NotFoundException<Company>();
+            var applications = await _context
+                .Applications.Include(a => a.Vacancy)
                 .ThenInclude(v => v.Company)
                 .Where(a => a.Vacancy.Company.UserId == userGuid)
                 .Select(a => new ApplicationInfoDto
                 {
                     UserId = a.UserId,
-                    CreatedDate = a.CreatedDate
+                    CreatedDate = a.CreatedDate,
                 })
                 .ToListAsync();
 
@@ -241,15 +272,19 @@ namespace JobCompany.Business.Services.ApplicationServices
                 .GroupBy(a => a.UserId)
                 .SelectMany(group =>
                 {
-                    var userData = userDataResponse.Users.FirstOrDefault(u => u.UserId == group.Key);
-                    var userResume = userResumeResponse.Users.FirstOrDefault(r => r.UserId == group.Key);
+                    var userData = userDataResponse.Users.FirstOrDefault(u =>
+                        u.UserId == group.Key
+                    );
+                    var userResume = userResumeResponse.Users.FirstOrDefault(r =>
+                        r.UserId == group.Key
+                    );
 
                     return group.Select(application => new ApplicationInfoListDto
                     {
                         FullName = $"{userData?.FirstName} {userData?.LastName}",
                         ImageUrl = $"{_authServiceBaseUrl}/{userData?.ProfileImage}",
                         Position = userResume?.Position,
-                        CreatedDate = application.CreatedDate
+                        CreatedDate = application.CreatedDate,
                     });
                 })
                 .Skip((skip - 1) * take)
@@ -260,7 +295,10 @@ namespace JobCompany.Business.Services.ApplicationServices
         }
 
         /// <summary> Şirkətə daxil olan bütün müraciətlərin filterlə birlikdə detallı şəkildə gətirilməsi </summary>
-        public async Task<ICollection<AllApplicationListDto>> GetAllApplicationsListAsync(int skip = 1, int take = 10)
+        public async Task<ICollection<AllApplicationListDto>> GetAllApplicationsListAsync(
+            int skip = 1,
+            int take = 10
+        )
         {
             var applications = await GetPaginatedApplicationsAsync(skip, take);
 
@@ -271,31 +309,36 @@ namespace JobCompany.Business.Services.ApplicationServices
             return MapApplicationsToDto(applications, userDataResponse);
         }
 
-        private List<AllApplicationListDto> MapApplicationsToDto(List<Application> applications, GetUsersDataResponse usersDataResponse)
+        private List<AllApplicationListDto> MapApplicationsToDto(
+            List<Application> applications,
+            GetUsersDataResponse usersDataResponse
+        )
         {
-            var response = applications.Select(a =>
-            {
-                var user = usersDataResponse.Users.FirstOrDefault(u => u.UserId == a.UserId);
-
-                return new AllApplicationListDto()
+            var response = applications
+                .Select(a =>
                 {
-                    FirstName = user.FirstName,
-                    LastName = user.LastName,
-                    Email = user.Email,
-                    PhoneNumber = user.PhoneNumber,
-                    StatusName = a.Status.StatusName,
-                    VacancyId = a.VacancyId,
-                    VacancyName = a.Vacancy.Title
-                };
-            }).ToList();
+                    var user = usersDataResponse.Users.FirstOrDefault(u => u.UserId == a.UserId);
+
+                    return new AllApplicationListDto()
+                    {
+                        FirstName = user.FirstName,
+                        LastName = user.LastName,
+                        Email = user.Email,
+                        PhoneNumber = user.PhoneNumber,
+                        StatusName = a.Status.StatusName,
+                        VacancyId = a.VacancyId,
+                        VacancyName = a.Vacancy.Title,
+                    };
+                })
+                .ToList();
 
             return response;
         }
 
         private async Task<List<Application>> GetPaginatedApplicationsAsync(int skip, int take)
         {
-            var query = _context.Applications
-                .Include(a => a.Vacancy)
+            var query = _context
+                .Applications.Include(a => a.Vacancy)
                 .ThenInclude(v => v.Company)
                 .Include(a => a.Status)
                 .Where(a => a.Vacancy.Company.UserId == userGuid)
