@@ -29,6 +29,7 @@ namespace JobCompany.Business.Consumers
             var application = await _jobCompanyDbContext
                 .Applications.Include(a => a.Vacancy)
                 .ThenInclude(v => v.Company)
+                .ThenInclude(c => c.Statuses)
                 .Include(a => a.Status)
                 .FirstOrDefaultAsync(a => a.Id == guidVacId);
 
