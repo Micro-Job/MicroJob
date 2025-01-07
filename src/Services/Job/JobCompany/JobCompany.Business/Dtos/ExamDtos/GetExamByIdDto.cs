@@ -6,7 +6,6 @@ namespace JobCompany.Business.Dtos.ExamDtos
     public record GetExamByIdDto
     {
         public Guid Id { get; set; }
-        public Guid CompanyId { get; set; }
         public string Title { get; set; }
         public bool IsTemplate { get; set; }
         public string IntroDescription { get; set; }

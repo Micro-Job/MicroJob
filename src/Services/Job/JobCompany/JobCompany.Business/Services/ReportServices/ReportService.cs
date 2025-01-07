@@ -20,13 +20,18 @@ namespace JobCompany.Business.Services.ReportServices
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly Guid _userGuid;
 
-
-        public ReportService(JobCompanyDbContext context, IRequestClient<GetUsersDataRequest> client, IHttpContextAccessor httpContextAccessor)
+        public ReportService(
+            JobCompanyDbContext context,
+            IRequestClient<GetUsersDataRequest> client,
+            IHttpContextAccessor httpContextAccessor
+        )
         {
             _context = context;
             _client = client;
             _httpContextAccessor = httpContextAccessor;
-            _userGuid = Guid.Parse(_httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value);
+            _userGuid = Guid.Parse(
+                _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value
+            );
         }
 
         /// <summary>
@@ -40,18 +45,22 @@ namespace JobCompany.Business.Services.ReportServices
         /// </returns>
         public async Task<SummaryDto> GetSummaryAsync()
         {
-            var acceptedStatusId = await _context.Statuses
-                .Where(s => s.StatusName == "Accepted" && s.IsDefault)
+            var acceptedStatusId = await _context
+                .Statuses.Where(s => s.StatusName == "Accepted" && s.IsDefault)
                 .Select(s => s.Id)
                 .FirstOrDefaultAsync();
 
-            var result = await _context.Applications
-                .GroupBy(a => new { a.Vacancy.IsActive, IsAccepted = a.StatusId == acceptedStatusId })
+            var result = await _context
+                .Applications.GroupBy(a => new
+                {
+                    a.Vacancy.IsActive,
+                    IsAccepted = a.StatusId == acceptedStatusId,
+                })
                 .Select(g => new
                 {
                     g.Key.IsActive,
                     g.Key.IsAccepted,
-                    Count = g.Count()
+                    Count = g.Count(),
                 })
                 .ToListAsync();
 
@@ -63,7 +72,7 @@ namespace JobCompany.Business.Services.ReportServices
             {
                 ActiveVacancies = activeVacancies,
                 TotalApplications = totalApplications,
-                AcceptedApplications = acceptedApplications
+                AcceptedApplications = acceptedApplications,
             };
             return summary;
         }
@@ -73,17 +82,17 @@ namespace JobCompany.Business.Services.ReportServices
         /// </summary>
         public async Task<List<RecentApplicationDto>> GetRecentApplicationsAsync()
         {
-            var recentApplications = await _context.Applications
-                    .OrderByDescending(a => a.CreatedDate)
-                    .Take(7)
-                    .Select(a => new
-                    {
-                        a.UserId,
-                        a.Vacancy.Title,
-                        a.Status.StatusName,
-                        a.Status.StatusColor
-                    })
-                    .ToListAsync();
+            var recentApplications = await _context
+                .Applications.OrderByDescending(a => a.CreatedDate)
+                .Take(7)
+                .Select(a => new
+                {
+                    a.UserId,
+                    a.Vacancy.Title,
+                    a.Status.StatusName,
+                    a.Status.StatusColor,
+                })
+                .ToListAsync();
 
             var userIds = recentApplications.Select(a => a.UserId).Distinct().ToList();
 
@@ -93,17 +102,21 @@ namespace JobCompany.Business.Services.ReportServices
 
             foreach (var application in recentApplications)
             {
-                var userData = userDataResponse.Users.FirstOrDefault(u => u.UserId == application.UserId);
+                var userData = userDataResponse.Users.FirstOrDefault(u =>
+                    u.UserId == application.UserId
+                );
 
                 if (userData != null)
                 {
-                    recentApplicationDtos.Add(new RecentApplicationDto
-                    {
-                        Fullname = $"{userData.FirstName} {userData.LastName}",
-                        VacancyName = application.Title,
-                        StatusName = application.StatusName,
-                        StatusColor = application.StatusColor
-                    });
+                    recentApplicationDtos.Add(
+                        new RecentApplicationDto
+                        {
+                            Fullname = $"{userData.FirstName} {userData.LastName}",
+                            VacancyName = application.Title,
+                            StatusName = application.StatusName,
+                            StatusColor = application.StatusColor,
+                        }
+                    );
                 }
             }
             return recentApplicationDtos;
@@ -111,51 +124,47 @@ namespace JobCompany.Business.Services.ReportServices
 
         public async Task<GetUsersDataResponse> GetUserDataResponseAsync(List<Guid> userIds)
         {
-            var request = new GetUsersDataRequest
-            {
-                UserIds = userIds
-            };
+            var request = new GetUsersDataRequest { UserIds = userIds };
             var response = await _client.GetResponse<GetUsersDataResponse>(request);
-            var userDataResponse = new GetUsersDataResponse
-            {
-                Users = response.Message.Users
-            };
+            var userDataResponse = new GetUsersDataResponse { Users = response.Message.Users };
             return userDataResponse;
         }
 
         /// <summary> Vakansiyanin statistikasi /// </summary>
         public async Task<ApplicationStatisticsDto> GetApplicationStatisticsAsync(string periodTime)
         {
-            var company = await _context.Companies.FirstOrDefaultAsync(c => c.UserId == _userGuid) ?? throw new NotFoundException<Company>();
-            var applications = await _context.Applications
-                .Include(a => a.Vacancy)
+            var company =
+                await _context.Companies.FirstOrDefaultAsync(c => c.UserId == _userGuid)
+                ?? throw new NotFoundException<Company>();
+            var applications = await _context
+                .Applications.Include(a => a.Vacancy)
                 .Where(a => a.Vacancy.CompanyId == company.Id)
                 .Select(a => new
                 {
                     a.VacancyId,
                     a.Vacancy.Title,
-                    a.CreatedDate
+                    a.CreatedDate,
                 })
                 .ToListAsync();
 
             IEnumerable<IGrouping<string, dynamic>> groupedApplications;
             switch (periodTime)
             {
-                case "1": 
+                case "1":
                     groupedApplications = applications
                         .GroupBy(a => $"{a.CreatedDate.Year} - Week {GetWeekNumber(a.CreatedDate)}")
                         .OrderByDescending(g => g.Key);
                     break;
 
-                case "2": 
+                case "2":
                     groupedApplications = applications
-                        .GroupBy(a => $"{a.CreatedDate.ToString("MMMM yyyy")}") 
+                        .GroupBy(a => $"{a.CreatedDate.ToString("MMMM yyyy")}")
                         .OrderByDescending(g => g.Key);
                     break;
 
                 case "3":
                     groupedApplications = applications
-                        .GroupBy(a => a.CreatedDate.ToString("yyyy")) 
+                        .GroupBy(a => a.CreatedDate.ToString("yyyy"))
                         .OrderByDescending(g => g.Key);
                     break;
 
@@ -168,19 +177,21 @@ namespace JobCompany.Business.Services.ReportServices
             var currentPeriodCount = currentPeriodApplications?.Count() ?? 0;
             var previousPeriodCount = previousPeriodApplications?.Count() ?? 0;
 
+            double percentageChange =
+                previousPeriodCount > 0
+                    ? (double)(currentPeriodCount - previousPeriodCount) / previousPeriodCount * 100
+                    : 0;
 
-            double percentageChange = previousPeriodCount > 0
-                ? (double)(currentPeriodCount - previousPeriodCount) / previousPeriodCount * 100
+            var mostCommonCount = groupedApplications.Any()
+                ? groupedApplications.Max(g => g.Count())
                 : 0;
-
-            var mostCommonCount = groupedApplications.Any() ? groupedApplications.Max(g => g.Count()) : 0;
 
             var groupedStatistics = groupedApplications
                 .Select(g => new PeriodStatisticDto
                 {
                     Period = g.Key,
                     Value = g.Count(),
-                    IsHighlighted = g.Count() == mostCommonCount
+                    IsHighlighted = g.Count() == mostCommonCount,
                 })
                 .ToList();
 
@@ -189,7 +200,7 @@ namespace JobCompany.Business.Services.ReportServices
                 .Select(g => new ApplicationDetailDto
                 {
                     Position = g.FirstOrDefault()?.Title,
-                    ApplicationsCount = g.Count()
+                    ApplicationsCount = g.Count(),
                 })
                 .ToList();
 
@@ -199,10 +210,10 @@ namespace JobCompany.Business.Services.ReportServices
                 PercentageChange = new PercentageChangeDto
                 {
                     Value = percentageChange,
-                    IsPositive = percentageChange > 0
+                    IsPositive = percentageChange > 0,
                 },
                 PeriodStatistics = groupedStatistics,
-                Applications = applicationDetails
+                Applications = applicationDetails,
             };
 
             return vacancyStatisticsDto;
@@ -211,7 +222,11 @@ namespace JobCompany.Business.Services.ReportServices
         private int GetWeekNumber(DateTime date)
         {
             var calendar = System.Globalization.CultureInfo.InvariantCulture.Calendar;
-            return calendar.GetWeekOfYear(date, System.Globalization.CalendarWeekRule.FirstDay, DayOfWeek.Monday);
+            return calendar.GetWeekOfYear(
+                date,
+                System.Globalization.CalendarWeekRule.FirstDay,
+                DayOfWeek.Monday
+            );
         }
     }
 }

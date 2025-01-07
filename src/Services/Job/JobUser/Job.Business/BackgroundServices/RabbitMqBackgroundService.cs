@@ -12,7 +12,10 @@ namespace Job.Business.BackgroundServices
         private readonly IServiceProvider _serviceProvider;
         private readonly IConfiguration _configuration;
 
-        public RabbitMqBackgroundService(IServiceProvider serviceProvider, IConfiguration configuration)
+        public RabbitMqBackgroundService(
+            IServiceProvider serviceProvider,
+            IConfiguration configuration
+        )
         {
             _serviceProvider = serviceProvider;
             _configuration = configuration;
@@ -26,50 +29,70 @@ namespace Job.Business.BackgroundServices
                 {
                     var connectionString = _configuration["RabbitMQ:ConnectionString"];
 
-                    cfg.ReceiveEndpoint("vacancy-created-queue", e =>
-                    {
-                        using var scope = _serviceProvider.CreateScope();
-                        var dbContext = scope.ServiceProvider.GetRequiredService<JobDbContext>();
-                        var consumer = new VacancyCreatedConsumer(dbContext);
+                    cfg.ReceiveEndpoint(
+                        "vacancy-created-queue",
+                        e =>
+                        {
+                            using var scope = _serviceProvider.CreateScope();
+                            var dbContext =
+                                scope.ServiceProvider.GetRequiredService<JobDbContext>();
+                            var consumer = new VacancyCreatedConsumer(dbContext);
 
-                        e.Consumer(() => consumer);
-                    });
+                            e.Consumer(() => consumer);
+                        }
+                    );
 
-                    cfg.ReceiveEndpoint("user-notification-queue", e =>
-                    {
-                        using var scope = _serviceProvider.CreateScope();
-                        var dbContext = scope.ServiceProvider.GetRequiredService<JobDbContext>();
-                        var consumer = new UpdateUserApplicationStatusConsumer(dbContext);
+                    cfg.ReceiveEndpoint(
+                        "user-notification-queue",
+                        e =>
+                        {
+                            using var scope = _serviceProvider.CreateScope();
+                            var dbContext =
+                                scope.ServiceProvider.GetRequiredService<JobDbContext>();
+                            var consumer = new UpdateUserApplicationStatusConsumer(dbContext);
 
-                        e.Consumer(() => consumer);
-                    });
+                            e.Consumer(() => consumer);
+                        }
+                    );
 
-                    cfg.ReceiveEndpoint("get-resume-data-queue", e =>
-                    {
-                        using var scope = _serviceProvider.CreateScope();
-                        var dbContext = scope.ServiceProvider.GetRequiredService<JobDbContext>();
-                        var consumer = new GetResumeDataConsumer(dbContext);
+                    cfg.ReceiveEndpoint(
+                        "get-resume-data-queue",
+                        e =>
+                        {
+                            using var scope = _serviceProvider.CreateScope();
+                            var dbContext =
+                                scope.ServiceProvider.GetRequiredService<JobDbContext>();
+                            var consumer = new GetResumeDataConsumer(dbContext);
 
-                        e.Consumer(() => consumer);
-                    });
+                            e.Consumer(() => consumer);
+                        }
+                    );
 
-                    cfg.ReceiveEndpoint("user-registered-queue", e =>
-                    {
-                        using var scope = _serviceProvider.CreateScope();
-                        var dbContext = scope.ServiceProvider.GetRequiredService<JobDbContext>();
-                        var consumer = new UserRegisteredConsumer(dbContext);
+                    cfg.ReceiveEndpoint(
+                        "user-registered-queue",
+                        e =>
+                        {
+                            using var scope = _serviceProvider.CreateScope();
+                            var dbContext =
+                                scope.ServiceProvider.GetRequiredService<JobDbContext>();
+                            var consumer = new UserRegisteredConsumer(dbContext);
 
-                        e.Consumer(() => consumer);
-                    });
+                            e.Consumer(() => consumer);
+                        }
+                    );
 
-                    cfg.ReceiveEndpoint("vacancy-updated-queue", e =>
-                    {
-                        using var scope = _serviceProvider.CreateScope();
-                        var dbContext = scope.ServiceProvider.GetRequiredService<JobDbContext>();
-                        var consumer = new VacancyUpdatedConsumer(dbContext);
+                    cfg.ReceiveEndpoint(
+                        "vacancy-updated-queue",
+                        e =>
+                        {
+                            using var scope = _serviceProvider.CreateScope();
+                            var dbContext =
+                                scope.ServiceProvider.GetRequiredService<JobDbContext>();
+                            var consumer = new VacancyUpdatedConsumer(dbContext);
 
-                        e.Consumer(() => consumer);
-                    });
+                            e.Consumer(() => consumer);
+                        }
+                    );
                 });
 
                 await busControl.StartAsync(stoppingToken);

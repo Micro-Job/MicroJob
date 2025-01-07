@@ -5,7 +5,8 @@ using Shared.Events;
 
 namespace Job.Business.Consumers
 {
-    public class UpdateUserApplicationStatusConsumer(JobDbContext _context) : IConsumer<UpdateUserApplicationStatusEvent>
+    public class UpdateUserApplicationStatusConsumer(JobDbContext _context)
+        : IConsumer<UpdateUserApplicationStatusEvent>
     {
         public async Task Consume(ConsumeContext<UpdateUserApplicationStatusEvent> context)
         {
@@ -15,7 +16,7 @@ namespace Job.Business.Consumers
                 SenderId = context.Message.SenderId,
                 Content = context.Message.Content,
                 InformationId = context.Message.InformationId,
-                IsSeen = false
+                IsSeen = false,
             };
 
             await _context.Notifications.AddAsync(newNotification);

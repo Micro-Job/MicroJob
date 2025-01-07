@@ -5,8 +5,10 @@ using System.Threading.Tasks;
 
 namespace JobCompany.Business.Dtos.ExamDtos
 {
-    public class ExamQuestionDetailDto
+    public record ExamListDto
     {
-        public Guid QuestionId { get; set; }
+        public Guid Id { get; set; }
+        public string Title { get; set; }
+        public int QuestionCount { get; set; }
     }
 }

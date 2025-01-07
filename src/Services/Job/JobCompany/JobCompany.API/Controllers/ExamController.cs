@@ -25,9 +25,15 @@ namespace JobCompany.API.Controllers
         }
 
         [HttpGet("[action]")]
+        public async Task<IActionResult> GetExams(int skip = 1, int take = 9)
+        {
+            return Ok(await examService.GetExamsAsync(skip, take));
+        }
+
+        [HttpGet("[action]")]
         public async Task<IActionResult> GetExamQuestionByStep(string examId, int step)
         {
-            return Ok(await examService.GetExamQuestionByStepAsync(examId, step));            
+            return Ok(await examService.GetExamQuestionByStepAsync(examId, step));
         }
 
         [HttpDelete("[action]")]
