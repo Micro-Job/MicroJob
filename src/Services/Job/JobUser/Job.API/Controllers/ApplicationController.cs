@@ -31,5 +31,11 @@ namespace Job.API.Controllers
         {
             return Ok(await service.GetUserApplicationByIdAsync(applicationId));
         }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetExamIntro(string vacancyId)
+        {
+            return Ok(await service.GetExamIntroAsync(vacancyId));
+        }
     }
 }

@@ -20,6 +20,7 @@ namespace Job.Business.Services.Application
         private readonly IRequestClient<GetUserApplicationsRequest> _userApplicationRequest;
         private readonly IRequestClient<CheckVacancyRequest> _requestClient;
         private readonly IRequestClient<GetUserDataRequest> _requestUser;
+        private readonly IRequestClient<GetExamDetailRequest> _examRequest;
         private readonly IRequestClient<GetApplicationDetailRequest> _requestApplicationDetail;
         private readonly Guid userGuid;
 
@@ -29,7 +30,8 @@ namespace Job.Business.Services.Application
             IRequestClient<GetUserApplicationsRequest> userApplicationRequest,
             IRequestClient<CheckVacancyRequest> requestClient,
             IRequestClient<GetUserDataRequest> requestUser,
-            IRequestClient<GetApplicationDetailRequest> requestApplicationDetail
+            IRequestClient<GetApplicationDetailRequest> requestApplicationDetail,
+            IRequestClient<GetExamDetailRequest> examRequest
         )
         {
             _publishEndpoint = publishEndpoint;
@@ -41,6 +43,7 @@ namespace Job.Business.Services.Application
             );
             _requestUser = requestUser;
             _requestApplicationDetail = requestApplicationDetail;
+            _examRequest = examRequest;
         }
 
         /// <summary> İstifadəçinin bütün müraciətlərini gətirir </summary>
@@ -111,6 +114,24 @@ namespace Job.Business.Services.Application
                 await _requestApplicationDetail.GetResponse<GetApplicationDetailResponse>(
                     new GetApplicationDetailRequest { ApplicationId = applicationId }
                 );
+            return response.Message;
+        }
+
+        public async Task<GetExamDetailResponse> GetExamIntroAsync(string vacancyId)
+        {
+            var request = new GetExamDetailRequest { VacancyId = vacancyId };
+
+            var response = await _examRequest.GetResponse<GetExamDetailResponse>(request);
+
+            var userDataResponse = await _requestUser.GetResponse<GetUserDataResponse>(
+                new GetUserDataRequest { UserId = userGuid }
+            );
+
+            var fullName =
+                $"{userDataResponse.Message.FirstName} {userDataResponse.Message.LastName}";
+
+            response.Message.FullName = fullName;
+
             return response.Message;
         }
     }
