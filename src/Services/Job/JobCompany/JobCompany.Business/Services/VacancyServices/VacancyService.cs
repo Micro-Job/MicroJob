@@ -150,6 +150,11 @@ namespace JobCompany.Business.Services.VacancyServices
                     }
                 );
             }
+
+            if (vacancyDto.Exam is not null)
+            {
+                await _examService.CreateExamAsync(vacancyDto.Exam);
+            }
         }
 
         public async Task DeleteAsync(List<string> ids)

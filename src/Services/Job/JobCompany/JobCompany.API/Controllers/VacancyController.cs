@@ -14,7 +14,7 @@ namespace JobCompany.API.Controllers
     public class VacancyController(IVacancyService vacancyService) : ControllerBase
     {
         [HttpPost("[action]")]
-        public async Task<IActionResult> CreateVacancy(CreateVacancyDto vacancyDto, ICollection<CreateNumberDto>? numberDtos)
+        public async Task<IActionResult> CreateVacancy([FromForm] CreateVacancyDto vacancyDto, [FromForm]ICollection<CreateNumberDto>? numberDtos)
         {
             await vacancyService.CreateVacancyAsync(vacancyDto, numberDtos);
             return Ok();
