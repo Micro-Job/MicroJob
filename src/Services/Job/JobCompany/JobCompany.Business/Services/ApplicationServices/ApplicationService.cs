@@ -71,10 +71,6 @@ namespace JobCompany.Business.Services.ApplicationServices
         /// <summary>
         /// Müraciətin statusunun dəyişilməsi ve eventle usere bildiris publishi
         /// </summary>
-        /// <param name="">Company name'ni where selectle aldim include elemedim </param>
-        /// <returns> </returns>
-        ///
-        ///TODO : include baxmaq lazimdir
         public async Task ChangeApplicationStatusAsync(string applicationId, string statusId)
         {
             var statusGuid = Guid.Parse(statusId);
@@ -82,25 +78,38 @@ namespace JobCompany.Business.Services.ApplicationServices
 
             var existAppVacancy =
                 await _context
-                    .Applications.Include(x => x.Vacancy)
-                    .ThenInclude(v => v.Company)
-                    .FirstOrDefaultAsync(x =>
+                    .Applications.Where(x =>
                         x.Id == applicationGuid && x.Vacancy.Company.UserId == userGuid
-                    ) ?? throw new NotFoundException<Application>("Müraciət mövcud deyil!");
+                    )
+                    .Select(x => new
+                    {
+                        Application = x,
+                        Vacancy = new
+                        {
+                            x.Vacancy.Id,
+                            x.Vacancy.CompanyId,
+                            CompanyName = x.Vacancy.Company.CompanyName,
+                        },
+                    })
+                    .FirstOrDefaultAsync()
+                ?? throw new NotFoundException<Application>("Müraciət mövcud deyil!");
 
-            existAppVacancy.StatusId = statusGuid;
+            var application = existAppVacancy.Application;
+            var vacancy = existAppVacancy.Vacancy;
+
+            application.StatusId = statusGuid;
             await _context.SaveChangesAsync();
 
-            await _context.Entry(existAppVacancy).Reference(x => x.Status).LoadAsync();
+            await _context.Entry(application).Reference(x => x.Status).LoadAsync();
 
             await _publishEndpoint.Publish(
                 new UpdateUserApplicationStatusEvent
                 {
-                    UserId = existAppVacancy.UserId,
+                    UserId = application.UserId,
                     SenderId = userGuid,
-                    InformationId = existAppVacancy.VacancyId,
+                    InformationId = vacancy.Id,
                     Content =
-                        $"{existAppVacancy.Vacancy.Company.CompanyName} şirkətinin müraciət statusu dəyişdirildi: {existAppVacancy.Status.StatusName}",
+                        $"{vacancy.CompanyName} şirkətinin müraciət statusu dəyişdirildi: {application.Status.StatusName}",
                 }
             );
         }
