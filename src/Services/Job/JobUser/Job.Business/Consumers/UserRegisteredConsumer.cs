@@ -9,10 +9,7 @@ namespace Job.Business.Consumers
     {
         public async Task Consume(ConsumeContext<UserRegisteredEvent> context)
         {
-            var newUser = new User
-            {
-                Id = context.Message.UserId
-            };
+            var newUser = new User { Id = context.Message.UserId };
 
             await _context.Users.AddAsync(newUser);
             await _context.SaveChangesAsync();

@@ -24,9 +24,7 @@ public class GetAllVacanciesConsumer : IConsumer<GetAllVacanciesRequest>
     {
         var request = context.Message;
 
-        var query = _context.Vacancies
-            .Include(v => v.Company)
-            .AsNoTracking();
+        var query = _context.Vacancies.Include(v => v.Company).AsNoTracking();
 
         if (!string.IsNullOrWhiteSpace(request.TitleName))
         {
@@ -85,9 +83,6 @@ public class GetAllVacanciesConsumer : IConsumer<GetAllVacanciesRequest>
             })
             .ToListAsync();
 
-        await context.RespondAsync(new GetAllVacanciesResponse
-        {
-            Vacancies = vacancies
-        });
+        await context.RespondAsync(new GetAllVacanciesResponse { Vacancies = vacancies });
     }
 }

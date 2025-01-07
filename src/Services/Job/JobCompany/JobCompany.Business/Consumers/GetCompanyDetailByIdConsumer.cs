@@ -18,33 +18,47 @@ public class GetCompanyDetailByIdConsumer : IConsumer<GetCompanyDetailByIdReques
     private readonly IRequestClient<GetAllCompaniesDataRequest> _requestClient;
     readonly IConfiguration _configuration;
     private readonly string? _authServiceBaseUrl;
-    public GetCompanyDetailByIdConsumer(JobCompanyDbContext jobCompanyDbContext, IRequestClient<GetAllCompaniesDataRequest> requestClient, IConfiguration configuration)
+
+    public GetCompanyDetailByIdConsumer(
+        JobCompanyDbContext jobCompanyDbContext,
+        IRequestClient<GetAllCompaniesDataRequest> requestClient,
+        IConfiguration configuration
+    )
     {
         _jobCompanyDbContext = jobCompanyDbContext;
         _requestClient = requestClient;
         _configuration = configuration;
         _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
     }
+
     public async Task Consume(ConsumeContext<GetCompanyDetailByIdRequest> context)
     {
-        var company = await _jobCompanyDbContext.Companies.Include(x => x.CompanyNumbers).FirstOrDefaultAsync(x => x.Id == context.Message.CompanyId)
+        var company =
+            await _jobCompanyDbContext
+                .Companies.Include(x => x.CompanyNumbers)
+                .FirstOrDefaultAsync(x => x.Id == context.Message.CompanyId)
             ?? throw new NotFoundException<Company>();
 
         GetAllCompaniesDataRequest userEmailRequest = new() { UserId = company.UserId };
 
-        var userEmailResponse = await _requestClient.GetResponse<GetAllCompaniesDataResponse>(userEmailRequest)
+        var userEmailResponse =
+            await _requestClient.GetResponse<GetAllCompaniesDataResponse>(userEmailRequest)
             ?? throw new Exception("Failed to retrieve user email");
 
-        await context.RespondAsync(new GetCompanyDetailByIdResponse
-        {
-            CompanyInformation = company.CompanyInformation,
-            CompanyLocation = company.CompanyLocation,
-            CompanyName = company.CompanyName,
-            CompanyLogo = $"{_authServiceBaseUrl}/{company.CompanyLogo}",
-            WebLink = company.WebLink,
-            CompanyNumbers = company.CompanyNumbers?.Select(x => new CompanyNumberDto { Number = x.Number }).ToList(),
-            Email = userEmailResponse.Message.Email,
-            PhoneNumber = userEmailResponse.Message.PhoneNumber
-        });
+        await context.RespondAsync(
+            new GetCompanyDetailByIdResponse
+            {
+                CompanyInformation = company.CompanyInformation,
+                CompanyLocation = company.CompanyLocation,
+                CompanyName = company.CompanyName,
+                CompanyLogo = $"{_authServiceBaseUrl}/{company.CompanyLogo}",
+                WebLink = company.WebLink,
+                CompanyNumbers = company
+                    .CompanyNumbers?.Select(x => new CompanyNumberDto { Number = x.Number })
+                    .ToList(),
+                Email = userEmailResponse.Message.Email,
+                PhoneNumber = userEmailResponse.Message.PhoneNumber,
+            }
+        );
     }
 }

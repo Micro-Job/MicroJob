@@ -8,9 +8,12 @@ using SharedLibrary.Statics;
 
 namespace Job.Business.Services.Certificate
 {
-    public class CertificateService(JobDbContext context, IFileService fileService) : ICertificateService
+    public class CertificateService(JobDbContext context, IFileService fileService)
+        : ICertificateService
     {
-        public async Task<ICollection<Core.Entities.Certificate>> CreateBulkCertificateAsync(ICollection<CertificateCreateDto> dtos)
+        public async Task<ICollection<Core.Entities.Certificate>> CreateBulkCertificateAsync(
+            ICollection<CertificateCreateDto> dtos
+        )
         {
             var certificatesToAdd = new List<Core.Entities.Certificate>();
 
@@ -23,23 +26,29 @@ namespace Job.Business.Services.Certificate
             return certificatesToAdd;
         }
 
-        public async Task<Core.Entities.Certificate> CreateCertificateAsync(CertificateCreateDto dto)
+        public async Task<Core.Entities.Certificate> CreateCertificateAsync(
+            CertificateCreateDto dto
+        )
         {
-            FileDto fileResult = await fileService.UploadAsync(FilePaths.document, dto.CertificateFile);
+            FileDto fileResult = await fileService.UploadAsync(
+                FilePaths.document,
+                dto.CertificateFile
+            );
 
             var certificate = new Core.Entities.Certificate
             {
                 CertificateName = dto.CertificateName,
                 CertificateFile = $"{fileResult.FilePath}/{fileResult.FileName}",
-                GivenOrganization = dto.GivenOrganization
+                GivenOrganization = dto.GivenOrganization,
             };
 
             await context.Certificates.AddAsync(certificate);
             return certificate;
         }
 
-
-        public async Task<ICollection<Core.Entities.Certificate>> UpdateBulkCertificateAsync(ICollection<CertificateUpdateDto> dtos)
+        public async Task<ICollection<Core.Entities.Certificate>> UpdateBulkCertificateAsync(
+            ICollection<CertificateUpdateDto> dtos
+        )
         {
             Guid parsedId;
 
@@ -51,9 +60,12 @@ namespace Job.Business.Services.Certificate
 
                 parsedId = Guid.Parse(dto.Id);
 
-                var certificate = await context.Certificates.FirstOrDefaultAsync(x => x.Id == parsedId);
+                var certificate = await context.Certificates.FirstOrDefaultAsync(x =>
+                    x.Id == parsedId
+                );
 
-                if (certificate != null) updatedCertificates.Add(certificate);
+                if (certificate != null)
+                    updatedCertificates.Add(certificate);
             }
 
             await context.SaveChangesAsync();
@@ -65,12 +77,16 @@ namespace Job.Business.Services.Certificate
         {
             var parsedId = Guid.Parse(dto.Id);
 
-            var certificate = await context.Certificates.FirstOrDefaultAsync(x => x.Id == parsedId)
+            var certificate =
+                await context.Certificates.FirstOrDefaultAsync(x => x.Id == parsedId)
                 ?? throw new NotFoundException<Core.Entities.Certificate>();
 
             fileService.DeleteFile(certificate.CertificateFile);
 
-            FileDto fileResult = await fileService.UploadAsync(FilePaths.document, dto.CertificateFile);
+            FileDto fileResult = await fileService.UploadAsync(
+                FilePaths.document,
+                dto.CertificateFile
+            );
 
             certificate.CertificateName = dto.CertificateName;
             certificate.GivenOrganization = dto.GivenOrganization;

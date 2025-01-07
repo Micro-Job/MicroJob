@@ -7,9 +7,15 @@ namespace Job.Business.Services.Education
 {
     public class EducationService(JobDbContext context) : IEducationService
     {
-        public async Task<ICollection<Core.Entities.Education>> CreateBulkEducationAsync(ICollection<EducationCreateDto> dtos, Guid resumeId)
+        public async Task<ICollection<Core.Entities.Education>> CreateBulkEducationAsync(
+            ICollection<EducationCreateDto> dtos,
+            Guid resumeId
+        )
         {
-            var educationsToAdd = dtos.Select(dto => MapEducationDtoToEntityForCreate(dto, resumeId)).ToList();
+            var educationsToAdd = dtos.Select(dto =>
+                    MapEducationDtoToEntityForCreate(dto, resumeId)
+                )
+                .ToList();
 
             await context.Educations.AddRangeAsync(educationsToAdd);
 
@@ -23,16 +29,19 @@ namespace Job.Business.Services.Education
             await context.Educations.AddAsync(education);
         }
 
-
-        public async Task<ICollection<Core.Entities.Education>> UpdateBulkEducationAsync(ICollection<EducationUpdateDto> dtos, Guid resumeId)
+        public async Task<ICollection<Core.Entities.Education>> UpdateBulkEducationAsync(
+            ICollection<EducationUpdateDto> dtos,
+            Guid resumeId
+        )
         {
             var educationsToUpdate = new List<Core.Entities.Education>();
 
             foreach (var dto in dtos)
             {
-                var education = await context.Educations
-                    .FirstOrDefaultAsync(e => e.ResumeId == resumeId && e.InstitutionName == dto.InstitutionName) ??
-                    throw new NotFoundException<Core.Entities.Education>();
+                var education =
+                    await context.Educations.FirstOrDefaultAsync(e =>
+                        e.ResumeId == resumeId && e.InstitutionName == dto.InstitutionName
+                    ) ?? throw new NotFoundException<Core.Entities.Education>();
 
                 MapEducationDtoToEntityForUpdate(education, dto);
 
@@ -46,14 +55,17 @@ namespace Job.Business.Services.Education
 
         public async Task UpdateEducationAsync(EducationUpdateDto dto)
         {
-            var education = await context.Educations.FindAsync(dto.Id)
+            var education =
+                await context.Educations.FindAsync(dto.Id)
                 ?? throw new NotFoundException<Core.Entities.Education>();
 
             MapEducationDtoToEntityForUpdate(education, dto);
         }
 
-
-        private static Core.Entities.Education MapEducationDtoToEntityForCreate(EducationCreateDto dto, Guid resumeId)
+        private static Core.Entities.Education MapEducationDtoToEntityForCreate(
+            EducationCreateDto dto,
+            Guid resumeId
+        )
         {
             return new Core.Entities.Education
             {
@@ -63,11 +75,14 @@ namespace Job.Business.Services.Education
                 StartDate = dto.StartDate,
                 EndDate = dto.IsCurrentEducation ? null : dto.EndDate,
                 IsCurrentEducation = dto.IsCurrentEducation,
-                ProfessionDegree = dto.ProfessionDegree
+                ProfessionDegree = dto.ProfessionDegree,
             };
         }
 
-        private static void MapEducationDtoToEntityForUpdate(Core.Entities.Education education, EducationUpdateDto dto)
+        private static void MapEducationDtoToEntityForUpdate(
+            Core.Entities.Education education,
+            EducationUpdateDto dto
+        )
         {
             education.InstitutionName = dto.InstitutionName;
             education.Profession = dto.Profession;

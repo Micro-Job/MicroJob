@@ -5,7 +5,8 @@ using SharedLibrary.Events;
 
 namespace JobCompany.Business.Consumers
 {
-    internal class CompanyRegisteredConsumer(JobCompanyDbContext _context) : IConsumer<CompanyRegisteredEvent>
+    internal class CompanyRegisteredConsumer(JobCompanyDbContext _context)
+        : IConsumer<CompanyRegisteredEvent>
     {
         public async Task Consume(ConsumeContext<CompanyRegisteredEvent> context)
         {
@@ -14,7 +15,7 @@ namespace JobCompany.Business.Consumers
                 Id = context.Message.CompanyId,
                 UserId = context.Message.UserId,
                 CompanyName = context.Message.CompanyName,
-                CompanyLogo = context.Message.CompanyLogo
+                CompanyLogo = context.Message.CompanyLogo,
             };
 
             await _context.Companies.AddAsync(newCompany);

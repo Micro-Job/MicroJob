@@ -18,9 +18,7 @@ namespace JobCompany.Business.Dtos.QuestionDtos
     {
         public QuestionCreateDtoValidator()
         {
-            RuleFor(q => q.Title)
-                .NotEmpty()
-                .WithMessage("Sual başlığı boş ola bilməz.");
+            RuleFor(q => q.Title).NotEmpty().WithMessage("Sual başlığı boş ola bilməz.");
         }
     }
 }

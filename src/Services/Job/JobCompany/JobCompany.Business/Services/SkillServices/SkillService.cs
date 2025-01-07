@@ -11,10 +11,7 @@ namespace JobCompany.Business.Services.Skill
 
         public async Task CreateSkillAsync(SkillDto dto)
         {
-            var skill = new Core.Entites.Skill()
-            {
-                Name = dto.Name,
-            };
+            var skill = new Core.Entites.Skill() { Name = dto.Name };
             await _context.Skills.AddAsync(skill);
             await _context.SaveChangesAsync();
         }
@@ -22,11 +19,7 @@ namespace JobCompany.Business.Services.Skill
         public async Task<List<GetAllSkillDto>> GetAllSkillsAsync()
         {
             var skills = await _context.Skills.ToListAsync();
-            return skills.Select(s => new GetAllSkillDto
-            {
-                Id = s.Id,
-                Name = s.Name
-            }).ToList();
+            return skills.Select(s => new GetAllSkillDto { Id = s.Id, Name = s.Name }).ToList();
         }
     }
 }

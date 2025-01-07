@@ -10,12 +10,11 @@ public class CheckCompanyConsumer(JobCompanyDbContext companyDb) : IConsumer<Che
 {
     public async Task Consume(ConsumeContext<CheckCompanyRequest> context)
     {
-        var company = await companyDb.Companies.FirstOrDefaultAsync(c => c.Id == context.Message.CompanyId);
-        
-        var response = new CheckCompanyResponse
-        {
-            IsExist = company != null
-        };
+        var company = await companyDb.Companies.FirstOrDefaultAsync(c =>
+            c.Id == context.Message.CompanyId
+        );
+
+        var response = new CheckCompanyResponse { IsExist = company != null };
 
         await context.RespondAsync(response);
     }

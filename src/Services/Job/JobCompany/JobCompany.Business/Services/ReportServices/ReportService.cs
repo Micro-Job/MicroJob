@@ -130,7 +130,7 @@ namespace JobCompany.Business.Services.ReportServices
             return userDataResponse;
         }
 
-        /// <summary> Vakansiyanin statistikasi /// </summary>
+        /// <summary> Applicationun statistikasi /// </summary>
         public async Task<ApplicationStatisticsDto> GetApplicationStatisticsAsync(string periodTime)
         {
             var company =

@@ -1,8 +1,8 @@
 ﻿using Job.Core.Entities;
 using Job.DAL.Contexts;
 using MassTransit;
-using SharedLibrary.Events;
 using Microsoft.EntityFrameworkCore;
+using SharedLibrary.Events;
 
 namespace Job.Business.Consumers
 {
@@ -19,9 +19,9 @@ namespace Job.Business.Consumers
         {
             var eventMessage = context.Message;
 
-            var resumes = await _context.Resumes
-                .Include(r => r.ResumeSkills)  
-                .Where(r => r.ResumeSkills.Any(rs => eventMessage.SkillIds.Contains(rs.SkillId))) 
+            var resumes = await _context
+                .Resumes.Include(r => r.ResumeSkills)
+                .Where(r => r.ResumeSkills.Any(rs => eventMessage.SkillIds.Contains(rs.SkillId)))
                 .ToListAsync();
 
             var notifications = new List<Notification>();
@@ -30,14 +30,14 @@ namespace Job.Business.Consumers
             {
                 var newNotification = new Notification
                 {
-                    ReceiverId = resume.UserId,  
-                    SenderId = eventMessage.SenderId, 
-                    Content = eventMessage.Content, 
+                    ReceiverId = resume.UserId,
+                    SenderId = eventMessage.SenderId,
+                    Content = eventMessage.Content,
                     InformationId = eventMessage.InformationId,
-                    IsSeen = false 
+                    IsSeen = false,
                 };
 
-                notifications.Add(newNotification);  
+                notifications.Add(newNotification);
             }
 
             if (notifications.Any())

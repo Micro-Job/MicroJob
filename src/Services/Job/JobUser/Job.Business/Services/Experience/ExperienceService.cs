@@ -7,9 +7,13 @@ namespace Job.Business.Services.Experience;
 
 public class ExperienceService(JobDbContext context) : IExperienceService
 {
-    public async Task<ICollection<Core.Entities.Experience>> CreateBulkExperienceAsync(ICollection<ExperienceCreateDto> dtos, Guid resumeId)
+    public async Task<ICollection<Core.Entities.Experience>> CreateBulkExperienceAsync(
+        ICollection<ExperienceCreateDto> dtos,
+        Guid resumeId
+    )
     {
-        var experiencesToAdd = dtos.Select(dto => MapExperienceDtoToEntityForCreate(dto, resumeId)).ToList();
+        var experiencesToAdd = dtos.Select(dto => MapExperienceDtoToEntityForCreate(dto, resumeId))
+            .ToList();
 
         await context.Experiences.AddRangeAsync(experiencesToAdd);
         await context.SaveChangesAsync();
@@ -17,16 +21,24 @@ public class ExperienceService(JobDbContext context) : IExperienceService
         return experiencesToAdd;
     }
 
-    public async Task CreateExperienceAsync(ExperienceCreateDto dto, Guid resumeId, bool saveChanges = true)
+    public async Task CreateExperienceAsync(
+        ExperienceCreateDto dto,
+        Guid resumeId,
+        bool saveChanges = true
+    )
     {
         var experience = MapExperienceDtoToEntityForCreate(dto, resumeId);
 
         await context.Experiences.AddAsync(experience);
 
-        if (saveChanges) await context.SaveChangesAsync();
+        if (saveChanges)
+            await context.SaveChangesAsync();
     }
 
-    public async Task<ICollection<Core.Entities.Experience>> UpdateBulkExperienceAsync(ICollection<ExperienceUpdateDto> dtos, Guid resumeId)
+    public async Task<ICollection<Core.Entities.Experience>> UpdateBulkExperienceAsync(
+        ICollection<ExperienceUpdateDto> dtos,
+        Guid resumeId
+    )
     {
         var experiencesToUpdate = new List<Core.Entities.Experience>();
 
@@ -39,24 +51,32 @@ public class ExperienceService(JobDbContext context) : IExperienceService
 
         await context.SaveChangesAsync();
 
-        return experiencesToUpdate; 
+        return experiencesToUpdate;
     }
 
-    public async Task<Core.Entities.Experience> UpdateExperienceAsync(ExperienceUpdateDto dto, Guid resumeId, bool saveChanges = true)
+    public async Task<Core.Entities.Experience> UpdateExperienceAsync(
+        ExperienceUpdateDto dto,
+        Guid resumeId,
+        bool saveChanges = true
+    )
     {
-        var experience = await context.Experiences
-            .FirstOrDefaultAsync(e => e.ResumeId == resumeId && e.OrganizationName == dto.OrganizationName)
-            ?? throw new NotFoundException<Core.Entities.Experience>();
+        var experience =
+            await context.Experiences.FirstOrDefaultAsync(e =>
+                e.ResumeId == resumeId && e.OrganizationName == dto.OrganizationName
+            ) ?? throw new NotFoundException<Core.Entities.Experience>();
 
         MapExperienceDtoToEntityForUpdate(experience, dto);
 
-        if (saveChanges) await context.SaveChangesAsync();
+        if (saveChanges)
+            await context.SaveChangesAsync();
 
         return experience;
     }
 
-
-    private static Core.Entities.Experience MapExperienceDtoToEntityForCreate(ExperienceCreateDto dto, Guid resumeId)
+    private static Core.Entities.Experience MapExperienceDtoToEntityForCreate(
+        ExperienceCreateDto dto,
+        Guid resumeId
+    )
     {
         return new Core.Entities.Experience
         {
@@ -66,11 +86,14 @@ public class ExperienceService(JobDbContext context) : IExperienceService
             PositionDescription = dto.PositionDescription,
             StartDate = dto.StartDate,
             EndDate = dto.IsCurrentOrganization ? null : dto.EndDate,
-            IsCurrentOrganization = dto.IsCurrentOrganization
+            IsCurrentOrganization = dto.IsCurrentOrganization,
         };
     }
 
-    private static void MapExperienceDtoToEntityForUpdate(Core.Entities.Experience experience, ExperienceUpdateDto dto)
+    private static void MapExperienceDtoToEntityForUpdate(
+        Core.Entities.Experience experience,
+        ExperienceUpdateDto dto
+    )
     {
         experience.OrganizationName = dto.OrganizationName;
         experience.PositionName = dto.PositionName;

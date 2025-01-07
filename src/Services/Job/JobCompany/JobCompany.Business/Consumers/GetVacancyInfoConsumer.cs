@@ -27,16 +27,17 @@ namespace Job.Business.Consumers
         public async Task Consume(ConsumeContext<GetVacancyInfoRequest> context)
         {
             var vacancyId = context.Message.Id;
-            var vacancy = await _context.Vacancies
-                .Where(x => x.Id == vacancyId)
-                .Select(v => new
-                {
-                    Vacancy = v,
-                    v.Category,
-                    v.Company,
-                    VacancyNumbers = v.VacancyNumbers.Select(n => n.Number).ToList()
-                })
-                .FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>();
+            var vacancy =
+                await _context
+                    .Vacancies.Where(x => x.Id == vacancyId)
+                    .Select(v => new
+                    {
+                        Vacancy = v,
+                        v.Category,
+                        v.Company,
+                        VacancyNumbers = v.VacancyNumbers.Select(n => n.Number).ToList(),
+                    })
+                    .FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>();
 
             vacancy.Vacancy.ViewCount++;
             await _context.SaveChangesAsync();
@@ -58,14 +59,16 @@ namespace Job.Business.Consumers
                 CompanyLogo = $"{_authServiceBaseUrl}/{vacancy.Company.CompanyLogo}",
                 Requirement = vacancy.Vacancy.Requirement,
                 Description = vacancy.Vacancy.Description,
-                VacancyNumbers = vacancy.VacancyNumbers.Select(n => new NumberDto { VacancyNumber = n }).ToList(),
+                VacancyNumbers = vacancy
+                    .VacancyNumbers.Select(n => new NumberDto { VacancyNumber = n })
+                    .ToList(),
                 StartDate = vacancy.Vacancy.StartDate,
                 EndDate = vacancy.Vacancy.EndDate,
                 CategoryName = vacancy.Category.CategoryName,
                 WorkType = vacancy.Vacancy.WorkType,
                 Location = vacancy.Vacancy.Location,
                 ViewCount = vacancy.Vacancy.ViewCount,
-                CompanyId = vacancy.Company.Id
+                CompanyId = vacancy.Company.Id,
             };
             await context.RespondAsync(response);
         }

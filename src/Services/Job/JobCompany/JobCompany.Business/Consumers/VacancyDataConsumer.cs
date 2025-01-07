@@ -23,12 +23,9 @@ namespace JobCompany.Business.Consumers
         public async Task Consume(ConsumeContext<GetUserSavedVacanciesRequest> context)
         {
             var vacancyIds = context.Message.VacancyIds;
-            // var totalCount = await _context.Vacancies
-            // .Where(v => vacancyIds.Contains(v.Id))
-            // .CountAsync();
 
-            var vacancies = await _context.Vacancies
-                .Where(v => vacancyIds.Contains(v.Id))
+            var vacancies = await _context
+                .Vacancies.Where(v => vacancyIds.Contains(v.Id))
                 .AsNoTracking()
                 .Skip(Math.Max(0, (context.Message.Skip - 1) * context.Message.Take))
                 .Take(context.Message.Take)
@@ -36,34 +33,33 @@ namespace JobCompany.Business.Consumers
 
             if (vacancies == null)
             {
-                await context.RespondAsync(new GetUserSavedVacanciesResponse
-                {
-                    Vacancies = new List<VacancyResponse>()
-                });
+                await context.RespondAsync(
+                    new GetUserSavedVacanciesResponse { Vacancies = new List<VacancyResponse>() }
+                );
                 return;
             }
 
             var response = new GetUserSavedVacanciesResponse
             {
-                Vacancies = vacancies.Select(v => new VacancyResponse
-                {
-                    Id = v.Id,
-                    Title = v.Title,
-                    CompanyName = v.CompanyName,
-                    CompanyLocation = v.Location,
-                    CreatedDate = v.StartDate,
-                    CompanyPhoto = $"{_authServiceBaseUrl}/{v.CompanyLogo}",
-                    MainSalary = v.MainSalary,
-                    MaxSalary = v.MaxSalary,
-                    ViewCount = v.ViewCount,
-                    IsVip = v.IsVip,
-                    WorkType = v.WorkType,
-                    IsSaved = true,
-                    // TotalCount = totalCount
-                }).ToList(),
+                Vacancies = vacancies
+                    .Select(v => new VacancyResponse
+                    {
+                        Id = v.Id,
+                        Title = v.Title,
+                        CompanyName = v.CompanyName,
+                        CompanyLocation = v.Location,
+                        CreatedDate = v.StartDate,
+                        CompanyPhoto = $"{_authServiceBaseUrl}/{v.CompanyLogo}",
+                        MainSalary = v.MainSalary,
+                        MaxSalary = v.MaxSalary,
+                        ViewCount = v.ViewCount,
+                        IsVip = v.IsVip,
+                        WorkType = v.WorkType,
+                        IsSaved = true,
+                    })
+                    .ToList(),
             };
             await context.RespondAsync(response);
         }
-
     }
 }

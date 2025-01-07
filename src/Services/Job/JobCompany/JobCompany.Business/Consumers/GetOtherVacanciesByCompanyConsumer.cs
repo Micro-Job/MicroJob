@@ -14,7 +14,10 @@ public class GetOtherVacanciesByCompanyConsumer : IConsumer<GetOtherVacanciesByC
     readonly IConfiguration _configuration;
     private readonly string? _authServiceBaseUrl;
 
-    public GetOtherVacanciesByCompanyConsumer(JobCompanyDbContext dbContext, IConfiguration configuration)
+    public GetOtherVacanciesByCompanyConsumer(
+        JobCompanyDbContext dbContext,
+        IConfiguration configuration
+    )
     {
         _dbContext = dbContext;
         _configuration = configuration;
@@ -23,8 +26,9 @@ public class GetOtherVacanciesByCompanyConsumer : IConsumer<GetOtherVacanciesByC
 
     public async Task Consume(ConsumeContext<GetOtherVacanciesByCompanyRequest> context)
     {
-        var vacanciesQuery = _dbContext.Vacancies
-            .Where(x => x.CompanyId == context.Message.CompanyId);
+        var vacanciesQuery = _dbContext.Vacancies.Where(x =>
+            x.CompanyId == context.Message.CompanyId
+        );
 
         if (context.Message.CurrentVacancyId.HasValue)
         {
@@ -41,30 +45,31 @@ public class GetOtherVacanciesByCompanyConsumer : IConsumer<GetOtherVacanciesByC
 
         if (vacancies is null || !vacancies.Any())
         {
-            await context.RespondAsync(new GetOtherVacanciesByCompanyResponse
-            {
-                Vacancies = new List<AllVacanyDto>()
-            });
+            await context.RespondAsync(
+                new GetOtherVacanciesByCompanyResponse { Vacancies = new List<AllVacanyDto>() }
+            );
             return;
         }
 
         var response = new GetOtherVacanciesByCompanyResponse
         {
-            Vacancies = vacancies.Select(x => new AllVacanyDto
-            {
-                VacancyId = x.Id.ToString(),
-                CompanyName = x.CompanyName,
-                CompanyLogo = $"{_authServiceBaseUrl}/{x.Company.CompanyLogo}",
-                Location = x.Location,
-                Title = x.Title,
-                WorkType = x.WorkType,
-                IsActive = x.IsActive,
-                IsVip = x.IsVip,
-                ViewCount = x.ViewCount,
-                MainSalary = x.MainSalary,
-                CategoryId = x.CategoryId,
-                StartDate = x.StartDate,
-            }).ToList()
+            Vacancies = vacancies
+                .Select(x => new AllVacanyDto
+                {
+                    VacancyId = x.Id.ToString(),
+                    CompanyName = x.CompanyName,
+                    CompanyLogo = $"{_authServiceBaseUrl}/{x.Company.CompanyLogo}",
+                    Location = x.Location,
+                    Title = x.Title,
+                    WorkType = x.WorkType,
+                    IsActive = x.IsActive,
+                    IsVip = x.IsVip,
+                    ViewCount = x.ViewCount,
+                    MainSalary = x.MainSalary,
+                    CategoryId = x.CategoryId,
+                    StartDate = x.StartDate,
+                })
+                .ToList(),
         };
         await context.RespondAsync(response);
     }

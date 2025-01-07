@@ -338,37 +338,43 @@ namespace JobCompany.Business.Services.VacancyServices
         {
             var vacancyGuid = Guid.Parse(vacancyDto.Id);
             var existingVacancy =
-                await _context.Vacancies.FirstOrDefaultAsync(v => v.Id == vacancyGuid)
-                ?? throw new NotFoundException<Vacancy>();
+                await _context
+                    .Vacancies.Where(v => v.Id == vacancyGuid && v.Company.UserId == _userGuid)
+                    .Select(v => new { Vacancy = v, CompanyId = v.Company.Id })
+                    .FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>();
 
-            existingVacancy.CompanyId = Guid.Parse(vacancyDto.CompanyId);
-            existingVacancy.CompanyName = vacancyDto.CompanyName;
-            existingVacancy.Title = vacancyDto.Title;
-            existingVacancy.StartDate = vacancyDto.StartDate;
-            existingVacancy.EndDate = vacancyDto.EndDate;
-            existingVacancy.Location = vacancyDto.Location;
-            existingVacancy.CountryId = Guid.Parse(vacancyDto.CountryId ?? throw new Exception());
-            existingVacancy.CityId = Guid.Parse(vacancyDto.CityId ?? throw new Exception());
-            existingVacancy.Email = vacancyDto.Email;
-            existingVacancy.WorkType = vacancyDto.WorkType;
-            existingVacancy.WorkStyle = vacancyDto.WorkStyle;
-            existingVacancy.MainSalary = vacancyDto.MainSalary;
-            existingVacancy.MaxSalary = vacancyDto.MaxSalary;
-            existingVacancy.Requirement = vacancyDto.Requirement;
-            existingVacancy.Description = vacancyDto.Description;
-            existingVacancy.Gender = vacancyDto.Gender;
-            existingVacancy.Military = vacancyDto.Military;
-            existingVacancy.Driver = vacancyDto.Driver;
-            existingVacancy.Family = vacancyDto.Family;
-            existingVacancy.Citizenship = vacancyDto.Citizenship;
-            existingVacancy.CategoryId = Guid.Parse(vacancyDto.CategoryId ?? throw new Exception());
+            existingVacancy.Vacancy.CompanyId = Guid.Parse(vacancyDto.CompanyId);
+            existingVacancy.Vacancy.CompanyName = vacancyDto.CompanyName;
+            existingVacancy.Vacancy.Title = vacancyDto.Title;
+            existingVacancy.Vacancy.StartDate = vacancyDto.StartDate;
+            existingVacancy.Vacancy.EndDate = vacancyDto.EndDate;
+            existingVacancy.Vacancy.Location = vacancyDto.Location;
+            existingVacancy.Vacancy.CountryId = Guid.Parse(
+                vacancyDto.CountryId ?? throw new Exception()
+            );
+            existingVacancy.Vacancy.CityId = Guid.Parse(vacancyDto.CityId ?? throw new Exception());
+            existingVacancy.Vacancy.Email = vacancyDto.Email;
+            existingVacancy.Vacancy.WorkType = vacancyDto.WorkType;
+            existingVacancy.Vacancy.WorkStyle = vacancyDto.WorkStyle;
+            existingVacancy.Vacancy.MainSalary = vacancyDto.MainSalary;
+            existingVacancy.Vacancy.MaxSalary = vacancyDto.MaxSalary;
+            existingVacancy.Vacancy.Requirement = vacancyDto.Requirement;
+            existingVacancy.Vacancy.Description = vacancyDto.Description;
+            existingVacancy.Vacancy.Gender = vacancyDto.Gender;
+            existingVacancy.Vacancy.Military = vacancyDto.Military;
+            existingVacancy.Vacancy.Driver = vacancyDto.Driver;
+            existingVacancy.Vacancy.Family = vacancyDto.Family;
+            existingVacancy.Vacancy.Citizenship = vacancyDto.Citizenship;
+            existingVacancy.Vacancy.CategoryId = Guid.Parse(
+                vacancyDto.CategoryId ?? throw new Exception()
+            );
 
             if (numberDtos is not null)
             {
                 foreach (var numberDto in numberDtos)
                 {
                     var phoneNumberGuid = Guid.Parse(numberDto.Id);
-                    var phoneNumber = existingVacancy.VacancyNumbers?.FirstOrDefault(p =>
+                    var phoneNumber = existingVacancy.Vacancy.VacancyNumbers?.FirstOrDefault(p =>
                         p.Id == phoneNumberGuid
                     );
                     if (phoneNumber != null && phoneNumber.Number != numberDto.PhoneNumber)
@@ -390,7 +396,7 @@ namespace JobCompany.Business.Services.VacancyServices
                     InformationId = vacancyGuid,
                     SenderId = _userGuid,
                     UserIds = userIds,
-                    Content = $"Vakansiya yeniləndi: {existingVacancy.Title}",
+                    Content = $"Vakansiya yeniləndi: {existingVacancy.Vacancy.Title}",
                 }
             );
         }
