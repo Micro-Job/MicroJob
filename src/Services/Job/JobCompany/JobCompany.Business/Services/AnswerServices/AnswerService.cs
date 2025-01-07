@@ -8,15 +8,19 @@ namespace JobCompany.Business.Services.AnswerServices
     {
         private readonly JobCompanyDbContext _context = context;
 
-        public async Task<ICollection<Answer>> CreateBulkAnswerAsync(ICollection<CreateAnswerDto> dtos, string questionId)
+        public async Task<ICollection<Answer>> CreateBulkAnswerAsync(
+            ICollection<CreateAnswerDto> dtos,
+            string questionId
+        )
         {
             Guid questionGuid = Guid.Parse(questionId);
             var answersToAdd = dtos.Select(dto => new Answer
-            {
-                Text = dto.Text,
-                QuestionId = questionGuid,
-                IsCorrect = dto.IsCorrect
-            }).ToList();
+                {
+                    Text = dto.Text,
+                    QuestionId = questionGuid,
+                    IsCorrect = dto.IsCorrect,
+                })
+                .ToList();
             await _context.Answers.AddRangeAsync(answersToAdd);
             return answersToAdd;
         }

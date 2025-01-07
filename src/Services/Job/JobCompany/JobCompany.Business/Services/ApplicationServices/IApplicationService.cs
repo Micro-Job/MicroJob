@@ -8,12 +8,6 @@ namespace JobCompany.Business.Services.ApplicationServices
         Task RemoveApplicationAsync(string applicationId);
         Task ChangeApplicationStatusAsync(string applicationId, string statusId);
         Task<List<StatusListDtoWithApps>> GetAllApplicationWithStatusAsync(string vacancyId);
-        Task GetAllApplicationWithStatusAsync(
-            string vacancyId,
-            string statusId,
-            int skip = 1,
-            int take = 5
-        );
         Task<List<ApplicationUserListDto>> GetUserApplicationAsync(int skip = 1, int take = 9);
         Task<ApplicationGetByIdDto> GetApplicationByIdAsync(string applicationId);
         Task<ICollection<ApplicationInfoListDto>> GetAllApplicationAsync(

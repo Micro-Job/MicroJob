@@ -112,23 +112,21 @@ namespace JobCompany.Business.Services.ApplicationServices
         {
             var vacancyGuid = Guid.Parse(vacancyId);
 
-            var statuses = await _context
-                .Statuses.Where(x => x.Company.UserId == userGuid || x.IsDefault == true)
-                .ToListAsync();
-
-            var applications = await _context
-                .Applications.Where(x => x.VacancyId == vacancyGuid && x.IsActive == true)
-                .ToListAsync();
-
-            var groupedData = statuses
+            var groupedData = await _context
+                .Statuses.Where(status => status.Company.UserId == userGuid)
                 .Select(status => new StatusListDtoWithApps
                 {
                     StatusId = status.Id,
                     StatusName = status.StatusName,
                     StatusColor = status.StatusColor,
                     IsDefault = status.IsDefault,
-                    Applications = applications
-                        .Where(app => app.StatusId == status.Id)
+                    Applications = _context
+                        .Applications.Where(app =>
+                            app.VacancyId == vacancyGuid
+                            && app.IsActive
+                            && app.StatusId == status.Id
+                        )
+                        .Take(5)
                         .Select(app => new ApplicationListDto
                         {
                             ApplicationId = app.Id,
@@ -136,32 +134,11 @@ namespace JobCompany.Business.Services.ApplicationServices
                             VacancyId = app.VacancyId,
                             IsActive = app.IsActive,
                         })
-                        .Take(5)
                         .ToList(),
                 })
-                .ToList();
+                .ToListAsync();
 
             return groupedData;
-        }
-
-        /// <summary> vacancy ve statusa görə müraciətlərin gətirilməsi </summary>
-        //bu metodun return-ü olmalıdır - tam deyil!!!!!!!!!!!!
-        public async Task GetAllApplicationWithStatusAsync(
-            string vacancyId,
-            string statusId,
-            int skip = 1,
-            int take = 5
-        )
-        {
-            var vacancyGuid = Guid.Parse(vacancyId);
-            var statusGuid = Guid.Parse(statusId);
-
-            var applications = await _context
-                .Applications.Where(x => x.VacancyId == vacancyGuid && x.StatusId == statusGuid)
-                .Select(x => new { x.StatusId, x.UserId })
-                .Skip(Math.Max(0, (skip - 1) * take))
-                .Take(take)
-                .ToListAsync();
         }
 
         /// <summary> Userin müraciətlərinin gətirilməsi </summary>
