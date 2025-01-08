@@ -77,6 +77,7 @@ public class GetAllVacanciesConsumer : IConsumer<GetAllVacanciesRequest>
                 ViewCount = v.ViewCount,
                 MainSalary = v.MainSalary,
                 WorkType = v.WorkType,
+                WorkStyle = v.WorkStyle,
                 IsVip = v.IsVip,
                 IsActive = v.IsActive,
                 CategoryId = v.CategoryId,

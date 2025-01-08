@@ -66,6 +66,7 @@ namespace Job.Business.Consumers
                 EndDate = vacancy.Vacancy.EndDate,
                 CategoryName = vacancy.Category.CategoryName,
                 WorkType = vacancy.Vacancy.WorkType,
+                WorkStyle = vacancy.Vacancy.WorkStyle,
                 Location = vacancy.Vacancy.Location,
                 ViewCount = vacancy.Vacancy.ViewCount,
                 CompanyId = vacancy.Company.Id,
