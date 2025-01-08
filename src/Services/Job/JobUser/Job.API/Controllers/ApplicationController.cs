@@ -1,3 +1,4 @@
+using Job.Business.Dtos.ExamDtos;
 using Job.Business.Services.Application;
 using Microsoft.AspNetCore.Mvc;
 using SharedLibrary.Attributes;
@@ -36,6 +37,18 @@ namespace Job.API.Controllers
         public async Task<IActionResult> GetExamIntro(string vacancyId)
         {
             return Ok(await service.GetExamIntroAsync(vacancyId));
+        }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetExamQuestions(Guid examId)
+        {
+            return Ok(await service.GetExamQuestionsAsync(examId));
+        }
+
+        [HttpPost("[action]")]
+        public async Task<IActionResult> EvaluateExamAnswers(SubmitExamAnswersDto dto)
+        {
+            return Ok(await service.EvaluateExamAnswersAsync(dto));
         }
     }
 }

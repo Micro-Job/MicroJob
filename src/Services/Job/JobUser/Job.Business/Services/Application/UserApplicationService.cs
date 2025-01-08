@@ -1,13 +1,20 @@
 using System.Security.Claims;
+using Job.Business.Dtos.ExamDtos;
 using Job.Business.Exceptions.ApplicationExceptions;
 using Job.Business.Exceptions.Common;
+using Job.Business.Exceptions.UserExceptions;
+using Job.Core.Entities;
+using Job.DAL.Contexts;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Shared.Dtos.ApplicationDtos;
 using Shared.Events;
 using Shared.Requests;
 using Shared.Responses;
 using SharedLibrary.Dtos.ApplicationDtos;
+using SharedLibrary.Dtos.QuestionDtos;
+using SharedLibrary.Enums;
 using SharedLibrary.Requests;
 using SharedLibrary.Responses;
 
@@ -16,24 +23,29 @@ namespace Job.Business.Services.Application
     public class UserApplicationService : IUserApplicationService
     {
         readonly IPublishEndpoint _publishEndpoint;
+        private readonly JobDbContext _jobDbContext;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IRequestClient<GetUserApplicationsRequest> _userApplicationRequest;
         private readonly IRequestClient<CheckVacancyRequest> _requestClient;
         private readonly IRequestClient<GetUserDataRequest> _requestUser;
         private readonly IRequestClient<GetExamDetailRequest> _examRequest;
         private readonly IRequestClient<GetApplicationDetailRequest> _requestApplicationDetail;
+        private readonly IRequestClient<GetExamQuestionsRequest> _getExamQuestionsRequest;
         private readonly Guid userGuid;
 
         public UserApplicationService(
+            JobDbContext jobDbContext,
             IPublishEndpoint publishEndpoint,
             IHttpContextAccessor httpContextAccessor,
             IRequestClient<GetUserApplicationsRequest> userApplicationRequest,
             IRequestClient<CheckVacancyRequest> requestClient,
             IRequestClient<GetUserDataRequest> requestUser,
             IRequestClient<GetApplicationDetailRequest> requestApplicationDetail,
-            IRequestClient<GetExamDetailRequest> examRequest
+            IRequestClient<GetExamDetailRequest> examRequest,
+            IRequestClient<GetExamQuestionsRequest> getExamQuestionsRequest
         )
         {
+            _jobDbContext = jobDbContext;
             _publishEndpoint = publishEndpoint;
             _httpContextAccessor = httpContextAccessor;
             _requestClient = requestClient;
@@ -44,6 +56,7 @@ namespace Job.Business.Services.Application
             _requestUser = requestUser;
             _requestApplicationDetail = requestApplicationDetail;
             _examRequest = examRequest;
+            _getExamQuestionsRequest = getExamQuestionsRequest;
         }
 
         /// <summary> İstifadəçinin bütün müraciətlərini gətirir </summary>
@@ -133,6 +146,94 @@ namespace Job.Business.Services.Application
             response.Message.FullName = fullName;
 
             return response.Message;
+        }
+
+        public async Task<GetExamQuestionsResponse> GetExamQuestionsAsync(Guid examId)
+        {
+            var userExam = await _jobDbContext.UserExams.AsNoTracking().FirstOrDefaultAsync(ue => ue.ExamId == examId && ue.UserId == userGuid);
+
+            if (userExam != null) throw new UserAlreadyCompletedExamException("The user has already completed this exam.");
+
+            var request = new GetExamQuestionsRequest { ExamId = examId };
+
+            var response = await _getExamQuestionsRequest.GetResponse<GetExamQuestionsResponse>(request);
+
+            return response.Message;
+        }
+
+        public async Task<SubmitExamResultDto> EvaluateExamAnswersAsync(SubmitExamAnswersDto dto)
+        {
+            var examQuestionsResponse = await GetExamQuestionsAsync(dto.ExamId);
+
+            var questionDictionary = examQuestionsResponse.Questions.ToDictionary(q => q.Id, q => q);
+
+            byte trueAnswerCount = 0;
+            byte falseAnswerCount = 0;
+
+            var userAnswers = dto.Answers.Select(userAnswer =>
+            {
+                if (!questionDictionary.TryGetValue(userAnswer.QuestionId, out var question))
+                    throw new EntityNotFoundException("Question");
+
+                bool isCorrect = question.QuestionType switch
+                {
+                    QuestionType.OpenEnded => true,
+
+                    QuestionType.SingleChoice => question.Answers.Any(a => a.Id == userAnswer.AnswerIds?.FirstOrDefault() && a.IsCorrect == true),
+
+                    QuestionType.MultipleChoice => ValidateMultipleChoice(question, userAnswer),
+
+                    _ => false
+                };
+
+                if (isCorrect) trueAnswerCount++;
+                else falseAnswerCount++;
+
+                return new UserAnswer
+                {
+                    UserId = userGuid,
+                    ExamQuestionId = question.Id,
+                    Text = userAnswer.Text,
+                    IsCorrect = isCorrect
+                };
+            }).ToList();
+
+            await _jobDbContext.UserAnswers.AddRangeAsync(userAnswers);
+
+            var userExam = new UserExam
+            {
+                UserId = userGuid,
+                ExamId = dto.ExamId,
+                TrueAnswerCount = trueAnswerCount,
+                FalseAnswerCount = falseAnswerCount
+            };
+
+            await _jobDbContext.UserExams.AddAsync(userExam);
+            await _jobDbContext.SaveChangesAsync();
+
+            bool isPassed = trueAnswerCount * 100 >= examQuestionsResponse.Questions.Count * examQuestionsResponse.LimitRate;
+
+            return new SubmitExamResultDto
+            {
+                TrueAnswerCount = trueAnswerCount,
+                FalseAnswerCount = falseAnswerCount,
+                IsPassed = isPassed
+            };
+        }
+
+        private static bool ValidateMultipleChoice(QuestionDetailDto question, UserAnswerDto userAnswer)
+        {
+            var correctAnswers = question.Answers
+                .Where(a => a.IsCorrect == true)
+                .Select(a => a.Id)
+                .ToList();
+
+            var userSelectedAnswers = userAnswer.AnswerIds?
+                .Where(id => id != Guid.Empty)
+                .ToList() ?? [];
+
+            return correctAnswers.Count == userSelectedAnswers.Count &&
+                   correctAnswers.All(userSelectedAnswers.Contains);
         }
     }
 }

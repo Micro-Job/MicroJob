@@ -1,4 +1,4 @@
-using Shared.Dtos.ApplicationDtos;
+using Job.Business.Dtos.ExamDtos;
 using Shared.Responses;
 using SharedLibrary.Dtos.ApplicationDtos;
 using SharedLibrary.Responses;
@@ -11,5 +11,7 @@ namespace Job.Business.Services.Application
         Task CreateUserApplicationAsync(string vacancyId);
         Task<GetApplicationDetailResponse> GetUserApplicationByIdAsync(string applicationId);
         Task<GetExamDetailResponse> GetExamIntroAsync(string vacancyId);
+        Task<GetExamQuestionsResponse> GetExamQuestionsAsync(Guid examId);
+        Task<SubmitExamResultDto> EvaluateExamAnswersAsync(SubmitExamAnswersDto dto);
     }
 }
