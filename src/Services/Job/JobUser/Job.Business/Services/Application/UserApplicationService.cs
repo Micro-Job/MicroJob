@@ -148,6 +148,21 @@ namespace Job.Business.Services.Application
             return response.Message;
         }
 
+        public async Task<GetExamDetailResponse> GetExamFinalDescriptionAsync(string vacancyId)
+        {
+            var request = new GetExamDetailRequest { VacancyId = vacancyId };
+
+            var response = await _examRequest.GetResponse<GetExamDetailResponse>(request);
+
+            var userDataResponse = await _requestUser.GetResponse<GetUserDataResponse>(new GetUserDataRequest { UserId = userGuid });
+
+            var fullName = $"{userDataResponse.Message.FirstName} {userDataResponse.Message.LastName}";
+
+            response.Message.FullName = fullName;
+
+            return response.Message;
+        }
+
         public async Task<GetExamQuestionsResponse> GetExamQuestionsAsync(Guid examId)
         {
             var userExam = await _jobDbContext.UserExams.AsNoTracking().FirstOrDefaultAsync(ue => ue.ExamId == examId && ue.UserId == userGuid);

@@ -26,7 +26,7 @@ namespace JobCompany.Business.Consumers
             var guidVacId = Guid.Parse(context.Message.VacancyId);
             var exam = await _jobCompanyDbContext
                 .Vacancies.Where(v => v.Id == guidVacId)
-                .Select(e => new { e.Exam.IntroDescription })
+                .Select(e => new { e.Exam.IntroDescription, e.Exam.LastDescription })
                 .FirstOrDefaultAsync();
 
             if (exam == null)

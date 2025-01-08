@@ -9,5 +9,6 @@ namespace Shared.Responses
     {
         public string FullName { get; set; }
         public string IntroDescription { get; set; }
+        public string LastDescription { get; set; } 
     }
 }
