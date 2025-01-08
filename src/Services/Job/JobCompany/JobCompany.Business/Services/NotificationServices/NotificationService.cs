@@ -21,25 +21,23 @@ namespace JobCompany.Business.Services.NotificationServices
         readonly IHttpContextAccessor _contextAccessor;
         private readonly Guid userGuid;
 
-        public NotificationService(JobCompanyDbContext context, IHttpContextAccessor contextAccessor)
+        public NotificationService(
+            JobCompanyDbContext context,
+            IHttpContextAccessor contextAccessor
+        )
         {
             _context = context;
             _contextAccessor = contextAccessor;
-            userGuid = Guid.Parse(_contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value ?? throw new UserIsNotLoggedInException());
+            userGuid = Guid.Parse(
+                _contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value
+                    ?? throw new UserIsNotLoggedInException()
+            );
         }
-
 
         public async Task<List<NotificationDto>> GetUserNotificationsAsync()
         {
-            var companyId = await _context.Companies
-                .Where(x => x.UserId == userGuid)
-                .Select(x => x.Id)
-                .FirstOrDefaultAsync();
-
-            if (companyId == Guid.Empty) throw new NotFoundException<Company>();
-
-            var notifications = await _context.Notifications
-                .Where(n => n.ReceiverId == companyId)
+            var notifications = await _context
+                .Notifications.Where(n => n.Receiver.UserId == userGuid)
                 .OrderByDescending(n => n.CreatedDate)
                 .Select(n => new NotificationDto
                 {
@@ -49,7 +47,7 @@ namespace JobCompany.Business.Services.NotificationServices
                     InformationId = n.InformationId,
                     CreatedDate = n.CreatedDate,
                     Content = n.Content,
-                    IsSeen = n.IsSeen
+                    IsSeen = n.IsSeen,
                 })
                 .ToListAsync();
 
@@ -58,15 +56,18 @@ namespace JobCompany.Business.Services.NotificationServices
 
         public async Task MarkNotificationAsReadAsync(Guid id)
         {
-            var companyId = await _context.Companies
-                .Where(x => x.UserId == userGuid)
+            var companyId = await _context
+                .Companies.Where(x => x.UserId == userGuid)
                 .Select(x => x.Id)
                 .FirstOrDefaultAsync();
 
-            if (companyId == Guid.Empty) throw new NotFoundException<Company>();
+            if (companyId == Guid.Empty)
+                throw new NotFoundException<Company>();
 
-            var notification = await _context.Notifications.FirstOrDefaultAsync(x => x.Id == id && x.ReceiverId == companyId)
-                ?? throw new NotFoundException<Notification>();
+            var notification =
+                await _context.Notifications.FirstOrDefaultAsync(x =>
+                    x.Id == id && x.ReceiverId == companyId
+                ) ?? throw new NotFoundException<Notification>();
 
             notification.IsSeen = true;
 
