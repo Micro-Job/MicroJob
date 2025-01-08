@@ -9,6 +9,7 @@ namespace JobCompany.Core.Entites
         public string IntroDescription { get; set; }
         public string LastDescription { get; set; }
         public string? Result { get; set; }
+        public decimal LimitRate { get; set; }
         public ICollection<Vacancy> Vacancies { get; set; }
         public Company Company { get; set; }
         public Guid CompanyId { get; set; }
