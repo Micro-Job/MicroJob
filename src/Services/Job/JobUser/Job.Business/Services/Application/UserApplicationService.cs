@@ -1,5 +1,7 @@
 using System.Security.Claims;
+using Job.Business.Dtos.AnswerDtos;
 using Job.Business.Dtos.ExamDtos;
+using Job.Business.Dtos.QuestionDtos;
 using Job.Business.Exceptions.ApplicationExceptions;
 using Job.Business.Exceptions.Common;
 using Job.Business.Exceptions.UserExceptions;
@@ -166,7 +168,7 @@ namespace Job.Business.Services.Application
             return response.Message;
         }
 
-        public async Task<GetExamQuestionsResponse> GetExamQuestionsAsync(Guid examId)
+        public async Task<GetExamQuestionsDetailDto> GetExamQuestionsAsync(Guid examId)
         {
             var userExam = await _jobDbContext
                 .UserExams.AsNoTracking()
@@ -177,18 +179,32 @@ namespace Job.Business.Services.Application
                     "The user has already completed this exam."
                 );
 
-            var request = new GetExamQuestionsRequest { ExamId = examId };
+            var response = await FetchExamQuestionsAsync(examId);
 
-            var response = await _getExamQuestionsRequest.GetResponse<GetExamQuestionsResponse>(
-                request
-            );
-
-            return response.Message;
+            return new GetExamQuestionsDetailDto
+            {
+                LimitRate = response.LimitRate,
+                TotalQuestions = response.Questions.Count,
+                Duration = response.Duration,
+                Questions = response.Questions.Select(q => new QuestionPublicDto
+                {
+                    Id = q.Id,
+                    Title = q.Title,
+                    QuestionType = q.QuestionType,
+                    Image = q.Image,
+                    IsRequired = q.IsRequired,
+                    Answers = q.Answers.Select(a => new AnswerPublicDto
+                    {
+                        Id = a.Id,
+                        Text = a.Text,
+                    }).ToList()
+                }).ToList()
+            };
         }
 
         public async Task<SubmitExamResultDto> EvaluateExamAnswersAsync(SubmitExamAnswersDto dto)
         {
-            var examQuestionsResponse = await GetExamQuestionsAsync(dto.ExamId);
+            var examQuestionsResponse = await FetchExamQuestionsAsync(dto.ExamId);
 
             var questionDictionary = examQuestionsResponse.Questions.ToDictionary(
                 q => q.Id,
@@ -255,6 +271,15 @@ namespace Job.Business.Services.Application
                 FalseAnswerCount = falseAnswerCount,
                 IsPassed = isPassed,
             };
+        }
+
+        private async Task<GetExamQuestionsResponse> FetchExamQuestionsAsync(Guid examId)
+        {
+            var request = new GetExamQuestionsRequest { ExamId = examId };
+         
+            var response = await _getExamQuestionsRequest.GetResponse<GetExamQuestionsResponse>(request);
+
+            return response.Message;
         }
 
         private static bool ValidateMultipleChoice(
