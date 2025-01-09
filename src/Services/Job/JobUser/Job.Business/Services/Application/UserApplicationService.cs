@@ -170,14 +170,14 @@ namespace Job.Business.Services.Application
 
         public async Task<GetExamQuestionsDetailDto> GetExamQuestionsAsync(Guid examId)
         {
-            var userExam = await _jobDbContext
-                .UserExams.AsNoTracking()
-                .FirstOrDefaultAsync(ue => ue.ExamId == examId && ue.UserId == userGuid);
+            //var userExam = await _jobDbContext
+            //    .UserExams.AsNoTracking()
+            //    .FirstOrDefaultAsync(ue => ue.ExamId == examId && ue.UserId == userGuid);
 
-            if (userExam != null)
-                throw new UserAlreadyCompletedExamException(
-                    "The user has already completed this exam."
-                );
+            //if (userExam != null)
+            //    throw new UserAlreadyCompletedExamException(
+            //        "The user has already completed this exam."
+            //    );
 
             var response = await FetchExamQuestionsAsync(examId);
 
@@ -261,14 +261,15 @@ namespace Job.Business.Services.Application
             await _jobDbContext.UserExams.AddAsync(userExam);
             await _jobDbContext.SaveChangesAsync();
 
-            bool isPassed =
-                trueAnswerCount * 100
-                >= examQuestionsResponse.Questions.Count * examQuestionsResponse.LimitRate;
+            decimal resultRate = trueAnswerCount * 100 / examQuestionsResponse.Questions.Count;
+
+            bool isPassed = resultRate >= examQuestionsResponse.LimitRate;
 
             return new SubmitExamResultDto
             {
                 TrueAnswerCount = trueAnswerCount,
                 FalseAnswerCount = falseAnswerCount,
+                ResultRate = resultRate,
                 IsPassed = isPassed,
             };
         }
@@ -276,7 +277,7 @@ namespace Job.Business.Services.Application
         private async Task<GetExamQuestionsResponse> FetchExamQuestionsAsync(Guid examId)
         {
             var request = new GetExamQuestionsRequest { ExamId = examId };
-         
+
             var response = await _getExamQuestionsRequest.GetResponse<GetExamQuestionsResponse>(request);
 
             return response.Message;
