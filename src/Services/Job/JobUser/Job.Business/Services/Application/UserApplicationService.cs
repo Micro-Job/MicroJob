@@ -154,9 +154,12 @@ namespace Job.Business.Services.Application
 
             var response = await _examRequest.GetResponse<GetExamDetailResponse>(request);
 
-            var userDataResponse = await _requestUser.GetResponse<GetUserDataResponse>(new GetUserDataRequest { UserId = userGuid });
+            var userDataResponse = await _requestUser.GetResponse<GetUserDataResponse>(
+                new GetUserDataRequest { UserId = userGuid }
+            );
 
-            var fullName = $"{userDataResponse.Message.FirstName} {userDataResponse.Message.LastName}";
+            var fullName =
+                $"{userDataResponse.Message.FirstName} {userDataResponse.Message.LastName}";
 
             response.Message.FullName = fullName;
 
@@ -165,13 +168,20 @@ namespace Job.Business.Services.Application
 
         public async Task<GetExamQuestionsResponse> GetExamQuestionsAsync(Guid examId)
         {
-            var userExam = await _jobDbContext.UserExams.AsNoTracking().FirstOrDefaultAsync(ue => ue.ExamId == examId && ue.UserId == userGuid);
+            var userExam = await _jobDbContext
+                .UserExams.AsNoTracking()
+                .FirstOrDefaultAsync(ue => ue.ExamId == examId && ue.UserId == userGuid);
 
-            if (userExam != null) throw new UserAlreadyCompletedExamException("The user has already completed this exam.");
+            if (userExam != null)
+                throw new UserAlreadyCompletedExamException(
+                    "The user has already completed this exam."
+                );
 
             var request = new GetExamQuestionsRequest { ExamId = examId };
 
-            var response = await _getExamQuestionsRequest.GetResponse<GetExamQuestionsResponse>(request);
+            var response = await _getExamQuestionsRequest.GetResponse<GetExamQuestionsResponse>(
+                request
+            );
 
             return response.Message;
         }
@@ -180,38 +190,47 @@ namespace Job.Business.Services.Application
         {
             var examQuestionsResponse = await GetExamQuestionsAsync(dto.ExamId);
 
-            var questionDictionary = examQuestionsResponse.Questions.ToDictionary(q => q.Id, q => q);
+            var questionDictionary = examQuestionsResponse.Questions.ToDictionary(
+                q => q.Id,
+                q => q
+            );
 
             byte trueAnswerCount = 0;
             byte falseAnswerCount = 0;
 
-            var userAnswers = dto.Answers.Select(userAnswer =>
-            {
-                if (!questionDictionary.TryGetValue(userAnswer.QuestionId, out var question))
-                    throw new EntityNotFoundException("Question");
-
-                bool isCorrect = question.QuestionType switch
+            var userAnswers = dto
+                .Answers.Select(userAnswer =>
                 {
-                    QuestionType.OpenEnded => true,
+                    if (!questionDictionary.TryGetValue(userAnswer.QuestionId, out var question))
+                        throw new EntityNotFoundException("Question");
 
-                    QuestionType.SingleChoice => question.Answers.Any(a => a.Id == userAnswer.AnswerIds?.FirstOrDefault() && a.IsCorrect == true),
+                    bool isCorrect = question.QuestionType switch
+                    {
+                        QuestionType.OpenEnded => true,
 
-                    QuestionType.MultipleChoice => ValidateMultipleChoice(question, userAnswer),
+                        QuestionType.SingleChoice => question.Answers.Any(a =>
+                            a.Id == userAnswer.AnswerIds?.FirstOrDefault() && a.IsCorrect == true
+                        ),
 
-                    _ => false
-                };
+                        QuestionType.MultipleChoice => ValidateMultipleChoice(question, userAnswer),
 
-                if (isCorrect) trueAnswerCount++;
-                else falseAnswerCount++;
+                        _ => false,
+                    };
 
-                return new UserAnswer
-                {
-                    UserId = userGuid,
-                    ExamQuestionId = question.Id,
-                    Text = userAnswer.Text,
-                    IsCorrect = isCorrect
-                };
-            }).ToList();
+                    if (isCorrect)
+                        trueAnswerCount++;
+                    else
+                        falseAnswerCount++;
+
+                    return new UserAnswer
+                    {
+                        UserId = userGuid,
+                        ExamQuestionId = question.Id,
+                        Text = userAnswer.Text,
+                        IsCorrect = isCorrect,
+                    };
+                })
+                .ToList();
 
             await _jobDbContext.UserAnswers.AddRangeAsync(userAnswers);
 
@@ -220,35 +239,39 @@ namespace Job.Business.Services.Application
                 UserId = userGuid,
                 ExamId = dto.ExamId,
                 TrueAnswerCount = trueAnswerCount,
-                FalseAnswerCount = falseAnswerCount
+                FalseAnswerCount = falseAnswerCount,
             };
 
             await _jobDbContext.UserExams.AddAsync(userExam);
             await _jobDbContext.SaveChangesAsync();
 
-            bool isPassed = trueAnswerCount * 100 >= examQuestionsResponse.Questions.Count * examQuestionsResponse.LimitRate;
+            bool isPassed =
+                trueAnswerCount * 100
+                >= examQuestionsResponse.Questions.Count * examQuestionsResponse.LimitRate;
 
             return new SubmitExamResultDto
             {
                 TrueAnswerCount = trueAnswerCount,
                 FalseAnswerCount = falseAnswerCount,
-                IsPassed = isPassed
+                IsPassed = isPassed,
             };
         }
 
-        private static bool ValidateMultipleChoice(QuestionDetailDto question, UserAnswerDto userAnswer)
+        private static bool ValidateMultipleChoice(
+            QuestionDetailDto question,
+            UserAnswerDto userAnswer
+        )
         {
-            var correctAnswers = question.Answers
-                .Where(a => a.IsCorrect == true)
+            var correctAnswers = question
+                .Answers.Where(a => a.IsCorrect == true)
                 .Select(a => a.Id)
                 .ToList();
 
-            var userSelectedAnswers = userAnswer.AnswerIds?
-                .Where(id => id != Guid.Empty)
-                .ToList() ?? [];
+            var userSelectedAnswers =
+                userAnswer.AnswerIds?.Where(id => id != Guid.Empty).ToList() ?? [];
 
-            return correctAnswers.Count == userSelectedAnswers.Count &&
-                   correctAnswers.All(userSelectedAnswers.Contains);
+            return correctAnswers.Count == userSelectedAnswers.Count
+                && correctAnswers.All(userSelectedAnswers.Contains);
         }
     }
 }

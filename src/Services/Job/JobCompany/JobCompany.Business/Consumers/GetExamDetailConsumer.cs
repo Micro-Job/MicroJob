@@ -26,7 +26,12 @@ namespace JobCompany.Business.Consumers
             var guidVacId = Guid.Parse(context.Message.VacancyId);
             var exam = await _jobCompanyDbContext
                 .Vacancies.Where(v => v.Id == guidVacId)
-                .Select(e => new { e.Id, e.Exam.IntroDescription })
+                .Select(e => new
+                {
+                    e.Id,
+                    e.Exam.IntroDescription,
+                    e.Exam.LimitRate,
+                })
                 .FirstOrDefaultAsync();
 
             if (exam == null)
@@ -39,6 +44,7 @@ namespace JobCompany.Business.Consumers
                 {
                     ExamId = exam.Id.ToString(),
                     IntroDescription = exam.IntroDescription,
+                    LimitRate = exam.LimitRate,
                 }
             );
         }

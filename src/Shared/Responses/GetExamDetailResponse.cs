@@ -8,6 +8,7 @@ namespace Shared.Responses
     public class GetExamDetailResponse
     {
         public string ExamId { get; set; }
+        public decimal LimitRate { get; set; }
         public string FullName { get; set; }
         public string IntroDescription { get; set; }
     }
