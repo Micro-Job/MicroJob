@@ -20,6 +20,7 @@ public class GetExamQuestionsConsumer(JobCompanyDbContext _dbContext) : IConsume
         .Select(e => new
         {
             e.LimitRate,
+            e.Duration,
             Questions = e.ExamQuestions.Select(eq => new QuestionDetailDto
             {
                 Id = eq.Question.Id,
@@ -41,6 +42,7 @@ public class GetExamQuestionsConsumer(JobCompanyDbContext _dbContext) : IConsume
         await context.RespondAsync(new GetExamQuestionsResponse
         {
             Questions = examData.Questions,
+            Duration = examData.Duration,
             LimitRate = examData.LimitRate
         });
     }
