@@ -26,7 +26,7 @@ namespace JobCompany.Business.Consumers
             var guidVacId = Guid.Parse(context.Message.VacancyId);
             var exam = await _jobCompanyDbContext
                 .Vacancies.Where(v => v.Id == guidVacId)
-                .Select(e => new { e.Exam.IntroDescription, e.Exam.LastDescription })
+                .Select(e => new { e.Id, e.Exam.IntroDescription })
                 .FirstOrDefaultAsync();
 
             if (exam == null)
@@ -35,7 +35,11 @@ namespace JobCompany.Business.Consumers
             }
 
             await context.RespondAsync(
-                new GetExamDetailResponse { IntroDescription = exam.IntroDescription }
+                new GetExamDetailResponse
+                {
+                    ExamId = exam.Id.ToString(),
+                    IntroDescription = exam.IntroDescription,
+                }
             );
         }
     }
