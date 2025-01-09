@@ -29,6 +29,9 @@ namespace JobCompany.Business.Consumers
                 .Select(e => new
                 {
                     e.Id,
+                    e.Company.CompanyName,
+                    e.Exam.ExamQuestions.Count,
+                    e.Exam.Duration,
                     e.Exam.IntroDescription,
                     e.Exam.LimitRate,
                 })
@@ -43,6 +46,9 @@ namespace JobCompany.Business.Consumers
                 new GetExamDetailResponse
                 {
                     ExamId = exam.Id.ToString(),
+                    CompanyName = exam.CompanyName,
+                    QuestionCount = exam.Count,
+                    Duration = exam.Duration,
                     IntroDescription = exam.IntroDescription,
                     LimitRate = exam.LimitRate,
                 }
