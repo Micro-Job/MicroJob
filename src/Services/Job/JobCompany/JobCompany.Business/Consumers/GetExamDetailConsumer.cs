@@ -28,7 +28,7 @@ namespace JobCompany.Business.Consumers
                 .Vacancies.Where(v => v.Id == guidVacId)
                 .Select(e => new
                 {
-                    e.Id,
+                    e.ExamId,
                     e.Company.CompanyName,
                     e.Exam.ExamQuestions.Count,
                     e.Exam.Duration,
@@ -45,7 +45,7 @@ namespace JobCompany.Business.Consumers
             await context.RespondAsync(
                 new GetExamDetailResponse
                 {
-                    ExamId = exam.Id.ToString(),
+                    ExamId = exam.ExamId.ToString(),
                     CompanyName = exam.CompanyName,
                     QuestionCount = exam.Count,
                     Duration = exam.Duration,
