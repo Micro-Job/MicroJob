@@ -142,6 +142,16 @@ namespace Job.Business.Services.Application
                 new GetUserDataRequest { UserId = userGuid }
             );
 
+            bool isTaken = await CheckUserCompletedExam(Guid.Parse(response.Message.ExamId));
+
+            if (isTaken)
+            {
+                return new GetExamDetailResponse
+                {
+                    IsTaken = true
+                };
+            }
+
             var fullName =
                 $"{userDataResponse.Message.FirstName} {userDataResponse.Message.LastName}";
 
@@ -298,6 +308,15 @@ namespace Job.Business.Services.Application
 
             return correctAnswers.Count == userSelectedAnswers.Count
                 && correctAnswers.All(userSelectedAnswers.Contains);
+        }
+
+        private async Task<bool> CheckUserCompletedExam(Guid examId)
+        {
+            var userExam = await _jobDbContext
+                .UserExams.AsNoTracking()
+                .FirstOrDefaultAsync(ue => ue.ExamId == examId && ue.UserId == userGuid);
+
+            return userExam != null;
         }
     }
 }

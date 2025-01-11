@@ -14,5 +14,6 @@ namespace Shared.Responses
         public decimal LimitRate { get; set; }
         public string FullName { get; set; }
         public string IntroDescription { get; set; }
+        public bool IsTaken { get; set; } // İstifadəçinin sınağa qatılıb qatılmadığını göstərir
     }
 }
