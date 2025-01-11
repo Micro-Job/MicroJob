@@ -11,7 +11,7 @@ namespace JobCompany.Infrastructure.Configurations.ExamConfigurations
             builder.HasKey(a => a.Id);
 
             builder.Property(a => a.Text)
-                   .HasMaxLength(1024);
+                   .HasMaxLength(2000);
 
             builder.Property(a => a.IsCorrect)
                    .IsRequired();

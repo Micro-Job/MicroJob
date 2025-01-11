@@ -135,7 +135,6 @@ namespace JobCompany.Business.Services.VacancyServices
             vacancy.VacancySkills = vacancySkills;
 
             await _context.Vacancies.AddAsync(vacancy);
-            await _context.SaveChangesAsync();
 
             if (vacancyDto.SkillIds != null)
             {
@@ -153,8 +152,12 @@ namespace JobCompany.Business.Services.VacancyServices
 
             if (vacancyDto.Exam is not null)
             {
-                await _examService.CreateExamAsync(vacancyDto.Exam);
+               var examId = await _examService.CreateExamAsync(vacancyDto.Exam);
+
+                vacancy.ExamId = examId;
             }
+
+            await _context.SaveChangesAsync();
         }
 
         public async Task DeleteAsync(List<string> ids)

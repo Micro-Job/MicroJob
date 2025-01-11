@@ -12,7 +12,7 @@ namespace JobCompany.DAL.Configurations.ExamConfigurations
 
             builder.Property(q => q.Title)
                    .IsRequired()
-                   .HasMaxLength(64);
+                   .HasMaxLength(2000);
 
             builder.Property(q => q.QuestionType)
                    .IsRequired();
