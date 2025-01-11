@@ -144,18 +144,11 @@ namespace Job.Business.Services.Application
 
             bool isTaken = await CheckUserCompletedExam(Guid.Parse(response.Message.ExamId));
 
-            if (isTaken)
-            {
-                return new GetExamDetailResponse
-                {
-                    IsTaken = true
-                };
-            }
-
             var fullName =
                 $"{userDataResponse.Message.FirstName} {userDataResponse.Message.LastName}";
 
             response.Message.FullName = fullName;
+            response.Message.IsTaken = isTaken;
 
             return response.Message;
         }
