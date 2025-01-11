@@ -12,5 +12,6 @@ namespace JobCompany.Business.Dtos.ExamDtos
         public decimal LimitRate { get; set; }
         public ICollection<QuestionCreateDto>? Questions { get; set; }
         public bool IsTemplate { get; set; }
+        public byte? Duration { get; set; }
     }
 }

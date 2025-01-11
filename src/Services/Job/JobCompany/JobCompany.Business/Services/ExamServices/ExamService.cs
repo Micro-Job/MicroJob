@@ -40,6 +40,7 @@ namespace JobCompany.Business.Services.ExamServices
                     LimitRate = dto.LimitRate,
                     CompanyId = company.Id,
                     IsTemplate = dto.IsTemplate,
+                    Duration = dto.Duration,
                 };
 
                 await _context.Exams.AddAsync(exam);
