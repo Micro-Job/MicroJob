@@ -208,6 +208,7 @@ namespace Job.Business.Services.Application
         public async Task<SubmitExamResultDto> EvaluateExamAnswersAsync(SubmitExamAnswersDto dto)
         {
             var examQuestionsResponse = await FetchExamQuestionsAsync(dto.ExamId);
+            var examQuestionMapping = await FetchExamQuestionMappingAsync(dto.ExamId);
 
             var questionDictionary = examQuestionsResponse.Questions.ToDictionary(
                 q => q.Id,
@@ -222,6 +223,9 @@ namespace Job.Business.Services.Application
                 {
                     if (!questionDictionary.TryGetValue(userAnswer.QuestionId, out var question))
                         throw new EntityNotFoundException("Question");
+
+                    if (!examQuestionMapping.TryGetValue(userAnswer.QuestionId, out var examQuestionId))
+                        throw new EntityNotFoundException("Exam Question");
 
                     bool isCorrect = question.QuestionType switch
                     {
@@ -244,7 +248,7 @@ namespace Job.Business.Services.Application
                     return new UserAnswer
                     {
                         UserId = userGuid,
-                        ExamQuestionId = question.Id,
+                        ExamQuestionId = examQuestionId,
                         Text = userAnswer.Text,
                         IsCorrect = isCorrect,
                     };
@@ -284,6 +288,15 @@ namespace Job.Business.Services.Application
             var response = await _getExamQuestionsRequest.GetResponse<GetExamQuestionsResponse>(request);
 
             return response.Message;
+        }
+
+        private async Task<Dictionary<Guid, Guid>> FetchExamQuestionMappingAsync(Guid examId)
+        {
+            var request = new GetExamQuestionMappingRequest { ExamId = examId };
+
+            var response = await _examRequest.GetResponse<GetExamQuestionMappingResponse>(request);
+
+            return response.Message.ExamQuestionMapping;
         }
 
         private static bool ValidateMultipleChoice(
