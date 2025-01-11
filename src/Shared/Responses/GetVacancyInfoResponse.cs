@@ -31,5 +31,6 @@ namespace SharedLibrary.Responses
         public bool IsSaved { get; set; }
         public string CategoryName { get; set; }
         public Guid? CompanyId { get; set; }
+        public bool HasExam { get; set; }
     }
 }

@@ -70,6 +70,7 @@ namespace Job.Business.Consumers
                 Location = vacancy.Vacancy.Location,
                 ViewCount = vacancy.Vacancy.ViewCount,
                 CompanyId = vacancy.Company.Id,
+                HasExam = vacancy.Vacancy.ExamId != null,
             };
             await context.RespondAsync(response);
         }
