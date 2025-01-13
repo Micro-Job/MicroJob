@@ -12,7 +12,6 @@ namespace Job.Business.Services.Application
         Task CreateUserApplicationAsync(string vacancyId);
         Task<GetApplicationDetailResponse> GetUserApplicationByIdAsync(string applicationId);
         Task<GetExamDetailResponse> GetExamIntroAsync(string vacancyId);
-        Task<GetExamDetailResponse> GetExamFinalDescriptionAsync(string vacancyId);
         Task<GetExamQuestionsDetailDto> GetExamQuestionsAsync(Guid examId);
         Task<SubmitExamResultDto> EvaluateExamAnswersAsync(SubmitExamAnswersDto dto);
     }

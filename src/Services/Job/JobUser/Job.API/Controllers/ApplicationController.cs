@@ -40,12 +40,6 @@ namespace Job.API.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetExamFinalDescription(string vacancyId)
-        {
-            return Ok(await service.GetExamFinalDescriptionAsync(vacancyId));
-        }
-
-        [HttpGet("[action]")]
         public async Task<IActionResult> GetExamQuestions(Guid examId)
         {
             return Ok(await service.GetExamQuestionsAsync(examId));
