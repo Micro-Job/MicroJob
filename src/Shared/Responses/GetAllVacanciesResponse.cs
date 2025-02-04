@@ -1,14 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Shared.Dtos.VacancyDtos;
-using SharedLibrary.Dtos.VacancyDtos;
 
-namespace Shared.Responses
+namespace Shared.Responses;
+
+public class GetAllVacanciesResponse
 {
-    public class GetAllVacanciesResponse
-    {
-        public ICollection<AllVacanyDto> Vacancies { get; set; }
-    }
+    public ICollection<AllVacanyDto> Vacancies { get; set; }
+    public int TotalCount { get; set; }
 }

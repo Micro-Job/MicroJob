@@ -51,7 +51,7 @@ namespace Job.Business.Services.Notification
             await _context.SaveChangesAsync();
         }
 
-        public async Task<List<NotificationListDto>> GetUserNotificationsAsync(
+        public async Task<PaginatedNotificationDto> GetUserNotificationsAsync(
             int skip = 1,
             int take = 6
         )
@@ -88,7 +88,13 @@ namespace Job.Business.Services.Notification
                 })
                 .ToList();
 
-            return notificationDtos;
+            var totalCount = await _context.Notifications.CountAsync(n => n.ReceiverId == userGuid);
+
+            return new PaginatedNotificationDto
+            {
+                Notifications = notificationDtos,
+                TotalCount = totalCount,
+            };
         }
 
         public async Task MarkNotificationAsReadAsync(Guid notificationId)

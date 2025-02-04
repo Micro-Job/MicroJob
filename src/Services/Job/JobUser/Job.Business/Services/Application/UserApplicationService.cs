@@ -62,7 +62,7 @@ namespace Job.Business.Services.Application
         }
 
         /// <summary> İstifadəçinin bütün müraciətlərini gətirir </summary>
-        public async Task<ICollection<ApplicationDto>> GetUserApplicationsAsync(int skip, int take)
+        public async Task<PaginatedApplicationDto> GetUserApplicationsAsync(int skip, int take)
         {
             GetUserApplicationsRequest request = new()
             {
@@ -75,7 +75,11 @@ namespace Job.Business.Services.Application
                 request
             );
 
-            return response.Message.UserApplications;
+            return new PaginatedApplicationDto
+            {
+                Applications = response.Message.UserApplications,
+                TotalCount = response.Message.TotalCount,
+            };
         }
 
         /// <summary> Eventle userin application yaratmasi  ve

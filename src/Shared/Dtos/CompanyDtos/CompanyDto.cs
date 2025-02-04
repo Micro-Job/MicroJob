@@ -8,4 +8,10 @@
         public string? CompanyImage { get; set; }
         public int CompanyVacancyCount { get; set; }
     }
+
+    public class PaginatedCompanyDto
+    {
+        public ICollection<CompanyDto> Companies { get; set; }
+        public int TotalCount { get; set; }
+    }
 }

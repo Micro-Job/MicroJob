@@ -20,13 +20,6 @@ namespace Job.API.Controllers
             return Ok(await service.GetUserApplicationsAsync(skip, take));
         }
 
-        [HttpPost("[action]")]
-        public async Task<IActionResult> CreateUserApplication(string vacancyId)
-        {
-            await service.CreateUserApplicationAsync(vacancyId);
-            return Ok();
-        }
-
         [HttpGet("[action]")]
         public async Task<IActionResult> GetUserApplicationByIdAsync(string applicationId)
         {
@@ -43,6 +36,13 @@ namespace Job.API.Controllers
         public async Task<IActionResult> GetExamQuestions(Guid examId)
         {
             return Ok(await service.GetExamQuestionsAsync(examId));
+        }
+
+        [HttpPost("[action]")]
+        public async Task<IActionResult> CreateUserApplication(string vacancyId)
+        {
+            await service.CreateUserApplicationAsync(vacancyId);
+            return Ok();
         }
 
         [HttpPost("[action]")]

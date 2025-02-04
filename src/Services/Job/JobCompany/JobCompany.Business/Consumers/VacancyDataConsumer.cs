@@ -24,6 +24,11 @@ namespace JobCompany.Business.Consumers
         {
             var vacancyIds = context.Message.VacancyIds;
 
+            var totalCount = await _context
+                .Vacancies.Where(v => vacancyIds.Contains(v.Id))
+                .AsNoTracking()
+                .CountAsync();
+
             var vacancies = await _context
                 .Vacancies.Where(v => vacancyIds.Contains(v.Id))
                 .AsNoTracking()
@@ -34,7 +39,7 @@ namespace JobCompany.Business.Consumers
             if (vacancies == null)
             {
                 await context.RespondAsync(
-                    new GetUserSavedVacanciesResponse { Vacancies = new List<VacancyResponse>() }
+                    new GetUserSavedVacanciesResponse { Vacancies = [], TotalCount = totalCount }
                 );
                 return;
             }
@@ -58,6 +63,8 @@ namespace JobCompany.Business.Consumers
                         IsSaved = true,
                     })
                     .ToList(),
+
+                TotalCount = totalCount,
             };
             await context.RespondAsync(response);
         }

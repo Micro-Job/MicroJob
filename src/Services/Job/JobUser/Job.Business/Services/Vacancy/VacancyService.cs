@@ -92,7 +92,7 @@ namespace Job.Business.Services.Vacancy
         }
 
         /// <summary> Userin bütün save etdiyi vakansiyalarin get allu </summary>
-        public async Task<List<VacancyResponse>> GetAllSavedVacancyAsync(int skip, int take)
+        public async Task<GetUserSavedVacanciesResponse> GetAllSavedVacancyAsync(int skip, int take)
         {
             Guid? userGuid = GetUserId();
             var savedVacanciesId = await _context
@@ -102,7 +102,11 @@ namespace Job.Business.Services.Vacancy
 
             var datas = await GetUserSavedVacancyDataAsync(savedVacanciesId, skip, take);
 
-            return datas.Vacancies;
+            return new GetUserSavedVacanciesResponse
+            {
+                Vacancies = datas.Vacancies,
+                TotalCount = datas.TotalCount,
+            };
         }
 
         /// <summary> Consumer metodu -  Vacancy idlerine göre saved olunan vakansiyalarin datasi </summary>
@@ -113,9 +117,8 @@ namespace Job.Business.Services.Vacancy
         )
         {
             if (vacancyIds == null || vacancyIds.Count == 0)
-            {
-                return new GetUserSavedVacanciesResponse { Vacancies = [] };
-            }
+                return new GetUserSavedVacanciesResponse { Vacancies = [], TotalCount = 0 };
+            
 
             var response = await _client.GetResponse<GetUserSavedVacanciesResponse>(
                 new GetUserSavedVacanciesRequest
@@ -126,7 +129,11 @@ namespace Job.Business.Services.Vacancy
                 }
             );
 
-            return response.Message;
+            return new GetUserSavedVacanciesResponse
+            {
+                Vacancies = response.Message.Vacancies,
+                TotalCount = response.Message.TotalCount,
+            };
         }
 
         /// <summary>
@@ -135,7 +142,7 @@ namespace Job.Business.Services.Vacancy
         /// <param name="companyId"></param>
         /// <param name="currentVacancyId"></param>
         /// <returns></returns>
-        public async Task<ICollection<AllVacanyDto>> GetOtherVacanciesByCompanyAsync(
+        public async Task<PaginatedVacancyDto> GetOtherVacanciesByCompanyAsync(
             string companyId,
             string? currentVacancyId,
             int skip = 1,
@@ -172,7 +179,11 @@ namespace Job.Business.Services.Vacancy
                 MarkSavedVacancies(response.Message.Vacancies, savedVacancies);
             }
 
-            return response.Message.Vacancies;
+            return new PaginatedVacancyDto
+            {
+                Vacancies = response.Message.Vacancies,
+                TotalCount = response.Message.TotalCount,
+            };
         }
 
         /// <summary>
@@ -202,7 +213,7 @@ namespace Job.Business.Services.Vacancy
         }
 
         /// <summary> Butun vakansiyalarin getirilmesi - search ve filter</summary>
-        public async Task<ICollection<AllVacanyDto>> GetAllVacanciesAsync(
+        public async Task<PaginatedVacancyDto> GetAllVacanciesAsync(
             string? titleName,
             string? categoryId,
             string? countryId,
@@ -226,7 +237,6 @@ namespace Job.Business.Services.Vacancy
             };
 
             var response = await _vacClient.GetResponse<GetAllVacanciesResponse>(request);
-            var vacancies = response.Message.Vacancies.AsQueryable();
             var userGuid = GetUserId();
 
             var savedVacancies =
@@ -237,8 +247,7 @@ namespace Job.Business.Services.Vacancy
                         .Select(x => x.VacancyId)
                         .ToListAsync();
 
-            return vacancies
-                .Skip((skip - 1) * take)
+            var paginatedVacancies = response.Message.Vacancies.Skip((skip - 1) * take)
                 .Take(take)
                 .Select(x => new AllVacanyDto
                 {
@@ -260,10 +269,12 @@ namespace Job.Business.Services.Vacancy
                         && savedVacancies.Contains(Guid.Parse(x.VacancyId.ToString())),
                 })
                 .ToList();
+
+            return new PaginatedVacancyDto { Vacancies = paginatedVacancies, TotalCount = response.Message.TotalCount };
         }
 
         /// <summary> Oxsar vakansiylarin getirilmesi category'e gore </summary>
-        public async Task<ICollection<SimilarVacancyDto>> SimilarVacanciesAsync(string vacancyId)
+        public async Task<PaginatedSimilarVacancyDto> SimilarVacanciesAsync(string vacancyId)
         {
             var userGuid = GetUserId();
             var guidVacancyId = Guid.Parse(vacancyId);
@@ -301,7 +312,11 @@ namespace Job.Business.Services.Vacancy
                 })
                 .ToList();
 
-            return allVacancies;
+            return new PaginatedSimilarVacancyDto
+            {
+                SimilarVacancies = allVacancies,
+                TotalCount = response.Message.TotalCount,
+            };
         }
 
         public async Task<ICollection<AllVacanyDto>> GetAllVacanciesByCompanyId(string companyId)

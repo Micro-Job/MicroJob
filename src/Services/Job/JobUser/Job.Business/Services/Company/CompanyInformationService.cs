@@ -10,7 +10,7 @@ namespace Job.Business.Services.Company
         IRequestClient<GetCompanyDetailByIdRequest> getDetailClient
     ) : ICompanyInformationService
     {
-        public async Task<ICollection<CompanyDto>> GetCompaniesDataAsync(
+        public async Task<PaginatedCompanyDto> GetCompaniesDataAsync(
             string? searchTerm,
             int skip,
             int take
@@ -24,7 +24,12 @@ namespace Job.Business.Services.Company
                     Take = take,
                 }
             );
-            return response.Message.Companies;
+
+            return new PaginatedCompanyDto
+            {
+                Companies = response.Message.Companies,
+                TotalCount = response.Message.TotalCount,
+            };
         }
 
         public async Task<GetCompanyDetailByIdResponse> GetCompanyDetailByIdAsync(string companyId)

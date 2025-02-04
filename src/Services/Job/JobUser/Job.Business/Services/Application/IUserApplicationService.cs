@@ -8,7 +8,7 @@ namespace Job.Business.Services.Application
 {
     public interface IUserApplicationService
     {
-        Task<ICollection<ApplicationDto>> GetUserApplicationsAsync(int skip, int take);
+        Task<PaginatedApplicationDto> GetUserApplicationsAsync(int skip, int take);
         Task CreateUserApplicationAsync(string vacancyId);
         Task<GetApplicationDetailResponse> GetUserApplicationByIdAsync(string applicationId);
         Task<GetExamDetailResponse> GetExamIntroAsync(string vacancyId);

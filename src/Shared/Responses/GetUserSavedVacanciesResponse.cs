@@ -5,6 +5,7 @@ namespace SharedLibrary.Responses
     public class GetUserSavedVacanciesResponse
     {
         public List<VacancyResponse> Vacancies { get; set; } = new List<VacancyResponse>();
+        public int TotalCount { get; set; }
     }
 
     public class VacancyResponse

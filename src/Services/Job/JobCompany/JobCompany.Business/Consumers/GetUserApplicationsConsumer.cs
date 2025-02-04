@@ -41,9 +41,11 @@ public class GetUserApplicationsConsumer : IConsumer<GetUserApplicationsRequest>
             .Take(context.Message.Take)
             .ToListAsync();
 
+        var totalCount = await query.CountAsync();
+
         if (!applications.Any())
         {
-            await context.RespondAsync(new GetUserApplicationsResponse() { UserApplications = [] });
+            await context.RespondAsync(new GetUserApplicationsResponse() { UserApplications = [], TotalCount = totalCount });
             return;
         }
 
@@ -66,6 +68,7 @@ public class GetUserApplicationsConsumer : IConsumer<GetUserApplicationsRequest>
                     startDate = a.CreatedDate,
                 })
                 .ToList(),
+            TotalCount = totalCount
         };
 
         await context.RespondAsync(response);

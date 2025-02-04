@@ -35,6 +35,8 @@ public class GetOtherVacanciesByCompanyConsumer : IConsumer<GetOtherVacanciesByC
             vacanciesQuery = vacanciesQuery.Where(x => x.Id != context.Message.CurrentVacancyId);
         }
 
+        var totalCount = await vacanciesQuery.CountAsync(); 
+
         var vacancies = await vacanciesQuery
             .OrderByDescending(x => x.StartDate)
             .Include(x => x.Company)
@@ -70,6 +72,8 @@ public class GetOtherVacanciesByCompanyConsumer : IConsumer<GetOtherVacanciesByC
                     StartDate = x.StartDate,
                 })
                 .ToList(),
+
+            TotalCount = totalCount
         };
         await context.RespondAsync(response);
     }

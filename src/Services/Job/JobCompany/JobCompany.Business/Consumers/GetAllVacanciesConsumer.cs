@@ -84,6 +84,6 @@ public class GetAllVacanciesConsumer : IConsumer<GetAllVacanciesRequest>
             })
             .ToListAsync();
 
-        await context.RespondAsync(new GetAllVacanciesResponse { Vacancies = vacancies });
+        await context.RespondAsync(new GetAllVacanciesResponse { Vacancies = vacancies, TotalCount = vacancies.Count });
     }
 }

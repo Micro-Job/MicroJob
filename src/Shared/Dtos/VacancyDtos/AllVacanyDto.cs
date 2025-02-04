@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Shared.Dtos.CompanyDtos;
-using SharedLibrary.Dtos.CompanyDtos;
 using SharedLibrary.Enums;
 
 namespace Shared.Dtos.VacancyDtos
@@ -26,5 +20,11 @@ namespace Shared.Dtos.VacancyDtos
         public bool IsActive { get; set; }
         public Guid? CategoryId { get; set; }
         // public CompanyDetailDto Company { get; set; }
+    }
+
+    public class PaginatedVacancyDto
+    {
+        public ICollection<AllVacanyDto> Vacancies { get; set; }
+        public int TotalCount { get; set; }
     }
 }

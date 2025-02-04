@@ -17,4 +17,10 @@ namespace Shared.Dtos.VacancyDtos
         public bool IsVip { get; set; }
         public bool IsActive { get; set; }
     }
+
+    public class PaginatedSimilarVacancyDto
+    {
+        public List<SimilarVacancyDto> SimilarVacancies { get; set; }
+        public int TotalCount { get; set; }
+    }
 }

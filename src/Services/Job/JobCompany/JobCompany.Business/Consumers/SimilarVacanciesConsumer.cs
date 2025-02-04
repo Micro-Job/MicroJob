@@ -6,25 +6,22 @@ using Shared.Responses;
 
 namespace JobCompany.Business.Consumers
 {
-    public class SimilarVacanciesConsumer(JobCompanyDbContext context)
-        : IConsumer<SimilarVacanciesRequest>
+    public class SimilarVacanciesConsumer(JobCompanyDbContext _dbContext) : IConsumer<SimilarVacanciesRequest>
     {
-        private readonly JobCompanyDbContext _context = context;
-
         public async Task Consume(ConsumeContext<SimilarVacanciesRequest> context)
         {
-            var vacancyId = context.Message.VacancyId;
-            var guidVacId = Guid.Parse(vacancyId);
+            var guidVacId = Guid.Parse(context.Message.VacancyId);
 
-            var vacancies = await _context
+            var vacancies = await _dbContext
                 .Vacancies.Include(v => v.Company)
                 .Where(v => v.Id == guidVacId)
                 .Select(v => new
                 {
                     v.CategoryId,
-                    SimilarVacancies = _context
+                    SimilarVacancies = _dbContext
                         .Vacancies.Where(s => s.CategoryId == v.CategoryId && s.Id != guidVacId)
-                        .Take(6)
+                        .Skip(context.Message.Skip)
+                        .Take(context.Message.Take)
                         .Select(sim => new SimilarVacancyResponse
                         {
                             Id = sim.Id,
@@ -41,16 +38,17 @@ namespace JobCompany.Business.Consumers
                             CategoryId = sim.Category.Id,
                         })
                         .ToList(),
+                    TotalCount = _dbContext.Vacancies.Where(s => s.CategoryId == v.CategoryId && s.Id != guidVacId).Count()
                 })
                 .FirstOrDefaultAsync();
 
             if (vacancies == null || vacancies.CategoryId == Guid.Empty)
             {
-                await context.RespondAsync(new SimilarVacanciesResponse { Vacancies = [] });
+                await context.RespondAsync(new SimilarVacanciesResponse { Vacancies = [], TotalCount = 0 });
                 return;
             }
 
-            var response = new SimilarVacanciesResponse { Vacancies = vacancies.SimilarVacancies };
+            var response = new SimilarVacanciesResponse { Vacancies = vacancies.SimilarVacancies, TotalCount = vacancies.TotalCount };
 
             await context.RespondAsync(response);
         }
