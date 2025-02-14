@@ -58,8 +58,9 @@ namespace Job.Business
                     //var rabbitMqConnectionString = configuration["RabbitMQ:ConnectionString"];
                     if (string.IsNullOrEmpty(cString))
                     {
-                        throw new InvalidOperationException("RabbitMQ Connection String is missing.");
-                    }
+                        h.Username(configuration["RabbitMQ:Username"]);
+                        h.Password(configuration["RabbitMQ:Password"]);
+                    });
 
                     cfg.Host(cString);
 

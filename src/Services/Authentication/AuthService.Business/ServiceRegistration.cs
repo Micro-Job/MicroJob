@@ -44,10 +44,17 @@ namespace AuthService.Business
                 {
                     if (string.IsNullOrEmpty(cString))
                     {
-                        throw new InvalidOperationException("RabbitMQ Connection String is missing.");
-                    }
+                        h.Username(configuration["RabbitMQ:Username"]);
+                        h.Password(configuration["RabbitMQ:Password"]);
+                    });
 
+                    //var rabbitMqConnectionString = configuration["RabbitMQ:ConnectionString"];
+                    //if (string.IsNullOrEmpty(rabbitMqConnectionString))
+                    //{
+                    //    throw new InvalidOperationException("RabbitMQ Connection String is missing.");
+                    //}
                     cfg.Host(cString);
+                    cfg.Host(rabbitMqConnectionString);
 
                     cfg.ConfigureEndpoints(context);
                 });

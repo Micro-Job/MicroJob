@@ -25,13 +25,20 @@ namespace Email
                 x.SetKebabCaseEndpointNameFormatter();
                 x.UsingRabbitMq((context, cfg) =>
                 {
-                    var rabbitMqConnectionString = configuration["RabbitMQ:ConnectionString"];
-                    if (string.IsNullOrEmpty(rabbitMqConnectionString))
-                    {
-                        throw new InvalidOperationException("RabbitMQ Connection String is missing.");
-                    }
+                    //var rabbitMqConnectionString = configuration["RabbitMQ:ConnectionString"];
+                    //if (string.IsNullOrEmpty(rabbitMqConnectionString))
+                    //{
+                    //    throw new InvalidOperationException("RabbitMQ Connection String is missing.");
+                    //}
 
-                    cfg.Host(rabbitMqConnectionString);
+                    //cfg.Host(rabbitMqConnectionString);
+
+                    cfg.Host(new Uri($"rabbitmq://{configuration["RabbitMQ:Hostname"]}:{configuration["RabbitMQ:Port"]}"), h =>
+                    {
+                        h.Username(configuration["RabbitMQ:Username"]);
+                        h.Password(configuration["RabbitMQ:Password"]);
+                    });
+
 
                     cfg.ConfigureEndpoints(context);
                 });

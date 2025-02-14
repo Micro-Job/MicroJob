@@ -43,38 +43,32 @@ namespace JobCompany.Business
             services.AddScoped<INotificationService, NotificationService>();
         }
 
-        //public static IServiceCollection AddMassTransitCompany(
-        //    this IServiceCollection services,
-        //    IConfiguration configuration
-        //)
-
-        public static IServiceCollection AddMassTransit(this IServiceCollection services, string username, string password, string hostname, string port)
+        public static IServiceCollection AddMassTransitCompany(
+            this IServiceCollection services,
+            IConfiguration configuration
+        )
         {
-            password = Uri.EscapeDataString(password);
-            string cString = $"amqp://{username}:{password}@{hostname}:{port}/";
-
+            var rabbitMqConfig = configuration.GetSection("RabbitMQ");
+            services.AddMassTransit(x =>
             {
-
-                services.AddMassTransit(x =>
-                {
-                    x.AddConsumer<CompanyRegisteredConsumer>();
-                    x.AddConsumer<VacancyDataConsumer>();
-                    x.AddConsumer<GetAllCompaniesConsumer>();
-                    x.AddConsumer<UserApplicationConsumer>();
-                    x.AddConsumer<VacancyApplicationConsumer>();
-                    x.AddConsumer<GetAllVacanciesConsumer>();
-                    x.AddConsumer<GetCompanyDetailByIdConsumer>();
-                    x.AddConsumer<SimilarVacanciesConsumer>();
-                    x.AddConsumer<GetVacancyInfoConsumer>();
-                    x.AddConsumer<GetAllVacanciesByCompanyIdConsumer>();
-                    x.AddConsumer<GetUserApplicationsConsumer>();
-                    x.AddConsumer<CheckVacancyConsumer>();
-                    x.AddConsumer<CheckCompanyConsumer>();
-                    x.AddConsumer<GetOtherVacanciesByCompanyConsumer>();
-                    x.AddConsumer<GetApplicationDetailConsumer>();
-                    x.AddConsumer<GetExamDetailConsumer>();
-                    x.AddConsumer<GetExamQuestionsConsumer>();
-                    x.SetKebabCaseEndpointNameFormatter();
+                x.AddConsumer<CompanyRegisteredConsumer>();
+                x.AddConsumer<VacancyDataConsumer>();
+                x.AddConsumer<GetAllCompaniesConsumer>();
+                x.AddConsumer<UserApplicationConsumer>();
+                x.AddConsumer<VacancyApplicationConsumer>();
+                x.AddConsumer<GetAllVacanciesConsumer>();
+                x.AddConsumer<GetCompanyDetailByIdConsumer>();
+                x.AddConsumer<SimilarVacanciesConsumer>();
+                x.AddConsumer<GetVacancyInfoConsumer>();
+                x.AddConsumer<GetAllVacanciesByCompanyIdConsumer>();
+                x.AddConsumer<GetUserApplicationsConsumer>();
+                x.AddConsumer<CheckVacancyConsumer>();
+                x.AddConsumer<CheckCompanyConsumer>();
+                x.AddConsumer<GetOtherVacanciesByCompanyConsumer>();
+                x.AddConsumer<GetApplicationDetailConsumer>();
+                x.AddConsumer<GetExamDetailConsumer>();
+                x.AddConsumer<GetExamQuestionsConsumer>();
+                x.SetKebabCaseEndpointNameFormatter();
 
                     x.UsingRabbitMq(
                         (context, cfg) =>
