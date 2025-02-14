@@ -86,7 +86,12 @@ namespace Job.API
                 x.UsingRabbitMq(
                     (context, cfg) =>
                     {
-                        cfg.Host(configuration["RabbitMQ:ConnectionString"]);
+                        var rabbitMqConfig = configuration.GetSection("RabbitMQ");
+                        cfg.Host(new Uri($"rabbitmq://{rabbitMqConfig["Hostname"]}:{rabbitMqConfig["Port"]}"), h =>
+                        {
+                            h.Username(rabbitMqConfig["Username"]);
+                            h.Password(rabbitMqConfig["Password"]);
+                        });
 
                         cfg.ReceiveEndpoint(
                             "vacancy-created-queue",
