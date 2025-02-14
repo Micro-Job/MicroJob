@@ -56,15 +56,15 @@ namespace Job.Business
                 x.UsingRabbitMq((context, cfg) =>
                 {
                     //var rabbitMqConnectionString = configuration["RabbitMQ:ConnectionString"];
-                    if (string.IsNullOrEmpty(cString))
-                    {
-                        h.Username(configuration["RabbitMQ:Username"]);
-                        h.Password(configuration["RabbitMQ:Password"]);
-                    });
+                    //if (string.IsNullOrEmpty(cString))
+                    //{
+                    //    h.Username(configuration["RabbitMQ:Username"]);
+                    //    h.Password(configuration["RabbitMQ:Password"]);
+                    //});
 
                     cfg.Host(cString);
 
-                    cfg.ConfigureEndpoints(context);
+                    //cfg.ConfigureEndpoints(context);
                 });
             });
 

@@ -43,12 +43,12 @@ namespace JobCompany.Business
             services.AddScoped<INotificationService, NotificationService>();
         }
 
-        public static IServiceCollection AddMassTransitCompany(
-            this IServiceCollection services,
-            IConfiguration configuration
-        )
+        public static IServiceCollection AddMassTransit(this IServiceCollection services, string username, string password, string hostname, string port)
         {
-            var rabbitMqConfig = configuration.GetSection("RabbitMQ");
+            password = Uri.EscapeDataString(password);
+            string cString = $"amqp://{username}:{password}@{hostname}:{port}/";
+            
+            //var rabbitMqConfig = configuration.GetSection("RabbitMQ");
             services.AddMassTransit(x =>
             {
                 x.AddConsumer<CompanyRegisteredConsumer>();
@@ -92,4 +92,4 @@ namespace JobCompany.Business
             }
         }
     }
-}
+

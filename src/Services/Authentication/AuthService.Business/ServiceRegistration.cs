@@ -42,11 +42,11 @@ namespace AuthService.Business
                 x.SetKebabCaseEndpointNameFormatter();
                 x.UsingRabbitMq((context, cfg) =>
                 {
-                    if (string.IsNullOrEmpty(cString))
-                    {
-                        h.Username(configuration["RabbitMQ:Username"]);
-                        h.Password(configuration["RabbitMQ:Password"]);
-                    });
+                    //if (string.IsNullOrEmpty(cString))
+                    //{
+                    //    h.Username(configuration["RabbitMQ:Username"]);
+                    //    h.Password(configuration["RabbitMQ:Password"]);
+                    //});
 
                     //var rabbitMqConnectionString = configuration["RabbitMQ:ConnectionString"];
                     //if (string.IsNullOrEmpty(rabbitMqConnectionString))
@@ -54,7 +54,7 @@ namespace AuthService.Business
                     //    throw new InvalidOperationException("RabbitMQ Connection String is missing.");
                     //}
                     cfg.Host(cString);
-                    cfg.Host(rabbitMqConnectionString);
+                    //cfg.Host(rabbitMqConnectionString);
 
                     cfg.ConfigureEndpoints(context);
                 });
