@@ -43,52 +43,59 @@ namespace JobCompany.Business
             services.AddScoped<INotificationService, NotificationService>();
         }
 
-        public static IServiceCollection AddMassTransitCompany(
-            this IServiceCollection services,
-            IConfiguration configuration
-        )
+        //public static IServiceCollection AddMassTransitCompany(
+        //    this IServiceCollection services,
+        //    IConfiguration configuration
+        //)
+
+        public static IServiceCollection AddMassTransit(this IServiceCollection services, string username, string password, string hostname, string port)
         {
-            var rabbitMqConfig = configuration.GetSection("RabbitMQ");
-            services.AddMassTransit(x =>
+            password = Uri.EscapeDataString(password);
+            string cString = $"amqp://{username}:{password}@{hostname}:{port}/";
+
             {
-                x.AddConsumer<CompanyRegisteredConsumer>();
-                x.AddConsumer<VacancyDataConsumer>();
-                x.AddConsumer<GetAllCompaniesConsumer>();
-                x.AddConsumer<UserApplicationConsumer>();
-                x.AddConsumer<VacancyApplicationConsumer>();
-                x.AddConsumer<GetAllVacanciesConsumer>();
-                x.AddConsumer<GetCompanyDetailByIdConsumer>();
-                x.AddConsumer<SimilarVacanciesConsumer>();
-                x.AddConsumer<GetVacancyInfoConsumer>();
-                x.AddConsumer<GetAllVacanciesByCompanyIdConsumer>();
-                x.AddConsumer<GetUserApplicationsConsumer>();
-                x.AddConsumer<CheckVacancyConsumer>();
-                x.AddConsumer<CheckCompanyConsumer>();
-                x.AddConsumer<GetOtherVacanciesByCompanyConsumer>();
-                x.AddConsumer<GetApplicationDetailConsumer>();
-                x.AddConsumer<GetExamDetailConsumer>();
-                x.AddConsumer<GetExamQuestionsConsumer>();
-                x.SetKebabCaseEndpointNameFormatter();
 
-                x.UsingRabbitMq(
-                    (context, cfg) =>
-                    {
-                        var rabbitMqConnectionString = configuration["RabbitMQ:ConnectionString"];
-                        if (string.IsNullOrEmpty(rabbitMqConnectionString))
+                services.AddMassTransit(x =>
+                {
+                    x.AddConsumer<CompanyRegisteredConsumer>();
+                    x.AddConsumer<VacancyDataConsumer>();
+                    x.AddConsumer<GetAllCompaniesConsumer>();
+                    x.AddConsumer<UserApplicationConsumer>();
+                    x.AddConsumer<VacancyApplicationConsumer>();
+                    x.AddConsumer<GetAllVacanciesConsumer>();
+                    x.AddConsumer<GetCompanyDetailByIdConsumer>();
+                    x.AddConsumer<SimilarVacanciesConsumer>();
+                    x.AddConsumer<GetVacancyInfoConsumer>();
+                    x.AddConsumer<GetAllVacanciesByCompanyIdConsumer>();
+                    x.AddConsumer<GetUserApplicationsConsumer>();
+                    x.AddConsumer<CheckVacancyConsumer>();
+                    x.AddConsumer<CheckCompanyConsumer>();
+                    x.AddConsumer<GetOtherVacanciesByCompanyConsumer>();
+                    x.AddConsumer<GetApplicationDetailConsumer>();
+                    x.AddConsumer<GetExamDetailConsumer>();
+                    x.AddConsumer<GetExamQuestionsConsumer>();
+                    x.SetKebabCaseEndpointNameFormatter();
+
+                    x.UsingRabbitMq(
+                        (context, cfg) =>
                         {
-                            throw new InvalidOperationException(
-                                "RabbitMQ Connection String is missing."
-                            );
+                            //var rabbitMqConnectionString = configuration["RabbitMQ:ConnectionString"];
+                            if (string.IsNullOrEmpty(cString))
+                            {
+                                throw new InvalidOperationException(
+                                    "RabbitMQ Connection String is missing."
+                                );
+                            }
+
+                            cfg.Host(cString);
+
+                            cfg.ConfigureEndpoints(context);
                         }
+                    );
+                });
 
-                        cfg.Host(rabbitMqConnectionString);
-
-                        cfg.ConfigureEndpoints(context);
-                    }
-                );
-            });
-
-            return services;
+                return services;
+            }
         }
     }
 }

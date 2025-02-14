@@ -74,62 +74,73 @@ namespace Job.API
                 opt.RegisterValidatorsFromAssemblyContaining<ResumeService>();
             });
 
-            builder.Services.AddMassTransit(x =>
-            {
-                // Add consumers for each queue
-                x.AddConsumer<VacancyCreatedConsumer>();
-                x.AddConsumer<UpdateUserApplicationStatusConsumer>();
-                x.AddConsumer<GetResumeDataConsumer>();
-                x.AddConsumer<UserRegisteredConsumer>();
-                x.AddConsumer<VacancyUpdatedConsumer>();
 
-                x.UsingRabbitMq(
-                    (context, cfg) =>
-                    {
-                        cfg.Host(configuration["RabbitMQ:ConnectionString"]);
+            var IconBuilder = builder.Configuration.SetBasePath(Directory.GetCurrentDirectory())
+                                    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                                    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true);
 
-                        cfg.ReceiveEndpoint(
-                            "vacancy-created-queue",
-                            e =>
-                            {
-                                e.ConfigureConsumer<VacancyCreatedConsumer>(context);
-                            }
-                        );
+            var newBuilder = IconBuilder.Build();
 
-                        cfg.ReceiveEndpoint(
-                            "user-notification-queue",
-                            e =>
-                            {
-                                e.ConfigureConsumer<UpdateUserApplicationStatusConsumer>(context);
-                            }
-                        );
+            builder.Services.AddMassTransit(newBuilder["RabbitMQ:Username"]!, newBuilder["RabbitMQ:Password"]!, newBuilder["RabbitMQ:Hostname"]!, newBuilder["RabbitMQ:Port"]!);
 
-                        cfg.ReceiveEndpoint(
-                            "get-resume-data-queue",
-                            e =>
-                            {
-                                e.ConfigureConsumer<GetResumeDataConsumer>(context);
-                            }
-                        );
+            //builder.Services.AddMassTransit(builder.Configuration);
 
-                        cfg.ReceiveEndpoint(
-                            "user-registered-queue",
-                            e =>
-                            {
-                                e.ConfigureConsumer<UserRegisteredConsumer>(context);
-                            }
-                        );
+            //builder.Services.AddMassTransit(x =>
+            //{
+            //    // Add consumers for each queue
+            //    x.AddConsumer<VacancyCreatedConsumer>();
+            //    x.AddConsumer<UpdateUserApplicationStatusConsumer>();
+            //    x.AddConsumer<GetResumeDataConsumer>();
+            //    x.AddConsumer<UserRegisteredConsumer>();
+            //    x.AddConsumer<VacancyUpdatedConsumer>();
 
-                        cfg.ReceiveEndpoint(
-                            "vacancy-updated-queue",
-                            e =>
-                            {
-                                e.ConfigureConsumer<VacancyUpdatedConsumer>(context);
-                            }
-                        );
-                    }
-                );
-            });
+            //    x.UsingRabbitMq(
+            //        (context, cfg) =>
+            //        {
+            //            cfg.Host(configuration["RabbitMQ:ConnectionString"]);
+
+            //            cfg.ReceiveEndpoint(
+            //                "vacancy-created-queue",
+            //                e =>
+            //                {
+            //                    e.ConfigureConsumer<VacancyCreatedConsumer>(context);
+            //                }
+            //            );
+
+            //            cfg.ReceiveEndpoint(
+            //                "user-notification-queue",
+            //                e =>
+            //                {
+            //                    e.ConfigureConsumer<UpdateUserApplicationStatusConsumer>(context);
+            //                }
+            //            );
+
+            //            cfg.ReceiveEndpoint(
+            //                "get-resume-data-queue",
+            //                e =>
+            //                {
+            //                    e.ConfigureConsumer<GetResumeDataConsumer>(context);
+            //                }
+            //            );
+
+            //            cfg.ReceiveEndpoint(
+            //                "user-registered-queue",
+            //                e =>
+            //                {
+            //                    e.ConfigureConsumer<UserRegisteredConsumer>(context);
+            //                }
+            //            );
+
+            //            cfg.ReceiveEndpoint(
+            //                "vacancy-updated-queue",
+            //                e =>
+            //                {
+            //                    e.ConfigureConsumer<VacancyUpdatedConsumer>(context);
+            //                }
+            //            );
+            //        }
+            //    );
+            //});
 
             builder.Services.AddHostedService<RabbitMqBackgroundService>();
 

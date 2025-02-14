@@ -64,7 +64,15 @@ namespace JobCompany.API
                 builder.Configuration["Jwt:SigningKey"]!
             );
             builder.Services.AddJobCompanyServices();
-            builder.Services.AddMassTransitCompany(builder.Configuration);
+            var IconBuilder = builder.Configuration.SetBasePath(Directory.GetCurrentDirectory())
+                                       .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                                       .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true);
+
+            var newBuilder = IconBuilder.Build();
+
+            builder.Services.AddMassTransit(newBuilder["RabbitMQ:Username"]!, newBuilder["RabbitMQ:Password"]!, newBuilder["RabbitMQ:Hostname"]!, newBuilder["RabbitMQ:Port"]!);
+
+            //builder.Services.AddMassTransit(builder.Configuration);
 
             // CORS policy with multiple allowed origins
             builder.Services.AddCors(options =>

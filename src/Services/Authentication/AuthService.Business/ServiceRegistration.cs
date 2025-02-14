@@ -26,9 +26,11 @@ namespace AuthService.Business
             services.AddScoped<IFileService, FileService>();
         }
 
-        public static IServiceCollection AddMassTransit(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddMassTransit(this IServiceCollection services, string username, string password, string hostname, string port)
         {
-            var rabbitMqConfig = configuration.GetSection("RabbitMQ");
+            password = Uri.EscapeDataString(password);
+            string cString = $"amqp://{username}:{password}@{hostname}:{port}/";
+
             services.AddMassTransit(x =>
             {
                 x.AddConsumer<GetUserDataConsumer>();
@@ -40,13 +42,12 @@ namespace AuthService.Business
                 x.SetKebabCaseEndpointNameFormatter();
                 x.UsingRabbitMq((context, cfg) =>
                 {
-                    var rabbitMqConnectionString = configuration["RabbitMQ:ConnectionString"];
-                    if (string.IsNullOrEmpty(rabbitMqConnectionString))
+                    if (string.IsNullOrEmpty(cString))
                     {
                         throw new InvalidOperationException("RabbitMQ Connection String is missing.");
                     }
 
-                    cfg.Host(rabbitMqConnectionString);
+                    cfg.Host(cString);
 
                     cfg.ConfigureEndpoints(context);
                 });

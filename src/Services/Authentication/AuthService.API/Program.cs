@@ -48,7 +48,16 @@ builder.Services.AddSwaggerGen(opt =>
 
 
 builder.Services.AddAuthServices();
-builder.Services.AddMassTransit(builder.Configuration);
+
+var IconBuilder = builder.Configuration.SetBasePath(Directory.GetCurrentDirectory())
+                                    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                                    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true);
+
+var newBuilder = IconBuilder.Build();
+
+builder.Services.AddMassTransit(newBuilder["RabbitMQ:Username"]!, newBuilder["RabbitMQ:Password"]!, newBuilder["RabbitMQ:Hostname"]!, newBuilder["RabbitMQ:Port"]!);
+
+//builder.Services.AddMassTransit(builder.Configuration);
 
 builder.Services.AddDbContext<AppDbContext>(opt =>
 {
