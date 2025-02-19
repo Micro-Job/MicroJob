@@ -125,9 +125,14 @@ namespace Job.Business.Services.Application
             string applicationId
         )
         {
+            var userId = userGuid.ToString();
             var response =
                 await _requestApplicationDetail.GetResponse<GetApplicationDetailResponse>(
-                    new GetApplicationDetailRequest { ApplicationId = applicationId }
+                    new GetApplicationDetailRequest
+                    {
+                        ApplicationId = applicationId,
+                        UserId = userId
+                    }
                 );
             return response.Message;
         }
