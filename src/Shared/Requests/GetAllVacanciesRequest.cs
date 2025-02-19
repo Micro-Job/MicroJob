@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using SharedLibrary.Enums;
 
 namespace Shared.Requests
@@ -15,5 +11,8 @@ namespace Shared.Requests
         public bool? IsActive { get; set; }
         public decimal? MinSalary { get; set; }
         public decimal? MaxSalary { get; set; }
+        public string? CompanyId { get; set; }
+        public WorkType? WorkType { get; set; }
+        public WorkStyle? WorkStyle { get; set; }
     }
-}
+} 

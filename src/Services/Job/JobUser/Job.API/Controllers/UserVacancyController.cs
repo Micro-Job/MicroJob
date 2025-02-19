@@ -41,6 +41,9 @@ namespace Job.API.Controllers
             bool? isActive,
             decimal? minSalary,
             decimal? maxSalary,
+            string? companyId,
+            WorkType workType,
+            WorkStyle workStyle,decimal? salary,
             int skip = 1,
             int take = 6
         )
@@ -54,6 +57,9 @@ namespace Job.API.Controllers
                     isActive,
                     minSalary,
                     maxSalary,
+                    companyId,
+                    workType,
+                    workStyle,
                     skip,
                     take
                 )

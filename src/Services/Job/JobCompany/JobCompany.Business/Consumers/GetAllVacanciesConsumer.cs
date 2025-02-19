@@ -2,10 +2,10 @@
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Shared.Dtos.CompanyDtos;
 using Shared.Dtos.VacancyDtos;
 using Shared.Requests;
 using Shared.Responses;
+using SharedLibrary.Enums;
 
 public class GetAllVacanciesConsumer : IConsumer<GetAllVacanciesRequest>
 {
@@ -52,6 +52,22 @@ public class GetAllVacanciesConsumer : IConsumer<GetAllVacanciesRequest>
         {
             var cityId = Guid.Parse(request.CityId);
             query = query.Where(v => v.Company.CityId == cityId);
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.CompanyId))
+        {
+            var companyId = Guid.Parse(request.CompanyId);
+            query = query.Where(x => x.Company.Id == companyId);
+        }
+
+        if (request.WorkType.HasValue && request.WorkType.Value != 0 && Enum.IsDefined(typeof(WorkType), request.WorkType.Value))
+        {
+            query = query.Where(x => x.WorkType == request.WorkType);
+        }
+
+        if (request.WorkStyle.HasValue && request.WorkStyle.Value != 0 && Enum.IsDefined(typeof(WorkStyle), request.WorkStyle.Value))
+        {
+            query = query.Where(x => x.WorkStyle == request.WorkStyle);
         }
 
         if (request.MinSalary.HasValue)

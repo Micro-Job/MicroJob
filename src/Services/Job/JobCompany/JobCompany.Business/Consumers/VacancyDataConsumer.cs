@@ -22,6 +22,8 @@ namespace JobCompany.Business.Consumers
 
         public async Task Consume(ConsumeContext<GetUserSavedVacanciesRequest> context)
         {
+
+
             var vacancyIds = context.Message.VacancyIds;
 
             var totalCount = await _context

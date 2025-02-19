@@ -1,16 +1,13 @@
-using System.Security.Claims;
 using Job.Business.Dtos.AnswerDtos;
 using Job.Business.Dtos.ExamDtos;
 using Job.Business.Dtos.QuestionDtos;
 using Job.Business.Exceptions.ApplicationExceptions;
 using Job.Business.Exceptions.Common;
-using Job.Business.Exceptions.UserExceptions;
 using Job.Core.Entities;
 using Job.DAL.Contexts;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Shared.Dtos.ApplicationDtos;
 using Shared.Events;
 using Shared.Requests;
 using Shared.Responses;
@@ -19,6 +16,7 @@ using SharedLibrary.Dtos.QuestionDtos;
 using SharedLibrary.Enums;
 using SharedLibrary.Requests;
 using SharedLibrary.Responses;
+using System.Security.Claims;
 
 namespace Job.Business.Services.Application
 {
@@ -71,9 +69,7 @@ namespace Job.Business.Services.Application
                 Take = take,
             };
 
-            var response = await _userApplicationRequest.GetResponse<GetUserApplicationsResponse>(
-                request
-            );
+            var response = await _userApplicationRequest.GetResponse<GetUserApplicationsResponse>(request);
 
             return new PaginatedApplicationDto
             {

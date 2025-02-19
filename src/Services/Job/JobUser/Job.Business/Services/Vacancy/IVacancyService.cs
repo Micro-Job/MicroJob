@@ -1,5 +1,5 @@
 ﻿using Shared.Dtos.VacancyDtos;
-using SharedLibrary.Dtos.CompanyDtos;
+using SharedLibrary.Enums;
 using SharedLibrary.Responses;
 
 namespace Job.Business.Services.Vacancy
@@ -23,6 +23,9 @@ namespace Job.Business.Services.Vacancy
             bool? IsActive,
             decimal? minSalary,
             decimal? maxSalary,
+            string? companyId,
+            WorkType? workType,
+            WorkStyle? workStyle,
             int skip = 1,
             int take = 6
         );

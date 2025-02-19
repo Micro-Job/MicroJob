@@ -1,5 +1,4 @@
 using JobCompany.Business.Services.CountryServices;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SharedLibrary.Attributes;
 using SharedLibrary.Enums;

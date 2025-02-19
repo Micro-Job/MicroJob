@@ -1,9 +1,11 @@
+using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Shared.Requests;
 using Shared.Responses;
+using SharedLibrary.Exceptions;
 
 namespace JobCompany.Business.Consumers
 {
@@ -31,8 +33,10 @@ namespace JobCompany.Business.Consumers
                 .ThenInclude(v => v.Company)
                 .ThenInclude(c => c.Statuses)
                 .Include(a => a.Status)
-                .FirstOrDefaultAsync(a => a.Id == guidVacId);
+                .FirstOrDefaultAsync(a => a.Id == guidVacId)
+                ?? throw new NotFoundException<Application>();
 
+            var vacancyId = application.Vacancy.Id.ToString();
             if (application == null)
             {
                 await context.RespondAsync<GetApplicationDetailResponse>(null);
@@ -41,6 +45,7 @@ namespace JobCompany.Business.Consumers
 
             var response = new GetApplicationDetailResponse
             {
+                VacancyId = vacancyId,
                 VacancyName = application.Vacancy.Title,
                 CompanyName = application.Vacancy.CompanyName,
                 CompanyLogo = $"{_authServiceBaseUrl}/{application.Vacancy.Company.CompanyLogo}",

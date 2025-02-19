@@ -1,5 +1,4 @@
-﻿using System.Security.Claims;
-using Job.Business.Exceptions.Common;
+﻿using Job.Business.Exceptions.Common;
 using Job.Core.Entities;
 using Job.DAL.Contexts;
 using MassTransit;
@@ -9,10 +8,11 @@ using Microsoft.Extensions.Configuration;
 using Shared.Dtos.VacancyDtos;
 using Shared.Requests;
 using Shared.Responses;
-using SharedLibrary.Dtos.CompanyDtos;
+using SharedLibrary.Enums;
 using SharedLibrary.Events;
 using SharedLibrary.Requests;
 using SharedLibrary.Responses;
+using System.Security.Claims;
 
 namespace Job.Business.Services.Vacancy
 {
@@ -118,7 +118,7 @@ namespace Job.Business.Services.Vacancy
         {
             if (vacancyIds == null || vacancyIds.Count == 0)
                 return new GetUserSavedVacanciesResponse { Vacancies = [], TotalCount = 0 };
-            
+
 
             var response = await _client.GetResponse<GetUserSavedVacanciesResponse>(
                 new GetUserSavedVacanciesRequest
@@ -221,6 +221,9 @@ namespace Job.Business.Services.Vacancy
             bool? isActive,
             decimal? minSalary,
             decimal? maxSalary,
+            string? companyId,
+            WorkType? workType,
+            WorkStyle? workStyle,
             int skip = 1,
             int take = 6
         )
@@ -234,6 +237,9 @@ namespace Job.Business.Services.Vacancy
                 IsActive = isActive,
                 MinSalary = minSalary,
                 MaxSalary = maxSalary,
+                CompanyId = companyId,
+                WorkType = workType,
+                WorkStyle = workStyle,
             };
 
             var response = await _vacClient.GetResponse<GetAllVacanciesResponse>(request);
@@ -241,11 +247,13 @@ namespace Job.Business.Services.Vacancy
 
             var savedVacancies =
                 userGuid == null
-                    ? new List<Guid>()
+                    ? []
                     : await _context
                         .SavedVacancies.Where(x => x.UserId == userGuid)
                         .Select(x => x.VacancyId)
                         .ToListAsync();
+
+            var savedVacanciesSet = new HashSet<Guid>(savedVacancies);
 
             var paginatedVacancies = response.Message.Vacancies.Skip((skip - 1) * take)
                 .Take(take)
@@ -259,16 +267,15 @@ namespace Job.Business.Services.Vacancy
                     Location = x.Location,
                     MainSalary = x.MainSalary,
                     ViewCount = x.ViewCount,
-                    WorkType = x.WorkType,
                     IsVip = x.IsVip,
                     IsActive = x.IsActive,
                     CategoryId = x.CategoryId,
+                    WorkType = x.WorkType,
                     WorkStyle = x.WorkStyle,
-                    IsSaved =
-                        userGuid != null
-                        && savedVacancies.Contains(Guid.Parse(x.VacancyId.ToString())),
+                    IsSaved = userGuid != null && savedVacanciesSet.Contains(Guid.Parse(x.VacancyId)),
                 })
                 .ToList();
+
 
             return new PaginatedVacancyDto { Vacancies = paginatedVacancies, TotalCount = response.Message.TotalCount };
         }
