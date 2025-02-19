@@ -1,6 +1,8 @@
 ﻿using Job.Business.Consumers;
 using Job.Business.Services.Application;
+using Job.Business.Services.Category;
 using Job.Business.Services.Certificate;
+using Job.Business.Services.City;
 using Job.Business.Services.Company;
 using Job.Business.Services.Education;
 using Job.Business.Services.Experience;
@@ -34,6 +36,8 @@ namespace Job.Business
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<IUserApplicationService, UserApplicationService>();
             services.AddScoped<ICompanyInformationService, CompanyInformationService>();
+            services.AddScoped<ICategoryService, CategoryService>();
+            services.AddScoped<ICityService, CityService>();
         }
 
         public static IServiceCollection AddMassTransit(this IServiceCollection services, string username, string password, string hostname, string port)
