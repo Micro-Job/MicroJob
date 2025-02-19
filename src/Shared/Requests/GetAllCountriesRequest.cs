@@ -2,7 +2,7 @@
 {
     public class GetAllCountriesRequest
     {
-        public int Skip { get; set; }
-        public int Take { get; set; }
+        public int Skip { get; set; } = 1;
+        public int Take { get; set; } = 6;
     }
 }

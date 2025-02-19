@@ -83,7 +83,6 @@ namespace JobCompany.Business
                                     "RabbitMQ Connection String is missing."
                                 );
                             }
-
                             cfg.Host(cString);
 
                             cfg.ConfigureEndpoints(context);
