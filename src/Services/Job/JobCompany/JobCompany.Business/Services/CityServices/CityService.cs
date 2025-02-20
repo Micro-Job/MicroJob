@@ -63,6 +63,7 @@ namespace JobCompany.Business.Services.CityServices
             .Where(city => city.CountryId == guidCountryId)
             .Select(city => new CityNameDto
             {
+                Id = city.Id,
                 CityName = city.CityName,
             })
             .ToListAsync();
