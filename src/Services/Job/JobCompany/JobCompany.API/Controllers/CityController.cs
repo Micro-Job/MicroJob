@@ -1,5 +1,6 @@
 using JobCompany.Business.Dtos.CityDtos;
 using JobCompany.Business.Services.CityServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SharedLibrary.Attributes;
 using SharedLibrary.Enums;
@@ -32,6 +33,7 @@ namespace JobCompany.API.Controllers
             return Ok(data);
         }
 
+        [AllowAnonymous]
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllCitiesByCountryId(string countryId)
         {

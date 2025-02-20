@@ -5,7 +5,6 @@ using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Shared.Dtos.VacancyDtos;
-using SharedLibrary.Dtos.CategoryDtos;
 using SharedLibrary.Requests;
 using SharedLibrary.Responses;
 

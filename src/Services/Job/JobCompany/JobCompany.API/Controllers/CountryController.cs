@@ -1,4 +1,5 @@
 using JobCompany.Business.Services.CountryServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SharedLibrary.Attributes;
 using SharedLibrary.Enums;
@@ -24,6 +25,7 @@ namespace JobCompany.API.Controllers
             return Ok();
         }
 
+        [AllowAnonymous]
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllCountries()
         {
