@@ -8,18 +8,11 @@ using SharedLibrary.Responses;
 
 namespace JobCompany.Business.Consumers
 {
-    public class GetAllCompaniesConsumer : IConsumer<GetAllCompaniesRequest>
+    public class GetAllCompaniesConsumer(IConfiguration configuration, JobCompanyDbContext context) : IConsumer<GetAllCompaniesRequest>
     {
-        private readonly JobCompanyDbContext _context;
-        readonly IConfiguration _configuration;
-        private readonly string? _authServiceBaseUrl;
-
-        public GetAllCompaniesConsumer(IConfiguration configuration, JobCompanyDbContext context)
-        {
-            _configuration = configuration;
-            _context = context;
-            _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
-        }
+        private readonly JobCompanyDbContext _context = context;
+        readonly IConfiguration _configuration = configuration;
+        private readonly string? _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
 
         public async Task Consume(ConsumeContext<GetAllCompaniesRequest> context)
         {

@@ -7,23 +7,14 @@ using SharedLibrary.Responses;
 
 namespace JobCompany.Business.Consumers
 {
-    public class VacancyDataConsumer : IConsumer<GetUserSavedVacanciesRequest>
+    public class VacancyDataConsumer(JobCompanyDbContext context, IConfiguration configuration) : IConsumer<GetUserSavedVacanciesRequest>
     {
-        private readonly JobCompanyDbContext _context;
-        readonly IConfiguration _configuration;
-        private readonly string? _authServiceBaseUrl;
-
-        public VacancyDataConsumer(JobCompanyDbContext context, IConfiguration configuration)
-        {
-            _context = context;
-            _configuration = configuration;
-            _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
-        }
+        private readonly JobCompanyDbContext _context = context;
+        readonly IConfiguration _configuration = configuration;
+        private readonly string? _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
 
         public async Task Consume(ConsumeContext<GetUserSavedVacanciesRequest> context)
         {
-
-
             var vacancyIds = context.Message.VacancyIds;
 
             var totalCount = await _context

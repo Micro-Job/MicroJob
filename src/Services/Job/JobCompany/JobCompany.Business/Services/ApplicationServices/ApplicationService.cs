@@ -1,8 +1,6 @@
-﻿using System.Security.Claims;
-using JobCompany.Business.Dtos.ApplicationDtos;
+﻿using JobCompany.Business.Dtos.ApplicationDtos;
 using JobCompany.Business.Dtos.StatusDtos;
 using JobCompany.Business.Exceptions.ApplicationExceptions;
-using JobCompany.Business.Exceptions.VacancyExceptions;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using MassTransit;
@@ -10,11 +8,11 @@ using MassTransit.Initializers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using Shared.Events;
 using Shared.Requests;
 using Shared.Responses;
 using SharedLibrary.Exceptions;
+using System.Security.Claims;
 
 namespace JobCompany.Business.Services.ApplicationServices
 {

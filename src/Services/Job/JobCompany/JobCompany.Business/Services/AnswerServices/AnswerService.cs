@@ -15,12 +15,11 @@ namespace JobCompany.Business.Services.AnswerServices
         {
             Guid questionGuid = Guid.Parse(questionId);
             var answersToAdd = dtos.Select(dto => new Answer
-                {
-                    Text = dto.Text,
-                    QuestionId = questionGuid,
-                    IsCorrect = dto.IsCorrect,
-                })
-                .ToList();
+            {
+                Text = dto.Text,
+                QuestionId = questionGuid,
+                IsCorrect = dto.IsCorrect,
+            }).ToList();
             await _context.Answers.AddRangeAsync(answersToAdd);
             return answersToAdd;
         }

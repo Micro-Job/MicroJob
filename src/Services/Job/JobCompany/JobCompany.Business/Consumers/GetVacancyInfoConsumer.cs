@@ -10,18 +10,11 @@ using SharedLibrary.Responses;
 
 namespace Job.Business.Consumers
 {
-    public class GetVacancyInfoConsumer : IConsumer<GetVacancyInfoRequest>
+    public class GetVacancyInfoConsumer(JobCompanyDbContext context, IConfiguration configuration) : IConsumer<GetVacancyInfoRequest>
     {
-        private readonly JobCompanyDbContext _context;
-        readonly IConfiguration _configuration;
-        private readonly string? _authServiceBaseUrl;
-
-        public GetVacancyInfoConsumer(JobCompanyDbContext context, IConfiguration configuration)
-        {
-            _context = context;
-            _configuration = configuration;
-            _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
-        }
+        private readonly JobCompanyDbContext _context = context;
+        readonly IConfiguration _configuration = configuration;
+        private readonly string? _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
 
         public async Task Consume(ConsumeContext<GetVacancyInfoRequest> context)
         {

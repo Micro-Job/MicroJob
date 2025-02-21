@@ -6,14 +6,9 @@ using SharedLibrary.Responses;
 
 namespace JobCompany.Business.Consumers
 {
-    public class CheckVacancyConsumer : IConsumer<CheckVacancyRequest>
+    public class CheckVacancyConsumer(JobCompanyDbContext companyDb) : IConsumer<CheckVacancyRequest>
     {
-        private readonly JobCompanyDbContext _companyDb;
-
-        public CheckVacancyConsumer(JobCompanyDbContext companyDb)
-        {
-            _companyDb = companyDb;
-        }
+        private readonly JobCompanyDbContext _companyDb = companyDb;
 
         public async Task Consume(ConsumeContext<CheckVacancyRequest> context)
         {

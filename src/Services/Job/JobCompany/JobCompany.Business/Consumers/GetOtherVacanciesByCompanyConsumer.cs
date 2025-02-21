@@ -8,21 +8,11 @@ using SharedLibrary.Responses;
 
 namespace JobCompany.Business.Consumers;
 
-public class GetOtherVacanciesByCompanyConsumer : IConsumer<GetOtherVacanciesByCompanyRequest>
+public class GetOtherVacanciesByCompanyConsumer(JobCompanyDbContext dbContext, IConfiguration configuration) : IConsumer<GetOtherVacanciesByCompanyRequest>
 {
-    private readonly JobCompanyDbContext _dbContext;
-    readonly IConfiguration _configuration;
-    private readonly string? _authServiceBaseUrl;
-
-    public GetOtherVacanciesByCompanyConsumer(
-        JobCompanyDbContext dbContext,
-        IConfiguration configuration
-    )
-    {
-        _dbContext = dbContext;
-        _configuration = configuration;
-        _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
-    }
+    private readonly JobCompanyDbContext _dbContext = dbContext;
+    readonly IConfiguration _configuration = configuration;
+    private readonly string? _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
 
     public async Task Consume(ConsumeContext<GetOtherVacanciesByCompanyRequest> context)
     {
@@ -35,7 +25,7 @@ public class GetOtherVacanciesByCompanyConsumer : IConsumer<GetOtherVacanciesByC
             vacanciesQuery = vacanciesQuery.Where(x => x.Id != context.Message.CurrentVacancyId);
         }
 
-        var totalCount = await vacanciesQuery.CountAsync(); 
+        var totalCount = await vacanciesQuery.CountAsync();
 
         var vacancies = await vacanciesQuery
             .OrderByDescending(x => x.StartDate)
@@ -45,7 +35,7 @@ public class GetOtherVacanciesByCompanyConsumer : IConsumer<GetOtherVacanciesByC
             .Take(context.Message.Take)
             .ToListAsync();
 
-        if (vacancies is null || !vacancies.Any())
+        if (vacancies is null || vacancies.Count == 0)
         {
             await context.RespondAsync(
                 new GetOtherVacanciesByCompanyResponse { Vacancies = new List<AllVacanyDto>() }

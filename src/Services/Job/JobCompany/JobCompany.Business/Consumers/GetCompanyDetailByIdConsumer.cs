@@ -12,37 +12,27 @@ using SharedLibrary.Responses;
 
 namespace JobCompany.Business.Consumers;
 
-public class GetCompanyDetailByIdConsumer : IConsumer<GetCompanyDetailByIdRequest>
+public class GetCompanyDetailByIdConsumer(
+    JobCompanyDbContext jobCompanyDbContext,
+    IRequestClient<GetAllCompaniesDataRequest> requestClient,
+    IConfiguration configuration
+    ) : IConsumer<GetCompanyDetailByIdRequest>
 {
-    private readonly JobCompanyDbContext _jobCompanyDbContext;
-    private readonly IRequestClient<GetAllCompaniesDataRequest> _requestClient;
-    readonly IConfiguration _configuration;
-    private readonly string? _authServiceBaseUrl;
-
-    public GetCompanyDetailByIdConsumer(
-        JobCompanyDbContext jobCompanyDbContext,
-        IRequestClient<GetAllCompaniesDataRequest> requestClient,
-        IConfiguration configuration
-    )
-    {
-        _jobCompanyDbContext = jobCompanyDbContext;
-        _requestClient = requestClient;
-        _configuration = configuration;
-        _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
-    }
+    private readonly JobCompanyDbContext _jobCompanyDbContext = jobCompanyDbContext;
+    private readonly IRequestClient<GetAllCompaniesDataRequest> _requestClient = requestClient;
+    readonly IConfiguration _configuration = configuration;
+    private readonly string? _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
 
     public async Task Consume(ConsumeContext<GetCompanyDetailByIdRequest> context)
     {
-        var company =
-            await _jobCompanyDbContext
+        var company = await _jobCompanyDbContext
                 .Companies.Include(x => x.CompanyNumbers)
                 .FirstOrDefaultAsync(x => x.Id == context.Message.CompanyId)
-            ?? throw new NotFoundException<Company>();
+                                   ?? throw new NotFoundException<Company>();
 
         GetAllCompaniesDataRequest userEmailRequest = new() { UserId = company.UserId };
 
-        var userEmailResponse =
-            await _requestClient.GetResponse<GetAllCompaniesDataResponse>(userEmailRequest)
+        var userEmailResponse = await _requestClient.GetResponse<GetAllCompaniesDataResponse>(userEmailRequest)
             ?? throw new Exception("Failed to retrieve user email");
 
         await context.RespondAsync(

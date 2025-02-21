@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using MassTransit;
@@ -12,14 +8,9 @@ using SharedLibrary.Exceptions;
 
 namespace JobCompany.Business.Consumers
 {
-    public class GetExamDetailConsumer : IConsumer<GetExamDetailRequest>
+    public class GetExamDetailConsumer(JobCompanyDbContext jobCompanyDbContext) : IConsumer<GetExamDetailRequest>
     {
-        private readonly JobCompanyDbContext _jobCompanyDbContext;
-
-        public GetExamDetailConsumer(JobCompanyDbContext jobCompanyDbContext)
-        {
-            _jobCompanyDbContext = jobCompanyDbContext;
-        }
+        private readonly JobCompanyDbContext _jobCompanyDbContext = jobCompanyDbContext;
 
         public async Task Consume(ConsumeContext<GetExamDetailRequest> context)
         {
@@ -35,13 +26,7 @@ namespace JobCompany.Business.Consumers
                     e.Exam.IntroDescription,
                     e.Exam.LimitRate,
                 })
-                .FirstOrDefaultAsync();
-
-            if (exam == null)
-            {
-                throw new NotFoundException<Exam>("Exam not found for the given vacancy.");
-            }
-
+                .FirstOrDefaultAsync() ?? throw new NotFoundException<Exam>("Exam not found for the given vacancy.");
             await context.RespondAsync(
                 new GetExamDetailResponse
                 {

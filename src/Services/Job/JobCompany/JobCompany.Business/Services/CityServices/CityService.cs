@@ -1,4 +1,5 @@
 using JobCompany.Business.Dtos.CityDtos;
+using JobCompany.Business.Exceptions.Common;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
@@ -14,18 +15,16 @@ namespace JobCompany.Business.Services.CityServices
             var GuidCountrId = Guid.Parse(dto.CountryId);
             var existCity = await _context.Cities
                 .SingleOrDefaultAsync(c => c.CityName == dto.CityName);
-            if (existCity != null) throw new Exceptions.Common.IsAlreadyExistException<City>();
+            if (existCity != null) throw new IsAlreadyExistException<City>();
 
-            var isExistCountry = await _context.Countries.FindAsync(GuidCountrId);
-            if (isExistCountry == null) throw new Exceptions.Common.NotFoundException<Country>();
-
+            var isExistCountry = await _context.Countries.FindAsync(GuidCountrId) ?? throw new NotFoundException<Country>();
             var city = new City
             {
                 CityName = dto.CityName,
                 CountryId = GuidCountrId,
             };
 
-            _context.Cities.Add(city);
+            await _context.Cities.AddAsync(city);
             await _context.SaveChangesAsync();
         }
 
@@ -47,7 +46,7 @@ namespace JobCompany.Business.Services.CityServices
         {
             var cityId = Guid.Parse(id);
             var city = await _context.Cities.FindAsync(cityId)
-            ?? throw new Exceptions.Common.NotFoundException<City>();
+            ?? throw new NotFoundException<City>();
 
             city.CityName = dto.CityName;
             await _context.SaveChangesAsync();
@@ -75,10 +74,9 @@ namespace JobCompany.Business.Services.CityServices
         {
             var guidCityId = Guid.Parse(cityId);
             var existCity = await _context.Cities.FindAsync(guidCityId)
-                ?? throw new Exceptions.Common.NotFoundException<City>();
+                ?? throw new NotFoundException<City>();
             _context.Cities.Remove(existCity);
             await _context.SaveChangesAsync();
-
         }
     }
 }

@@ -11,8 +11,7 @@ namespace JobCompany.Business.Consumers
     {
         public async Task Consume(ConsumeContext<UserApplicationEvent> context)
         {
-            var status =
-                await _companyDb.Statuses.FirstOrDefaultAsync(s => s.Order == 1)
+            var status = await _companyDb.Statuses.FirstOrDefaultAsync(s => s.Order == 1)
                 ?? throw new SharedLibrary.Exceptions.NotFoundException<Status>();
             var newApp = new Application
             {

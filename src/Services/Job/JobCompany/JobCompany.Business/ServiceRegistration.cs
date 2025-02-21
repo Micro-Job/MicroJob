@@ -15,7 +15,6 @@ using JobCompany.Business.Services.SkillServices;
 using JobCompany.Business.Services.StatusServices;
 using JobCompany.Business.Services.VacancyServices;
 using MassTransit;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SharedLibrary.ExternalServices.FileService;
 
@@ -47,7 +46,7 @@ namespace JobCompany.Business
         {
             password = Uri.EscapeDataString(password);
             string cString = $"amqp://{username}:{password}@{hostname}:{port}/";
-            
+
             //var rabbitMqConfig = configuration.GetSection("RabbitMQ");
             services.AddMassTransit(x =>
             {
@@ -70,25 +69,24 @@ namespace JobCompany.Business
                 x.AddConsumer<GetExamQuestionsConsumer>();
                 x.SetKebabCaseEndpointNameFormatter();
 
-                    x.UsingRabbitMq(
-                        (context, cfg) =>
+                x.UsingRabbitMq(
+                    (context, cfg) =>
+                    {
+                        //var rabbitMqConnectionString = configuration["RabbitMQ:ConnectionString"];
+                        if (string.IsNullOrEmpty(cString))
                         {
-                            //var rabbitMqConnectionString = configuration["RabbitMQ:ConnectionString"];
-                            if (string.IsNullOrEmpty(cString))
-                            {
-                                throw new InvalidOperationException(
-                                    "RabbitMQ Connection String is missing."
-                                );
-                            }
-                            cfg.Host(cString);
-
-                            cfg.ConfigureEndpoints(context);
+                            throw new InvalidOperationException(
+                                "RabbitMQ Connection String is missing."
+                            );
                         }
-                    );
-                });
+                        cfg.Host(cString);
 
-                return services;
-            }
+                        cfg.ConfigureEndpoints(context);
+                    }
+                );
+            });
+
+            return services;
         }
     }
-
+}

@@ -7,18 +7,12 @@ using Shared.Requests;
 using Shared.Responses;
 using SharedLibrary.Enums;
 
-public class GetAllVacanciesConsumer : IConsumer<GetAllVacanciesRequest>
+namespace JobCompany.Business.Consumers;
+public class GetAllVacanciesConsumer(JobCompanyDbContext context, IConfiguration configuration) : IConsumer<GetAllVacanciesRequest>
 {
-    private readonly JobCompanyDbContext _context;
-    readonly IConfiguration _configuration;
-    private readonly string? _authServiceBaseUrl;
-
-    public GetAllVacanciesConsumer(JobCompanyDbContext context, IConfiguration configuration)
-    {
-        _context = context;
-        _configuration = configuration;
-        _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
-    }
+    private readonly JobCompanyDbContext _context = context;
+    readonly IConfiguration _configuration = configuration;
+    private readonly string? _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
 
     public async Task Consume(ConsumeContext<GetAllVacanciesRequest> context)
     {
@@ -28,7 +22,7 @@ public class GetAllVacanciesConsumer : IConsumer<GetAllVacanciesRequest>
 
         if (!string.IsNullOrWhiteSpace(request.TitleName))
         {
-            query = query.Where(v => EF.Functions.Like(v.Title, $"%{request.TitleName}%"));
+            query = query.Where(v => v.Title.ToLower().Contains(request.TitleName.ToLower()));
         }
 
         if (request.IsActive.HasValue)
@@ -81,7 +75,6 @@ public class GetAllVacanciesConsumer : IConsumer<GetAllVacanciesRequest>
         }
 
         var vacancies = await query
-            // .Include(q => q.Skills)
             .Select(v => new AllVacanyDto
             {
                 VacancyId = v.Id.ToString(),
