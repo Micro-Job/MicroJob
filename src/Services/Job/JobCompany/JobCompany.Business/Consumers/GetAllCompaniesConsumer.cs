@@ -18,10 +18,7 @@ namespace JobCompany.Business.Consumers
         {
             var searchTerm = context.Message.SearchTerm?.ToLower() ?? string.Empty;
 
-            var companiesQuery = _context
-                .Companies.Skip(Math.Max(0, (context.Message.Skip - 1) * context.Message.Take))
-                .Take(context.Message.Take)
-                .AsQueryable();
+            var companiesQuery = _context.Companies.AsQueryable();
 
             if (!string.IsNullOrEmpty(searchTerm))
             {
@@ -29,8 +26,11 @@ namespace JobCompany.Business.Consumers
                     x.CompanyName.ToLower().Contains(searchTerm)
                 );
             }
+            var totalCount = await companiesQuery.CountAsync();
 
             var companies = await companiesQuery
+                .Skip(Math.Max(0, (context.Message.Skip - 1) * context.Message.Take))
+                .Take(context.Message.Take)
                 .Select(x => new CompanyDto
                 {
                     CompanyId = x.Id,
@@ -40,9 +40,6 @@ namespace JobCompany.Business.Consumers
                     CompanyVacancyCount = x.Vacancies.Count,
                 })
                 .ToListAsync();
-
-            var totalCount = await companiesQuery.CountAsync(); 
-
             await context.RespondAsync(new GetAllCompaniesResponse { Companies = companies, TotalCount = totalCount });
         }
     }

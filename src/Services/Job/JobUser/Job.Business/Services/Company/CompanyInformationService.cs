@@ -24,7 +24,7 @@ namespace Job.Business.Services.Company
                     Take = take,
                 }
             );
-
+                
             return new PaginatedCompanyDto
             {
                 Companies = response.Message.Companies,
