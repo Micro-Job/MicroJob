@@ -41,7 +41,7 @@ namespace JobCompany.Business.Consumers
                 })
                 .ToListAsync();
 
-            var totalCount = await _context.Companies.CountAsync(); 
+            var totalCount = await companiesQuery.CountAsync(); 
 
             await context.RespondAsync(new GetAllCompaniesResponse { Companies = companies, TotalCount = totalCount });
         }
