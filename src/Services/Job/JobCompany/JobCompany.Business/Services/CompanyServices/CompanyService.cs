@@ -1,7 +1,9 @@
 using System.Security.Claims;
+using JobCompany.Business.Dtos.Common;
 using JobCompany.Business.Dtos.CompanyDtos;
 using JobCompany.Business.Dtos.NumberDtos;
 using JobCompany.Business.Exceptions.Common;
+using JobCompany.Business.HelperServices.Current;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using MassTransit;
@@ -20,39 +22,26 @@ namespace JobCompany.Business.Services.CompanyServices
         private JobCompanyDbContext _context;
         readonly IConfiguration _configuration;
         readonly IRequestClient<GetAllCompaniesDataRequest> _client;
-        private readonly IHttpContextAccessor _contextAccessor;
-        private readonly string? _baseUrl;
         private readonly string? _authServiceBaseUrl;
+        private readonly ICurrentUser _currentUser;
 
         public CompanyService(
             JobCompanyDbContext context,
             IRequestClient<GetAllCompaniesDataRequest> client,
             IHttpContextAccessor contextAccessor,
-            IConfiguration configuration
+            IConfiguration configuration,ICurrentUser currentUser
         )
         {
             _context = context;
             _client = client;
-            _contextAccessor = contextAccessor;
-            _baseUrl =
-                $"{_contextAccessor.HttpContext.Request.Scheme}://{_contextAccessor.HttpContext.Request.Host.Value}{_contextAccessor.HttpContext.Request.PathBase.Value}";
             _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
             _configuration = configuration;
+            _currentUser = currentUser;
         }
 
-        public async Task UpdateCompanyAsync(
-            CompanyUpdateDto dto,
-            ICollection<UpdateNumberDto>? numbersDto
-        )
+        public async Task UpdateCompanyAsync(CompanyUpdateDto dto,ICollection<UpdateNumberDto>? numbersDto)
         {
-            Guid userGuid = Guid.Parse(
-                _contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid).Value
-            );
-
-            var company =
-                await _context
-                    .Companies.Include(c => c.CompanyNumbers)
-                    .FirstOrDefaultAsync(x => x.UserId == userGuid)
+            var company = await _context.Companies.Include(c => c.CompanyNumbers).FirstOrDefaultAsync(x => x.UserId == _currentUser.UserGuid)
                 ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>();
 
             company.CompanyName = dto.CompanyName.Trim();
@@ -99,76 +88,65 @@ namespace JobCompany.Business.Services.CompanyServices
             await _context.SaveChangesAsync();
         }
 
-        public async Task<ICollection<CompanyListDto>> GetAllCompaniesAsync(
-            string? searchTerm,
-            int skip = 1,
-            int take = 12
-        )
+        public async Task<DataListDto<CompanyDto>> GetAllCompaniesAsync(string? searchTerm,int skip = 1,int take = 12)
         {
             var query = _context.Companies.AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(searchTerm))
-            {
-                query = query.Where(c =>
-                    c.CompanyName.ToLower().Contains(searchTerm.Trim().ToLower())
-                );
-            }
+                query = query.Where(x => x.CompanyName.Contains(searchTerm));
 
             var companies = await query
-                .Select(c => new CompanyListDto
+                .Select(c => new CompanyDto
                 {
                     CompanyId = c.Id,
                     CompanyName = c.CompanyName,
                     CompanyImage = $"{_authServiceBaseUrl}/{c.CompanyLogo}",
-                    CompanyVacancyCount = c.Vacancies.Count(v => v.IsActive),
+                    CompanyVacancyCount = c.Vacancies != null ? c.Vacancies.Count(v => v.IsActive) : 0,
                 })
                 .Skip(Math.Max(0, (skip - 1) * take))
                 .Take(take)
                 .ToListAsync();
 
-            return companies;
+            var count = await query.CountAsync();
+
+            return new DataListDto<CompanyDto>
+            {
+                Datas = companies,
+                TotalCount = count,
+                TotalPage = (int)Math.Ceiling((double)count / take)
+            };
         }
 
-        /// <summary> Consumer metodu - User id ye görə bütün şirkətlərin datalarının gətirilməsi </summary>
-        public async Task<GetAllCompaniesDataResponse> GetAllCompaniesDataResponseAsync(Guid UserId)
-        {
-            var response = await _client.GetResponse<GetAllCompaniesDataResponse>(
-                new GetAllCompaniesDataRequest { UserId = UserId }
-            );
-            return response.Message;
-        }
-
+        //TODO : bu hissede email ve phonenumber ucun job proyektindeki endpointe sorgu atmaq mumkundur mu?
         /// <summary> İdyə görə şirkət detaili consumer metodundan istifadə ilə </summary>
         public async Task<CompanyDetailItemDto> GetCompanyDetailAsync(string id)
         {
             var companyGuid = Guid.Parse(id);
-            var company =
-                await _context
-                    .Companies.Where(c => c.Id == companyGuid)
-                    .Select(x => new CompanyDetailItemDto
-                    {
-                        CompanyInformation = x.CompanyInformation,
-                        CompanyLocation = x.CompanyLocation,
-                        CompanyName = x.CompanyName,
-                        CompanyLogo = $"{_authServiceBaseUrl}/{x.CompanyLogo}",
-                        WebLink = x.WebLink,
-                        UserId = x.UserId.ToString(),
-                        CompanyNumbers = x
-                            .CompanyNumbers.Select(cn => new CompanyNumberDto
-                            {
-                                Id = cn.Id,
-                                Number = cn.Number,
-                            })
-                            .ToList(),
-                    })
-                    .FirstOrDefaultAsync()
-                ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>();
+            var company = await _context.Companies.Where(c => c.Id == companyGuid)
+                        .Select(x => new CompanyDetailItemDto
+                        {
+                            CompanyInformation = x.CompanyInformation,
+                            CompanyLocation = x.CompanyLocation,
+                            CompanyName = x.CompanyName,
+                            CompanyLogo = $"{_authServiceBaseUrl}/{x.CompanyLogo}",
+                            WebLink = x.WebLink,
+                            UserId = x.UserId,
+                            CompanyNumbers = x
+                                .CompanyNumbers.Select(cn => new CompanyNumberDto
+                                {
+                                    Id = cn.Id,
+                                    Number = cn.Number,
+                                })
+                                .ToList(),
+                        })
+                        .FirstOrDefaultAsync()
+                    ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>();
 
-            var GuidUserId = Guid.Parse(company.UserId);
-
-            var response = await GetAllCompaniesDataResponseAsync(GuidUserId);
-            company.Email = response.Email;
-            company.PhoneNumber = response.PhoneNumber;
+            var response = await _client.GetResponse<GetAllCompaniesDataResponse>(
+                new GetAllCompaniesDataRequest { UserId = company.UserId }
+            );
+            company.Email = response.Message.Email;
+            company.PhoneNumber = response.Message.PhoneNumber;
             return company;
         }
     }

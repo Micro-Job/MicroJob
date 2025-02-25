@@ -1,6 +1,6 @@
 ﻿namespace JobCompany.Business.Dtos.CompanyDtos
 {
-    public record CompanyListDto
+    public record CompanyDto
     {
         public Guid CompanyId { get; set; }
         public string CompanyName { get; set; }

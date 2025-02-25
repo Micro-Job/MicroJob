@@ -4,7 +4,7 @@ namespace JobCompany.Business.Dtos.CompanyDtos
 {
     public record CompanyDetailItemDto
     {
-        public string UserId { get; set; }
+        public Guid UserId { get; set; }
         public string? CompanyInformation { get; set; }
         public string CompanyName { get; set; }
         public string? CompanyLogo { get; set; }
