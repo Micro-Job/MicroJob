@@ -272,8 +272,6 @@ namespace Job.Business.Services.Resume
             }).ToList() ?? [];
         }
 
-
-
         public async Task<ResumeDetailItemDto> GetOwnResumeAsync()
         {
             var resume = await _context.Resumes
@@ -292,7 +290,7 @@ namespace Job.Business.Services.Resume
                                             ResumeEmail = resume.ResumeEmail,
                                             Skills = resume.ResumeSkills.Select(s => new SkillGetByIdDto
                                             {
-                                                Skill = s.Skill.Name
+                                                Name = s.Skill.Name
                                             }).ToList(),
                                             PhoneNumbers = resume.PhoneNumbers.Select(p => new NumberGetByIdDto
                                             {

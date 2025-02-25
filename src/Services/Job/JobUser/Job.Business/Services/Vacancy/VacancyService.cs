@@ -1,4 +1,5 @@
 ﻿using Job.Business.Exceptions.Common;
+using Job.Business.HelperServices.Current;
 using Job.Core.Entities;
 using Job.DAL.Contexts;
 using MassTransit;
@@ -32,6 +33,7 @@ namespace Job.Business.Services.Vacancy
         private readonly IRequestClient<GetOtherVacanciesByCompanyRequest> _othVacRequest;
         readonly IConfiguration _configuration;
         private readonly string? _authServiceBaseUrl;
+        private readonly ICurrentUser _currentUser;
 
         public VacancyService(
             JobDbContext context,
@@ -46,7 +48,8 @@ namespace Job.Business.Services.Vacancy
             IRequestClient<CheckVacancyRequest> checkVacancyRequest,
             IRequestClient<CheckCompanyRequest> checkCompanyRequest,
             IRequestClient<GetOtherVacanciesByCompanyRequest> othVacRequest,
-            IConfiguration configuration
+            IConfiguration configuration,
+            ICurrentUser currentUser
         )
         {
             _context = context;
@@ -63,12 +66,12 @@ namespace Job.Business.Services.Vacancy
             _othVacRequest = othVacRequest;
             _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
             _configuration = configuration;
+            _currentUser = currentUser;
         }
 
         /// <summary> Userin vakansiya save etme toggle metodu </summary>
         public async Task ToggleSaveVacancyAsync(string vacancyId)
         {
-            Guid? userGuid = GetUserId();
 
             Guid vacancyGuid = Guid.Parse(vacancyId);
 
@@ -85,18 +88,18 @@ namespace Job.Business.Services.Vacancy
             else
             {
                 await _context.SavedVacancies.AddAsync(
-                    new SavedVacancy { UserId = userGuid, VacancyId = vacancyGuid }
+                    new SavedVacancy { UserId = _currentUser.UserGuid, VacancyId = vacancyGuid }
                 );
             }
             await _context.SaveChangesAsync();
         }
 
+        //TODO : savedVacancy buradan dasinmalidir - JobCompany-e
         /// <summary> Userin bütün save etdiyi vakansiyalarin get allu </summary>
         public async Task<GetUserSavedVacanciesResponse> GetAllSavedVacancyAsync(int skip, int take)
         {
-            Guid? userGuid = GetUserId();
             var savedVacanciesId = await _context
-                .SavedVacancies.Where(x => x.UserId == userGuid)
+                .SavedVacancies.Where(x => x.UserId == _currentUser.UserGuid)
                 .Select(x => x.VacancyId)
                 .ToListAsync();
 
@@ -110,11 +113,7 @@ namespace Job.Business.Services.Vacancy
         }
 
         /// <summary> Consumer metodu -  Vacancy idlerine göre saved olunan vakansiyalarin datasi </summary>
-        private async Task<GetUserSavedVacanciesResponse> GetUserSavedVacancyDataAsync(
-            List<Guid> vacancyIds,
-            int skip,
-            int take
-        )
+        private async Task<GetUserSavedVacanciesResponse> GetUserSavedVacancyDataAsync(List<Guid> vacancyIds,int skip,int take)
         {
             if (vacancyIds == null || vacancyIds.Count == 0)
                 return new GetUserSavedVacanciesResponse { Vacancies = [], TotalCount = 0 };
@@ -142,12 +141,7 @@ namespace Job.Business.Services.Vacancy
         /// <param name="companyId"></param>
         /// <param name="currentVacancyId"></param>
         /// <returns></returns>
-        public async Task<PaginatedVacancyDto> GetOtherVacanciesByCompanyAsync(
-            string companyId,
-            string? currentVacancyId,
-            int skip = 1,
-            int take = 6
-        )
+        public async Task<PaginatedVacancyDto> GetOtherVacanciesByCompanyAsync(string companyId,string? currentVacancyId,int skip = 1,int take = 6)
         {
             var guidCompanyId = Guid.Parse(companyId);
             Guid? guidVacancyId = string.IsNullOrEmpty(currentVacancyId)
@@ -171,11 +165,10 @@ namespace Job.Business.Services.Vacancy
                 request
             );
 
-            var userGuid = GetUserId();
 
-            if (userGuid.HasValue)
+            if (_currentUser.UserGuid != Guid.Empty)
             {
-                var savedVacancies = await FetchUserSavedVacancyIdsAsync(userGuid.Value);
+                var savedVacancies = await FetchUserSavedVacancyIdsAsync((Guid)_currentUser.UserGuid);
                 MarkSavedVacancies(response.Message.Vacancies, savedVacancies);
             }
 
@@ -196,7 +189,7 @@ namespace Job.Business.Services.Vacancy
             var request = new GetVacancyInfoRequest { Id = vacancyId };
             var response = await _vacancyInforRequest.GetResponse<GetVacancyInfoResponse>(request);
 
-            var userGuid = GetUserId();
+            var userGuid = _currentUser.UserGuid;
 
             var savedVacancies =
                 userGuid == null
@@ -243,10 +236,10 @@ namespace Job.Business.Services.Vacancy
             };
 
             var response = await _vacClient.GetResponse<GetAllVacanciesResponse>(request);
-            var userGuid = GetUserId();
+            Guid? userGuid = _currentUser.UserGuid;
 
             var savedVacancies =
-                userGuid == null
+                userGuid == Guid.Empty
                     ? []
                     : await _context
                         .SavedVacancies.Where(x => x.UserId == userGuid)
@@ -280,16 +273,19 @@ namespace Job.Business.Services.Vacancy
             return new PaginatedVacancyDto { Vacancies = paginatedVacancies, TotalCount = response.Message.TotalCount };
         }
 
+
+        //TODO : Oxsar vakansiyalarin getirilmesi neye gore Job proyektindedir / JobCompany-de olmalidir
+        //Bu metotda optimization sohbetleri olmalidir
         /// <summary> Oxsar vakansiylarin getirilmesi category'e gore </summary>
         public async Task<PaginatedSimilarVacancyDto> SimilarVacanciesAsync(string vacancyId)
         {
-            var userGuid = GetUserId();
+            var userGuid = _currentUser.UserGuid;
             var guidVacancyId = Guid.Parse(vacancyId);
 
-            await EnsureVacancyExistsAsync(guidVacancyId);
+            //await EnsureVacancyExistsAsync(guidVacancyId);
 
             var savedVacancies =
-                userGuid == null
+                userGuid == Guid.Empty
                     ? new List<Guid>()
                     : await _context
                         .SavedVacancies.Where(x => x.UserId == userGuid)
@@ -314,8 +310,7 @@ namespace Job.Business.Services.Vacancy
                     WorkType = v.WorkType,
                     IsVip = v.IsVip,
                     IsActive = v.IsActive,
-                    IsSaved =
-                        userGuid != null && savedVacancies.Contains(Guid.Parse(v.Id.ToString())),
+                    IsSaved = userGuid != Guid.Empty && savedVacancies.Contains(v.Id),
                 })
                 .ToList();
 
@@ -326,6 +321,7 @@ namespace Job.Business.Services.Vacancy
             };
         }
 
+        //TODO : Bu da burada olmali deyil(yeni ki bu proyektde)
         public async Task<ICollection<AllVacanyDto>> GetAllVacanciesByCompanyId(string companyId)
         {
             var guidCompanyId = Guid.Parse(companyId);
@@ -358,20 +354,7 @@ namespace Job.Business.Services.Vacancy
                 throw new EntityNotFoundException("Company");
         }
 
-        private Guid? GetUserId()
-        {
-            var userIdClaim = _contextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Sid)?.Value;
-
-            if (string.IsNullOrEmpty(userIdClaim))
-                return null;
-
-            return Guid.Parse(userIdClaim);
-        }
-
-        private static void MarkSavedVacancies(
-            ICollection<AllVacanyDto> vacancies,
-            ICollection<Guid> savedVacancies
-        )
+        private static void MarkSavedVacancies(ICollection<AllVacanyDto> vacancies,ICollection<Guid> savedVacancies)
         {
             foreach (var vacancy in vacancies)
             {

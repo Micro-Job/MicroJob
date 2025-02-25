@@ -7,6 +7,6 @@ namespace Job.Business.Dtos.SkillDtos
 {
     public record SkillGetByIdDto
     {
-        public string Skill { get; set; }
+        public string Name { get; set; }
     }
 }

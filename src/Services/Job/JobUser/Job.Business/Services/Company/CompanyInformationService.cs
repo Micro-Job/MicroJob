@@ -5,6 +5,7 @@ using SharedLibrary.Responses;
 
 namespace Job.Business.Services.Company
 {
+    //TODO : bele bir sey niye var direkt olaraq jobCompany proyektine gedilmir ki?
     public class CompanyInformationService(
         IRequestClient<GetAllCompaniesRequest> _client,
         IRequestClient<GetCompanyDetailByIdRequest> getDetailClient

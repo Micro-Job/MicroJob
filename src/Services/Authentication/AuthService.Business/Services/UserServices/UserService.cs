@@ -20,16 +20,12 @@ namespace AuthService.Business.Services.UserServices
         private readonly AppDbContext _context;
         private readonly IFileService _fileService;
         private readonly ICurrentUser _currentUser;
-        private readonly string _currentUserId;
-        private readonly Guid _currentUserGuid;
 
         public UserService(AppDbContext context, IFileService fileService, ICurrentUser currentUser)
         {
             _context = context;
             _fileService = fileService;
             _currentUser = currentUser;
-            _currentUserId = _currentUser.UserId ?? throw new UserNotLoggedInException();
-            _currentUserGuid = Guid.Parse(_currentUserId);
         }
 
         /// <summary> Loginde olan User informasiyası </summary>
@@ -37,7 +33,7 @@ namespace AuthService.Business.Services.UserServices
         {
             var user =
                 await _context
-                    .Users.FirstOrDefaultAsync(u => u.Id == _currentUserGuid)
+                    .Users.FirstOrDefaultAsync(u => u.Id == _currentUser.UserGuid)
                     .Select(x => new UserInformationDto
                     {
                         Id = x.Id,
@@ -58,7 +54,7 @@ namespace AuthService.Business.Services.UserServices
         {
             var userQuery = _context.Users.AsQueryable();
             var user =
-                await userQuery.FirstOrDefaultAsync(u => u.Id == _currentUserGuid)
+                await userQuery.FirstOrDefaultAsync(u => u.Id == _currentUser.UserGuid)
                 ?? throw new UserNotFoundException();
             var isEmailTaken = await userQuery.FirstOrDefaultAsync(u =>
                 u.Id != user.Id && u.Email == dto.Email.Trim()
@@ -96,13 +92,10 @@ namespace AuthService.Business.Services.UserServices
         }
 
         /// <summary> Logində olan userin şəkil update'si </summary>
-        public async Task<UserProfileImageUpdateResponseDto> UpdateUserProfileImageAsync(
-            UserProfileImageUpdateDto dto
-        )
+        public async Task<UserProfileImageUpdateResponseDto> UpdateUserProfileImageAsync(UserProfileImageUpdateDto dto)
         {
-            var user =
-                await _context.Users.FirstOrDefaultAsync(u => u.Id == _currentUserGuid)
-                ?? throw new UserNotFoundException();
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == _currentUser.UserGuid)
+                                                    ?? throw new UserNotFoundException();
 
             if (!string.IsNullOrEmpty(user.Image))
             {
@@ -129,7 +122,7 @@ namespace AuthService.Business.Services.UserServices
         public async Task<JobStatus> UpdateUserJobStatusAsync(UserJobStatusUpdateDto dto)
         {
             var user =
-                await _context.Users.FirstOrDefaultAsync(u => u.Id == _currentUserGuid)
+                await _context.Users.FirstOrDefaultAsync(u => u.Id == _currentUser.UserGuid)
                 ?? throw new UserNotFoundException();
 
             user.JobStatus = dto.JobStatus;

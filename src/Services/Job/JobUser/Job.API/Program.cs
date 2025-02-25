@@ -142,7 +142,8 @@ namespace Job.API
             //    );
             //});
 
-            builder.Services.AddHostedService<RabbitMqBackgroundService>();
+            //TODO : Bu neye gore var
+            //builder.Services.AddHostedService<RabbitMqBackgroundService>();
 
             // Add Job Services
             builder.Services.AddJobServices();

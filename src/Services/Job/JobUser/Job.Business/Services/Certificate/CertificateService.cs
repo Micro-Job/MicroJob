@@ -11,9 +11,7 @@ namespace Job.Business.Services.Certificate
     public class CertificateService(JobDbContext context, IFileService fileService)
         : ICertificateService
     {
-        public async Task<ICollection<Core.Entities.Certificate>> CreateBulkCertificateAsync(
-            ICollection<CertificateCreateDto> dtos
-        )
+        public async Task<ICollection<Core.Entities.Certificate>> CreateBulkCertificateAsync(ICollection<CertificateCreateDto> dtos)
         {
             var certificatesToAdd = new List<Core.Entities.Certificate>();
 
@@ -26,9 +24,7 @@ namespace Job.Business.Services.Certificate
             return certificatesToAdd;
         }
 
-        public async Task<Core.Entities.Certificate> CreateCertificateAsync(
-            CertificateCreateDto dto
-        )
+        public async Task<Core.Entities.Certificate> CreateCertificateAsync(CertificateCreateDto dto)
         {
             FileDto fileResult = await fileService.UploadAsync(
                 FilePaths.document,
@@ -46,9 +42,7 @@ namespace Job.Business.Services.Certificate
             return certificate;
         }
 
-        public async Task<ICollection<Core.Entities.Certificate>> UpdateBulkCertificateAsync(
-            ICollection<CertificateUpdateDto> dtos
-        )
+        public async Task<ICollection<Core.Entities.Certificate>> UpdateBulkCertificateAsync(ICollection<CertificateUpdateDto> dtos)
         {
             Guid parsedId;
 

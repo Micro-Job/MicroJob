@@ -5,19 +5,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Job.Business.Services.Skill
 {
-    public class SkillService(JobDbContext context) : ISkillService
+    public class SkillService(JobDbContext _context) : ISkillService
     {
-        private readonly JobDbContext _context = context;
-
         public async Task CreateSkillAsync(SkillDto dto)
         {
-            bool isExist = await _context.Skills.AnyAsync(x => x.Name.Trim().ToLower() == dto.Name.Trim().ToLower());
+            //TODO : bu hisse trim ve tolower olmadan olmalidir
+            //bool isExist = await _context.Skills.AnyAsync(x => x.Name.Trim().ToLower() == dto.Name.Trim().ToLower());
             
-            if (isExist) throw new IsAlreadyExistException<Core.Entities.Skill>();
+            //if (isExist) throw new IsAlreadyExistException<Core.Entities.Skill>();
 
             var skill = new Core.Entities.Skill()
             {
-                Name = dto.Name,
+                Name = dto.Name.Trim(),
             };
             await _context.Skills.AddAsync(skill);
             await _context.SaveChangesAsync();
@@ -25,11 +24,12 @@ namespace Job.Business.Services.Skill
 
         public async Task<List<GetAllSkillDto>> GetAllSkillsAsync()
         {
-            var skills = await _context.Skills.ToListAsync();
-            return skills.Select(s => new GetAllSkillDto
+            var skills = await _context.Skills.Select(x=> new GetAllSkillDto
             {
-                Name = s.Name
-            }).ToList();
+                Name = x.Name,
+            }).ToListAsync();
+
+            return skills;
         }
     }
 }

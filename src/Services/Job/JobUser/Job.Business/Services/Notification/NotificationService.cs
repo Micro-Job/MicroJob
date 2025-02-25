@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using Job.Business.Dtos.NotificationDtos;
 using Job.Business.Exceptions.UserExceptions;
+using Job.Business.HelperServices.Current;
 using Job.DAL.Contexts;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
@@ -12,27 +13,8 @@ using SharedLibrary.Responses;
 
 namespace Job.Business.Services.Notification
 {
-    public class NotificationService : INotificationService
+    public class NotificationService(JobDbContext _context , IRequestClient<GetAllCompaniesRequest> _getCompaniesClient , ICurrentUser _currentUser) : INotificationService
     {
-        private readonly JobDbContext _context;
-        readonly IHttpContextAccessor _contextAccessor;
-        private readonly IRequestClient<GetAllCompaniesRequest> _getCompaniesClient;
-        private readonly Guid userGuid;
-
-        public NotificationService(
-            JobDbContext context,
-            IHttpContextAccessor contextAccessor,
-            IRequestClient<GetAllCompaniesRequest> getCompaniesClient
-        )
-        {
-            _context = context;
-            _contextAccessor = contextAccessor;
-            _getCompaniesClient = getCompaniesClient;
-            userGuid = Guid.Parse(
-                _contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value
-                    ?? throw new UserIsNotLoggedInException()
-            );
-        }
 
         public async Task CreateNotificationAsync(NotificationDto notificationDto)
         {
@@ -56,25 +38,20 @@ namespace Job.Business.Services.Notification
             int take = 6
         )
         {
-            var companies = await GetAllCompaniesData();
+            //var companies = await GetAllCompaniesData();
 
-            var companyDictionary = companies
-                .Companies.GroupBy(x => x.CompanyUserId)
-                .ToDictionary(g => g.Key, g => g.First());
+            //var companyDictionary = companies
+            //    .Companies.GroupBy(x => x.CompanyUserId)
+            //    .ToDictionary(g => g.Key, g => g.First());
 
-            var notifications = await _context
-                .Notifications.Where(n => n.ReceiverId == userGuid)
-                .OrderByDescending(n => n.CreatedDate)
-                .Skip(Math.Max(0, (skip - 1) * take))
-                .ToListAsync();
+            var query = _context
+                .Notifications.Where(n => n.ReceiverId == _currentUser.UserGuid);
 
-            var notificationDtos = notifications
-                .Select(n =>
+            var notificationDtos = await query
+                .Select(n => new NotificationListDto
                 {
-                    companyDictionary.TryGetValue(n.SenderId, out var company);
+                    //companyDictionary.TryGetValue(n.SenderId, out var company);
 
-                    return new NotificationListDto
-                    {
                         Id = n.Id,
                         ReceiverId = n.ReceiverId,
                         SenderId = n.SenderId,
@@ -84,23 +61,22 @@ namespace Job.Business.Services.Notification
                         CreatedDate = n.CreatedDate,
                         Content = n.Content,
                         IsSeen = n.IsSeen,
-                    };
                 })
-                .ToList();
-
-            var totalCount = await _context.Notifications.CountAsync(n => n.ReceiverId == userGuid);
+                .OrderByDescending(n => n.CreatedDate)
+                .Skip(Math.Max(0, (skip - 1) * take))
+                .ToListAsync();
 
             return new PaginatedNotificationDto
             {
                 Notifications = notificationDtos,
-                TotalCount = totalCount,
+                TotalCount = await query.CountAsync(),
             };
         }
 
         public async Task MarkNotificationAsReadAsync(Guid notificationId)
         {
             var notification =
-                await _context.Notifications.FindAsync(notificationId)
+                await _context.Notifications.FirstOrDefaultAsync(x=> x.Id == notificationId)
                 ?? throw new NotFoundException<Core.Entities.Notification>();
 
             notification.IsSeen = true;

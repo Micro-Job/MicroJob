@@ -1,7 +1,12 @@
+﻿using Microsoft.AspNetCore.Http;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Http;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace AuthService.Business.Services.CurrentUser
+namespace JobCompany.Business.HelperServices.Current
 {
     public class CurrentUser(IHttpContextAccessor _contextAccessor) : ICurrentUser
     {

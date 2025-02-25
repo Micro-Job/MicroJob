@@ -29,10 +29,7 @@ namespace Job.Business.Services.Education
             await context.Educations.AddAsync(education);
         }
 
-        public async Task<ICollection<Core.Entities.Education>> UpdateBulkEducationAsync(
-            ICollection<EducationUpdateDto> dtos,
-            Guid resumeId
-        )
+        public async Task<ICollection<Core.Entities.Education>> UpdateBulkEducationAsync(ICollection<EducationUpdateDto> dtos,Guid resumeId)
         {
             var educationsToUpdate = new List<Core.Entities.Education>();
 
@@ -62,7 +59,7 @@ namespace Job.Business.Services.Education
             MapEducationDtoToEntityForUpdate(education, dto);
         }
 
-        private static Core.Entities.Education MapEducationDtoToEntityForCreate(
+        private Core.Entities.Education MapEducationDtoToEntityForCreate(
             EducationCreateDto dto,
             Guid resumeId
         )
@@ -79,10 +76,7 @@ namespace Job.Business.Services.Education
             };
         }
 
-        private static void MapEducationDtoToEntityForUpdate(
-            Core.Entities.Education education,
-            EducationUpdateDto dto
-        )
+        private void MapEducationDtoToEntityForUpdate(Core.Entities.Education education,EducationUpdateDto dto)
         {
             education.InstitutionName = dto.InstitutionName;
             education.Profession = dto.Profession;

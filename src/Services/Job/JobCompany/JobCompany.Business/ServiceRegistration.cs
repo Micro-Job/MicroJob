@@ -1,5 +1,6 @@
 ﻿using Job.Business.Consumers;
 using JobCompany.Business.Consumers;
+using JobCompany.Business.HelperServices.Current;
 using JobCompany.Business.Services.AnswerServices;
 using JobCompany.Business.Services.ApplicationServices;
 using JobCompany.Business.Services.CategoryServices;
@@ -40,6 +41,8 @@ namespace JobCompany.Business
             services.AddScoped<IAnswerService, AnswerService>();
             services.AddScoped<ISkillService, SkillService>();
             services.AddScoped<INotificationService, NotificationService>();
+            services.AddScoped<ICurrentUser, CurrentUser>();
+
         }
 
         public static IServiceCollection AddMassTransit(this IServiceCollection services, string username, string password, string hostname, string port)
@@ -73,12 +76,6 @@ namespace JobCompany.Business
                     (context, cfg) =>
                     {
                         //var rabbitMqConnectionString = configuration["RabbitMQ:ConnectionString"];
-                        if (string.IsNullOrEmpty(cString))
-                        {
-                            throw new InvalidOperationException(
-                                "RabbitMQ Connection String is missing."
-                            );
-                        }
                         cfg.Host(cString);
 
                         cfg.ConfigureEndpoints(context);

@@ -1,4 +1,5 @@
 ﻿using Job.Business.Consumers;
+using Job.Business.HelperServices.Current;
 using Job.Business.Services.Application;
 using Job.Business.Services.Certificate;
 using Job.Business.Services.Company;
@@ -34,6 +35,7 @@ namespace Job.Business
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<IUserApplicationService, UserApplicationService>();
             services.AddScoped<ICompanyInformationService, CompanyInformationService>();
+            services.AddScoped<ICurrentUser, CurrentUser>();
         }
 
         public static IServiceCollection AddMassTransit(this IServiceCollection services, string username, string password, string hostname, string port)
