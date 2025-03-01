@@ -333,12 +333,12 @@ namespace Job.Business.Services.Resume
             resume.FirstName = userFullName.FirstName;
             resume.LastName = userFullName.LastName;
 
-            var response = await _resumeUser.GetResponse<GetResumeUserPhotoResponse>(new GetResumeUserPhotoRequest
-            {
-                UserId = userGuid
-            });
+            //var response = await _resumeUser.GetResponse<GetResumeUserPhotoResponse>(new GetResumeUserPhotoRequest
+            //{
+            //    UserId = userGuid
+            //});
 
-            resume.UserPhoto = $"{_authServiceBaseUrl}/{response.Message.ProfileImage}";
+            resume.UserPhoto = $"{_authServiceBaseUrl}/{userFullName.ProfileImage}";
 
             return resume;
         }

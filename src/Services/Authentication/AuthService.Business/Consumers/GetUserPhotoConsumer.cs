@@ -28,12 +28,6 @@ namespace AuthService.Business.Consumers
                 })
                 .FirstOrDefaultAsync();
 
-                if (user is null)
-                {
-                    await context.RespondAsync<GetResumeUserPhotoResponse>(null);
-                    return;
-                }
-
                 await context.RespondAsync(new GetResumeUserPhotoResponse
                 {
                     ProfileImage = user.Image

@@ -113,16 +113,16 @@ namespace AuthService.Business.Services.Auth
                 UserRole = UserRole.CompanyUser,
             };
 
-            var company = new Company { Id = Guid.NewGuid(), UserId = user.Id };
 
+            //var company = new Company { Id = Guid.NewGuid(), UserId = user.Id };
+            //await _context.Companies.AddAsync(company);
             await _context.Users.AddAsync(user);
-            await _context.Companies.AddAsync(company);
             await _context.SaveChangesAsync();
 
             await _publishEndpoint.Publish(
                 new CompanyRegisteredEvent
                 {
-                    CompanyId = company.Id,
+                    CompanyId = Guid.NewGuid(),
                     UserId = user.Id,
                     CompanyName = dto.CompanyName.Trim(),
                     CompanyLogo = user.Image,
@@ -157,54 +157,55 @@ namespace AuthService.Business.Services.Auth
             var hashedPassword = _tokenHandler.GeneratePasswordHash(dto.Password);
             if (user.Password != hashedPassword)
             {
-                await _context.LoginLogs.AddAsync(
-                    new LoginLog
-                    {
-                        UserId = user.Id,
-                        Date = DateTime.Now,
-                        IsSucceed = false,
-                        IP = _ipAddress,
-                    }
-                );
-
-                // sonuncu ugurlu login saatini al
-                var lastSuccessfulLogin =
-                    user.LoginLogs.Where(l => l.IsSucceed)
-                        .OrderByDescending(l => l.Date)
-                        .FirstOrDefault()
-                        ?.Date ?? DateTime.MinValue;
-
-                // user bloklanma vaxti kecibse failedAttempts ucun lockDownDate-e gore hesablama apar
-                if (user.LockDownDate.HasValue && user.LockDownDate.Value < DateTime.Now)
-                    lastSuccessfulLogin = user.LockDownDate.Value;
-
-                // sonuncu ugurlu login cehdinden sonraki ugursuz cehdlerin sayini al
-                var failedAttempts = user
-                    .LoginLogs.Where(l => !l.IsSucceed && l.Date > lastSuccessfulLogin)
-                    .Count();
-
-                if (failedAttempts >= 3)
-                {
-                    user.LockDownDate = DateTime.Now.AddHours(1);
-                }
-
-                await _context.SaveChangesAsync();
                 throw new LoginFailedException();
+                #region LoginLog
+                //await _context.LoginLogs.AddAsync(
+                //    new LoginLog
+                //    {
+                //        UserId = user.Id,
+                //        Date = DateTime.Now,
+                //        IsSucceed = false,
+                //        IP = _ipAddress,
+                //    }
+                //);
+
+                //// sonuncu ugurlu login saatini al
+                //var lastSuccessfulLogin =
+                //    user.LoginLogs.Where(l => l.IsSucceed)
+                //        .OrderByDescending(l => l.Date)
+                //        .FirstOrDefault()
+                //        ?.Date ?? DateTime.MinValue;
+
+                //// user bloklanma vaxti kecibse failedAttempts ucun lockDownDate-e gore hesablama apar
+                //if (user.LockDownDate.HasValue && user.LockDownDate.Value < DateTime.Now)
+                //    lastSuccessfulLogin = user.LockDownDate.Value;
+
+                //// sonuncu ugurlu login cehdinden sonraki ugursuz cehdlerin sayini al
+                //var failedAttempts = user
+                //    .LoginLogs.Where(l => !l.IsSucceed && l.Date > lastSuccessfulLogin)
+                //    .Count();
+
+                //if (failedAttempts >= 3)
+                //{
+                //    user.LockDownDate = DateTime.Now.AddHours(1);
+                //}
+
+                //await _context.SaveChangesAsync();
+                #endregion
             }
 
-            await _context.LoginLogs.AddAsync(
-                new LoginLog
-                {
-                    UserId = user.Id,
-                    Date = DateTime.Now,
-                    IsSucceed = true,
-                    IP = _ipAddress,
-                }
-            );
-
+            //await _context.LoginLogs.AddAsync(
+            //    new LoginLog
+            //    {
+            //        UserId = user.Id,
+            //        Date = DateTime.Now,
+            //        IsSucceed = true,
+            //        IP = _ipAddress,
+            //    }
+            //);
             // ugurlu loginden sonra bloklanma vaxtini sifirla
-            user.LockDownDate = null;
-            await _context.SaveChangesAsync();
+            //user.LockDownDate = null;
+            //await _context.SaveChangesAsync();
 
             var accessToken = _tokenHandler.CreateToken(user, 60);
             var refreshToken = _tokenHandler.GenerateRefreshToken(accessToken, 1440);
