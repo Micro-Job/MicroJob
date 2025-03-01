@@ -13,7 +13,7 @@ namespace JobCompany.Business.Services.CompanyServices
             int skip = 1,
             int take = 12
         );
-        Task<GetAllCompaniesDataResponse> GetAllCompaniesDataResponseAsync(Guid UserId);
+        //Task<GetAllCompaniesDataResponse> GetAllCompaniesDataResponseAsync(Guid UserId);
         Task<CompanyDetailItemDto> GetCompanyDetailAsync(string id);
     }
 }
