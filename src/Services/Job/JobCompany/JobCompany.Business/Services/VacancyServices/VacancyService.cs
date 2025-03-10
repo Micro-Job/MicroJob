@@ -5,7 +5,6 @@ using JobCompany.Business.Dtos.CompanyDtos;
 using JobCompany.Business.Dtos.NumberDtos;
 using JobCompany.Business.Dtos.SkillDtos;
 using JobCompany.Business.Dtos.VacancyDtos;
-using JobCompany.Business.HelperServices.Current;
 using JobCompany.Business.Services.ExamServices;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
@@ -19,6 +18,7 @@ using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.Events;
 using SharedLibrary.Exceptions;
 using SharedLibrary.ExternalServices.FileService;
+using SharedLibrary.HelperServices.Current;
 using SharedLibrary.Statics;
 
 namespace JobCompany.Business.Services.VacancyServices

@@ -4,6 +4,8 @@ using JobCompany.Business.Dtos.VacancyDtos;
 using JobCompany.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using SharedLibrary.Filters;
+using SharedLibrary.Middlewares;
 using SharedLibrary.ServiceRegistration;
 
 namespace JobCompany.API
@@ -18,6 +20,7 @@ namespace JobCompany.API
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(opt =>
             {
+                opt.OperationFilter<AddLanguageHeaderParameter>();
                 opt.SwaggerDoc("v1", new OpenApiInfo { Title = "MyAPI", Version = "v1" });
                 opt.AddSecurityDefinition(
                     "Bearer",
@@ -106,14 +109,15 @@ namespace JobCompany.API
             }
 
             app.UseHttpsRedirection();
-            // app.UseCustomExceptionHandler();
             app.UseStaticFiles();
+            app.UseMiddleware<LanguageMiddleware>();
+
+            // app.UseCustomExceptionHandler();
 
             app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseCors("_myAllowSpecificOrigins");
-
             app.MapControllers();
 
             app.Run();

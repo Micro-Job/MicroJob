@@ -1,11 +1,11 @@
 ﻿using System.Security.Claims;
 using JobCompany.Business.Dtos.StatusDtos;
 using JobCompany.Business.Exceptions.StatusExceptions;
-using JobCompany.Business.HelperServices.Current;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using SharedLibrary.HelperServices.Current;
 
 namespace JobCompany.Business.Services.StatusServices
 {

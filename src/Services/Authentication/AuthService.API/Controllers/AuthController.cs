@@ -1,6 +1,7 @@
 ﻿using AuthService.Business.Dtos;
 using AuthService.Business.Services.Auth;
 using Microsoft.AspNetCore.Mvc;
+using SharedLibrary.Helpers;
 
 namespace AuthService.API.Controllers
 {
@@ -46,6 +47,12 @@ namespace AuthService.API.Controllers
         {
             await _authService.ConfirmPasswordResetAsync(resetDto);
             return Ok();
+        }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> TryLanguage()
+        {
+            return Ok(MessageHelper.GetMessage("WELCOME"));
         }
     }
 }

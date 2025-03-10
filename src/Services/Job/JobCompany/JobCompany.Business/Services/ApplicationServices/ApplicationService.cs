@@ -1,7 +1,6 @@
 ﻿using JobCompany.Business.Dtos.ApplicationDtos;
 using JobCompany.Business.Dtos.StatusDtos;
 using JobCompany.Business.Exceptions.ApplicationExceptions;
-using JobCompany.Business.HelperServices.Current;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using MassTransit;
@@ -13,6 +12,7 @@ using Shared.Events;
 using Shared.Requests;
 using Shared.Responses;
 using SharedLibrary.Exceptions;
+using SharedLibrary.HelperServices.Current;
 using System.Security.Claims;
 
 namespace JobCompany.Business.Services.ApplicationServices

@@ -14,6 +14,7 @@ using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.Events;
 using SharedLibrary.Exceptions;
 using SharedLibrary.ExternalServices.FileService;
+using SharedLibrary.Helpers;
 using SharedLibrary.Statics;
 
 namespace AuthService.Business.Services.Auth
@@ -71,8 +72,8 @@ namespace AuthService.Business.Services.Auth
                 new EmailMessage
                 {
                     Email = dto.Email,
-                    Subject = "Xoş gəldiniz",
-                    Content = "Qeydiyyat uğurla başa çatdı",
+                    Subject = MessageHelper.GetMessage("WELCOME"),
+                    Content = MessageHelper.GetMessage("REGISTER_COMPLETED"),
                 }
             );
 
@@ -135,8 +136,8 @@ namespace AuthService.Business.Services.Auth
                 new EmailMessage
                 {
                     Email = dto.Email,
-                    Subject = "Xoş gəldiniz",
-                    Content = "Qeydiyyat uğurla başa çatdı",
+                    Subject = MessageHelper.GetMessage("WELCOME"),
+                    Content = MessageHelper.GetMessage("REGISTER_COMPLETED"),
                 }
             );
         }

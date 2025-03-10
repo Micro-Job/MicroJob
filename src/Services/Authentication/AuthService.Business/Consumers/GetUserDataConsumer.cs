@@ -1,7 +1,7 @@
-﻿using AuthService.Business.Services.CurrentUser;
-using AuthService.DAL.Contexts;
+﻿using AuthService.DAL.Contexts;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using SharedLibrary.HelperServices.Current;
 using SharedLibrary.Requests;
 using SharedLibrary.Responses;
 
