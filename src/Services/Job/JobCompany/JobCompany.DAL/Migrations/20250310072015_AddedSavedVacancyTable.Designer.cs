@@ -4,6 +4,7 @@ using JobCompany.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JobCompany.DAL.Migrations
 {
     [DbContext(typeof(JobCompanyDbContext))]
-    partial class JobCompanyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250310072015_AddedSavedVacancyTable")]
+    partial class AddedSavedVacancyTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -383,9 +386,6 @@ namespace JobCompany.DAL.Migrations
                     b.Property<string>("StatusColor")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<byte>("StatusEnum")
-                        .HasColumnType("tinyint");
 
                     b.Property<string>("StatusName")
                         .IsRequired()

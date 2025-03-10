@@ -1,8 +1,8 @@
 ﻿namespace SharedLibrary.Enums;
 
-public enum QuestionType
+public enum QuestionType : byte
 {
-    OpenEnded,
-    SingleChoice,
-    MultipleChoice
+    OpenEnded = 1,
+    SingleChoice = 2,
+    MultipleChoice = 3
 }

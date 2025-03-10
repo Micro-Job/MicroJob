@@ -2,8 +2,8 @@
 {
     public enum Gender : byte
     {
-        Male = 0,
-        Female = 1,
-        Unspecified = 2
+        Male = 1,
+        Female = 2,
+        Unspecified = 3
     }
 }

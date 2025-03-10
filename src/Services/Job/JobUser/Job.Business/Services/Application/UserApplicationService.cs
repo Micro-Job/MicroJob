@@ -59,6 +59,7 @@ namespace Job.Business.Services.Application
             _getExamQuestionsRequest = getExamQuestionsRequest;
         }
 
+        //TODO : bu metod burada olmali deyil  job - company de olmalidir
         /// <summary> İstifadəçinin bütün müraciətlərini gətirir </summary>
         public async Task<PaginatedApplicationDto> GetUserApplicationsAsync(int skip, int take)
         {

@@ -19,6 +19,8 @@ namespace Job.Business.Consumers
         {
             var eventMessage = context.Message;
 
+            //TODO : burada skill sayina ve resunedaki skill sayina nisbetde 25 faiz olarsa , o zaman getsin hemin adamlara notification
+
             var resumes = await _context
                 .Resumes.Include(r => r.ResumeSkills)
                 .Where(r => r.ResumeSkills.Any(rs => eventMessage.SkillIds.Contains(rs.SkillId)))
