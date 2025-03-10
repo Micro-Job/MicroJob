@@ -1,9 +1,11 @@
 ﻿using System.Security.Claims;
 using JobCompany.Business.Dtos.CategoryDtos;
+using JobCompany.Business.Dtos.Common;
 using JobCompany.Business.Dtos.CompanyDtos;
 using JobCompany.Business.Dtos.NumberDtos;
 using JobCompany.Business.Dtos.SkillDtos;
 using JobCompany.Business.Dtos.VacancyDtos;
+using JobCompany.Business.HelperServices.Current;
 using JobCompany.Business.Services.ExamServices;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
@@ -24,13 +26,12 @@ namespace JobCompany.Business.Services.VacancyServices
     public class VacancyService : IVacancyService
     {
         private readonly JobCompanyDbContext _context;
-        private readonly Guid _userGuid;
         private readonly IFileService _fileService;
-        private readonly IHttpContextAccessor _contextAccessor;
         private readonly IExamService _examService;
         private readonly IPublishEndpoint _publishEndpoint;
         readonly IConfiguration _configuration;
         private readonly string? _authServiceBaseUrl;
+        private readonly ICurrentUser _currentUser;
 
         public VacancyService(
             JobCompanyDbContext context,
@@ -38,20 +39,17 @@ namespace JobCompany.Business.Services.VacancyServices
             IHttpContextAccessor contextAccessor,
             IExamService examService,
             IPublishEndpoint publishEndpoint,
-            IConfiguration configuration
+            IConfiguration configuration,
+            ICurrentUser currentUser
         )
         {
             _context = context;
             _fileService = fileService;
-            _contextAccessor = contextAccessor;
-            _userGuid = Guid.Parse(
-                _contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value
-                    ?? throw new Exception("Istifadeci sisteme daxil olmayib.")
-            );
             _examService = examService;
             _publishEndpoint = publishEndpoint;
             _configuration = configuration;
             _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
+            _currentUser = currentUser;
         }
 
         /// <summary> vacancy yaradılması </summary>
@@ -62,7 +60,7 @@ namespace JobCompany.Business.Services.VacancyServices
         )
         {
             string? companyLogoPath = null;
-            var company = await _context.Companies.FirstOrDefaultAsync(x => x.UserId == _userGuid);
+            var company = await _context.Companies.FirstOrDefaultAsync(x => x.UserId == _currentUser.UserGuid);
 
             if (company != null && !string.IsNullOrEmpty(company.CompanyLogo))
             {
@@ -141,7 +139,7 @@ namespace JobCompany.Business.Services.VacancyServices
                 await _publishEndpoint.Publish(
                     new VacancyCreatedEvent
                     {
-                        SenderId = _userGuid,
+                        SenderId = (Guid)_currentUser.UserGuid,
                         SkillIds = vacancyDto.SkillIds,
                         InformationId = vacancy.Id,
                         Content =
@@ -173,7 +171,7 @@ namespace JobCompany.Business.Services.VacancyServices
                 .ToList();
 
             var deletedCount = await _context
-                .Vacancies.Where(x => vacancyGuids.Contains(x.Id) && x.Company.UserId == _userGuid)
+                .Vacancies.Where(x => vacancyGuids.Contains(x.Id) && x.Company.UserId == _currentUser.UserGuid)
                 .ExecuteUpdateAsync(x => x.SetProperty(v => v.IsActive, false));
 
             if (deletedCount == 0)
@@ -194,7 +192,7 @@ namespace JobCompany.Business.Services.VacancyServices
         )
         {
             var query = _context
-                .Vacancies.Where(x => x.Company.UserId == _userGuid)
+                .Vacancies.Where(x => x.Company.UserId == _currentUser.UserGuid)
                 .Include(x => x.Company)
                 .AsNoTracking();
 
@@ -236,7 +234,7 @@ namespace JobCompany.Business.Services.VacancyServices
         public async Task<List<VacancyListDtoForAppDto>> GetAllVacanciesForAppAsync()
         {
             var vacancies = await _context
-                .Vacancies.Where(x => x.Company.UserId == _userGuid && x.IsActive == true)
+                .Vacancies.Where(x => x.Company.UserId == _currentUser.UserGuid && x.IsActive == true)
                 .Select(x => new VacancyListDtoForAppDto
                 {
                     VacancyId = x.Id,
@@ -342,7 +340,7 @@ namespace JobCompany.Business.Services.VacancyServices
             var vacancyGuid = Guid.Parse(vacancyDto.Id);
             var existingVacancy =
                 await _context
-                    .Vacancies.Where(v => v.Id == vacancyGuid && v.Company.UserId == _userGuid)
+                    .Vacancies.Where(v => v.Id == vacancyGuid && v.Company.UserId == _currentUser.UserGuid)
                     .Select(v => new { Vacancy = v, CompanyId = v.Company.Id })
                     .FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>();
 
@@ -397,7 +395,7 @@ namespace JobCompany.Business.Services.VacancyServices
                 new VacancyUpdatedEvent
                 {
                     InformationId = vacancyGuid,
-                    SenderId = _userGuid,
+                    SenderId = (Guid)_currentUser.UserGuid,
                     UserIds = userIds,
                     Content = $"Vakansiya yeniləndi: {existingVacancy.Vacancy.Title}",
                 }
@@ -495,5 +493,39 @@ namespace JobCompany.Business.Services.VacancyServices
 
             return query;
         }
+
+        public async Task ToggleSaveVacancyAsync(string vacancyId)
+        {
+            Guid vacancyGuid = Guid.Parse(vacancyId);
+
+            if (!await _context.Vacancies.AnyAsync(x => x.Id == vacancyGuid))
+                throw new NotFoundException<Vacancy>("Vakansiya mövcud deyil");
+
+            var vacancyCheck = await _context.SavedVacancies.FirstOrDefaultAsync(x =>x.VacancyId == vacancyGuid);
+
+            if (vacancyCheck != null)
+            {
+                _context.SavedVacancies.Remove(vacancyCheck);
+            }
+            else
+            {
+                await _context.SavedVacancies.AddAsync(
+                    new SavedVacancy { UserId = _currentUser.UserGuid, VacancyId = vacancyGuid }
+                );
+            }
+            await _context.SaveChangesAsync();
+        }
+
+        //public async Task<DataListDto<VacancyGetAllDto>> GetAllSavedVacancyAsync(int skip, int take)
+        //{
+        //    var datas = await _context.Vacancies.Where(x => x.SavedVacancies.Any(x => x.UserId == _currentUser.UserGuid))
+        //        .Select(x => new VacancyGetAllDto
+        //        {
+                    
+        //        })
+        //        .Skip(Math.Max(0, (skip - 1) * take))
+        //        .Take(take)
+        //        .ToListAsync();
+        //}
     }
 }

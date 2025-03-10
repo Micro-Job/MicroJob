@@ -48,7 +48,6 @@ namespace Job.Business
             {
                 x.AddConsumer<UserRegisteredConsumer>();
                 x.AddConsumer<GetResumeDataConsumer>();
-                x.AddConsumer<IsApplicationSavedConsumer>();
                 x.AddConsumer<UpdateUserApplicationStatusConsumer>();
                 x.AddConsumer<VacancyCreatedConsumer>();
                 x.AddConsumer<VacancyUpdatedConsumer>();
@@ -57,19 +56,9 @@ namespace Job.Business
 
                 x.UsingRabbitMq((context, cfg) =>
                 {
-                    //var rabbitMqConnectionString = configuration["RabbitMQ:ConnectionString"];
-                    //if (string.IsNullOrEmpty(cString))
-                    //{
-                    //    h.Username(configuration["RabbitMQ:Username"]);
-                    //    h.Password(configuration["RabbitMQ:Password"]);
-                    //});
-                    cfg.ReceiveEndpoint("is-application-saved", e =>
-                    {
-                        e.ConfigureConsumer<IsApplicationSavedConsumer>(context);
-                    });
                     cfg.Host(cString);
 
-                    //cfg.ConfigureEndpoints(context);
+                    cfg.ConfigureEndpoints(context);
                 });
             });
 

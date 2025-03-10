@@ -69,5 +69,13 @@ namespace JobCompany.API.Controllers
         {
             return Ok(await vacancyService.GetAllVacanciesAsync(titleName, categoryId, countryId, cityId, minSalary, maxSalary, skip, take));
         }
+
+        [HttpPost("[action]")]
+        [AuthorizeRole(UserRole.SimpleUser)]
+        public async Task<IActionResult> ToggleSaveVacancy(string vacancyId)
+        {
+            await vacancyService.ToggleSaveVacancyAsync(vacancyId);
+            return Ok();
+        }
     }
 }

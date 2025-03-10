@@ -11,63 +11,40 @@ using SharedLibrary.Responses;
 
 namespace JobCompany.Business.Consumers
 {
-    public class GetApplicationDetailConsumer(
-        JobCompanyDbContext jobCompanyDbContext,
-        IConfiguration configuration,
-        IRequestClient<IsApplicationSavedRequest> requestClient
-        ) : IConsumer<GetApplicationDetailRequest>
+    public class GetApplicationDetailConsumer(JobCompanyDbContext _context,IConfiguration _configuration) : IConsumer<GetApplicationDetailRequest>
     {
-        private readonly JobCompanyDbContext _jobCompanyDbContext = jobCompanyDbContext;
-        private readonly IConfiguration _configuration = configuration;
-        private readonly string? _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
-        private readonly IRequestClient<IsApplicationSavedRequest> _isApplicationSavedClient = requestClient;
+        private readonly string? _authServiceBaseUrl = _configuration["AuthService:BaseUrl"];
 
         public async Task Consume(ConsumeContext<GetApplicationDetailRequest> context)
         {
             var guidVacId = Guid.Parse(context.Message.ApplicationId);
-            var application = await _jobCompanyDbContext
+
+            var responseMessage = await _context
                 .Applications.Include(a => a.Vacancy)
                 .ThenInclude(v => v.Company)
                 .ThenInclude(c => c.Statuses)
                 .Include(a => a.Status)
-                .FirstOrDefaultAsync(a => a.Id == guidVacId) ?? throw new NotFoundException<Application>();
+                .Where(a => a.Id == guidVacId).Select(x=> new GetApplicationDetailResponse
+                {
+                    VacancyId = x
+                    .Vacancy.Id.ToString(),
+                    VacancyName = x.Vacancy.Title,
+                    CompanyName = x.Vacancy.CompanyName,
+                    CompanyLogo = $"{_authServiceBaseUrl}/{x.Vacancy.Company.CompanyLogo}",
+                    Location = x.Vacancy.Location,
+                    WorkType = x.Vacancy.WorkType,
+                    WorkStyle = x.Vacancy.WorkStyle,
+                    startDate = x.CreatedDate,
+                    CompanyStatuses = x.Vacancy.Company.Statuses != null ? x.Vacancy.Company.Statuses.Select(cs => cs.StatusName).ToList() : new List<string>(),
+                    ApplicationStatus = x.Status.StatusName,
+                    IsSaved = false,
+                }).FirstOrDefaultAsync();
 
-            var vacancyId = application.VacancyId.ToString();
-
-            if (application == null)
+            if (responseMessage == null)
             {
                 await context.RespondAsync<GetApplicationDetailResponse>(null);
                 return;
             }
-
-            var userGuid = string.IsNullOrEmpty(context.Message.UserId) ? (Guid?)null : Guid.Parse(context.Message.UserId);
-            var isSaved = false;
-
-            if (userGuid != null)
-            {
-                var response = await _isApplicationSavedClient.GetResponse<IsApplicationSavedResponse>(
-                    new IsApplicationSavedRequest { UserId = userGuid.ToString(), VacancyId = vacancyId }
-                );
-
-                isSaved = response.Message.IsSaved;
-            }
-
-            var responseMessage = new GetApplicationDetailResponse
-            {
-                VacancyId = application.Vacancy.Id.ToString(),
-                VacancyName = application.Vacancy.Title,
-                CompanyName = application.Vacancy.CompanyName,
-                CompanyLogo = $"{_authServiceBaseUrl}/{application.Vacancy.Company.CompanyLogo}",
-                Location = application.Vacancy.Location,
-                WorkType = application.Vacancy.WorkType,
-                WorkStyle = application.Vacancy.WorkStyle,
-                startDate = application.CreatedDate,
-                CompanyStatuses =
-            application.Vacancy?.Company?.Statuses != null
-                ? application.Vacancy.Company.Statuses.Select(cs => cs.StatusName).ToList() : [],
-                ApplicationStatus = application.Status?.StatusName,
-                IsSaved = isSaved,
-            };
 
             await context.RespondAsync(responseMessage);
         }
