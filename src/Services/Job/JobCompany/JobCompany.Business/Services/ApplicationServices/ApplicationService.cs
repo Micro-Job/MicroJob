@@ -149,10 +149,7 @@ namespace JobCompany.Business.Services.ApplicationServices
         }
 
         /// <summary> Userin müraciətlərinin gətirilməsi </summary>
-        public async Task<List<ApplicationUserListDto>> GetUserApplicationAsync(
-            int skip = 1,
-            int take = 9
-        )
+        public async Task<List<ApplicationUserListDto>> GetUserApplicationAsync(int skip = 1,int take = 9)
         {
             var userApps = await _context
                 .Applications.Where(x => x.UserId == _currentUser.UserGuid)
@@ -228,10 +225,7 @@ namespace JobCompany.Business.Services.ApplicationServices
         }
 
         /// <summary> Daxil olmus muracietler -> Şirkət üçün bütün müraciətlərin gətirilməsi </summary>
-        public async Task<ICollection<ApplicationInfoListDto>> GetAllApplicationAsync(
-            int skip = 1,
-            int take = 9
-        )
+        public async Task<ICollection<ApplicationInfoListDto>> GetAllApplicationAsync(int skip = 1,int take = 9)
         {
             var company =
                 await _context.Companies.FirstOrDefaultAsync(c => c.UserId == _currentUser.UserGuid)
@@ -281,10 +275,7 @@ namespace JobCompany.Business.Services.ApplicationServices
         }
 
         /// <summary> Şirkətə daxil olan bütün müraciətlərin filterlə birlikdə detallı şəkildə gətirilməsi </summary>
-        public async Task<ICollection<AllApplicationListDto>> GetAllApplicationsListAsync(
-            int skip = 1,
-            int take = 10
-        )
+        public async Task<ICollection<AllApplicationListDto>> GetAllApplicationsListAsync(int skip = 1,int take = 10)
         {
             var applications = await GetPaginatedApplicationsAsync(skip, take);
 
@@ -295,10 +286,7 @@ namespace JobCompany.Business.Services.ApplicationServices
             return MapApplicationsToDto(applications, userDataResponse);
         }
 
-        private List<AllApplicationListDto> MapApplicationsToDto(
-            List<Application> applications,
-            GetUsersDataResponse usersDataResponse
-        )
+        private List<AllApplicationListDto> MapApplicationsToDto(List<Application> applications,GetUsersDataResponse usersDataResponse)
         {
             var response = applications
                 .Select(a =>
@@ -324,16 +312,12 @@ namespace JobCompany.Business.Services.ApplicationServices
 
         private async Task<List<Application>> GetPaginatedApplicationsAsync(int skip, int take)
         {
-            var query = _context
-                .Applications.Include(a => a.Vacancy)
-                .ThenInclude(v => v.Company)
+            var applications =await _context.Applications
+                .Include(a => a.Vacancy)
                 .Include(a => a.Status)
                 .Where(a => a.Vacancy.Company.UserId == _currentUser.UserGuid)
-                .AsNoTracking();
-
-            var applications = await query
                 .OrderByDescending(a => a.CreatedDate)
-                .Skip((skip - 1) * take)
+                .Skip(Math.Max(0, (skip - 1) * take))
                 .Take(take)
                 .ToListAsync();
 

@@ -144,15 +144,13 @@ namespace AuthService.Business.Services.Auth
         public async Task<TokenResponseDto> LoginAsync(LoginDto dto)
         {
             // useri email ve ya userName ile tapmaq
-            var user = await _context
-                .Users.Include(u => u.LoginLogs)
-                .FirstOrDefaultAsync(x => x.Email == dto.UserNameOrEmail);
+            var user = await _context.Users.FirstOrDefaultAsync(x => x.Email == dto.UserNameOrEmail);
             if (user == null)
                 throw new LoginFailedException();
 
             // hesabin hal hazirda bloklanmadigini yoxla
-            if (user.LockDownDate.HasValue && user.LockDownDate.Value > DateTime.Now)
-                throw new AccountLockedException(user.LockDownDate.Value);
+            //if (user.LockDownDate.HasValue && user.LockDownDate.Value > DateTime.Now)
+            //    throw new AccountLockedException(user.LockDownDate.Value);
 
             var hashedPassword = _tokenHandler.GeneratePasswordHash(dto.Password);
             if (user.Password != hashedPassword)
