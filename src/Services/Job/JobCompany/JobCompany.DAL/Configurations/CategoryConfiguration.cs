@@ -10,9 +10,9 @@ namespace JobCompany.DAL.Configurations
         {
             builder.HasKey(p => p.Id);
 
-            builder.Property(c => c.CategoryName)
-                   .IsRequired()
-                   .HasMaxLength(32);
+            //builder.Property(c => c.CategoryName)
+            //       .IsRequired()
+            //       .HasMaxLength(32);
 
             builder.HasMany(c => c.Vacancies)
                    .WithOne(v => v.Category)
@@ -23,6 +23,11 @@ namespace JobCompany.DAL.Configurations
                    .WithOne(v => v.Category)
                    .HasForeignKey(v => v.CategoryId)
                    .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasMany(c => c.Translations)
+                   .WithOne(t => t.Category)
+                   .HasForeignKey(t => t.CategoryId)
+                   .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

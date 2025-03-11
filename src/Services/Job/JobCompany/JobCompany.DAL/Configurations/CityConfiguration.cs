@@ -10,7 +10,7 @@ namespace JobCompany.DAL.Configurations
         {
             builder.HasKey(p => p.Id);
 
-            builder.Property(c => c.CityName)
+            builder.Property(c => c.Name)
                    .IsRequired()
                    .HasMaxLength(32);
 

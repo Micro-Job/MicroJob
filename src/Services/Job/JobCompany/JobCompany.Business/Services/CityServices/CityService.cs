@@ -14,13 +14,13 @@ namespace JobCompany.Business.Services.CityServices
         {
             var GuidCountrId = Guid.Parse(dto.CountryId);
             var existCity = await _context.Cities
-                .SingleOrDefaultAsync(c => c.CityName == dto.CityName);
+                .SingleOrDefaultAsync(c => c.Name == dto.CityName);
             if (existCity != null) throw new IsAlreadyExistException<City>();
 
             var isExistCountry = await _context.Countries.FindAsync(GuidCountrId) ?? throw new NotFoundException<Country>();
             var city = new City
             {
-                CityName = dto.CityName,
+                Name = dto.CityName,
                 CountryId = GuidCountrId,
             };
 
@@ -34,7 +34,7 @@ namespace JobCompany.Business.Services.CityServices
                .Select(c => new CityListDto
                {
                    Id = c.Id,
-                   CityName = c.CityName,
+                   CityName = c.Name,
                    CountryId = c.CountryId
                })
                .ToListAsync();
@@ -48,7 +48,7 @@ namespace JobCompany.Business.Services.CityServices
             var city = await _context.Cities.FindAsync(cityId)
             ?? throw new NotFoundException<City>();
 
-            city.CityName = dto.CityName;
+            city.Name = dto.CityName;
             await _context.SaveChangesAsync();
         }
 
@@ -63,7 +63,7 @@ namespace JobCompany.Business.Services.CityServices
             .Select(city => new CityNameDto
             {
                 Id = city.Id,
-                CityName = city.CityName,
+                CityName = city.Name,
             })
             .ToListAsync();
 

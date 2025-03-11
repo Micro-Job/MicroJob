@@ -107,7 +107,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                     SenderId = (Guid)_currentUser.UserGuid,
                     InformationId = vacancy.Id,
                     Content =
-                        $"{vacancy.CompanyName} şirkətinin müraciət statusu dəyişdirildi: {application.Status.StatusName}",
+                        $"{vacancy.CompanyName} şirkətinin müraciət statusu dəyişdirildi: {application.Status.Name}",
                 }
             );
         }
@@ -124,7 +124,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                 .Select(status => new StatusListDtoWithApps
                 {
                     StatusId = status.Id,
-                    StatusName = status.StatusName,
+                    StatusName = status.Name,
                     StatusColor = status.StatusColor,
                     IsDefault = status.IsDefault,
                     Applications = _context
@@ -160,7 +160,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                     MainSalary = x.Vacancy.MainSalary,
                     MaxSalary = x.Vacancy.MaxSalary,
                     StatusColor = x.Status.StatusColor,
-                    StatusName = x.Status.StatusName,
+                    StatusName = x.Status.Name,
                     VacancyId = x.VacancyId,
                     VacancyImage = $"{_baseUrl}/{x.Vacancy.CompanyLogo}",
                     VacancyTitle = x.Vacancy.Title,
@@ -189,11 +189,11 @@ namespace JobCompany.Business.Services.ApplicationServices
                         CompanyName = a.Vacancy.CompanyName,
                         CreatedDate = a.CreatedDate,
                         Description = a.Vacancy.Description,
-                        StatusName = a.Status.StatusName,
+                        StatusName = a.Status.Name,
                         StatusColor = a.Status.StatusColor,
                         Steps = _context
                             .Statuses.OrderBy(s => s.Order)
-                            .Select(s => s.StatusName)
+                            .Select(s => s.Name)
                             .ToList(),
                     })
                     .FirstOrDefaultAsync() ?? throw new NotFoundException<Application>();
@@ -300,7 +300,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                         LastName = user.LastName,
                         Email = user.Email,
                         PhoneNumber = user.PhoneNumber,
-                        StatusName = a.Status.StatusName,
+                        StatusName = a.Status.Name,
                         VacancyId = a.VacancyId,
                         VacancyName = a.Vacancy.Title,
                     };

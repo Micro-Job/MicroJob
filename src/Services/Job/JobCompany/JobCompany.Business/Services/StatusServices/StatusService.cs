@@ -24,7 +24,7 @@ namespace JobCompany.Business.Services.StatusServices
             var newStatus = new Status
             {
                 IsDefault = false,
-                StatusName = dto.StatusName.Trim(),
+                Name = dto.StatusName.Trim(),
                 StatusColor = dto.StatusColor.Trim(),
                 CompanyId = companyId,
                 Order = dto.Order,
@@ -60,7 +60,7 @@ namespace JobCompany.Business.Services.StatusServices
                 .Select(s => new StatusListDto
                 {
                     StatusId = s.Id,
-                    StatusName = s.StatusName,
+                    StatusName = s.Name,
                     StatusColor = s.StatusColor,
                 })
                 .ToListAsync();

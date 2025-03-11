@@ -28,6 +28,13 @@ namespace JobCompany.DAL.Contexts
         public DbSet<ExamQuestion> ExamQuestions { get; set; }
         public DbSet<SavedVacancy> SavedVacancies { get; set; }
 
+
+        public DbSet<SkillTranslation> SkillTranslations { get; set; }
+        public DbSet<CategoryTranslation> CategoryTranslations { get; set; }
+        public DbSet<StatusTranslation> StatusTranslations { get; set; }
+        public DbSet<CountryTranslation> CountryTranslations { get; set; }
+        public DbSet<CityTranslation> CityTranslations { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());

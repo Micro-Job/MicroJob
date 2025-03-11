@@ -46,7 +46,7 @@ namespace JobCompany.Business.Services.ReportServices
         public async Task<SummaryDto> GetSummaryAsync()
         {
             var acceptedStatusId = await _context
-                .Statuses.Where(s => s.StatusName == "Accepted" && s.IsDefault)
+                .Statuses.Where(s => s.Name == "Accepted" && s.IsDefault)
                 .Select(s => s.Id)
                 .FirstOrDefaultAsync();
 
@@ -89,7 +89,7 @@ namespace JobCompany.Business.Services.ReportServices
                 {
                     a.UserId,
                     a.Vacancy.Title,
-                    a.Status.StatusName,
+                    a.Status.Name,
                     a.Status.StatusColor,
                 })
                 .ToListAsync();
