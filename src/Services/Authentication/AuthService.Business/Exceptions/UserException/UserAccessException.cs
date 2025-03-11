@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using SharedLibrary.Exceptions.Common;
+using SharedLibrary.Helpers;
 
 namespace AuthService.Business.Exceptions.UserException
 {
@@ -11,7 +12,7 @@ namespace AuthService.Business.Exceptions.UserException
 
         public UserAccessException() : base()
         {
-            ErrorMessage = "Bu əməliyyat üçün icazəniz yoxdur.";
+            ErrorMessage = MessageHelper.GetMessage("NO_PERMISSION");
         }
 
         public UserAccessException(string? message) : base(message)

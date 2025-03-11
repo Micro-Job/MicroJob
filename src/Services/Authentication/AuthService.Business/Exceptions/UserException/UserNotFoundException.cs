@@ -1,4 +1,5 @@
 ﻿using SharedLibrary.Exceptions.Common;
+using SharedLibrary.Helpers;
 
 namespace AuthService.Business.Exceptions.UserException
 {
@@ -10,7 +11,7 @@ namespace AuthService.Business.Exceptions.UserException
 
         public UserNotFoundException() : base()
         {
-            ErrorMessage = "İstifadəçi mövcud deyil";
+            ErrorMessage = MessageHelper.GetMessage("NOTFOUNDEXCEPTION_USER");
         }
 
         public UserNotFoundException(string? message) : base(message)

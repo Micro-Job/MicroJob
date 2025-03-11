@@ -117,8 +117,71 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AUTHENTICATION_FAILED" xml:space="preserve">
+    <value>Giriş uğursuzdur</value>
+  </data>
+  <data name="CANNOT_BE_EMPTY" xml:space="preserve">
+    <value>Boş ola bilməz</value>
+  </data>
+  <data name="INVALID_FORMAT" xml:space="preserve">
+    <value>Format düzgün deyil</value>
+  </data>
+  <data name="INVALID_USER_STATUS" xml:space="preserve">
+    <value>Verilən istifadəçi statusu yanlışdır</value>
+  </data>
+  <data name="LENGTH_MUST_BE_BETWEEN_1_50" xml:space="preserve">
+    <value>Uzunluq 1-50 arasında olmalıdır</value>
+  </data>
+  <data name="LOGIN_REQUIRED" xml:space="preserve">
+    <value>Davam etmək üçün yenidən daxil olun</value>
+  </data>
+  <data name="NOTFOUNDEXCEPTION_USER" xml:space="preserve">
+    <value>İstifadəçi mövcud deyil</value>
+  </data>
+  <data name="NOT_FOUND" xml:space="preserve">
+    <value>Mövcud deyil</value>
+  </data>
+  <data name="NO_PERMISSION" xml:space="preserve">
+    <value>İcazəniz yoxdur</value>
+  </data>
+  <data name="PASSWORDS_DO_NOT_MATCH" xml:space="preserve">
+    <value>Şifrələr uyğunlaşmır</value>
+  </data>
+  <data name="PASSWORD_LENGTH_RANGE" xml:space="preserve">
+    <value>Uzunluq 8-100 arasında olmalıdır</value>
+  </data>
+  <data name="PASSWORD_MIN_LENGTH" xml:space="preserve">
+    <value>Şifrə ən az 8 simvol uzunluğunda olmalıdır</value>
+  </data>
+  <data name="PASSWORD_MUST_CONTAIN_LOWERCASE" xml:space="preserve">
+    <value>Şifrədə ən az bir kiçik hərf olmalıdır</value>
+  </data>
+  <data name="PASSWORD_MUST_CONTAIN_NUMBER" xml:space="preserve">
+    <value>Şifrədə ən az bir rəqəm olmalıdır</value>
+  </data>
+  <data name="PASSWORD_MUST_CONTAIN_SPECIAL_CHAR" xml:space="preserve">
+    <value>Şifrədə ən az bir xüsusi simvol olmalıdır</value>
+  </data>
+  <data name="PASSWORD_MUST_CONTAIN_UPPERCASE" xml:space="preserve">
+    <value>Şifrədə ən az bir böyük hərf olmalıdır</value>
+  </data>
   <data name="REGISTER_COMPLETED" xml:space="preserve">
     <value>Qeydiyyat uğurla başa çatdı</value>
+  </data>
+  <data name="SESSION_EXPIRED" xml:space="preserve">
+    <value>Sessiyanızın müddəti bitmişdir</value>
+  </data>
+  <data name="TERMS_NOT_ACCEPTED" xml:space="preserve">
+    <value>Şərtlərlə razı olmadan qeydiyyatdan keçə bilməzsiniz</value>
+  </data>
+  <data name="USEREXISTEXCEPTION_EMAIL" xml:space="preserve">
+    <value>Email mövcuddur</value>
+  </data>
+  <data name="USEREXISTEXCEPTION_PHONE" xml:space="preserve">
+    <value>Bu nömrə sistemdə artıq mövcuddur</value>
+  </data>
+  <data name="USER_PHONE_OR_EMAIL_EXISTS" xml:space="preserve">
+    <value>İstifadəçi nömrəsi və ya email mövcuddur</value>
   </data>
   <data name="WELCOME" xml:space="preserve">
     <value>Xoş gəlmisiniz</value>

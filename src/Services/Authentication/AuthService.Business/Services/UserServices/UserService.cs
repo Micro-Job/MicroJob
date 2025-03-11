@@ -7,7 +7,9 @@ using MassTransit;
 using MassTransit.Initializers;
 using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Dtos.FileDtos;
+using SharedLibrary.Exceptions;
 using SharedLibrary.ExternalServices.FileService;
+using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;
 using SharedLibrary.Requests;
 using SharedLibrary.Responses;
@@ -44,7 +46,7 @@ namespace AuthService.Business.Services.UserServices
                         Image = x.Image != null ? $"{_currentUser.BaseUrl}/{x.Image}" : null,
                         UserRole = x.UserRole,
                         JobStatus = x.JobStatus,
-                    }) ?? throw new UserNotFoundException();
+                    }) ??throw new NotFoundException<User>(MessageHelper.GetMessage("NOTFOUNDEXCEPTION_USER"));
 
             return user;
         }
@@ -55,7 +57,7 @@ namespace AuthService.Business.Services.UserServices
             var userQuery = _context.Users.AsQueryable();
             var user =
                 await userQuery.FirstOrDefaultAsync(u => u.Id == _currentUser.UserGuid)
-                ?? throw new UserNotFoundException();
+                ?? throw new NotFoundException<User>(MessageHelper.GetMessage("NOTFOUNDEXCEPTION_USER"));
             var isEmailTaken = await userQuery.FirstOrDefaultAsync(u =>
                 u.Id != user.Id && u.Email == dto.Email.Trim()
             );
@@ -95,7 +97,7 @@ namespace AuthService.Business.Services.UserServices
         public async Task<UserProfileImageUpdateResponseDto> UpdateUserProfileImageAsync(UserProfileImageUpdateDto dto)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == _currentUser.UserGuid)
-                                                    ?? throw new UserNotFoundException();
+                        ?? throw new NotFoundException<User>(MessageHelper.GetMessage("NOTFOUNDEXCEPTION_USER"));
 
             if (!string.IsNullOrEmpty(user.Image))
             {
@@ -123,7 +125,7 @@ namespace AuthService.Business.Services.UserServices
         {
             var user =
                 await _context.Users.FirstOrDefaultAsync(u => u.Id == _currentUser.UserGuid)
-                ?? throw new UserNotFoundException();
+                ?? throw new NotFoundException<User>(MessageHelper.GetMessage("NOTFOUNDEXCEPTION_USER"));
 
             user.JobStatus = dto.JobStatus;
 

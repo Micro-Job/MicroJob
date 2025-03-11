@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using SharedLibrary.Exceptions.Common;
+using SharedLibrary.Helpers;
 
 namespace AuthService.Business.Exceptions.UserException
 {
@@ -11,7 +12,7 @@ namespace AuthService.Business.Exceptions.UserException
 
         public UserExistException() : base()
         {
-            ErrorMessage = "İstifadəçi nömrəsi və ya email mövcuddur.";
+            ErrorMessage = MessageHelper.GetMessage("USER_PHONE_OR_EMAIL_EXISTS");
         }
 
         public UserExistException(string? message) : base(message)

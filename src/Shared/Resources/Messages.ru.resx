@@ -117,8 +117,71 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AUTHENTICATION_FAILED" xml:space="preserve">
+    <value>Ошибка аутентификации</value>
+  </data>
+  <data name="CANNOT_BE_EMPTY" xml:space="preserve">
+    <value>Не может быть пустым</value>
+  </data>
+  <data name="INVALID_FORMAT" xml:space="preserve">
+    <value>Неверный формат</value>
+  </data>
+  <data name="INVALID_USER_STATUS" xml:space="preserve">
+    <value>Указанный статус пользователя недействителен</value>
+  </data>
+  <data name="LENGTH_MUST_BE_BETWEEN_1_50" xml:space="preserve">
+    <value>Длина должна быть от 1 до 50</value>
+  </data>
+  <data name="LOGIN_REQUIRED" xml:space="preserve">
+    <value>Пожалуйста, войдите снова, чтобы продолжить</value>
+  </data>
+  <data name="NOTFOUNDEXCEPTION_USER" xml:space="preserve">
+    <value>Пользователь не существует</value>
+  </data>
+  <data name="NOT_FOUND" xml:space="preserve">
+    <value>Не найдено</value>
+  </data>
+  <data name="NO_PERMISSION" xml:space="preserve">
+    <value>У вас нет разрешения</value>
+  </data>
+  <data name="PASSWORDS_DO_NOT_MATCH" xml:space="preserve">
+    <value>Пароли не совпадают</value>
+  </data>
+  <data name="PASSWORD_LENGTH_RANGE" xml:space="preserve">
+    <value>Длина должна быть от 8 до 100 символов</value>
+  </data>
+  <data name="PASSWORD_MIN_LENGTH" xml:space="preserve">
+    <value>Пароль должен содержать минимум 8 символов</value>
+  </data>
+  <data name="PASSWORD_MUST_CONTAIN_LOWERCASE" xml:space="preserve">
+    <value>Пароль должен содержать хотя бы одну строчную букву</value>
+  </data>
+  <data name="PASSWORD_MUST_CONTAIN_NUMBER" xml:space="preserve">
+    <value>Пароль должен содержать хотя бы одну цифру</value>
+  </data>
+  <data name="PASSWORD_MUST_CONTAIN_SPECIAL_CHAR" xml:space="preserve">
+    <value>Пароль должен содержать хотя бы один специальный символ</value>
+  </data>
+  <data name="PASSWORD_MUST_CONTAIN_UPPERCASE" xml:space="preserve">
+    <value>Пароль должен содержать хотя бы одну заглавную букву</value>
+  </data>
   <data name="REGISTER_COMPLETED" xml:space="preserve">
     <value>Регистрация успешно завершена</value>
+  </data>
+  <data name="SESSION_EXPIRED" xml:space="preserve">
+    <value>Время вашей сессии истекло</value>
+  </data>
+  <data name="TERMS_NOT_ACCEPTED" xml:space="preserve">
+    <value>Вы не можете зарегистрироваться без согласия с условиями</value>
+  </data>
+  <data name="USEREXISTEXCEPTION_EMAIL" xml:space="preserve">
+    <value>Электронная почта уже существует</value>
+  </data>
+  <data name="USEREXISTEXCEPTION_PHONE" xml:space="preserve">
+    <value>Номер уже существует</value>
+  </data>
+  <data name="USER_PHONE_OR_EMAIL_EXISTS" xml:space="preserve">
+    <value>Номер пользователя или email уже существует</value>
   </data>
   <data name="WELCOME" xml:space="preserve">
     <value>Добро пожаловать</value>

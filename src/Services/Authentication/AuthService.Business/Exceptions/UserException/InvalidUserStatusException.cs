@@ -1,9 +1,11 @@
-﻿namespace AuthService.Business.Exceptions.UserException
+﻿using SharedLibrary.Helpers;
+
+namespace AuthService.Business.Exceptions.UserException
 {
     public class InvalidUserStatusException : Exception
     {
         public InvalidUserStatusException()
-            : base("The provided user status is invalid.")
+            : base(MessageHelper.GetMessage("INVALID_USER_STATUS"))
         {
         }
 
