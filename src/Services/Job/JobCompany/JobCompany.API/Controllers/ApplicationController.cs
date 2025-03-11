@@ -36,10 +36,7 @@ namespace JobCompany.API.Controllers
         }
 
         [HttpPatch("[action]")]
-        public async Task<IActionResult> ChangeApplicationStatus(
-            string applicationId,
-            string statusId
-        )
+        public async Task<IActionResult> ChangeApplicationStatus(string applicationId,string statusId)
         {
             await service.ChangeApplicationStatusAsync(applicationId, statusId);
             return Ok();

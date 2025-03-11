@@ -30,11 +30,11 @@ namespace Job.Business
             services.AddScoped<INumberService, NumberService>();
             services.AddScoped<ILanguageService, LanguageService>();
             services.AddScoped<ICertificateService, CertificateService>();
+            //TODO : VacancyService artıq istifadə edilmir silinə bilər
             services.AddScoped<IVacancyService, VacancyService>();
             services.AddScoped<ISkillService, SkillService>();
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<IUserApplicationService, UserApplicationService>();
-            services.AddScoped<ICompanyInformationService, CompanyInformationService>();
             services.AddScoped<ICurrentUser, CurrentUser>();
         }
 

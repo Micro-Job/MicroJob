@@ -59,7 +59,7 @@ namespace Job.Business.Services.Application
             _getExamQuestionsRequest = getExamQuestionsRequest;
         }
 
-        //TODO : bu metod burada olmali deyil  job - company de olmalidir
+        //TODO : bu metod burada olmali deyil  jobcompany de olmalidir
         /// <summary> İstifadəçinin bütün müraciətlərini gətirir </summary>
         public async Task<PaginatedApplicationDto> GetUserApplicationsAsync(int skip, int take)
         {
@@ -122,9 +122,7 @@ namespace Job.Business.Services.Application
             );
         }
 
-        public async Task<GetApplicationDetailResponse> GetUserApplicationByIdAsync(
-            string applicationId
-        )
+        public async Task<GetApplicationDetailResponse> GetUserApplicationByIdAsync(string applicationId)
         {
             var userId = userGuid.ToString();
             var response =

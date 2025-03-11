@@ -56,7 +56,7 @@ namespace JobCompany.Business.Services.StatusServices
         public async Task<List<StatusListDto>> GetAllStatusesAsync()
         {
             var statuses = await _context
-                .Statuses.Where(s => s.Company.UserId == _currentUser.UserGuid)
+                .Statuses.Where(s => s.Company.UserId == _currentUser.UserGuid && s.IsDefault == true)
                 .Select(s => new StatusListDto
                 {
                     StatusId = s.Id,

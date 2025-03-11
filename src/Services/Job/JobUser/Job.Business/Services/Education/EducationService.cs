@@ -1,4 +1,4 @@
-using Job.Business.Dtos.EducationDtos;
+﻿using Job.Business.Dtos.EducationDtos;
 using Job.Business.Exceptions.Common;
 using Job.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
@@ -29,6 +29,7 @@ namespace Job.Business.Services.Education
             await context.Educations.AddAsync(education);
         }
 
+        //TODO : Burada kod optimizasiyasına ehtiyyac var 
         public async Task<ICollection<Core.Entities.Education>> UpdateBulkEducationAsync(ICollection<EducationUpdateDto> dtos,Guid resumeId)
         {
             var educationsToUpdate = new List<Core.Entities.Education>();
