@@ -1,13 +1,13 @@
 ﻿using System.Security.Claims;
 using Job.Business.Dtos.NotificationDtos;
 using Job.Business.Exceptions.UserExceptions;
-using Job.Business.HelperServices.Current;
 using Job.DAL.Contexts;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Shared.Responses;
 using SharedLibrary.Exceptions;
+using SharedLibrary.HelperServices.Current;
 using SharedLibrary.Requests;
 using SharedLibrary.Responses;
 

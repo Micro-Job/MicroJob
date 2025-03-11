@@ -1,5 +1,4 @@
 ﻿using Job.Business.Exceptions.Common;
-using Job.Business.HelperServices.Current;
 using Job.Core.Entities;
 using Job.DAL.Contexts;
 using MassTransit;
@@ -11,6 +10,7 @@ using Shared.Requests;
 using Shared.Responses;
 using SharedLibrary.Enums;
 using SharedLibrary.Events;
+using SharedLibrary.HelperServices.Current;
 using SharedLibrary.Requests;
 using SharedLibrary.Responses;
 using System.Security.Claims;

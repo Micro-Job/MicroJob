@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using SharedLibrary.Helpers;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -25,19 +26,19 @@ namespace AuthService.Business.Dtos
             RuleFor(x => x.NewPassword)
               .NotNull()
               .NotEmpty()
-              .WithMessage("Boş ola bilməz")
+              .WithMessage(MessageHelper.GetMessage("CANNOT_BE_EMPTY"))
               .MinimumLength(8)
-              .WithMessage("Şifrə ən az 8 simvol uzunluğunda olmalıdır")
+              .WithMessage(MessageHelper.GetMessage("PASSWORD_MIN_LENGTH"))
               .Matches(@"[A-Z]")
-              .WithMessage("Şifrədə ən az bir böyük hərf olmalıdır")
+              .WithMessage(MessageHelper.GetMessage("PASSWORD_MUST_CONTAIN_UPPERCASE"))
               .Matches(@"[a-z]")
-              .WithMessage("Şifrədə ən az bir kiçik hərf olmalıdır")
+              .WithMessage(MessageHelper.GetMessage("PASSWORD_MUST_CONTAIN_LOWERCASE"))
               .Matches(@"[0-9]")
-              .WithMessage("Şifrədə ən az bir rəqəm olmalıdır")
+              .WithMessage(MessageHelper.GetMessage("PASSWORD_MUST_CONTAIN_NUMBER"))
               .Matches(@"[\W_]")
-              .WithMessage("Şifrədə ən az bir xüsusi simvol olmalıdır")
+              .WithMessage(MessageHelper.GetMessage("PASSWORD_MUST_CONTAIN_SPECIAL_CHAR"))
               .Length(8, 100)
-              .WithMessage("Uzunluq 8-100 arasında olmalıdır");
+              .WithMessage(MessageHelper.GetMessage("PASSWORD_LENGTH_RANGE"));
         }
     }
 }

@@ -7,6 +7,7 @@ using Job.DAL.Contexts;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using SharedLibrary.Filters;
 using SharedLibrary.Middlewares;
 using SharedLibrary.ServiceRegistration;
 
@@ -26,6 +27,7 @@ namespace Job.API
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(c =>
             {
+                c.OperationFilter<AddLanguageHeaderParameter>();
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "MyAPI", Version = "v1" });
                 c.AddSecurityDefinition(
                     "Bearer",
@@ -121,10 +123,15 @@ namespace Job.API
             }
 
             app.UseHttpsRedirection();
-            app.UseAuthorization();
-            // app.UseCustomExceptionHandler();
-            app.UseCors("_myAllowSpecificOrigins");
+            app.UseStaticFiles();
+            app.UseMiddleware<LanguageMiddleware>();
 
+            // app.UseCustomExceptionHandler();
+
+            app.UseAuthentication();
+            app.UseAuthorization();
+
+            app.UseCors("_myAllowSpecificOrigins");
             app.MapControllers();
 
             app.Run();

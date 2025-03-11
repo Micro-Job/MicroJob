@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using SharedLibrary.Exceptions.Common;
+using SharedLibrary.Helpers;
 
 namespace AuthService.Business.Exceptions.UserException
 {
@@ -11,7 +12,7 @@ namespace AuthService.Business.Exceptions.UserException
 
         public LoginFailedException() : base()
         {
-            ErrorMessage = "Giriş uğursuz oldu.";
+            ErrorMessage = MessageHelper.GetMessage("AUTHENTICATION_FAILED");
         }
 
         public LoginFailedException(string? message) : base(message)

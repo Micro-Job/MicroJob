@@ -14,6 +14,7 @@ using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.Events;
 using SharedLibrary.Exceptions;
 using SharedLibrary.ExternalServices.FileService;
+using SharedLibrary.Helpers;
 using SharedLibrary.Statics;
 
 namespace AuthService.Business.Services.Auth
@@ -71,8 +72,8 @@ namespace AuthService.Business.Services.Auth
                 new EmailMessage
                 {
                     Email = dto.Email,
-                    Subject = "Xoş gəldiniz",
-                    Content = "Qeydiyyat uğurla başa çatdı",
+                    Subject = MessageHelper.GetMessage("WELCOME"),
+                    Content = MessageHelper.GetMessage("REGISTER_COMPLETED"),
                 }
             );
 
@@ -135,8 +136,8 @@ namespace AuthService.Business.Services.Auth
                 new EmailMessage
                 {
                     Email = dto.Email,
-                    Subject = "Xoş gəldiniz",
-                    Content = "Qeydiyyat uğurla başa çatdı",
+                    Subject = MessageHelper.GetMessage("WELCOME"),
+                    Content = MessageHelper.GetMessage("REGISTER_COMPLETED"),
                 }
             );
         }
@@ -226,17 +227,17 @@ namespace AuthService.Business.Services.Auth
         public async Task<TokenResponseDto> LoginWithRefreshTokenAsync(string refreshToken)
         {
             if (string.IsNullOrEmpty(refreshToken))
-                throw new BadRequestException("Refresh token tələb olunur.");
+                throw new BadRequestException(MessageHelper.GetMessage("SESSION_EXPIRED"));
 
             var user = await _context.Users.FirstOrDefaultAsync(x =>
                 x.RefreshToken == refreshToken
             );
 
             if (user == null)
-                throw new LoginFailedException("Keçərsiz refresh token.");
+                throw new LoginFailedException(MessageHelper.GetMessage("AUTHENTICATION_FAILED"));
 
             if (user.RefreshTokenExpireDate < DateTime.Now)
-                throw new RefreshTokenExpiredException();
+                throw new RefreshTokenExpiredException(MessageHelper.GetMessage("LOGIN_REQUIRED"));
 
             var newToken = _tokenHandler.CreateToken(user, 60);
             var newRefreshToken = _tokenHandler.GenerateRefreshToken(newToken, 1440);
@@ -267,7 +268,7 @@ namespace AuthService.Business.Services.Auth
         {
             var user = await _context.Users.FirstOrDefaultAsync(x => x.Email == email);
             if (user == null)
-                throw new NotFoundException<User>("İstiadəçi mövcud deyil.");
+                throw new NotFoundException<User>(MessageHelper.GetMessage("NOTFOUNDEXCEPTION_USER"));
 
             var token = _tokenHandler.CreatePasswordResetToken(user);
 
@@ -299,7 +300,7 @@ namespace AuthService.Business.Services.Auth
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
             if (user == null)
-                throw new NotFoundException<User>("İstiadəçi mövcud deyil.");
+                throw new NotFoundException<User>(MessageHelper.GetMessage("NOTFOUNDEXCEPTION_USER"));
 
             var passwordToken = await _context.PasswordTokens.FirstOrDefaultAsync(pt =>
                 pt.Token == dto.Token && pt.UserId == user.Id && pt.ExpireTime > DateTime.Now
