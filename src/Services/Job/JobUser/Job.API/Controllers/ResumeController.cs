@@ -9,7 +9,7 @@ namespace Job.API.Controllers
 
     [ApiController]
     [Route("api/[controller]")]
-    [AuthorizeRole(UserRole.SimpleUser)]
+    //[AuthorizeRole(UserRole.SimpleUser)]
     public class ResumeController(IResumeService service) : ControllerBase
     {
         [HttpPost("[action]")]
@@ -29,9 +29,9 @@ namespace Job.API.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetOwnResume()
+        public async Task<IActionResult> GetOwnResume(string salam)
         {
-            return Ok(await service.GetOwnResumeAsync());
+            return Ok(await service.GetOwnResumeAsync(salam));
         }
     }
 }

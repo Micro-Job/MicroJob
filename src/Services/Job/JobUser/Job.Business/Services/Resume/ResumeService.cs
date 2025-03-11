@@ -274,10 +274,11 @@ namespace Job.Business.Services.Resume
             }).ToList() ?? [];
         }
 
-        public async Task<ResumeDetailItemDto> GetOwnResumeAsync()
+        public async Task<ResumeDetailItemDto> GetOwnResumeAsync(string salam)
         {
+            var resumeİd = Guid.Parse(salam);
             var resume = await _context.Resumes
-                                        .Where(x => x.UserId == userGuid)
+                                        .Where(x => x.Id == resumeİd)
                                         .Select(resume => new ResumeDetailItemDto
                                         {
                                             UserId = resume.UserId,

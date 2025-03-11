@@ -278,6 +278,7 @@ namespace JobCompany.Business.Services.VacancyServices
                     {
                         Id = x.Id,
                         Title = x.Title,
+                        CompanyId = x.CompanyId,
                         CompanyLogo = $"{_authServiceBaseUrl}/{x.Company.CompanyLogo}",
                         StartDate = x.StartDate,
                         Location = x.Location,
