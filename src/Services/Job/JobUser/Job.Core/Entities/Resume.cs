@@ -1,4 +1,6 @@
 ﻿using Job.Core.Enums;
+using Shared.Enums;
+using SharedLibrary.Enums;
 
 namespace Job.Core.Entities
 {
@@ -9,11 +11,12 @@ namespace Job.Core.Entities
         public string FatherName { get; set; }
         public string Position { get; set; }
         public string? UserPhoto { get; set; }
-        public bool IsDriver { get; set; }
-        public bool IsMarried { get; set; }
-        public bool IsCitizen { get; set; }
-        public bool IsPublic { get; set; }
+        public Driver IsDriver { get; set; }
+        public FamilySituation IsMarried { get; set; }
+        public Citizenship IsCitizen { get; set; }
         public Gender Gender { get; set; }
+        public Military MilitarySituation { get; set; }
+        public bool IsPublic { get; set; }
         public string? Adress { get; set; }
         public DateTime BirthDay { get; set; }
         public string? ResumeEmail { get; set; }

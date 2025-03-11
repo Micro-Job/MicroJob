@@ -3,6 +3,8 @@ using Job.Business.Dtos.CertificateDtos;
 using Job.Business.Dtos.LanguageDtos;
 using Job.Core.Enums;
 using Microsoft.AspNetCore.Http;
+using Shared.Enums;
+using SharedLibrary.Enums;
 
 namespace Job.Business.Dtos.ResumeDtos
 {
@@ -11,14 +13,15 @@ namespace Job.Business.Dtos.ResumeDtos
         public string FatherName { get; set; }
         public string Position { get; set; }
         public IFormFile? UserPhoto { get; set; }
-        public bool IsDriver { get; set; }
-        public bool IsMarried { get; set; }
-        public bool IsCitizen { get; set; }
+        public Driver IsDriver { get; set; }
+        public FamilySituation IsMarried { get; set; }
+        public Citizenship IsCitizen { get; set; }
+        public Gender Gender { get; set; }
+        public Military MilitarySituation { get; set; }
         public bool IsMainNumber { get; set; }
         public bool IsMainEmail { get; set; }
         public bool IsPublic { get; set; }
         public string? ResumeEmail { get; set; }
-        public Gender Gender { get; set; }
         public string? Adress { get; set; }
         public DateTime BirthDay { get; set; }
         public ICollection<Guid>? SkillIds { get; set; }

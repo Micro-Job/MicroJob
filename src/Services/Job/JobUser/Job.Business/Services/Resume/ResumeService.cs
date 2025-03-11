@@ -124,6 +124,7 @@ namespace Job.Business.Services.Resume
                 IsDriver = dto.IsDriver,
                 IsMarried = dto.IsMarried,
                 IsCitizen = dto.IsCitizen,
+                MilitarySituation = dto.MilitarySituation,
                 IsPublic = dto.IsPublic,
                 Gender = dto.Gender,
                 Adress = dto.Adress,
@@ -211,6 +212,7 @@ namespace Job.Business.Services.Resume
             resume.IsDriver = updateDto.IsDriver;
             resume.IsMarried = updateDto.IsMarried;
             resume.IsCitizen = updateDto.IsCitizen;
+            resume.MilitarySituation = updateDto.MilitarySituation;
             resume.IsPublic = updateDto.IsPublic;
             resume.Gender = updateDto.Gender;
             resume.Adress = updateDto.Adress;
@@ -284,6 +286,7 @@ namespace Job.Business.Services.Resume
                                             IsDriver = resume.IsDriver,
                                             IsMarried = resume.IsMarried,
                                             IsCitizen = resume.IsCitizen,
+                                            MilitarySituation = resume.MilitarySituation,
                                             Gender = resume.Gender,
                                             Adress = resume.Adress,
                                             BirthDay = resume.BirthDay,

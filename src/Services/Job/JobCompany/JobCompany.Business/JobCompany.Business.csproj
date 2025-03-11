@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="HelperServices\**" />
+    <EmbeddedResource Remove="HelperServices\**" />
+    <None Remove="HelperServices\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\JobUser\Job.DAL\Job.DAL.csproj" />
     <ProjectReference Include="..\JobCompany.DAL\JobCompany.DAL.csproj" />
   </ItemGroup>
@@ -14,10 +20,6 @@
   <ItemGroup>
     <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
     <PackageReference Include="MassTransit.RabbitMQ" Version="8.3.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="HelperServices\" />
   </ItemGroup>
 
 </Project>
