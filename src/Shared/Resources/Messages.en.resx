@@ -138,6 +138,9 @@
   <data name="NOTFOUNDEXCEPTION_USER" xml:space="preserve">
     <value>User does not exist</value>
   </data>
+  <data name="NOT_EMPTY" xml:space="preserve">
+    <value>It should not be empty</value>
+  </data>
   <data name="NOT_FOUND" xml:space="preserve">
     <value>Not found</value>
   </data>
@@ -170,6 +173,9 @@
   </data>
   <data name="SESSION_EXPIRED" xml:space="preserve">
     <value>Your session has expired</value>
+  </data>
+  <data name="STATUS_PERMISSION" xml:space="preserve">
+    <value>You do not have permission to delete status.</value>
   </data>
   <data name="TERMS_NOT_ACCEPTED" xml:space="preserve">
     <value>You cannot register without accepting the terms</value>

@@ -22,7 +22,7 @@ namespace SharedLibrary.HelperServices.Current
         {
             get
             {
-                var currentLanguage = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName.ToLower();
+                var currentLanguage = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName.ToUpper();
 
                 if (!Enum.TryParse<LanguageCode>(currentLanguage, true, out var languageEnum))
                 {

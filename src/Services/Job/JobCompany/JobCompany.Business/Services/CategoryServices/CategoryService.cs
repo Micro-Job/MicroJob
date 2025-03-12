@@ -1,25 +1,30 @@
 using JobCompany.Business.Dtos.CategoryDtos;
+using JobCompany.Business.Extensions;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
+using SharedLibrary.HelperServices.Current;
 
 namespace JobCompany.Business.Services.CategoryServices
 {
-    public class CategoryService(JobCompanyDbContext context) : ICategoryService
+    public class CategoryService(JobCompanyDbContext context, ICurrentUser _user) : ICategoryService
     {
         readonly JobCompanyDbContext _context = context;
 
-        public async Task CreateCategoryAsync(string categoryName)
+        public async Task CreateCategoryAsync(CategoryCreateDto dto)
         {
-            var existCategory = await _context.Categories.FirstOrDefaultAsync(x => x.CategoryName == categoryName);
-            if (existCategory != null) throw new Exceptions.Common.IsAlreadyExistException<Category>();
+            Category category = new();
+            await _context.Categories.AddAsync(category);
+            await _context.SaveChangesAsync();
 
-            var category = new Category
+            var categoryTranslations = dto.Categories.Select(x => new CategoryTranslation
             {
-                CategoryName = categoryName,
-            };
+                CategoryId = category.Id,
+                Language = x.language,
+                Name = x.Name.Trim()
+            }).ToList();
 
-            _context.Categories.Add(category);
+            await _context.CategoryTranslations.AddRangeAsync(categoryTranslations);
             await _context.SaveChangesAsync();
         }
 
@@ -35,23 +40,52 @@ namespace JobCompany.Business.Services.CategoryServices
 
         public async Task<ICollection<CategoryListDto>> GetAllCategoriesAsync()
         {
-            var categories = await _context.Categories.Select(c => new CategoryListDto
+            var categories = await _context.Categories
+                .IncludeTranslations()
+            .Select(b => new CategoryListDto
             {
-                Id = c.Id,
-                CategoryName = c.CategoryName
-            }).ToListAsync();
+                Id = b.Id,
+                CategoryName = b.GetTranslation(_user.LanguageCode)
+            })
+            .ToListAsync();
+
             return categories;
         }
 
-        public async Task UpdateCategoryAsync(string id, string? categoryName)
+        public async Task<CategoryGetByIdDto> CategoryGetByIdAsync(Guid id)
         {
-            var categoryId = Guid.Parse(id);
-            var category = await _context.Categories.FindAsync(categoryId) ??
-            throw new Exceptions.Common.NotFoundException<Category>();
+            var res = await _context.Categories
+              .Where(x => x.Id == id)
+              .Include(x => x.Translations)
+              .Select(x => new CategoryGetByIdDto
+              {
+                  Id = x.Id,
+                  CategoryTranslations = x.Translations.Select(t => new CategoryTranslationGetByIdDto
+                  {
+                      Id = t.Id,
+                      Name = t.Name,
+                      LanguageCode = t.Language
+                  }).ToList()
+              })
+              .FirstOrDefaultAsync();
 
-            var isExistCat = await _context.Categories.FirstOrDefaultAsync(c => c.CategoryName == categoryName && c.Id != categoryId);
-            if (isExistCat != null) throw new Exceptions.Common.IsAlreadyExistException<Category>();
-            category.CategoryName = categoryName;
+            return res;
+        }
+
+        public async Task UpdateCategoryAsync(List<CategoryUpdateDto> dtos)
+        {
+            var categoryTranslations = await _context.CategoryTranslations
+            .Where(x => dtos.Select(b => b.Id).Contains(x.Id))
+            .ToListAsync();
+
+            foreach (var translation in categoryTranslations)
+            {
+                var category = dtos.FirstOrDefault(b => b.Id == translation.Id);
+                if (category != null)
+                {
+                    translation.Name = category.Name;
+                }
+            }
             await _context.SaveChangesAsync();
         }
     }

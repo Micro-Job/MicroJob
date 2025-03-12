@@ -10,10 +10,6 @@ namespace JobCompany.DAL.Configurations
         {
             builder.HasKey(p => p.Id);
 
-            builder.Property(c => c.Name)
-                   .IsRequired()
-                   .HasMaxLength(32);
-
             builder.HasOne(c => c.Country)
                    .WithMany(country => country.Cities)
                    .HasForeignKey(c => c.CountryId)

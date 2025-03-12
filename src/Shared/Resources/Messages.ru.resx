@@ -138,6 +138,9 @@
   <data name="NOTFOUNDEXCEPTION_USER" xml:space="preserve">
     <value>Пользователь не существует</value>
   </data>
+  <data name="NOT_EMPTY" xml:space="preserve">
+    <value>Он не должен быть пустым</value>
+  </data>
   <data name="NOT_FOUND" xml:space="preserve">
     <value>Не найдено</value>
   </data>
@@ -170,6 +173,9 @@
   </data>
   <data name="SESSION_EXPIRED" xml:space="preserve">
     <value>Время вашей сессии истекло</value>
+  </data>
+  <data name="STATUS_PERMISSION" xml:space="preserve">
+    <value>Вам не разрешено удалять статус</value>
   </data>
   <data name="TERMS_NOT_ACCEPTED" xml:space="preserve">
     <value>Вы не можете зарегистрироваться без согласия с условиями</value>

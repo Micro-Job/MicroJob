@@ -43,39 +43,39 @@ namespace JobCompany.Business.Services.ReportServices
         /// - Total applications count.
         /// - Accepted applications count.
         /// </returns>
-        public async Task<SummaryDto> GetSummaryAsync()
-        {
-            var acceptedStatusId = await _context
-                .Statuses.Where(s => s.Name == "Accepted" && s.IsDefault)
-                .Select(s => s.Id)
-                .FirstOrDefaultAsync();
+        //public async Task<SummaryDto> GetSummaryAsync()
+        //{
+            //var acceptedStatusId = await _context
+            //    .Statuses.Where(s => s.Name == "Accepted" && s.IsDefault)
+            //    .Select(s => s.Id)
+            //    .FirstOrDefaultAsync();
 
-            var result = await _context
-                .Applications.GroupBy(a => new
-                {
-                    a.Vacancy.IsActive,
-                    IsAccepted = a.StatusId == acceptedStatusId,
-                })
-                .Select(g => new
-                {
-                    g.Key.IsActive,
-                    g.Key.IsAccepted,
-                    Count = g.Count(),
-                })
-                .ToListAsync();
+            //var result = await _context
+            //    .Applications.GroupBy(a => new
+            //    {
+            //        a.Vacancy.IsActive,
+            //        IsAccepted = a.StatusId == acceptedStatusId,
+            //    })
+            //    .Select(g => new
+            //    {
+            //        g.Key.IsActive,
+            //        g.Key.IsAccepted,
+            //        Count = g.Count(),
+            //    })
+            //    .ToListAsync();
 
-            var activeVacancies = result.Where(r => r.IsActive).Sum(r => r.Count);
-            var totalApplications = result.Sum(r => r.Count);
-            var acceptedApplications = result.Where(r => r.IsAccepted).Sum(r => r.Count);
+            //var activeVacancies = result.Where(r => r.IsActive).Sum(r => r.Count);
+            //var totalApplications = result.Sum(r => r.Count);
+            //var acceptedApplications = result.Where(r => r.IsAccepted).Sum(r => r.Count);
 
-            var summary = new SummaryDto
-            {
-                ActiveVacancies = activeVacancies,
-                TotalApplications = totalApplications,
-                AcceptedApplications = acceptedApplications,
-            };
-            return summary;
-        }
+            //var summary = new SummaryDto
+            //{
+            //    ActiveVacancies = activeVacancies,
+            //    TotalApplications = totalApplications,
+            //    AcceptedApplications = acceptedApplications,
+            //};
+            //return summary;
+        //}
 
         /// <summary>
         /// admin/dashboard son muracietler
@@ -89,7 +89,7 @@ namespace JobCompany.Business.Services.ReportServices
                 {
                     a.UserId,
                     a.Vacancy.Title,
-                    a.Status.Name,
+                    //a.Status.Name,
                     a.Status.StatusColor,
                 })
                 .ToListAsync();
@@ -106,18 +106,18 @@ namespace JobCompany.Business.Services.ReportServices
                     u.UserId == application.UserId
                 );
 
-                if (userData != null)
-                {
-                    recentApplicationDtos.Add(
-                        new RecentApplicationDto
-                        {
-                            Fullname = $"{userData.FirstName} {userData.LastName}",
-                            VacancyName = application.Title,
-                            StatusName = application.StatusName,
-                            StatusColor = application.StatusColor,
-                        }
-                    );
-                }
+                //if (userData != null)
+                //{
+                //    recentApplicationDtos.Add(
+                //        new RecentApplicationDto
+                //        {
+                //            Fullname = $"{userData.FirstName} {userData.LastName}",
+                //            VacancyName = application.Title,
+                //            StatusName = application.StatusName,
+                //            StatusColor = application.StatusColor,
+                //        }
+                //    );
+                //}
             }
             return recentApplicationDtos;
         }
@@ -227,6 +227,11 @@ namespace JobCompany.Business.Services.ReportServices
                 System.Globalization.CalendarWeekRule.FirstDay,
                 DayOfWeek.Monday
             );
+        }
+
+        public Task<SummaryDto> GetSummaryAsync()
+        {
+            throw new NotImplementedException();
         }
     }
 }

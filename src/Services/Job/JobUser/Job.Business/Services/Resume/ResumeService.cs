@@ -4,7 +4,6 @@ using Job.Business.Dtos.ExperienceDtos;
 using Job.Business.Dtos.LanguageDtos;
 using Job.Business.Dtos.NumberDtos;
 using Job.Business.Dtos.ResumeDtos;
-using Job.Business.Dtos.SkillDtos;
 using Job.Business.Exceptions.Common;
 using Job.Business.Exceptions.UserExceptions;
 using Job.Business.Services.Certificate;
@@ -21,7 +20,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Shared.Requests;
-using Shared.Responses;
 using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.ExternalServices.FileService;
 using SharedLibrary.Statics;
@@ -288,10 +286,10 @@ namespace Job.Business.Services.Resume
                                             Adress = resume.Adress,
                                             BirthDay = resume.BirthDay,
                                             ResumeEmail = resume.ResumeEmail,
-                                            Skills = resume.ResumeSkills.Select(s => new SkillGetByIdDto
-                                            {
-                                                Name = s.Skill.Name
-                                            }).ToList(),
+                                            //Skills = resume.ResumeSkills.Select(s => new SkillGetByIdDto
+                                            //{
+                                            //    Name = s.Skill.Name
+                                            //}).ToList(),
                                             PhoneNumbers = resume.PhoneNumbers.Select(p => new NumberGetByIdDto
                                             {
                                                 PhoneNumber = p.PhoneNumber

@@ -1,10 +1,10 @@
 ﻿using Job.Business.Dtos.SkillDtos;
 
-namespace Job.Business.Services.Skill
+namespace Job.Business.Services.Skill;
+
+public interface ISkillService
 {
-    public interface ISkillService
-    {
-        Task CreateSkillAsync(SkillDto dto);
-        Task<List<GetAllSkillDto>> GetAllSkillsAsync();
-    }
+    Task CreateSkillAsync(SkillCreateDto dto);
+    Task UpdateSkillAsync(List<SkillUpdateDto> dto);
+    Task<List<GetAllSkillDto>> GetAllSkillsAsync();
 }

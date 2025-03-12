@@ -9,7 +9,7 @@ namespace JobCompany.Core.Entites
 
         public LanguageCode Language { get; set; }
 
-        public int StatusId { get; set; }
+        public Guid StatusId { get; set; }
         public Status Status { get; set; }
 
     }

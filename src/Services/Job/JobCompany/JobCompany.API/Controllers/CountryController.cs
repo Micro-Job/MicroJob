@@ -1,3 +1,4 @@
+using JobCompany.Business.Dtos.CountryDtos;
 using JobCompany.Business.Services.CountryServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,16 +13,16 @@ namespace JobCompany.API.Controllers
     public class CountryController(ICountryService service) : ControllerBase
     {
         [HttpPost("[action]")]
-        public async Task<IActionResult> CreateCountry([FromBody] string countryName)
+        public async Task<IActionResult> CreateCountry(CountryCreateDto dto)
         {
-            await service.CreateCountryAsync(countryName);
+            await service.CreateCountryAsync(dto);
             return Ok();
         }
 
         [HttpPut("[action]/{id}")]
-        public async Task<IActionResult> UpdateCountry([FromRoute] string id, [FromBody] string? countryName)
+        public async Task<IActionResult> UpdateCountry(List<CountryUpdateDto> dtos)
         {
-            await service.UpdateCountryAsync(id, countryName);
+            await service.UpdateCountryAsync(dtos);
             return Ok();
         }
 

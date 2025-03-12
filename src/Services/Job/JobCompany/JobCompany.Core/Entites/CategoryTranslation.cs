@@ -10,6 +10,5 @@ namespace JobCompany.Core.Entites
 
         public Guid CategoryId { get; set; }
         public Category Category { get; set; }
-
     }
 }

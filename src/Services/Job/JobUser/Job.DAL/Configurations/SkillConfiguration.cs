@@ -9,7 +9,6 @@ namespace Job.DAL.Configurations
         public void Configure(EntityTypeBuilder<Skill> builder)
         {
             builder.HasKey(s => s.Id);
-            builder.Property(s => s.Name).IsRequired().HasMaxLength(32);
             builder
                 .HasMany(s => s.ResumeSkills)
                 .WithOne(rs => rs.Skill)

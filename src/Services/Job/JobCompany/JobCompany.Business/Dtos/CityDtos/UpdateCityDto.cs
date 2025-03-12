@@ -2,6 +2,7 @@ namespace JobCompany.Business.Dtos.CityDtos
 {
     public record UpdateCityDto
     {
-        public string? CityName { get; set; }
+        public Guid Id { get; set; }
+        public string Name { get; set; }
     }
 }

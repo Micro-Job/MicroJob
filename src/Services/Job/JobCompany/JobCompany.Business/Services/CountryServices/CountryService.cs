@@ -1,59 +1,73 @@
+using JobCompany.Business.Dtos.CityDtos;
 using JobCompany.Business.Dtos.CountryDtos;
+using JobCompany.Business.Extensions;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
+using SharedLibrary.HelperServices.Current;
 
 namespace JobCompany.Business.Services.CountryServices
 {
-    public class CountryService(JobCompanyDbContext context) : ICountryService
+    public class CountryService(JobCompanyDbContext context, ICurrentUser _user) : ICountryService
     {
         readonly JobCompanyDbContext _context = context;
 
-        public async Task CreateCountryAsync(string countryName)
+        public async Task CreateCountryAsync(CountryCreateDto dto)
         {
-            var existCountry = await _context.Countries
-                                              .FirstOrDefaultAsync(c => c.Name == countryName);
-            if (existCountry != null) throw new Exceptions.Common.IsAlreadyExistException<Country>();
-
-            var country = new Country
-            {
-                Name = countryName,
-            };
-
+            Country country = new();
             await _context.Countries.AddAsync(country);
+            await _context.SaveChangesAsync();
+
+            var countryTranslations = dto.Countries.Select(x => new CountryTranslation
+            {
+                CountryId = country.Id,
+                Language = x.Language,
+                Name = x.Name.Trim()
+            }).ToList();
+
+            await _context.CountryTranslations.AddRangeAsync(countryTranslations);
             await _context.SaveChangesAsync();
         }
 
         public async Task DeleteCountryAsync(string id)
         {
             var countryId = Guid.Parse(id);
-            var country = await _context.Countries.FindAsync(countryId)
-                ?? throw new Exceptions.Common.NotFoundException<Country>();
+            var country = await _context.Countries.Include(x => x.Translations).Where(x => x.Id == countryId).FirstOrDefaultAsync();
 
+            var brandTranslations = country.Translations.Select(x => x).ToList();
+            _context.CountryTranslations.RemoveRange(brandTranslations);
             _context.Countries.Remove(country);
             await _context.SaveChangesAsync();
         }
 
         public async Task<ICollection<CountryListDto>> GetAllCountryAsync()
         {
-            var countries = await _context.Countries.Select(c => new CountryListDto
+            var countries = await _context.Countries
+                .IncludeTranslations()
+            .Select(b => new CountryListDto
             {
-                Id = c.Id,
-                CountryName = c.Name,
-            }).ToListAsync();
+                Id = b.Id,
+                CountryName = b.GetTranslation(_user.LanguageCode),
+            })
+            .ToListAsync();
+
             return countries;
         }
 
-        public async Task UpdateCountryAsync(string id, string? countryName)
+        public async Task UpdateCountryAsync(List<CountryUpdateDto> countries)
         {
-            var countryId = Guid.Parse(id);
-            var country = await _context.Countries.FindAsync(countryId)
-            ?? throw new Exceptions.Common.NotFoundException<Country>();
+            var countryTranslations = await _context.CountryTranslations
+            .Where(x => countries.Select(b => b.Id).Contains(x.Id))
+            .ToListAsync();
 
-            var isExistCountry = await _context.Countries.FirstOrDefaultAsync(c => c.Name == countryName && c.Id != countryId);
-            if (isExistCountry != null) throw new Exceptions.Common.IsAlreadyExistException<Country>();
-
-            country.Name = countryName;
+            foreach (var translation in countryTranslations)
+            {
+                var category = countries.FirstOrDefault(b => b.Id == translation.Id);
+                if (category != null)
+                {
+                    translation.Name = category.Name;
+                }
+            }
             await _context.SaveChangesAsync();
         }
     }

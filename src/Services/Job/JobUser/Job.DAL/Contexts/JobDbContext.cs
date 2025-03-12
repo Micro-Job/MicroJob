@@ -21,6 +21,8 @@ namespace Job.DAL.Contexts
         public DbSet<UserAnswer> UserAnswers { get; set; }
         public DbSet<UserExam> UserExams { get; set; }
 
+        public DbSet<SkillTranslation> SkillTranslations { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());

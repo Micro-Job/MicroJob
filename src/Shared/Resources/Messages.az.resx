@@ -138,6 +138,9 @@
   <data name="NOTFOUNDEXCEPTION_USER" xml:space="preserve">
     <value>İstifadəçi mövcud deyil</value>
   </data>
+  <data name="NOT_EMPTY" xml:space="preserve">
+    <value>Boş olmamalıdır</value>
+  </data>
   <data name="NOT_FOUND" xml:space="preserve">
     <value>Mövcud deyil</value>
   </data>
@@ -170,6 +173,9 @@
   </data>
   <data name="SESSION_EXPIRED" xml:space="preserve">
     <value>Sessiyanızın müddəti bitmişdir</value>
+  </data>
+  <data name="STATUS_PERMISSION" xml:space="preserve">
+    <value>Status silməyə icazəniz yoxdur</value>
   </data>
   <data name="TERMS_NOT_ACCEPTED" xml:space="preserve">
     <value>Şərtlərlə razı olmadan qeydiyyatdan keçə bilməzsiniz</value>

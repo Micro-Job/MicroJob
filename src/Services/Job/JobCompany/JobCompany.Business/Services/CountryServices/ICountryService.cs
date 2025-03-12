@@ -4,8 +4,8 @@ namespace JobCompany.Business.Services.CountryServices
 {
     public interface ICountryService
     {
-        Task CreateCountryAsync(string countryName);
-        Task UpdateCountryAsync(string id, string? countryName);
+        Task CreateCountryAsync(CountryCreateDto dto);
+        Task UpdateCountryAsync(List<CountryUpdateDto> countries);
         Task<ICollection<CountryListDto>> GetAllCountryAsync();
         Task DeleteCountryAsync(string id);
     }

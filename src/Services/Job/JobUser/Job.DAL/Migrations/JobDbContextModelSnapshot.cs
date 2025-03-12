@@ -286,14 +286,33 @@ namespace Job.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("nvarchar(32)");
-
                     b.HasKey("Id");
 
                     b.ToTable("Skills");
+                });
+
+            modelBuilder.Entity("Job.Core.Entities.SkillTranslation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte>("Language")
+                        .HasColumnType("tinyint");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<Guid>("SkillId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SkillId");
+
+                    b.ToTable("SkillTranslations");
                 });
 
             modelBuilder.Entity("Job.Core.Entities.User", b =>
@@ -454,6 +473,17 @@ namespace Job.DAL.Migrations
                     b.Navigation("Skill");
                 });
 
+            modelBuilder.Entity("Job.Core.Entities.SkillTranslation", b =>
+                {
+                    b.HasOne("Job.Core.Entities.Skill", "Skill")
+                        .WithMany("Translations")
+                        .HasForeignKey("SkillId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Skill");
+                });
+
             modelBuilder.Entity("Job.Core.Entities.UserAnswer", b =>
                 {
                     b.HasOne("Job.Core.Entities.User", "User")
@@ -494,6 +524,8 @@ namespace Job.DAL.Migrations
             modelBuilder.Entity("Job.Core.Entities.Skill", b =>
                 {
                     b.Navigation("ResumeSkills");
+
+                    b.Navigation("Translations");
                 });
 
             modelBuilder.Entity("Job.Core.Entities.User", b =>

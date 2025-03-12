@@ -299,12 +299,12 @@ namespace JobCompany.Business.Services.VacancyServices
                                 VacancyNumber = vn.Number,
                             })
                             .ToList(),
-                        Skills = x
-                            .VacancySkills.Where(vc => vc.Skill != null)
-                            .Select(vc => new SkillDto { Name = vc.Skill.Name })
-                            .ToList(),
-                        CompanyName = x.CompanyName,
-                        CategoryName = x.Category.CategoryName,
+                        //Skills = x
+                        //    .VacancySkills.Where(vc => vc.Skill != null)
+                        //    .Select(vc => new SkillDto { Name = vc.Skill.Name })
+                        //    .ToList(),
+                        //CompanyName = x.CompanyName,
+                        //CategoryName = x.Category.CategoryName,
                     })
                     .FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>();
 
