@@ -13,6 +13,6 @@ namespace Job.Business.Services.Resume
             ResumeUpdateDto resumeUpdateDto,
             ResumeUpdateListDto resumeUpdateListsDto
         );
-        Task<ResumeDetailItemDto> GetOwnResumeAsync(string salam);
+        Task<ResumeDetailItemDto> GetOwnResumeAsync();
     }
 }

@@ -29,9 +29,9 @@ namespace Job.API.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetOwnResume(string salam)
+        public async Task<IActionResult> GetOwnResume()
         {
-            return Ok(await service.GetOwnResumeAsync(salam));
+            return Ok(await service.GetOwnResumeAsync());
         }
     }
 }
