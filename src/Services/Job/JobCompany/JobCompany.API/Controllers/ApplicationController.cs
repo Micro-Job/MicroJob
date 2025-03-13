@@ -62,5 +62,11 @@ namespace JobCompany.API.Controllers
         {
             return Ok(await service.GetUserApplicationsAsync(skip, take));
         }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetUserApplicationById(string applicationId)
+        {
+            return Ok(await service.GetApplicationByIdAsync(applicationId));
+        }
     }
 }
