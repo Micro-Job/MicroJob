@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using System.Data;
+using System.Security.Claims;
 using JobCompany.Business.Dtos.CategoryDtos;
 using JobCompany.Business.Dtos.Common;
 using JobCompany.Business.Dtos.CompanyDtos;
@@ -510,5 +511,38 @@ namespace JobCompany.Business.Services.VacancyServices
             return vacancies;
         }
 
+        public async Task<DataListDto<VacancyGetAllDto>> GetAllSavedVacancyAsync(int skip , int take)
+        {
+            var query = _context.SavedVacancies.Where(x => x.UserId == _currentUser.UserGuid)
+                                               .AsQueryable()
+                                               .AsNoTracking();
+
+            var vacancies = await query
+            .Select(x=> new VacancyGetAllDto
+            {
+                Id = x.Vacancy.Id,
+                Title = x.Vacancy.Title,
+                CompanyLogo = x.Vacancy.CompanyLogo != null ? $"{_authServiceBaseUrl}/{x.Vacancy.CompanyLogo}" : null,
+                CompanyName = x.Vacancy.CompanyName,
+                StartDate = x.Vacancy.StartDate,
+                Location = x.Vacancy.Location,
+                ViewCount = x.Vacancy.ViewCount,
+                IsActive = x.Vacancy.IsActive,
+                WorkType = x.Vacancy.WorkType,
+                WorkStyle = x.Vacancy.WorkStyle,
+                MainSalary = x.Vacancy.MainSalary,
+                MaxSalary = x.Vacancy.MaxSalary,
+                IsSaved = true
+            })
+            .Skip(Math.Max(0, (skip - 1) * take))
+            .Take(take)
+            .ToListAsync();
+
+            return new DataListDto<VacancyGetAllDto>
+            {
+                Datas = vacancies,
+                TotalCount = await query.CountAsync()
+            };
+        }
     }
 }
