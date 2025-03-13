@@ -82,5 +82,10 @@ namespace JobCompany.Business.Services.StatusServices
 
             return statuses;
         }
+
+        public Task UpdateStatusAsync(List<UpdateStatusDto> dtos)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -1,4 +1,4 @@
-﻿using JobCompany.Business.Dtos.SkillDtos;
+﻿ using JobCompany.Business.Dtos.SkillDtos;
 using JobCompany.Business.Extensions;
 using JobCompany.Business.Services.SkillServices;
 using JobCompany.Core.Entites;
@@ -45,19 +45,7 @@ namespace JobCompany.Business.Services.Skill
 
         public async Task UpdateSkillAsync(List<SkillUpdateDto> dtos)
         {
-            var skillTranslations = await _context.SkillTranslations
-            .Where(x => dtos.Select(b => b.Id).Contains(x.Id))
-            .ToListAsync();
 
-            foreach (var translation in skillTranslations)
-            {
-                var skill = dtos.FirstOrDefault(b => b.Id == translation.Id);
-                if (skill != null)
-                {
-                    translation.Name = skill.Name;
-                }
-            }
-            await _context.SaveChangesAsync();
         }
 
         public async Task DeleteSkillAsync(string skillId)

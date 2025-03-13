@@ -7,7 +7,7 @@ namespace JobCompany.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser)]
+    [AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser, UserRole.SimpleUser)]
     public class ApplicationController(IApplicationService service) : ControllerBase
     {
         [HttpPost("[action]")]
@@ -47,6 +47,20 @@ namespace JobCompany.API.Controllers
         {
             var data = await service.GetApplicationByIdAsync(applicationId);
             return Ok(data);
+        }
+
+
+        [HttpPost("[action]")]
+        public async Task<IActionResult> CreateUserApplication(string vacancyId)
+        {
+            await service.CreateUserApplicationAsync(vacancyId);
+            return Ok();
+        }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetUserApplications(int skip = 1, int take = 9)
+        {
+            return Ok(await service.GetUserApplicationsAsync(skip, take));
         }
     }
 }

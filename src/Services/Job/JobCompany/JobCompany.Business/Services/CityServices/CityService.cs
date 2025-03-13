@@ -70,6 +70,7 @@ namespace JobCompany.Business.Services.CityServices
             var guidCountryId = Guid.Parse(countryId);
 
             var cities = await _context.Cities
+                .IncludeTranslations()
                 .Where(city => city.CountryId == guidCountryId)
                 .Select(b => new CityNameDto
                 {

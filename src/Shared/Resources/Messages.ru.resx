@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="APPLICATION_ALREADY_EXIST" xml:space="preserve">
+    <value>Заявка на данную вакансию уже доступна</value>
+  </data>
   <data name="AUTHENTICATION_FAILED" xml:space="preserve">
     <value>Ошибка аутентификации</value>
   </data>

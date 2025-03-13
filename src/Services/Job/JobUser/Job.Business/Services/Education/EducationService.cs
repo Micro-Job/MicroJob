@@ -30,26 +30,35 @@ namespace Job.Business.Services.Education
         }
 
         //TODO : Burada kod optimizasiyasına ehtiyyac var 
-        public async Task<ICollection<Core.Entities.Education>> UpdateBulkEducationAsync(ICollection<EducationUpdateDto> dtos,Guid resumeId)
+        public async Task<ICollection<Core.Entities.Education>> UpdateBulkEducationAsync(
+            ICollection<EducationUpdateDto> dtos, Guid resumeId)
         {
-            var educationsToUpdate = new List<Core.Entities.Education>();
+            var institutionNames = dtos.Select(d => d.InstitutionName).ToList();
 
-            foreach (var dto in dtos)
-            {
-                var education =
-                    await context.Educations.FirstOrDefaultAsync(e =>
-                        e.ResumeId == resumeId && e.InstitutionName == dto.InstitutionName
-                    ) ?? throw new NotFoundException<Core.Entities.Education>();
+            var educations = await context.Educations
+                .Where(e => e.ResumeId == resumeId && institutionNames.Contains(e.InstitutionName))
+                .ToListAsync();
 
-                MapEducationDtoToEntityForUpdate(education, dto);
+            if (!educations.Any())
+                throw new NotFoundException<Core.Entities.Education>();
 
-                educationsToUpdate.Add(education);
-            }
+            educations = educations
+                .Select(education =>
+                {
+                    var dto = dtos.FirstOrDefault(d => d.InstitutionName == education.InstitutionName);
+                    if (dto != null)
+                    {
+                        MapEducationDtoToEntityForUpdate(education, dto);
+                    }
+                    return education;
+                })
+                .ToList();
 
             await context.SaveChangesAsync();
 
-            return educationsToUpdate;
+            return educations;
         }
+
 
         public async Task UpdateEducationAsync(EducationUpdateDto dto)
         {
