@@ -8,7 +8,7 @@ namespace Job.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [AuthorizeRole(UserRole.SimpleUser)]
+    //[AuthorizeRole(UserRole.SimpleUser)]
     public class ApplicationController(IUserApplicationService service) : ControllerBase
     {
         [HttpGet("[action]")]
@@ -21,7 +21,7 @@ namespace Job.API.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetUserApplicationByIdAsync(string applicationId)
+        public async Task<IActionResult> GetUserApplicationById(string applicationId)
         {
             return Ok(await service.GetUserApplicationByIdAsync(applicationId));
         }

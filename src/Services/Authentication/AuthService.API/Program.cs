@@ -4,6 +4,7 @@ using AuthService.DAL.Contexts;
 using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using SharedLibrary.Filters;
 using SharedLibrary.Middlewares;
 using SharedLibrary.ServiceRegistration;
 
@@ -19,6 +20,7 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(opt =>
 {
+    opt.OperationFilter<AddLanguageHeaderParameter>();
     opt.SwaggerDoc("v1", new OpenApiInfo { Title = "MyAPI", Version = "v1" });
     opt.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
@@ -80,8 +82,6 @@ builder.Services.AddAuth(builder.Configuration["Jwt:Issuer"]!, builder.Configura
 var app = builder.Build();
 
 
-app.UseStaticFiles();
-
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -91,12 +91,16 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseMiddleware<LanguageMiddleware>();
+
+// app.UseCustomExceptionHandler();
+
 app.UseAuthentication();
 app.UseAuthorization();
+
 app.UseCors("_myAllowSpecificOrigins");
-
-app.UseCustomExceptionHandler();
-
 app.MapControllers();
 
 app.Run();

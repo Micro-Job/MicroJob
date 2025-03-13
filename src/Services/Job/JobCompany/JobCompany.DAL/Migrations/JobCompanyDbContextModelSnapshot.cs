@@ -329,6 +329,26 @@ namespace JobCompany.DAL.Migrations
                     b.ToTable("Questions");
                 });
 
+            modelBuilder.Entity("JobCompany.Core.Entites.SavedVacancy", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("UserId")
+                        .IsRequired()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("VacancyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VacancyId");
+
+                    b.ToTable("SavedVacancies");
+                });
+
             modelBuilder.Entity("JobCompany.Core.Entites.Skill", b =>
                 {
                     b.Property<Guid>("Id")
@@ -363,6 +383,9 @@ namespace JobCompany.DAL.Migrations
                     b.Property<string>("StatusColor")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte>("StatusEnum")
+                        .HasColumnType("tinyint");
 
                     b.Property<string>("StatusName")
                         .IsRequired()
@@ -639,6 +662,17 @@ namespace JobCompany.DAL.Migrations
                     b.Navigation("Receiver");
                 });
 
+            modelBuilder.Entity("JobCompany.Core.Entites.SavedVacancy", b =>
+                {
+                    b.HasOne("JobCompany.Core.Entites.Vacancy", "Vacancy")
+                        .WithMany("SavedVacancies")
+                        .HasForeignKey("VacancyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Vacancy");
+                });
+
             modelBuilder.Entity("JobCompany.Core.Entites.Status", b =>
                 {
                     b.HasOne("JobCompany.Core.Entites.Company", "Company")
@@ -779,6 +813,8 @@ namespace JobCompany.DAL.Migrations
             modelBuilder.Entity("JobCompany.Core.Entites.Vacancy", b =>
                 {
                     b.Navigation("Applications");
+
+                    b.Navigation("SavedVacancies");
 
                     b.Navigation("VacancyNumbers");
 

@@ -1,13 +1,13 @@
 ﻿using System.Security.Claims;
 using Job.Business.Dtos.NotificationDtos;
 using Job.Business.Exceptions.UserExceptions;
-using Job.Business.HelperServices.Current;
 using Job.DAL.Contexts;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Shared.Responses;
 using SharedLibrary.Exceptions;
+using SharedLibrary.HelperServices.Current;
 using SharedLibrary.Requests;
 using SharedLibrary.Responses;
 
@@ -33,10 +33,7 @@ namespace Job.Business.Services.Notification
             await _context.SaveChangesAsync();
         }
 
-        public async Task<PaginatedNotificationDto> GetUserNotificationsAsync(
-            int skip = 1,
-            int take = 6
-        )
+        public async Task<PaginatedNotificationDto> GetUserNotificationsAsync(int skip = 1,int take = 6)
         {
             //var companies = await GetAllCompaniesData();
 
@@ -51,16 +48,15 @@ namespace Job.Business.Services.Notification
                 .Select(n => new NotificationListDto
                 {
                     //companyDictionary.TryGetValue(n.SenderId, out var company);
-
-                        Id = n.Id,
-                        ReceiverId = n.ReceiverId,
-                        SenderId = n.SenderId,
-                        // CompanyName = company?.CompanyName,
-                        // CompanyLogo = company?.CompanyImage,
-                        InformationId = n.InformationId,
-                        CreatedDate = n.CreatedDate,
-                        Content = n.Content,
-                        IsSeen = n.IsSeen,
+                    Id = n.Id,
+                    ReceiverId = n.ReceiverId,
+                    SenderId = n.SenderId,
+                    // CompanyName = company?.CompanyName,
+                    // CompanyLogo = company?.CompanyImage,
+                    InformationId = n.InformationId,
+                    CreatedDate = n.CreatedDate,
+                    Content = n.Content,
+                    IsSeen = n.IsSeen,
                 })
                 .OrderByDescending(n => n.CreatedDate)
                 .Skip(Math.Max(0, (skip - 1) * take))

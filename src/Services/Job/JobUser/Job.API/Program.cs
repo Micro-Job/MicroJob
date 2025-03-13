@@ -7,6 +7,7 @@ using Job.DAL.Contexts;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using SharedLibrary.Filters;
 using SharedLibrary.Middlewares;
 using SharedLibrary.ServiceRegistration;
 
@@ -26,6 +27,7 @@ namespace Job.API
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(c =>
             {
+                c.OperationFilter<AddLanguageHeaderParameter>();
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "MyAPI", Version = "v1" });
                 c.AddSecurityDefinition(
                     "Bearer",
@@ -82,66 +84,6 @@ namespace Job.API
             var newBuilder = IconBuilder.Build();
 
             builder.Services.AddMassTransit(newBuilder["RabbitMQ:Username"]!, newBuilder["RabbitMQ:Password"]!, newBuilder["RabbitMQ:Hostname"]!, newBuilder["RabbitMQ:Port"]!);
-
-            //builder.Services.AddMassTransit(builder.Configuration);
-
-            //builder.Services.AddMassTransit(x =>
-            //{
-            //    // Add consumers for each queue
-            //    x.AddConsumer<VacancyCreatedConsumer>();
-            //    x.AddConsumer<UpdateUserApplicationStatusConsumer>();
-            //    x.AddConsumer<GetResumeDataConsumer>();
-            //    x.AddConsumer<UserRegisteredConsumer>();
-            //    x.AddConsumer<VacancyUpdatedConsumer>();
-
-            //    x.UsingRabbitMq(
-            //        (context, cfg) =>
-            //        {
-            //            cfg.Host(configuration["RabbitMQ:ConnectionString"]);
-
-            //            cfg.ReceiveEndpoint(
-            //                "vacancy-created-queue",
-            //                e =>
-            //                {
-            //                    e.ConfigureConsumer<VacancyCreatedConsumer>(context);
-            //                }
-            //            );
-
-            //            cfg.ReceiveEndpoint(
-            //                "user-notification-queue",
-            //                e =>
-            //                {
-            //                    e.ConfigureConsumer<UpdateUserApplicationStatusConsumer>(context);
-            //                }
-            //            );
-
-            //            cfg.ReceiveEndpoint(
-            //                "get-resume-data-queue",
-            //                e =>
-            //                {
-            //                    e.ConfigureConsumer<GetResumeDataConsumer>(context);
-            //                }
-            //            );
-
-            //            cfg.ReceiveEndpoint(
-            //                "user-registered-queue",
-            //                e =>
-            //                {
-            //                    e.ConfigureConsumer<UserRegisteredConsumer>(context);
-            //                }
-            //            );
-
-            //            cfg.ReceiveEndpoint(
-            //                "vacancy-updated-queue",
-            //                e =>
-            //                {
-            //                    e.ConfigureConsumer<VacancyUpdatedConsumer>(context);
-            //                }
-            //            );
-            //        }
-            //    );
-            //});
-
             //TODO : Bu neye gore var
             //builder.Services.AddHostedService<RabbitMqBackgroundService>();
 
@@ -181,10 +123,15 @@ namespace Job.API
             }
 
             app.UseHttpsRedirection();
-            app.UseAuthorization();
-            // app.UseCustomExceptionHandler();
-            app.UseCors("_myAllowSpecificOrigins");
+            app.UseStaticFiles();
+            app.UseMiddleware<LanguageMiddleware>();
 
+            // app.UseCustomExceptionHandler();
+
+            app.UseAuthentication();
+            app.UseAuthorization();
+
+            app.UseCors("_myAllowSpecificOrigins");
             app.MapControllers();
 
             app.Run();

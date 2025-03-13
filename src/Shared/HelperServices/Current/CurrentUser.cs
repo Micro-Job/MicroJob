@@ -1,12 +1,14 @@
 ﻿using Microsoft.AspNetCore.Http;
+using SharedLibrary.Enums;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Job.Business.HelperServices.Current
+namespace SharedLibrary.HelperServices.Current
 {
     public class CurrentUser(IHttpContextAccessor _contextAccessor) : ICurrentUser
     {
@@ -15,5 +17,20 @@ namespace Job.Business.HelperServices.Current
         public string? UserName => _contextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.Name);
         public string? BaseUrl =>
             $"{_contextAccessor.HttpContext?.Request.Scheme}://{_contextAccessor.HttpContext?.Request.Host.Value}{_contextAccessor.HttpContext?.Request.PathBase.Value}";
+
+        public LanguageCode LanguageCode
+        {
+            get
+            {
+                var currentLanguage = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName.ToLower();
+
+                if (!Enum.TryParse<LanguageCode>(currentLanguage, true, out var languageEnum))
+                {
+                    languageEnum = LanguageCode.en;
+                }
+
+                return languageEnum;
+            }
+        }
     }
 }

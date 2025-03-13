@@ -10,11 +10,6 @@ namespace Job.DAL.Configurations
         {
             builder.HasKey(u => u.Id);
 
-            builder.HasMany(u => u.SavedVacancies)
-                .WithOne(sv => sv.User)
-                .HasForeignKey(sv => sv.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
-
             builder.HasMany(u => u.Notifications)
                 .WithOne(sv => sv.Receiver)
                 .HasForeignKey(sv => sv.ReceiverId)

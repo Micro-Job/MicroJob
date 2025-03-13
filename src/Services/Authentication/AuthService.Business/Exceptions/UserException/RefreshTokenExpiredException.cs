@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using SharedLibrary.Exceptions.Common;
+using SharedLibrary.Helpers;
 
 namespace AuthService.Business.Exceptions.UserException
 {
@@ -11,7 +12,7 @@ namespace AuthService.Business.Exceptions.UserException
 
         public RefreshTokenExpiredException() : base()
         {
-            ErrorMessage = "Yenidən giriş etməlisiniz.";
+            ErrorMessage = MessageHelper.GetMessage("LOGIN_REQUIRED");
         }
 
         public RefreshTokenExpiredException(string? message) : base(message)

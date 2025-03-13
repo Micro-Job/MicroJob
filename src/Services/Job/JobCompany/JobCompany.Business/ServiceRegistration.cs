@@ -1,6 +1,5 @@
 ﻿using Job.Business.Consumers;
 using JobCompany.Business.Consumers;
-using JobCompany.Business.HelperServices.Current;
 using JobCompany.Business.Services.AnswerServices;
 using JobCompany.Business.Services.ApplicationServices;
 using JobCompany.Business.Services.CategoryServices;
@@ -18,6 +17,7 @@ using JobCompany.Business.Services.VacancyServices;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using SharedLibrary.ExternalServices.FileService;
+using SharedLibrary.HelperServices.Current;
 
 namespace JobCompany.Business
 {

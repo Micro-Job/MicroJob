@@ -1,5 +1,4 @@
 ﻿using Job.Business.Consumers;
-using Job.Business.HelperServices.Current;
 using Job.Business.Services.Application;
 using Job.Business.Services.Certificate;
 using Job.Business.Services.Company;
@@ -15,6 +14,7 @@ using Job.Business.Services.Vacancy;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using SharedLibrary.ExternalServices.FileService;
+using SharedLibrary.HelperServices.Current;
 
 namespace Job.Business
 {
@@ -30,11 +30,11 @@ namespace Job.Business
             services.AddScoped<INumberService, NumberService>();
             services.AddScoped<ILanguageService, LanguageService>();
             services.AddScoped<ICertificateService, CertificateService>();
+            //TODO : VacancyService artıq istifadə edilmir silinə bilər
             services.AddScoped<IVacancyService, VacancyService>();
             services.AddScoped<ISkillService, SkillService>();
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<IUserApplicationService, UserApplicationService>();
-            services.AddScoped<ICompanyInformationService, CompanyInformationService>();
             services.AddScoped<ICurrentUser, CurrentUser>();
         }
 
@@ -48,7 +48,6 @@ namespace Job.Business
             {
                 x.AddConsumer<UserRegisteredConsumer>();
                 x.AddConsumer<GetResumeDataConsumer>();
-                x.AddConsumer<IsApplicationSavedConsumer>();
                 x.AddConsumer<UpdateUserApplicationStatusConsumer>();
                 x.AddConsumer<VacancyCreatedConsumer>();
                 x.AddConsumer<VacancyUpdatedConsumer>();
@@ -57,19 +56,9 @@ namespace Job.Business
 
                 x.UsingRabbitMq((context, cfg) =>
                 {
-                    //var rabbitMqConnectionString = configuration["RabbitMQ:ConnectionString"];
-                    //if (string.IsNullOrEmpty(cString))
-                    //{
-                    //    h.Username(configuration["RabbitMQ:Username"]);
-                    //    h.Password(configuration["RabbitMQ:Password"]);
-                    //});
-                    cfg.ReceiveEndpoint("is-application-saved", e =>
-                    {
-                        e.ConfigureConsumer<IsApplicationSavedConsumer>(context);
-                    });
                     cfg.Host(cString);
 
-                    //cfg.ConfigureEndpoints(context);
+                    cfg.ConfigureEndpoints(context);
                 });
             });
 

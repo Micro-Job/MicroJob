@@ -18,8 +18,13 @@ namespace JobCompany.Business.Services.Skill
 
         public async Task<List<GetAllSkillDto>> GetAllSkillsAsync()
         {
-            var skills = await _context.Skills.ToListAsync();
-            return skills.Select(s => new GetAllSkillDto { Id = s.Id, Name = s.Name }).ToList();
+            var skills = await _context.Skills.Select(x=> new GetAllSkillDto
+            {
+                Id = x.Id,
+                Name = x.Name
+            }).ToListAsync();
+
+            return skills;
         }
     }
 }

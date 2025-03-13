@@ -14,7 +14,6 @@ namespace Job.DAL.Contexts
         public DbSet<Language> Languages { get; set; }
         public DbSet<Number> Numbers { get; set; }
         public DbSet<Resume> Resumes { get; set; }
-        public DbSet<SavedVacancy> SavedVacancies { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Skill> Skills { get; set; }
         public DbSet<ResumeSkill> ResumeSkills { get; set; }

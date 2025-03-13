@@ -14,6 +14,7 @@ using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.Events;
 using SharedLibrary.Exceptions;
 using SharedLibrary.ExternalServices.FileService;
+using SharedLibrary.Helpers;
 using SharedLibrary.Statics;
 
 namespace AuthService.Business.Services.Auth
@@ -71,8 +72,8 @@ namespace AuthService.Business.Services.Auth
                 new EmailMessage
                 {
                     Email = dto.Email,
-                    Subject = "Xoş gəldiniz",
-                    Content = "Qeydiyyat uğurla başa çatdı",
+                    Subject = MessageHelper.GetMessage("WELCOME"),
+                    Content = MessageHelper.GetMessage("REGISTER_COMPLETED"),
                 }
             );
 
@@ -113,16 +114,16 @@ namespace AuthService.Business.Services.Auth
                 UserRole = UserRole.CompanyUser,
             };
 
-            var company = new Company { Id = Guid.NewGuid(), UserId = user.Id };
 
+            //var company = new Company { Id = Guid.NewGuid(), UserId = user.Id };
+            //await _context.Companies.AddAsync(company);
             await _context.Users.AddAsync(user);
-            await _context.Companies.AddAsync(company);
             await _context.SaveChangesAsync();
 
             await _publishEndpoint.Publish(
                 new CompanyRegisteredEvent
                 {
-                    CompanyId = company.Id,
+                    CompanyId = Guid.NewGuid(),
                     UserId = user.Id,
                     CompanyName = dto.CompanyName.Trim(),
                     CompanyLogo = user.Image,
@@ -135,8 +136,8 @@ namespace AuthService.Business.Services.Auth
                 new EmailMessage
                 {
                     Email = dto.Email,
-                    Subject = "Xoş gəldiniz",
-                    Content = "Qeydiyyat uğurla başa çatdı",
+                    Subject = MessageHelper.GetMessage("WELCOME"),
+                    Content = MessageHelper.GetMessage("REGISTER_COMPLETED"),
                 }
             );
         }
@@ -144,67 +145,66 @@ namespace AuthService.Business.Services.Auth
         public async Task<TokenResponseDto> LoginAsync(LoginDto dto)
         {
             // useri email ve ya userName ile tapmaq
-            var user = await _context
-                .Users.Include(u => u.LoginLogs)
-                .FirstOrDefaultAsync(x => x.Email == dto.UserNameOrEmail);
+            var user = await _context.Users.FirstOrDefaultAsync(x => x.Email == dto.UserNameOrEmail);
             if (user == null)
                 throw new LoginFailedException();
 
             // hesabin hal hazirda bloklanmadigini yoxla
-            if (user.LockDownDate.HasValue && user.LockDownDate.Value > DateTime.Now)
-                throw new AccountLockedException(user.LockDownDate.Value);
+            //if (user.LockDownDate.HasValue && user.LockDownDate.Value > DateTime.Now)
+            //    throw new AccountLockedException(user.LockDownDate.Value);
 
             var hashedPassword = _tokenHandler.GeneratePasswordHash(dto.Password);
             if (user.Password != hashedPassword)
             {
-                await _context.LoginLogs.AddAsync(
-                    new LoginLog
-                    {
-                        UserId = user.Id,
-                        Date = DateTime.Now,
-                        IsSucceed = false,
-                        IP = _ipAddress,
-                    }
-                );
-
-                // sonuncu ugurlu login saatini al
-                var lastSuccessfulLogin =
-                    user.LoginLogs.Where(l => l.IsSucceed)
-                        .OrderByDescending(l => l.Date)
-                        .FirstOrDefault()
-                        ?.Date ?? DateTime.MinValue;
-
-                // user bloklanma vaxti kecibse failedAttempts ucun lockDownDate-e gore hesablama apar
-                if (user.LockDownDate.HasValue && user.LockDownDate.Value < DateTime.Now)
-                    lastSuccessfulLogin = user.LockDownDate.Value;
-
-                // sonuncu ugurlu login cehdinden sonraki ugursuz cehdlerin sayini al
-                var failedAttempts = user
-                    .LoginLogs.Where(l => !l.IsSucceed && l.Date > lastSuccessfulLogin)
-                    .Count();
-
-                if (failedAttempts >= 3)
-                {
-                    user.LockDownDate = DateTime.Now.AddHours(1);
-                }
-
-                await _context.SaveChangesAsync();
                 throw new LoginFailedException();
+                #region LoginLog
+                //await _context.LoginLogs.AddAsync(
+                //    new LoginLog
+                //    {
+                //        UserId = user.Id,
+                //        Date = DateTime.Now,
+                //        IsSucceed = false,
+                //        IP = _ipAddress,
+                //    }
+                //);
+
+                //// sonuncu ugurlu login saatini al
+                //var lastSuccessfulLogin =
+                //    user.LoginLogs.Where(l => l.IsSucceed)
+                //        .OrderByDescending(l => l.Date)
+                //        .FirstOrDefault()
+                //        ?.Date ?? DateTime.MinValue;
+
+                //// user bloklanma vaxti kecibse failedAttempts ucun lockDownDate-e gore hesablama apar
+                //if (user.LockDownDate.HasValue && user.LockDownDate.Value < DateTime.Now)
+                //    lastSuccessfulLogin = user.LockDownDate.Value;
+
+                //// sonuncu ugurlu login cehdinden sonraki ugursuz cehdlerin sayini al
+                //var failedAttempts = user
+                //    .LoginLogs.Where(l => !l.IsSucceed && l.Date > lastSuccessfulLogin)
+                //    .Count();
+
+                //if (failedAttempts >= 3)
+                //{
+                //    user.LockDownDate = DateTime.Now.AddHours(1);
+                //}
+
+                //await _context.SaveChangesAsync();
+                #endregion
             }
 
-            await _context.LoginLogs.AddAsync(
-                new LoginLog
-                {
-                    UserId = user.Id,
-                    Date = DateTime.Now,
-                    IsSucceed = true,
-                    IP = _ipAddress,
-                }
-            );
-
+            //await _context.LoginLogs.AddAsync(
+            //    new LoginLog
+            //    {
+            //        UserId = user.Id,
+            //        Date = DateTime.Now,
+            //        IsSucceed = true,
+            //        IP = _ipAddress,
+            //    }
+            //);
             // ugurlu loginden sonra bloklanma vaxtini sifirla
-            user.LockDownDate = null;
-            await _context.SaveChangesAsync();
+            //user.LockDownDate = null;
+            //await _context.SaveChangesAsync();
 
             var accessToken = _tokenHandler.CreateToken(user, 60);
             var refreshToken = _tokenHandler.GenerateRefreshToken(accessToken, 1440);
@@ -227,17 +227,17 @@ namespace AuthService.Business.Services.Auth
         public async Task<TokenResponseDto> LoginWithRefreshTokenAsync(string refreshToken)
         {
             if (string.IsNullOrEmpty(refreshToken))
-                throw new BadRequestException("Refresh token tələb olunur.");
+                throw new BadRequestException(MessageHelper.GetMessage("SESSION_EXPIRED"));
 
             var user = await _context.Users.FirstOrDefaultAsync(x =>
                 x.RefreshToken == refreshToken
             );
 
             if (user == null)
-                throw new LoginFailedException("Keçərsiz refresh token.");
+                throw new LoginFailedException(MessageHelper.GetMessage("AUTHENTICATION_FAILED"));
 
             if (user.RefreshTokenExpireDate < DateTime.Now)
-                throw new RefreshTokenExpiredException();
+                throw new RefreshTokenExpiredException(MessageHelper.GetMessage("LOGIN_REQUIRED"));
 
             var newToken = _tokenHandler.CreateToken(user, 60);
             var newRefreshToken = _tokenHandler.GenerateRefreshToken(newToken, 1440);
@@ -268,7 +268,7 @@ namespace AuthService.Business.Services.Auth
         {
             var user = await _context.Users.FirstOrDefaultAsync(x => x.Email == email);
             if (user == null)
-                throw new NotFoundException<User>("İstiadəçi mövcud deyil.");
+                throw new NotFoundException<User>(MessageHelper.GetMessage("NOTFOUNDEXCEPTION_USER"));
 
             var token = _tokenHandler.CreatePasswordResetToken(user);
 
@@ -300,7 +300,7 @@ namespace AuthService.Business.Services.Auth
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
             if (user == null)
-                throw new NotFoundException<User>("İstiadəçi mövcud deyil.");
+                throw new NotFoundException<User>(MessageHelper.GetMessage("NOTFOUNDEXCEPTION_USER"));
 
             var passwordToken = await _context.PasswordTokens.FirstOrDefaultAsync(pt =>
                 pt.Token == dto.Token && pt.UserId == user.Id && pt.ExpireTime > DateTime.Now
