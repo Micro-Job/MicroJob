@@ -241,18 +241,13 @@ namespace JobCompany.Business.Services.VacancyServices
         }
 
         /// <summary> şirkət id'sinə görə vacanciyaların gətirilməsi </summary>
-        public async Task<ICollection<VacancyGetByCompanyIdDto>> GetVacancyByCompanyIdAsync(string companyId,int skip = 1,int take = 9)
+        public async Task<DataListDto<VacancyGetByCompanyIdDto>> GetVacanciesByCompanyIdAsync(string companyId,int skip = 1,int take = 9)
         {
             var companyGuid = Guid.Parse(companyId);
 
-            var isCompanyExist = await _context.Companies.AnyAsync(x => x.Id == companyGuid);
+            var query = _context.Vacancies.Where(x => x.CompanyId == companyGuid && x.IsActive).AsQueryable().AsNoTracking();
 
-            if (!isCompanyExist)
-                throw new NotFoundException<Company>();
-
-            var vacancies = await _context
-                .Vacancies.Where(x => x.CompanyId == companyGuid && x.IsActive)
-                .Include(x => x.Company)
+            var vacancies = await query
                 .Select(x => new VacancyGetByCompanyIdDto
                 {
                     CompanyName = x.CompanyName,
@@ -269,7 +264,11 @@ namespace JobCompany.Business.Services.VacancyServices
                 .Take(take)
                 .ToListAsync();
 
-            return vacancies;
+            return new DataListDto<VacancyGetByCompanyIdDto>
+            {
+                Datas = vacancies,
+                TotalCount = await query.CountAsync()
+            };
         }
 
         /// <summary> vacanciya id'sinə görə vacancyın gətirilməsi </summary>

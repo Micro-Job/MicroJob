@@ -66,9 +66,9 @@ namespace JobCompany.API.Controllers
 
         [AllowAnonymous]
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetVacancyByCompanyIdAsync(string companyId)
+        public async Task<IActionResult> GetVacanciesByCompanyId(string companyId)
         {
-            return Ok(await _vacancyService.GetVacancyByCompanyIdAsync(companyId));
+            return Ok(await _vacancyService.GetVacanciesByCompanyIdAsync(companyId));
         }
 
         [AllowAnonymous]
