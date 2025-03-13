@@ -13,6 +13,7 @@ using MassTransit.Initializers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Shared.Dtos.VacancyDtos;
 using Shared.Events;
 using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.Events;
@@ -34,7 +35,7 @@ namespace JobCompany.Business.Services.VacancyServices
         private readonly ICurrentUser _currentUser;
 
         public VacancyService(
-            JobCompanyDbContext context,
+            JobCompanyDbContext _context,
             IFileService fileService,
             IExamService examService,
             IPublishEndpoint publishEndpoint,
@@ -42,7 +43,7 @@ namespace JobCompany.Business.Services.VacancyServices
             ICurrentUser currentUser
         )
         {
-            _context = context;
+            this._context = _context;
             _fileService = fileService;
             _examService = examService;
             _publishEndpoint = publishEndpoint;
@@ -475,16 +476,39 @@ namespace JobCompany.Business.Services.VacancyServices
             await _context.SaveChangesAsync();
         }
 
-        //public async Task<DataListDto<VacancyGetAllDto>> GetAllSavedVacancyAsync(int skip, int take)
-        //{
-        //    var datas = await _context.Vacancies.Where(x => x.SavedVacancies.Any(x => x.UserId == _currentUser.UserGuid))
-        //        .Select(x => new VacancyGetAllDto
-        //        {
+        public async Task<List<VacancyGetAllDto>> SimilarVacanciesAsync(string vacancyId , int take = 6)
+        {
+            var mainVacancy = await _context.Vacancies.Where(x=> x.Id == Guid.Parse(vacancyId))
+            .Select(x=> new
+            {
+                x.Id,
+                x.CategoryId
+            }).FirstOrDefaultAsync();
 
-        //        })
-        //        .Skip(Math.Max(0, (skip - 1) * take))
-        //        .Take(take)
-        //        .ToListAsync();
-        //}
+            var vacancies = await _context.Vacancies
+            .OrderByDescending(x=> x.StartDate)
+            .Where(x=> x.CategoryId == mainVacancy.CategoryId && x.Id != mainVacancy.Id)
+            .Select(x=> new VacancyGetAllDto
+            {
+                Id = x.Id,
+                Title = x.Title,
+                CompanyLogo = x.CompanyLogo != null ? $"{_authServiceBaseUrl}/{x.CompanyLogo}" : null,
+                CompanyName = x.CompanyName,
+                StartDate = x.StartDate,
+                Location = x.Location,
+                ViewCount = x.ViewCount,
+                IsActive = x.IsActive,
+                WorkType = x.WorkType,
+                WorkStyle = x.WorkStyle,
+                MainSalary = x.MainSalary,
+                MaxSalary = x.MaxSalary,
+                IsSaved = x.SavedVacancies.Any(y=> y.VacancyId == x.Id && y.UserId == _currentUser.UserGuid)
+            })
+            .Take(take)
+            .ToListAsync();
+
+            return vacancies;
+        }
+
     }
 }
