@@ -1,5 +1,6 @@
 ﻿using AuthService.Core.Enums;
 using FluentValidation;
+using SharedLibrary.Helpers;
 
 namespace AuthService.Business.Dtos
 {
@@ -19,27 +20,27 @@ namespace AuthService.Business.Dtos
             RuleFor(x => x.FirstName)
                  .NotNull()
                  .NotEmpty()
-                 .WithMessage("Boş ola bilməz")
-                 .Length(1, 32)
-                 .WithMessage("Uzunluq 1-50 arasında olmalıdır");
+                 .WithMessage(MessageHelper.GetMessage("CANNOT_BE_EMPTY"))
+                 .Length(1, 50)
+                 .WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_50"));
 
             RuleFor(x => x.LastName)
                 .NotNull()
                 .NotEmpty()
-                .WithMessage("Boş ola bilməz")
-                .Length(1, 32)
-                .WithMessage("Uzunluq 1-50 arasında olmalıdır");
+                .WithMessage(MessageHelper.GetMessage("CANNOT_BE_EMPTY"))
+                .Length(1, 50)
+                .WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_50"));
 
             RuleFor(x => x.Email)
                 .NotEmpty()
                 .NotNull()
-                .WithMessage("Boş ola bilməz")
+                .WithMessage(MessageHelper.GetMessage("CANNOT_BE_EMPTY"))
                 .EmailAddress()
-                .WithMessage("E-mail doğru formatda deyil");
+                .WithMessage(MessageHelper.GetMessage("INVALID_FORMAT"));
 
             RuleFor(x => x.MainPhoneNumber)
                 .Matches(@"^(?:\+\d{1,3})?\d{1,4}\d{7,10}$")
-                .WithMessage("Telefon nömrəsi doğru formatda deyil");
+                .WithMessage(MessageHelper.GetMessage("INVALID_FORMAT"));
         }
     }
 }

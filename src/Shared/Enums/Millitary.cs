@@ -3,8 +3,8 @@ namespace Shared.Enums
 {
     public enum Military : byte
     {
-        Yes = 0,
-        No = 1,
-        Unspecified = 2
+        Yes = 1,
+        No = 2,
+        Unspecified = 3
     }
 }

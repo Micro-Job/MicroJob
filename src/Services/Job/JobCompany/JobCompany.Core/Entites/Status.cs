@@ -1,4 +1,5 @@
 ﻿using JobCompany.Core.Entites.Base;
+using SharedLibrary.Enums;
 
 namespace JobCompany.Core.Entites
 {
@@ -10,6 +11,7 @@ namespace JobCompany.Core.Entites
         public byte Order { get; set; }
         public Guid CompanyId { get; set; }
         public Company Company { get; set; }
-        public ICollection<Application>? Applications { get; set; }        
+        public ICollection<Application>? Applications { get; set; }
+        public StatusEnum StatusEnum { get; set; }
     }
 }

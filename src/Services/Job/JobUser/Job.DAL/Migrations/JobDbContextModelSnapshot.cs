@@ -231,17 +231,20 @@ namespace Job.DAL.Migrations
                     b.Property<byte>("Gender")
                         .HasColumnType("tinyint");
 
-                    b.Property<bool>("IsCitizen")
-                        .HasColumnType("bit");
+                    b.Property<byte>("IsCitizen")
+                        .HasColumnType("tinyint");
 
-                    b.Property<bool>("IsDriver")
-                        .HasColumnType("bit");
+                    b.Property<byte>("IsDriver")
+                        .HasColumnType("tinyint");
 
-                    b.Property<bool>("IsMarried")
-                        .HasColumnType("bit");
+                    b.Property<byte>("IsMarried")
+                        .HasColumnType("tinyint");
 
                     b.Property<bool>("IsPublic")
                         .HasColumnType("bit");
+
+                    b.Property<byte>("MilitarySituation")
+                        .HasColumnType("tinyint");
 
                     b.Property<string>("Position")
                         .IsRequired()
@@ -278,25 +281,6 @@ namespace Job.DAL.Migrations
                     b.HasIndex("SkillId");
 
                     b.ToTable("ResumeSkills");
-                });
-
-            modelBuilder.Entity("Job.Core.Entities.SavedVacancy", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("VacancyId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("SavedVacancies");
                 });
 
             modelBuilder.Entity("Job.Core.Entities.Skill", b =>
@@ -473,16 +457,6 @@ namespace Job.DAL.Migrations
                     b.Navigation("Skill");
                 });
 
-            modelBuilder.Entity("Job.Core.Entities.SavedVacancy", b =>
-                {
-                    b.HasOne("Job.Core.Entities.User", "User")
-                        .WithMany("SavedVacancies")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Job.Core.Entities.UserAnswer", b =>
                 {
                     b.HasOne("Job.Core.Entities.User", "User")
@@ -530,8 +504,6 @@ namespace Job.DAL.Migrations
                     b.Navigation("Notifications");
 
                     b.Navigation("Resume");
-
-                    b.Navigation("SavedVacancies");
 
                     b.Navigation("UserAnswers");
 

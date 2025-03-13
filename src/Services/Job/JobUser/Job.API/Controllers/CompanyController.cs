@@ -1,4 +1,3 @@
-using Job.Business.Services.Company;
 using Microsoft.AspNetCore.Mvc;
 
 //Lazimsizdir

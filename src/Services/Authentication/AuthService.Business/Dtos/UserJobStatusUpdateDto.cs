@@ -1,5 +1,6 @@
 ﻿using AuthService.Core.Enums;
 using FluentValidation;
+using SharedLibrary.Helpers;
 
 namespace AuthService.Business.Dtos;
 
@@ -14,6 +15,6 @@ public class UserJobStatusUpdateDtoValidator : AbstractValidator<UserJobStatusUp
     {
         RuleFor(x => x.JobStatus)
             .IsInEnum()
-            .WithMessage("Düzgün iş statusu seçin");
+            .WithMessage(MessageHelper.GetMessage("NOT_FOUND"));
     }
 }

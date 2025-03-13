@@ -26,6 +26,7 @@
 
   <ItemGroup>
     <Folder Include="Dtos\ApplicationDtos\" />
+    <Folder Include="HelperServices\" />
   </ItemGroup>
 
 </Project>

@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using AuthService.Core.Entities;
 using SharedLibrary.Exceptions;
 using SharedLibrary.Dtos.EmailDtos;
+using SharedLibrary.Helpers;
 
 namespace AuthService.Business.HelperServices.Email
 {
@@ -34,7 +35,7 @@ namespace AuthService.Business.HelperServices.Email
                 })
                 .SingleOrDefaultAsync();
 
-            if (user == null || user.Email != toEmail) throw new NotFoundException<User>("İstifadəçi mövcud deyil.");
+            if (user == null || user.Email != toEmail) throw new NotFoundException<User>(MessageHelper.GetMessage("NOTFOUNDEXCEPTION_USER"));
             
             //await SendEmailAsync(new EmailMessage
             //{

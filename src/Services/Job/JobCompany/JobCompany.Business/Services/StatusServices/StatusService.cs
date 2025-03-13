@@ -1,11 +1,11 @@
 ﻿using System.Security.Claims;
 using JobCompany.Business.Dtos.StatusDtos;
 using JobCompany.Business.Exceptions.StatusExceptions;
-using JobCompany.Business.HelperServices.Current;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using SharedLibrary.HelperServices.Current;
 
 namespace JobCompany.Business.Services.StatusServices
 {
@@ -56,7 +56,7 @@ namespace JobCompany.Business.Services.StatusServices
         public async Task<List<StatusListDto>> GetAllStatusesAsync()
         {
             var statuses = await _context
-                .Statuses.Where(s => s.Company.UserId == _currentUser.UserGuid)
+                .Statuses.Where(s => s.Company.UserId == _currentUser.UserGuid && s.IsDefault == true)
                 .Select(s => new StatusListDto
                 {
                     StatusId = s.Id,
