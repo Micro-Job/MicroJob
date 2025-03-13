@@ -56,10 +56,7 @@ namespace JobCompany.Business.Services.VacancyServices
 
         /// <summary> vacancy yaradılması </summary>
         /// vacancy yaradilan zaman exam yaradılması
-        public async Task CreateVacancyAsync(
-            CreateVacancyDto vacancyDto,
-            ICollection<CreateNumberDto>? numberDto
-        )
+        public async Task CreateVacancyAsync(CreateVacancyDto vacancyDto,ICollection<CreateNumberDto>? numberDto)
         {
             string? companyLogoPath = null;
             var company = await _context.Companies.FirstOrDefaultAsync(x => x.UserId == _currentUser.UserGuid);
@@ -406,6 +403,7 @@ namespace JobCompany.Business.Services.VacancyServices
                     WorkStyle = v.WorkStyle,
                     MainSalary = v.MainSalary,
                     MaxSalary = v.MaxSalary,
+                    IsSaved = v.SavedVacancies.Any(x=> x.VacancyId == v.Id && x.UserId == _currentUser.UserGuid)
                 })
                 .Skip(Math.Max(0, (skip - 1) * take))
                 .Take(take)
