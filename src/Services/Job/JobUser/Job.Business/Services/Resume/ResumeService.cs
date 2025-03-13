@@ -293,6 +293,7 @@ namespace Job.Business.Services.Resume
                                             ResumeEmail = resume.ResumeEmail,
                                             Skills = resume.ResumeSkills.Select(s => new SkillGetByIdDto
                                             {
+                                                Id = s.SkillId,
                                                 Name = s.Skill.Name
                                             }).ToList(),
                                             PhoneNumbers = resume.PhoneNumbers.Select(p => new NumberGetByIdDto
