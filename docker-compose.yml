@@ -12,7 +12,7 @@ services:
       - jobuser
       - jobcompany
     environment:
-      - VIRTUAL_HOST=job1-api.siesco.studio
+      - VIRTUAL_HOST=job-api.siesco.studio
       - VIRTUAL_PORT=8080
     networks:
       - public-network
