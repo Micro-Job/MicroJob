@@ -5,6 +5,7 @@ using JobCompany.Business.Dtos.CompanyDtos;
 using JobCompany.Business.Dtos.NumberDtos;
 using JobCompany.Business.Dtos.SkillDtos;
 using JobCompany.Business.Dtos.VacancyDtos;
+using JobCompany.Business.Extensions;
 using JobCompany.Business.Services.ExamServices;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
@@ -273,7 +274,7 @@ namespace JobCompany.Business.Services.VacancyServices
 
             var vacancyDto =
                 await _context
-                    .Vacancies.Where(x => x.Id == vacancyGuid)
+                    .Vacancies.Include(v => v.Category.Translations).Include(v => v.VacancySkills).ThenInclude(vs => vs.Skill.Translations).Where(x => x.Id == vacancyGuid)
                     .Select(x => new VacancyGetByIdDto
                     {
                         Id = x.Id,
@@ -299,12 +300,12 @@ namespace JobCompany.Business.Services.VacancyServices
                                 VacancyNumber = vn.Number,
                             })
                             .ToList(),
-                        //Skills = x
-                        //    .VacancySkills.Where(vc => vc.Skill != null)
-                        //    .Select(vc => new SkillDto { Name = vc.Skill.Name })
-                        //    .ToList(),
-                        //CompanyName = x.CompanyName,
-                        //CategoryName = x.Category.CategoryName,
+                        Skills = x
+                            .VacancySkills.Where(vc => vc.Skill != null)
+                            .Select(vc => new SkillDto { Name = vc.Skill.GetTranslation(_currentUser.LanguageCode)})
+                            .ToList(),
+                        CompanyName = x.CompanyName,
+                        CategoryName = x.Category.GetTranslation(_currentUser.LanguageCode),
                     })
                     .FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>();
 
