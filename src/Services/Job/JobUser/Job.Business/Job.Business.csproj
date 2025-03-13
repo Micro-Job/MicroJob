@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="HelperServices\**" />
+    <EmbeddedResource Remove="HelperServices\**" />
+    <None Remove="HelperServices\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="../../../../Shared/SharedLibrary.csproj" />
     <ProjectReference Include="..\Job.DAL\Job.DAL.csproj" />
   </ItemGroup>
@@ -26,7 +32,6 @@
 
   <ItemGroup>
     <Folder Include="Dtos\ApplicationDtos\" />
-    <Folder Include="HelperServices\" />
   </ItemGroup>
 
 </Project>
