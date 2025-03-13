@@ -68,14 +68,14 @@ namespace AuthService.Business.Services.Auth
 
             await _publishEndpoint.Publish(new UserRegisteredEvent { UserId = user.Id });
 
-            await _publisher.SendEmail(
-                new EmailMessage
-                {
-                    Email = dto.Email,
-                    Subject = MessageHelper.GetMessage("WELCOME"),
-                    Content = MessageHelper.GetMessage("REGISTER_COMPLETED"),
-                }
-            );
+            //await _publisher.SendEmail(
+            //    new EmailMessage
+            //    {
+            //        Email = dto.Email,
+            //        Subject = MessageHelper.GetMessage("WELCOME"),
+            //        Content = MessageHelper.GetMessage("REGISTER_COMPLETED"),
+            //    }
+            //);
 
             // sifre yaratmaq ucun mail gondermek
             //await _emailService.SendSetPassword(dto.Email, await GeneratePasswordResetTokenAsync(user));
@@ -132,14 +132,14 @@ namespace AuthService.Business.Services.Auth
 
             await _publishEndpoint.Publish(new UserRegisteredEvent { UserId = user.Id });
 
-            await _publisher.SendEmail(
-                new EmailMessage
-                {
-                    Email = dto.Email,
-                    Subject = MessageHelper.GetMessage("WELCOME"),
-                    Content = MessageHelper.GetMessage("REGISTER_COMPLETED"),
-                }
-            );
+            //await _publisher.SendEmail(
+            //    new EmailMessage
+            //    {
+            //        Email = dto.Email,
+            //        Subject = MessageHelper.GetMessage("WELCOME"),
+            //        Content = MessageHelper.GetMessage("REGISTER_COMPLETED"),
+            //    }
+            //);
         }
 
         public async Task<TokenResponseDto> LoginAsync(LoginDto dto)

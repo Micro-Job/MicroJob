@@ -20,9 +20,9 @@ namespace JobCompany.API.Controllers
         }
 
         [HttpPut("[action]/{id}")]
-        public async Task<IActionResult> UpdateCity(string id, UpdateCityDto dto)
+        public async Task<IActionResult> UpdateCity(List<UpdateCityDto> dtos)
         {
-            await service.UpdateCityAsync(id, dto);
+            await service.UpdateCityAsync(dtos);
             return Ok();
         }
 

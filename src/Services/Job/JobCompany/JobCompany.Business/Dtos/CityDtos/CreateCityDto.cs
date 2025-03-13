@@ -1,19 +1,27 @@
 using FluentValidation;
+using SharedLibrary.Enums;
+using SharedLibrary.Helpers;
 
-namespace JobCompany.Business.Dtos.CityDtos
+namespace JobCompany.Business.Dtos.CityDtos;
+
+public class CreateCityDto
 {
-    public class CreateCityDto
-    {
-        public string CityName { get; set; }
-        public string CountryId { get; set; }
-    }
+    public Guid CountryId { get; set; }
+    public List<CreateCityLanguageDto> Cities { get; set; }
+}
 
-    public class CreateCityDtoValidator : AbstractValidator<CreateCityDto>
+public class CreateCityLanguageDto
+{
+    public string Name { get; set; }
+    public LanguageCode language { get; set; }
+}
+
+
+public class CreateCityLanguageDtoValidator : AbstractValidator<CreateCityLanguageDto>
+{
+    public CreateCityLanguageDtoValidator()
     {
-        public CreateCityDtoValidator()
-        {
-            RuleFor(x => x.CityName).NotEmpty().WithMessage("City name is required");
-            RuleFor(x => x.CountryId).NotEmpty().WithMessage("Country id is required");
-        }
+        RuleFor(x => x.Name).NotEmpty().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"));
+        RuleFor(x => x.language).NotEmpty().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"));
     }
 }
