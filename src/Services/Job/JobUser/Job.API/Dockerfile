@@ -5,7 +5,7 @@ EXPOSE 5001
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 COPY . .
-WORKDIR "./src/Services/JobUser/Job.API"
+WORKDIR "./src/Services/Job/JobUser/Job.API"
 RUN dotnet restore "Job.API.csproj"
 RUN dotnet build "Job.API.csproj" -c Release -o /app/build
 
