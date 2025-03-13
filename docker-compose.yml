@@ -8,10 +8,10 @@ services:
     ports:
       - "81:80"
     environment:
-      - VIRTUAL_HOST=microjob.az
+      - VIRTUAL_HOST=job-api.siesco.studio
       - VIRTUAL_PORT=80
     networks:
-      - job-network
+      - public-network
 networks:
-  job-network:
+  public-network:
     external: true
