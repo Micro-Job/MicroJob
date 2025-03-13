@@ -5,14 +5,14 @@ EXPOSE 5001
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 COPY . .
-WORKDIR "/src/Services/Authentication/JobCompany.API"
-RUN dotnet restore "JobCompany.API.csproj"
-RUN dotnet build "JobCompany.API.csproj" -c Release -o /app/build
+WORKDIR "/src/Services/Authentication/Job.API"
+RUN dotnet restore "Job.API.csproj"
+RUN dotnet build "Job.API.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "JobCompany.API.csproj" -c Release -o /app/publish
+RUN dotnet publish "Job.API.csproj" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "JobCompany.API.dll"]
+ENTRYPOINT ["dotnet", "Job.API.dll"]
