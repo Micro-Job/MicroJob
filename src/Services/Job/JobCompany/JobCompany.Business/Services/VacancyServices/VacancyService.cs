@@ -276,7 +276,7 @@ namespace JobCompany.Business.Services.VacancyServices
 
             var vacancyDto =
                 await _context
-                    .Vacancies.Include(v => v.Category.Translations).Include(v => v.VacancySkills).ThenInclude(vs => vs.Skill.Translations).Where(x => x.Id == vacancyGuid)
+                    .Vacancies.Where(x => x.Id == vacancyGuid)
                     .Select(x => new VacancyGetByIdDto
                     {
                         Id = x.Id,
