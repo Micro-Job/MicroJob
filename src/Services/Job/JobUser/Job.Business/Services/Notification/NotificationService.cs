@@ -13,7 +13,7 @@ using SharedLibrary.Responses;
 
 namespace Job.Business.Services.Notification
 {
-    public class NotificationService(JobDbContext _context , IRequestClient<GetAllCompaniesRequest> _getCompaniesClient , ICurrentUser _currentUser) : INotificationService
+    public class NotificationService(JobDbContext _context , ICurrentUser _currentUser) : INotificationService
     {
 
         public async Task CreateNotificationAsync(NotificationDto notificationDto)
@@ -80,13 +80,11 @@ namespace Job.Business.Services.Notification
             await _context.SaveChangesAsync();
         }
 
-        private async Task<GetAllCompaniesResponse> GetAllCompaniesData()
+        public async Task MarkAllNotificationAsReadAsync()
         {
-            var request = new GetAllCompaniesRequest();
-
-            var response = await _getCompaniesClient.GetResponse<GetAllCompaniesResponse>(request);
-
-            return response.Message;
+            await _context.Notifications
+                .Where(x => x.ReceiverId == _currentUser.UserGuid && x.IsSeen == false)
+                .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsSeen, true));
         }
     }
 }

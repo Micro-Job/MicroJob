@@ -11,33 +11,17 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SharedLibrary.Exceptions;
+using SharedLibrary.HelperServices.Current;
 
 namespace JobCompany.Business.Services.NotificationServices
 {
-    public class NotificationService : INotificationService
+    public class NotificationService(JobCompanyDbContext _context , ICurrentUser _currentUser) : INotificationService
     {
-        private readonly JobCompanyDbContext _context;
 
-        readonly IHttpContextAccessor _contextAccessor;
-        private readonly Guid userGuid;
-
-        public NotificationService(
-            JobCompanyDbContext context,
-            IHttpContextAccessor contextAccessor
-        )
-        {
-            _context = context;
-            _contextAccessor = contextAccessor;
-            userGuid = Guid.Parse(
-                _contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value
-                    ?? throw new UserIsNotLoggedInException()
-            );
-        }
-
-        public async Task<List<NotificationDto>> GetUserNotificationsAsync()
+        public async Task<List<NotificationDto>> GetUserNotificationsAsync(int skip , int take)
         {
             var notifications = await _context
-                .Notifications.Where(n => n.Receiver.UserId == userGuid)
+                .Notifications.Where(n => n.Receiver.UserId == _currentUser.UserGuid)
                 .OrderByDescending(n => n.CreatedDate)
                 .Select(n => new NotificationDto
                 {
@@ -49,6 +33,8 @@ namespace JobCompany.Business.Services.NotificationServices
                     Content = n.Content,
                     IsSeen = n.IsSeen,
                 })
+                .Skip(Math.Max(0,(skip - 1)*take))
+                .Take(take)
                 .ToListAsync();
 
             return notifications;
@@ -57,7 +43,7 @@ namespace JobCompany.Business.Services.NotificationServices
         public async Task MarkNotificationAsReadAsync(Guid id)
         {
             var companyId = await _context
-                .Companies.Where(x => x.UserId == userGuid)
+                .Companies.Where(x => x.UserId == _currentUser.UserGuid)
                 .Select(x => x.Id)
                 .FirstOrDefaultAsync();
 
@@ -73,5 +59,13 @@ namespace JobCompany.Business.Services.NotificationServices
 
             await _context.SaveChangesAsync();
         }
+
+        public async Task MarkAllNotificationAsReadAsync()
+        {
+            await _context.Notifications
+                .Where(x => x.Receiver.UserId == _currentUser.UserGuid && x.IsSeen == false)
+                .ExecuteUpdateAsync(x=> x.SetProperty(y=> y.IsSeen , true));
+        }
+
     }
 }

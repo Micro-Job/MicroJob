@@ -18,7 +18,7 @@ using System.Security.Claims;
 namespace Job.Business.Services.Vacancy
 {
     //TODO : ümumilikde Bu vacancyService olmalı deyil Job-da
-    public class VacancyService : IVacancyService
+    public class VacancyService /*: IVacancyService*/
     {
         private readonly JobDbContext _context;
         private readonly IRequestClient<GetAllCompaniesRequest> _request;

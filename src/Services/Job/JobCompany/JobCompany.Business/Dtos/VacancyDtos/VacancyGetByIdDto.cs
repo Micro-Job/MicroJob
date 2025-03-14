@@ -36,5 +36,6 @@ namespace JobCompany.Business.Dtos.VacancyDtos
         public ICollection<SkillDto> Skills { get; set; }
         public bool IsActive { get; set; }
         public string CategoryName { get; set; }
+        public bool HasExam { get; set; }
     }
 }
