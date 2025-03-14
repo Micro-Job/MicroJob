@@ -69,6 +69,8 @@ namespace JobCompany.Business
                 x.AddConsumer<GetApplicationDetailConsumer>();
                 x.AddConsumer<GetExamDetailConsumer>();
                 x.AddConsumer<GetExamQuestionsConsumer>();
+                x.AddConsumer<GetExamQuestionMappingConsumer>();
+
                 x.SetKebabCaseEndpointNameFormatter();
 
                 x.UsingRabbitMq(

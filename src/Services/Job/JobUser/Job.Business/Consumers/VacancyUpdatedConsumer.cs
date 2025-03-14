@@ -18,7 +18,7 @@ namespace Job.Business.Consumers
                 {
                     ReceiverId = userId,
                     SenderId = context.Message.SenderId,
-                    Content = context.Message.Content,
+                    //Content = context.Message.Content,
                     InformationId = context.Message.InformationId,
                     IsSeen = false,
                 })
