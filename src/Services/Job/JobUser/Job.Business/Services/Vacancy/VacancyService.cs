@@ -26,7 +26,6 @@ namespace Job.Business.Services.Vacancy
         private readonly IRequestClient<GetAllVacanciesRequest> _vacClient;
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly IRequestClient<UserRegisteredEvent> _requestClient;
-        private readonly IRequestClient<SimilarVacanciesRequest> _similarRequest;
         private readonly IRequestClient<GetVacancyInfoRequest> _vacancyInforRequest;
         private readonly IRequestClient<GetAllVacanciesByCompanyIdDataRequest> _vacancyByCompanyId;
         private readonly IRequestClient<CheckVacancyRequest> _checkVacancyRequest;
@@ -43,7 +42,6 @@ namespace Job.Business.Services.Vacancy
             IHttpContextAccessor contextAccessor,
             IRequestClient<UserRegisteredEvent> requestClient,
             IRequestClient<GetAllVacanciesRequest> vacClient,
-            IRequestClient<SimilarVacanciesRequest> similarRequest,
             IRequestClient<GetVacancyInfoRequest> vacancyInforRequest,
             IRequestClient<GetAllVacanciesByCompanyIdDataRequest> vacancyByCompanyId,
             IRequestClient<CheckVacancyRequest> checkVacancyRequest,
@@ -59,7 +57,6 @@ namespace Job.Business.Services.Vacancy
             _contextAccessor = contextAccessor;
             _requestClient = requestClient;
             _vacClient = vacClient;
-            _similarRequest = similarRequest;
             _vacancyInforRequest = vacancyInforRequest;
             _vacancyByCompanyId = vacancyByCompanyId;
             _checkVacancyRequest = checkVacancyRequest;
