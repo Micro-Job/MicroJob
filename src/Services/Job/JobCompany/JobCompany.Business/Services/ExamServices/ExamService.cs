@@ -8,6 +8,8 @@ using JobCompany.DAL.Contexts;
 using MassTransit.Initializers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Shared.Responses;
+using SharedLibrary.Exceptions;
 
 namespace JobCompany.Business.Services.ExamServices
 {
@@ -160,6 +162,24 @@ namespace JobCompany.Business.Services.ExamServices
                 .ToListAsync();
 
             return exams;
+        }
+
+        public async Task<GetExamDetailResponse> GetExamIntroAsync(string examId)
+        {
+            var examGuid = Guid.Parse(examId);
+            var data = await _context.Exams.Where(x=> x.Id == examGuid)
+                .Select(x=> new GetExamDetailResponse
+                {
+                    CompanyName = x.Company.CompanyName,
+                    IntroDescription = x.IntroDescription,
+                    Duration = x.Duration,
+                    //IsTaken = x.UserExams.Any(ue => ue.ExamId == examId && ue.UserId == userGuid);
+                    QuestionCount = x.ExamQuestions.Count,
+                    LimitRate = x.LimitRate,
+                })
+                .FirstOrDefaultAsync() ?? throw new NotFoundException<Exam>("İmtahan mövcud deyil");
+
+            return data;
         }
     }
 }

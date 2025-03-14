@@ -59,103 +59,26 @@ namespace Job.Business.Services.Application
             _getExamQuestionsRequest = getExamQuestionsRequest;
         }
 
-        //TODO : bu metod burada olmali deyil  jobcompany de olmalidir
-        /// <summary> İstifadəçinin bütün müraciətlərini gətirir </summary>
-        public async Task<PaginatedApplicationDto> GetUserApplicationsAsync(int skip, int take)
-        {
-            GetUserApplicationsRequest request = new()
-            {
-                UserId = userGuid,
-                Skip = skip,
-                Take = take,
-            };
+        //public async Task<GetExamDetailResponse> GetExamIntroAsync(string vacancyId)
+        //{
+        //    var request = new GetExamDetailRequest { VacancyId = vacancyId };
 
-            var response = await _userApplicationRequest.GetResponse<GetUserApplicationsResponse>(request);
+        //    var response = await _examRequest.GetResponse<GetExamDetailResponse>(request);
 
-            return new PaginatedApplicationDto
-            {
-                Applications = response.Message.UserApplications,
-                TotalCount = response.Message.TotalCount,
-            };
-        }
+        //    var userDataResponse = await _requestUser.GetResponse<GetUserDataResponse>(
+        //        new GetUserDataRequest { UserId = userGuid }
+        //    );
 
-        /// <summary> Eventle userin application yaratmasi  ve
-        /// vakansiyaya muraciet ederken companye bildiris getmesi </summary>
-        public async Task CreateUserApplicationAsync(string vacancyId)
-        {
-            var guidVac = Guid.Parse(vacancyId);
+        //    bool isTaken = await CheckUserCompletedExam(Guid.Parse(response.Message.ExamId));
 
-            var responseUser = await _requestUser.GetResponse<GetUserDataResponse>(
-                new GetUserDataRequest { UserId = userGuid }
-            );
+        //    var fullName =
+        //        $"{userDataResponse.Message.FirstName} {userDataResponse.Message.LastName}";
 
-            var response = await _requestClient.GetResponse<CheckVacancyResponse>(
-                new CheckVacancyRequest { VacancyId = guidVac, UserId = userGuid }
-            );
+        //    response.Message.FullName = fullName;
+        //    response.Message.IsTaken = isTaken;
 
-            if (!response.Message.IsExist)
-                throw new EntityNotFoundException("Vacancy");
-            var companyId = response.Message.CompanyId;
-
-            if (response.Message.IsUserApplied)
-                throw new ApplicationIsAlreadyExistException();
-
-            await _publishEndpoint.Publish(
-                new UserApplicationEvent
-                {
-                    UserId = userGuid,
-                    VacancyId = guidVac,
-                    CreatedDate = DateTime.Now,
-                }
-            );
-
-            await _publishEndpoint.Publish(
-                new VacancyApplicationEvent
-                {
-                    UserId = companyId,
-                    SenderId = userGuid,
-                    VacancyId = guidVac,
-                    InformationId = userGuid,
-                    Content =
-                        $"İstifadəçi {responseUser.Message.FirstName} {responseUser.Message.LastName} {response.Message.VacancyName} vakansiyasına müraciət etdi.",
-                }
-            );
-        }
-
-        public async Task<GetApplicationDetailResponse> GetUserApplicationByIdAsync(string applicationId)
-        {
-            var userId = userGuid.ToString();
-            var response =
-                await _requestApplicationDetail.GetResponse<GetApplicationDetailResponse>(
-                    new GetApplicationDetailRequest
-                    {
-                        ApplicationId = applicationId,
-                        UserId = userId
-                    }
-                );
-            return response.Message;
-        }
-
-        public async Task<GetExamDetailResponse> GetExamIntroAsync(string vacancyId)
-        {
-            var request = new GetExamDetailRequest { VacancyId = vacancyId };
-
-            var response = await _examRequest.GetResponse<GetExamDetailResponse>(request);
-
-            var userDataResponse = await _requestUser.GetResponse<GetUserDataResponse>(
-                new GetUserDataRequest { UserId = userGuid }
-            );
-
-            bool isTaken = await CheckUserCompletedExam(Guid.Parse(response.Message.ExamId));
-
-            var fullName =
-                $"{userDataResponse.Message.FirstName} {userDataResponse.Message.LastName}";
-
-            response.Message.FullName = fullName;
-            response.Message.IsTaken = isTaken;
-
-            return response.Message;
-        }
+        //    return response.Message;
+        //}
 
         public async Task<GetExamQuestionsDetailDto> GetExamQuestionsAsync(Guid examId)
         {
@@ -302,13 +225,5 @@ namespace Job.Business.Services.Application
                 && correctAnswers.All(userSelectedAnswers.Contains);
         }
 
-        private async Task<bool> CheckUserCompletedExam(Guid examId)
-        {
-            var userExam = await _jobDbContext
-                .UserExams.AsNoTracking()
-                .FirstOrDefaultAsync(ue => ue.ExamId == examId && ue.UserId == userGuid);
-
-            return userExam != null;
-        }
     }
 }

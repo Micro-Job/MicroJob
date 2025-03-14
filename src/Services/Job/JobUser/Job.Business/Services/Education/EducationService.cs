@@ -7,10 +7,7 @@ namespace Job.Business.Services.Education
 {
     public class EducationService(JobDbContext context) : IEducationService
     {
-        public async Task<ICollection<Core.Entities.Education>> CreateBulkEducationAsync(
-            ICollection<EducationCreateDto> dtos,
-            Guid resumeId
-        )
+        public async Task<ICollection<Core.Entities.Education>> CreateBulkEducationAsync(ICollection<EducationCreateDto> dtos,Guid resumeId)
         {
             var educationsToAdd = dtos.Select(dto =>
                     MapEducationDtoToEntityForCreate(dto, resumeId)
@@ -69,10 +66,7 @@ namespace Job.Business.Services.Education
             MapEducationDtoToEntityForUpdate(education, dto);
         }
 
-        private Core.Entities.Education MapEducationDtoToEntityForCreate(
-            EducationCreateDto dto,
-            Guid resumeId
-        )
+        private Core.Entities.Education MapEducationDtoToEntityForCreate(EducationCreateDto dto,Guid resumeId)
         {
             return new Core.Entities.Education
             {

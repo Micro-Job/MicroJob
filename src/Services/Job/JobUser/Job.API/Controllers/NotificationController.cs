@@ -23,5 +23,12 @@ namespace Job.API.Controllers
             await service.MarkNotificationAsReadAsync(notificationId);
             return Ok();
         }
+
+        [HttpPost("[action]")]
+        public async Task<IActionResult> MarkAllNotificationAsRead()
+        {
+            await service.MarkAllNotificationAsReadAsync();
+            return Ok();
+        }
     }
 }

@@ -7,5 +7,6 @@ namespace Job.Business.Services.Notification
         Task CreateNotificationAsync(NotificationDto notificationDto);
         Task<PaginatedNotificationDto> GetUserNotificationsAsync(int skip = 1, int take = 6);
         Task MarkNotificationAsReadAsync(Guid id);
+        Task MarkAllNotificationAsReadAsync();
     }
 }

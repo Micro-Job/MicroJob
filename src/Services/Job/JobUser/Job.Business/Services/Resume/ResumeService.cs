@@ -4,8 +4,10 @@ using Job.Business.Dtos.ExperienceDtos;
 using Job.Business.Dtos.LanguageDtos;
 using Job.Business.Dtos.NumberDtos;
 using Job.Business.Dtos.ResumeDtos;
+using Job.Business.Dtos.SkillDtos;
 using Job.Business.Exceptions.Common;
 using Job.Business.Exceptions.UserExceptions;
+using Job.Business.Extensions;
 using Job.Business.Services.Certificate;
 using Job.Business.Services.Education;
 using Job.Business.Services.Experience;
@@ -22,6 +24,7 @@ using Microsoft.Extensions.Configuration;
 using Shared.Requests;
 using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.ExternalServices.FileService;
+using SharedLibrary.HelperServices.Current;
 using SharedLibrary.Statics;
 using System.Security.Claims;
 
@@ -31,6 +34,7 @@ namespace Job.Business.Services.Resume
     {
         readonly JobDbContext _context;
         readonly IFileService _fileService;
+        readonly ICurrentUser _currentUser;
         readonly INumberService _numberService;
         readonly IEducationService _educationService;
         readonly IExperienceService _experienceService;
@@ -54,7 +58,8 @@ namespace Job.Business.Services.Resume
             IHttpContextAccessor httpContextAccess,
             IUserInformationService userInformationService,
             IRequestClient<GetResumeUserPhotoRequest> resumeUser,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            ICurrentUser currentUser)
         {
             _context = context;
             _fileService = fileService;
@@ -70,6 +75,7 @@ namespace Job.Business.Services.Resume
             _resumeUser = resumeUser;
             _configuration = configuration;
             _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
+            _currentUser = currentUser;
         }
 
         public async Task CreateResumeAsync(ResumeCreateDto resumeCreateDto, ResumeCreateListsDto resumeCreateListsDto)
@@ -275,6 +281,7 @@ namespace Job.Business.Services.Resume
         public async Task<ResumeDetailItemDto> GetOwnResumeAsync()
         {
             var resume = await _context.Resumes
+                                        .Include(r => r.ResumeSkills).ThenInclude(rs => rs.Skill.Translations)
                                         .Where(x => x.UserId == userGuid)
                                         .Select(resume => new ResumeDetailItemDto
                                         {
@@ -289,10 +296,11 @@ namespace Job.Business.Services.Resume
                                             Adress = resume.Adress,
                                             BirthDay = resume.BirthDay,
                                             ResumeEmail = resume.ResumeEmail,
-                                            //Skills = resume.ResumeSkills.Select(s => new SkillGetByIdDto
-                                            //{
-                                            //    Name = s.Skill.Name
-                                            //}).ToList(),
+                                            Skills = resume.ResumeSkills.Select(s => new SkillGetByIdDto
+                                            {
+                                                Id = s.SkillId,
+                                                Name = s.Skill.GetTranslation(_currentUser.LanguageCode)
+                                            }).ToList(),
                                             PhoneNumbers = resume.PhoneNumbers.Select(p => new NumberGetByIdDto
                                             {
                                                 PhoneNumber = p.PhoneNumber

@@ -158,7 +158,7 @@ namespace JobCompany.Business.Services.ApplicationServices
         public async Task<List<ApplicationUserListDto>> GetUserApplicationAsync(int skip = 1,int take = 9)
         {
             var userApps = await _context
-                .Applications.Where(x => x.UserId == _currentUser.UserGuid)
+                .Applications.Include(x => x.Status.Translations).Where(x => x.UserId == _currentUser.UserGuid)
                 .Select(x => new ApplicationUserListDto
                 {
                     CompanyName = x.Vacancy.Company.CompanyName,
@@ -166,7 +166,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                     MainSalary = x.Vacancy.MainSalary,
                     MaxSalary = x.Vacancy.MaxSalary,
                     StatusColor = x.Status.StatusColor,
-                    //StatusName = x.Status.Name,
+                    StatusName = x.Status.GetTranslation(_currentUser.LanguageCode),
                     VacancyId = x.VacancyId,
                     VacancyImage = $"{_baseUrl}/{x.Vacancy.CompanyLogo}",
                     VacancyTitle = x.Vacancy.Title,
@@ -186,7 +186,7 @@ namespace JobCompany.Business.Services.ApplicationServices
 
             var application =
                 await _context
-                    .Applications.Where(a => a.Id == applicationGuid && a.IsActive)
+                    .Applications.Include(a => a.Status.Translations).Where(a => a.Id == applicationGuid && a.IsActive)
                     .Select(a => new ApplicationGetByIdDto
                     {
                         VacancyId = a.VacancyId,
@@ -195,12 +195,12 @@ namespace JobCompany.Business.Services.ApplicationServices
                         CompanyName = a.Vacancy.CompanyName,
                         CreatedDate = a.CreatedDate,
                         Description = a.Vacancy.Description,
-                        //StatusName = a.Status.Name,
+                        StatusName = a.Status.GetTranslation(_currentUser.LanguageCode),
                         StatusColor = a.Status.StatusColor,
-                        //Steps = _context
-                        //    .Statuses.OrderBy(s => s.Order)
-                        //    .Select(s => s.Name)
-                        //    .ToList(),
+                        Steps = _context
+                            .Statuses.OrderBy(s => s.Order)
+                            .Select(s => s.GetTranslation(_currentUser.LanguageCode))
+                            .ToList(),
                     })
                     .FirstOrDefaultAsync() ?? throw new NotFoundException<Application>();
             return application;
@@ -306,7 +306,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                         LastName = user.LastName,
                         Email = user.Email,
                         PhoneNumber = user.PhoneNumber,
-                        //StatusName = a.Status.Name,
+                        StatusName = a.Status.GetTranslation(_currentUser.LanguageCode),
                         VacancyId = a.VacancyId,
                         VacancyName = a.Vacancy.Title,
                     };
@@ -410,6 +410,37 @@ namespace JobCompany.Business.Services.ApplicationServices
             };
         }
 
+        public async Task<GetApplicationDetailResponse> GetUserApplicationByIdAsync(string applicationId)
+        {
+            var userGuid = _currentUser.UserGuid;
+            var applicationGuid = Guid.Parse(applicationId);
+
+    
+            var application = await _context.Applications
+                .Include(a => a.Status.Translations)
+                .Include(a => a.Vacancy)           
+                .ThenInclude(v => v.Company)  
+                .ThenInclude(c => c.Statuses)
+                .ThenInclude(c => c.Translations)
+                .Where(a => a.UserId == userGuid && a.Id == applicationGuid)
+                .FirstOrDefaultAsync()
+                ?? throw new NotFoundException<Application>("NOT_FOUND");
+
+            return new GetApplicationDetailResponse
+            {
+                VacancyId = application.VacancyId.ToString(),
+                VacancyName = application.Vacancy.Title,
+                CompanyName = application.Vacancy.Company != null ? application.Vacancy.Company.CompanyName : string.Empty,
+                CompanyLogo = application.Vacancy.Company != null ? application.Vacancy.Company.CompanyLogo : string.Empty,
+                Location = application.Vacancy.Company != null ? application.Vacancy.Company.CompanyLocation : string.Empty,
+                WorkType = application.Vacancy.WorkType,
+                WorkStyle = application.Vacancy.WorkStyle,
+                startDate = application.Vacancy.StartDate,
+                //IsSaved = application.,
+                CompanyStatuses = application.Vacancy.Company != null ? application.Vacancy.Company.Statuses.Select(cs => cs.GetTranslation(_currentUser.LanguageCode)).ToList() : new List<string>(),
+                ApplicationStatus = application.Status.ToString()
+            };
+        }
 
     }
 }
