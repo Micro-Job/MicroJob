@@ -10,10 +10,6 @@ namespace JobCompany.DAL.Configurations
         {
             builder.HasKey(x => x.Id);
 
-            builder.Property(x => x.StatusName)
-                .IsRequired()
-                .HasMaxLength(32);
-
             builder.Property(x => x.Order);
 
             builder.HasOne(x => x.Company)

@@ -35,8 +35,8 @@ namespace JobCompany.Business.Consumers
                     WorkType = x.Vacancy.WorkType,
                     WorkStyle = x.Vacancy.WorkStyle,
                     startDate = x.CreatedDate,
-                    CompanyStatuses = x.Vacancy.Company.Statuses != null ? x.Vacancy.Company.Statuses.Select(cs => cs.StatusName).ToList() : new List<string>(),
-                    ApplicationStatus = x.Status.StatusName,
+                    //CompanyStatuses = x.Vacancy.Company.Statuses != null ? x.Vacancy.Company.Statuses.Select(cs => cs.Name).ToList() : new List<string>(),
+                    //ApplicationStatus = x.Status.Name,
                     IsSaved = false,
                 }).FirstOrDefaultAsync();
 
