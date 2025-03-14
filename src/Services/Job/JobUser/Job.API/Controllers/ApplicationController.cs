@@ -11,11 +11,11 @@ namespace Job.API.Controllers
     //[AuthorizeRole(UserRole.SimpleUser)]
     public class ApplicationController(IUserApplicationService service) : ControllerBase
     {
-        [HttpGet("[action]")]
-        public async Task<IActionResult> GetExamIntro(string vacancyId)
-        {
-            return Ok(await service.GetExamIntroAsync(vacancyId));
-        }
+        //[HttpGet("[action]")]
+        //public async Task<IActionResult> GetExamIntro(string vacancyId)
+        //{
+        //    return Ok(await service.GetExamIntroAsync(vacancyId));
+        //}
 
         [HttpGet("[action]")]
         public async Task<IActionResult> GetExamQuestions(Guid examId)

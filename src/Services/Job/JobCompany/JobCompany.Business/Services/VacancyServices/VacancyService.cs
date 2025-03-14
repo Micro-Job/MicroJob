@@ -297,7 +297,7 @@ namespace JobCompany.Business.Services.VacancyServices
                         Family = x.Family,
                         Driver = x.Driver,
                         Citizenship = x.Citizenship,
-                        HasExam = x.ExamId != null ? true : false,
+                        ExamId = x.ExamId,
                         VacancyNumbers = x
                             .VacancyNumbers.Select(vn => new VacancyNumberDto
                             {

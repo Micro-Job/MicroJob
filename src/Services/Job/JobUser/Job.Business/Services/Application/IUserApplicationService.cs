@@ -8,7 +8,7 @@ namespace Job.Business.Services.Application
 {
     public interface IUserApplicationService
     {
-        Task<GetExamDetailResponse> GetExamIntroAsync(string vacancyId);
+        //Task<GetExamDetailResponse> GetExamIntroAsync(string vacancyId);
         Task<GetExamQuestionsDetailDto> GetExamQuestionsAsync(Guid examId);
         Task<SubmitExamResultDto> EvaluateExamAnswersAsync(SubmitExamAnswersDto dto);
     }
