@@ -82,14 +82,12 @@ builder.Services.AddAuth(builder.Configuration["Jwt:Issuer"]!, builder.Configura
 var app = builder.Build();
 
 
-if (app.Environment.IsDevelopment())
+
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.ConfigObject.AdditionalItems.Add("persistAuthorization", "true");
-    });
-}
+    c.ConfigObject.AdditionalItems.Add("persistAuthorization", "true");
+});
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
