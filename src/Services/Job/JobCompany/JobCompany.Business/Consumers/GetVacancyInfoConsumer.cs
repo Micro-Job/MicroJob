@@ -56,7 +56,7 @@ namespace Job.Business.Consumers
                     .ToList(),
                 StartDate = vacancy.Vacancy.StartDate,
                 EndDate = vacancy.Vacancy.EndDate,
-                CategoryName = vacancy.Category.CategoryName,
+                //CategoryName = vacancy.Category.CategoryName,
                 WorkType = vacancy.Vacancy.WorkType,
                 WorkStyle = vacancy.Vacancy.WorkStyle,
                 Location = vacancy.Vacancy.Location,

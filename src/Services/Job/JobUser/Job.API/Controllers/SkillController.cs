@@ -12,7 +12,14 @@ namespace Job.API.Controllers
     public class SkillController(ISkillService skillService) : ControllerBase
     {
         [HttpPost("[action]")]
-        public async Task<IActionResult> CreateSkill(SkillDto dto)
+        public async Task<IActionResult> CreateSkill(SkillCreateDto dto)
+        {
+            await skillService.CreateSkillAsync(dto);
+            return Ok();
+        }
+
+        [HttpPut("[action]")]
+        public async Task<IActionResult> UpdateSkil(SkillCreateDto dto)
         {
             await skillService.CreateSkillAsync(dto);
             return Ok();

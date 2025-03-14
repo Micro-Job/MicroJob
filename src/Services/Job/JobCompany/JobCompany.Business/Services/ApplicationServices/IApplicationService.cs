@@ -1,5 +1,7 @@
 ﻿using JobCompany.Business.Dtos.ApplicationDtos;
 using JobCompany.Business.Dtos.StatusDtos;
+using Shared.Responses;
+using SharedLibrary.Dtos.ApplicationDtos;
 
 namespace JobCompany.Business.Services.ApplicationServices
 {
@@ -18,5 +20,9 @@ namespace JobCompany.Business.Services.ApplicationServices
             int skip = 1,
             int take = 10
         );
+
+        Task CreateUserApplicationAsync(string vacancyId);
+        Task<PaginatedApplicationDto> GetUserApplicationsAsync(int skip, int take);
+        Task<GetApplicationDetailResponse> GetUserApplicationByIdAsync(string applicationId);
     }
 }
