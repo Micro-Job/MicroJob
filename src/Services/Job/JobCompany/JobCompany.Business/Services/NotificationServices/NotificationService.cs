@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using JobCompany.Business.Dtos.Common;
 using JobCompany.Business.Dtos.NotificationDtos;
 using JobCompany.Business.Exceptions.UserExceptions;
 using JobCompany.Core.Entites;
@@ -18,26 +19,39 @@ namespace JobCompany.Business.Services.NotificationServices
     public class NotificationService(JobCompanyDbContext _context , ICurrentUser _currentUser) : INotificationService
     {
 
-        public async Task<List<NotificationDto>> GetUserNotificationsAsync(int skip , int take)
+        public async Task<DataListDto<NotificationDto>> GetUserNotificationsAsync(bool? IsSeen , int skip , int take)
         {
-            var notifications = await _context
-                .Notifications.Where(n => n.Receiver.UserId == _currentUser.UserGuid)
-                .OrderByDescending(n => n.CreatedDate)
-                .Select(n => new NotificationDto
-                {
-                    Id = n.Id,
-                    ReceiverId = n.ReceiverId,
-                    SenderId = n.SenderId,
-                    InformationId = n.InformationId,
-                    CreatedDate = n.CreatedDate,
-                    Content = n.Content,
-                    IsSeen = n.IsSeen,
-                })
-                .Skip(Math.Max(0,(skip - 1)*take))
-                .Take(take)
-                .ToListAsync();
+            var query = _context.Notifications.Where(n => n.ReceiverId == _currentUser.UserGuid).AsNoTracking().AsQueryable();
 
-            return notifications;
+            if(IsSeen != null)
+            {
+                query = query.Where(n => n.IsSeen == IsSeen).OrderByDescending(n => n.CreatedDate);
+            }
+            else
+            {
+                query = query.OrderBy(n => n.IsSeen).ThenByDescending(n => n.CreatedDate);
+            }
+
+            var notifications = await query
+            .Select(n => new NotificationDto
+            {
+                Id = n.Id,
+                ReceiverId = n.ReceiverId,
+                SenderId = n.SenderId,
+                InformationId = n.InformationId,
+                CreatedDate = n.CreatedDate,
+                Content = n.Content,
+                IsSeen = n.IsSeen,
+            })
+            .Skip(Math.Max(0, (skip - 1) * take))
+            .Take(take)
+            .ToListAsync();
+
+            return new DataListDto<NotificationDto>
+            {
+                Datas = notifications,
+                TotalCount = await query.CountAsync()
+            };
         }
 
         public async Task MarkNotificationAsReadAsync(Guid id)

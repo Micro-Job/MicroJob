@@ -1,3 +1,4 @@
+using JobCompany.Business.Dtos.ExamDtos;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using MassTransit;
@@ -28,9 +29,8 @@ namespace JobCompany.Business.Consumers
                 })
                 .FirstOrDefaultAsync() ?? throw new NotFoundException<Exam>("Exam not found for the given vacancy.");
             await context.RespondAsync(
-                new GetExamDetailResponse
+                new GetExamIntroDto
                 {
-                    ExamId = exam.ExamId.ToString(),
                     CompanyName = exam.CompanyName,
                     QuestionCount = exam.Count,
                     Duration = exam.Duration,

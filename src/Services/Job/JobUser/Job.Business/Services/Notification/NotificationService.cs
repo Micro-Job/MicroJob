@@ -33,38 +33,37 @@ namespace Job.Business.Services.Notification
             await _context.SaveChangesAsync();
         }
 
-        public async Task<PaginatedNotificationDto> GetUserNotificationsAsync(int skip = 1,int take = 6)
+        public async Task<PaginatedNotificationDto> GetUserNotificationsAsync(bool? IsSeen , int skip = 1,int take = 6)
         {
-            //var companies = await GetAllCompaniesData();
+            var query = _context.Notifications.Where(n => n.ReceiverId == _currentUser.UserGuid).AsNoTracking().AsQueryable();
 
-            //var companyDictionary = companies
-            //    .Companies.GroupBy(x => x.CompanyUserId)
-            //    .ToDictionary(g => g.Key, g => g.First());
+            if (IsSeen != null)
+            {
+                query = query.Where(n => n.IsSeen == IsSeen).OrderByDescending(n => n.CreatedDate);
+            }
+            else
+            {
+                query = query.OrderBy(n => n.IsSeen).ThenByDescending(n => n.CreatedDate);
+            }
 
-            var query = _context
-                .Notifications.Where(n => n.ReceiverId == _currentUser.UserGuid);
-
-            var notificationDtos = await query
-                .Select(n => new NotificationListDto
-                {
-                    //companyDictionary.TryGetValue(n.SenderId, out var company);
-                    Id = n.Id,
-                    ReceiverId = n.ReceiverId,
-                    SenderId = n.SenderId,
-                    // CompanyName = company?.CompanyName,
-                    // CompanyLogo = company?.CompanyImage,
-                    InformationId = n.InformationId,
-                    CreatedDate = n.CreatedDate,
-                    //Content = n.Content,
-                    IsSeen = n.IsSeen,
-                })
-                .OrderByDescending(n => n.CreatedDate)
-                .Skip(Math.Max(0, (skip - 1) * take))
-                .ToListAsync();
+            var notifications = await query
+            .Select(n => new NotificationListDto
+            {
+                Id = n.Id,
+                ReceiverId = n.ReceiverId,
+                SenderId = n.SenderId,
+                InformationId = n.InformationId,
+                CreatedDate = n.CreatedDate,
+                //Content = n.Translations.,
+                IsSeen = n.IsSeen,
+            })
+            .Skip(Math.Max(0, (skip - 1) * take))
+            .Take(take)
+            .ToListAsync();
 
             return new PaginatedNotificationDto
             {
-                Notifications = notificationDtos,
+                Notifications = notifications,
                 TotalCount = await query.CountAsync(),
             };
         }

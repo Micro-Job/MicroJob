@@ -298,6 +298,7 @@ namespace JobCompany.Business.Services.VacancyServices
                         Driver = x.Driver,
                         Citizenship = x.Citizenship,
                         ExamId = x.ExamId,
+                        IsSaved = x.SavedVacancies.Any(y=> y.UserId == _currentUser.UserGuid && y.VacancyId == vacancyGuid),
                         VacancyNumbers = x
                             .VacancyNumbers.Select(vn => new VacancyNumberDto
                             {
@@ -400,7 +401,6 @@ namespace JobCompany.Business.Services.VacancyServices
                     StartDate = v.StartDate,
                     Location = v.Location,
                     ViewCount = v.ViewCount,
-                    IsActive = v.IsActive,
                     WorkType = v.WorkType,
                     WorkStyle = v.WorkStyle,
                     MainSalary = v.MainSalary,

@@ -164,11 +164,11 @@ namespace JobCompany.Business.Services.ExamServices
             return exams;
         }
 
-        public async Task<GetExamDetailResponse> GetExamIntroAsync(string examId)
+        public async Task<GetExamIntroDto> GetExamIntroAsync(string examId)
         {
             var examGuid = Guid.Parse(examId);
             var data = await _context.Exams.Where(x=> x.Id == examGuid)
-                .Select(x=> new GetExamDetailResponse
+                .Select(x=> new GetExamIntroDto
                 {
                     CompanyName = x.Company.CompanyName,
                     IntroDescription = x.IntroDescription,
@@ -176,6 +176,7 @@ namespace JobCompany.Business.Services.ExamServices
                     //IsTaken = x.UserExams.Any(ue => ue.ExamId == examId && ue.UserId == userGuid);
                     QuestionCount = x.ExamQuestions.Count,
                     LimitRate = x.LimitRate,
+                    //FullName = ,
                 })
                 .FirstOrDefaultAsync() ?? throw new NotFoundException<Exam>("İmtahan mövcud deyil");
 
