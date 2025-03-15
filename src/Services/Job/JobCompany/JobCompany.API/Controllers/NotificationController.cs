@@ -18,7 +18,7 @@ namespace JobCompany.API.Controllers
         }
 
         [HttpPost("[action]")]
-        public async Task<IActionResult> MarkNotificationAsReadAsync(Guid notificationId)
+        public async Task<IActionResult> MarkNotificationAsReadAsync(string notificationId)
         {
             await _notificationService.MarkNotificationAsReadAsync(notificationId);
             return Ok();

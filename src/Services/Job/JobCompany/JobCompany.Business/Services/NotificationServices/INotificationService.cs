@@ -6,7 +6,7 @@ namespace JobCompany.Business.Services.NotificationServices
     public interface INotificationService
     {
         Task<DataListDto<NotificationDto>> GetUserNotificationsAsync(bool? IsSeen , int skip,int take);
-        Task MarkNotificationAsReadAsync(Guid id);
+        Task MarkNotificationAsReadAsync(string id);
         Task MarkAllNotificationAsReadAsync();
     }
 }

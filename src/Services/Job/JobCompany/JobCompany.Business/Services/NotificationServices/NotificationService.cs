@@ -21,7 +21,7 @@ namespace JobCompany.Business.Services.NotificationServices
 
         public async Task<DataListDto<NotificationDto>> GetUserNotificationsAsync(bool? IsSeen , int skip , int take)
         {
-            var query = _context.Notifications.Where(n => n.ReceiverId == _currentUser.UserGuid).AsNoTracking().AsQueryable();
+            var query = _context.Notifications.Where(n => n.Receiver.UserId == _currentUser.UserGuid).AsNoTracking().AsQueryable();
 
             if(IsSeen != null)
             {
@@ -54,20 +54,12 @@ namespace JobCompany.Business.Services.NotificationServices
             };
         }
 
-        public async Task MarkNotificationAsReadAsync(Guid id)
+        public async Task MarkNotificationAsReadAsync(string id)
         {
-            var companyId = await _context
-                .Companies.Where(x => x.UserId == _currentUser.UserGuid)
-                .Select(x => x.Id)
-                .FirstOrDefaultAsync();
+            var notificationGuid = Guid.Parse(id);
 
-            if (companyId == Guid.Empty)
-                throw new NotFoundException<Company>();
-
-            var notification =
-                await _context.Notifications.FirstOrDefaultAsync(x =>
-                    x.Id == id && x.ReceiverId == companyId
-                ) ?? throw new NotFoundException<Notification>();
+            var notification = await _context.Notifications.FirstOrDefaultAsync(x =>x.Id == notificationGuid && x.Receiver.UserId == _currentUser.UserGuid) 
+                                            ?? throw new NotFoundException<Notification>();
 
             notification.IsSeen = true;
 
@@ -76,7 +68,7 @@ namespace JobCompany.Business.Services.NotificationServices
 
         public async Task MarkAllNotificationAsReadAsync()
         {
-            await _context.Notifications
+            await _context.Notifications    
                 .Where(x => x.Receiver.UserId == _currentUser.UserGuid && x.IsSeen == false)
                 .ExecuteUpdateAsync(x=> x.SetProperty(y=> y.IsSeen , true));
         }
