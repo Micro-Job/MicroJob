@@ -12,10 +12,6 @@ namespace JobCompany.DAL.Configurations
 
             builder.HasIndex(x => x.CreatedDate);
 
-            builder.Property(x => x.Content)
-                .HasMaxLength(500)
-                .IsRequired();
-
             builder.Property(x => x.CreatedDate)
                 .HasDefaultValueSql("getdate()");
 
