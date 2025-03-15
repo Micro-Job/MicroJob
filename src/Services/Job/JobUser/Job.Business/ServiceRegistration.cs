@@ -1,7 +1,5 @@
 ﻿using Job.Business.Consumers;
-using Job.Business.Services.Application;
 using Job.Business.Services.Certificate;
-using Job.Business.Services.Company;
 using Job.Business.Services.Education;
 using Job.Business.Services.Experience;
 using Job.Business.Services.Language;
@@ -10,7 +8,6 @@ using Job.Business.Services.Number;
 using Job.Business.Services.Resume;
 using Job.Business.Services.Skill;
 using Job.Business.Services.User;
-using Job.Business.Services.Vacancy;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using SharedLibrary.ExternalServices.FileService;
@@ -30,11 +27,8 @@ namespace Job.Business
             services.AddScoped<INumberService, NumberService>();
             services.AddScoped<ILanguageService, LanguageService>();
             services.AddScoped<ICertificateService, CertificateService>();
-            //TODO : VacancyService artıq istifadə edilmir silinə bilər
-            //services.AddScoped<IVacancyService, VacancyService>();
             services.AddScoped<ISkillService, SkillService>();
             services.AddScoped<INotificationService, NotificationService>();
-            services.AddScoped<IUserApplicationService, UserApplicationService>();
             services.AddScoped<ICurrentUser, CurrentUser>();
         }
 

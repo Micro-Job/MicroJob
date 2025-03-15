@@ -4,6 +4,7 @@ using JobCompany.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JobCompany.DAL.Migrations
 {
     [DbContext(typeof(JobCompanyDbContext))]
-    partial class JobCompanyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250315072748_UserExamTableCreated")]
+    partial class UserExamTableCreated
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -330,6 +333,11 @@ namespace JobCompany.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<DateTime>("CreatedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
@@ -354,30 +362,6 @@ namespace JobCompany.DAL.Migrations
                     b.HasIndex("ReceiverId");
 
                     b.ToTable("Notifications");
-                });
-
-            modelBuilder.Entity("JobCompany.Core.Entites.NotificationTranslation", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
-
-                    b.Property<byte>("Language")
-                        .HasColumnType("tinyint");
-
-                    b.Property<Guid>("NotificationId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("NotificationId");
-
-                    b.ToTable("NotificationTranslation");
                 });
 
             modelBuilder.Entity("JobCompany.Core.Entites.Question", b =>
@@ -834,17 +818,6 @@ namespace JobCompany.DAL.Migrations
                     b.Navigation("Receiver");
                 });
 
-            modelBuilder.Entity("JobCompany.Core.Entites.NotificationTranslation", b =>
-                {
-                    b.HasOne("JobCompany.Core.Entites.Notification", "Notification")
-                        .WithMany("Translations")
-                        .HasForeignKey("NotificationId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Notification");
-                });
-
             modelBuilder.Entity("JobCompany.Core.Entites.SavedVacancy", b =>
                 {
                     b.HasOne("JobCompany.Core.Entites.Vacancy", "Vacancy")
@@ -1015,11 +988,6 @@ namespace JobCompany.DAL.Migrations
                     b.Navigation("UserExams");
 
                     b.Navigation("Vacancies");
-                });
-
-            modelBuilder.Entity("JobCompany.Core.Entites.Notification", b =>
-                {
-                    b.Navigation("Translations");
                 });
 
             modelBuilder.Entity("JobCompany.Core.Entites.Question", b =>

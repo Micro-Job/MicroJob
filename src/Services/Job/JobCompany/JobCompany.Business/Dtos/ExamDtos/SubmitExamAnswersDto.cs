@@ -1,4 +1,4 @@
-﻿namespace Job.Business.Dtos.ExamDtos;
+﻿namespace JobCompany.Business.Dtos.ExamDtos;
 
 public class SubmitExamAnswersDto
 {

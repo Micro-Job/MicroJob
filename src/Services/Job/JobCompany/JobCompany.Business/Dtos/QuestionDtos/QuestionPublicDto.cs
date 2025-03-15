@@ -1,7 +1,7 @@
-﻿using Job.Business.Dtos.AnswerDtos;
-using SharedLibrary.Enums;
+﻿using JobCompany.Business.Dtos.AnswerDtos;
+using JobCompany.Core.Enums;
 
-namespace Job.Business.Dtos.QuestionDtos;
+namespace JobCompany.Business.Dtos.QuestionDtos;
 
 public class QuestionPublicDto
 {

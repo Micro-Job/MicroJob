@@ -1,4 +1,4 @@
-﻿namespace Job.Business.Dtos.AnswerDtos;
+﻿namespace JobCompany.Business.Dtos.AnswerDtos;
 
 public class AnswerPublicDto
 {

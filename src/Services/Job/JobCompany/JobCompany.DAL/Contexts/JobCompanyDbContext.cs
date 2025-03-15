@@ -34,6 +34,8 @@ namespace JobCompany.DAL.Contexts
         public DbSet<CountryTranslation> CountryTranslations { get; set; }
         public DbSet<CityTranslation> CityTranslations { get; set; }
 
+        public DbSet<UserExam> UserExams { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());

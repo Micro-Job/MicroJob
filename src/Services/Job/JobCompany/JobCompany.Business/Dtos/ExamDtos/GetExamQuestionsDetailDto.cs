@@ -1,6 +1,6 @@
-﻿using Job.Business.Dtos.QuestionDtos;
+﻿using JobCompany.Business.Dtos.QuestionDtos;
 
-namespace Job.Business.Dtos.ExamDtos;
+namespace JobCompany.Business.Dtos.ExamDtos;
 
 public class GetExamQuestionsDetailDto
 {
