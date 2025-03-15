@@ -219,6 +219,7 @@ namespace JobCompany.Business.Services.ExamServices
 
         public async Task<SubmitExamResultDto> EvaluateExamAnswersAsync(SubmitExamAnswersDto dto)
         {
+            var userGuid = _user.UserGuid ?? throw new InvalidOperationException("UserId can not be null");
             var exam = await _context.Exams
                 .Include(e => e.ExamQuestions)
                 .ThenInclude(eq => eq.Question)
@@ -264,6 +265,18 @@ namespace JobCompany.Business.Services.ExamServices
             decimal resultRate = totalQuestions > 0 ? (decimal)trueCount / totalQuestions * 100 : 0;
             bool isPassed = resultRate >= exam.LimitRate;
 
+            var userExam = new UserExam
+            {
+                UserId = userGuid, 
+                ExamId = dto.ExamId,
+                TrueAnswerCount = (byte)trueCount,
+                FalseAnswerCount = (byte)falseCount, 
+            };
+
+
+            _context.UserExams.Add(userExam);
+            await _context.SaveChangesAsync(); 
+
             return new SubmitExamResultDto
             {
                 TrueAnswerCount = (byte)trueCount,
@@ -272,7 +285,5 @@ namespace JobCompany.Business.Services.ExamServices
                 IsPassed = isPassed
             };
         }
-
-
     }
 }
