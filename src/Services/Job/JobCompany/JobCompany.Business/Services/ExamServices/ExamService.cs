@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Shared.Responses;
 using SharedLibrary.Exceptions;
+using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;
 
 namespace JobCompany.Business.Services.ExamServices
@@ -32,7 +33,7 @@ namespace JobCompany.Business.Services.ExamServices
 
             var company =
                 await _context.Companies.FirstOrDefaultAsync(a => a.UserId == userGuid)
-                ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>();
+                ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>(MessageHelper.GetMessage("NOT_FOUND"));
 
             try
             {
@@ -98,7 +99,7 @@ namespace JobCompany.Business.Services.ExamServices
                         Duration = e.Duration,
                     })
                     .FirstOrDefaultAsync(e => e.Id == examGuid)
-                ?? throw new SharedLibrary.Exceptions.NotFoundException<Exam>();
+                ?? throw new SharedLibrary.Exceptions.NotFoundException<Exam>(MessageHelper.GetMessage("NOT_FOUND"));
         }
 
         public async Task<GetQuestionByStepDto> GetExamQuestionByStepAsync(string examId, int step)
@@ -131,7 +132,7 @@ namespace JobCompany.Business.Services.ExamServices
                         },
                     })
                     .FirstOrDefaultAsync()
-                ?? throw new SharedLibrary.Exceptions.NotFoundException<Question>();
+                ?? throw new SharedLibrary.Exceptions.NotFoundException<Question>(MessageHelper.GetMessage("NOT_FOUND"));
 
             return question;
         }
@@ -143,7 +144,7 @@ namespace JobCompany.Business.Services.ExamServices
             var exam =
                 await _context.Exams.FirstOrDefaultAsync(e =>
                     e.Id == examGuid && e.Company.UserId == userGuid
-                ) ?? throw new SharedLibrary.Exceptions.NotFoundException<Exam>();
+                ) ?? throw new SharedLibrary.Exceptions.NotFoundException<Exam>(MessageHelper.GetMessage("NOT_FOUND"));
 
             _context.Exams.Remove(exam);
 
@@ -180,7 +181,7 @@ namespace JobCompany.Business.Services.ExamServices
                     QuestionCount = x.ExamQuestions.Count,
                     LimitRate = x.LimitRate,
                 })
-                .FirstOrDefaultAsync() ?? throw new NotFoundException<Exam>("İmtahan mövcud deyil");
+                .FirstOrDefaultAsync() ?? throw new NotFoundException<Exam>(MessageHelper.GetMessage("NOT_FOUND"));
 
             return data;
         }
@@ -194,7 +195,7 @@ namespace JobCompany.Business.Services.ExamServices
                 .ThenInclude(q => q.Answers)
                 .Where(x => x.Id == examGuid)
                 .FirstOrDefaultAsync()
-                ?? throw new NotFoundException<Exam>();
+                ?? throw new NotFoundException<Exam>(MessageHelper.GetMessage("NOT_FOUND"));
 
             return new GetExamQuestionsDetailDto
             {
@@ -225,7 +226,7 @@ namespace JobCompany.Business.Services.ExamServices
                 .ThenInclude(eq => eq.Question)
                 .ThenInclude(q => q.Answers)
                 .FirstOrDefaultAsync(x => x.Id == dto.ExamId)
-                ?? throw new NotFoundException<Exam>();
+                ?? throw new NotFoundException<Exam>(MessageHelper.GetMessage("NOT_FOUND"));
 
             var answerResults = exam.ExamQuestions
                 .Select(eq =>

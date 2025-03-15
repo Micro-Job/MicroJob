@@ -120,6 +120,9 @@
   <data name="APPLICATION_ALREADY_EXIST" xml:space="preserve">
     <value>Bu vakansiyaya müraciət artıq mövcuddur</value>
   </data>
+  <data name="APPLICATION_IS_DEACTIVE" xml:space="preserve">
+    <value>Bu müraciət deaktivdir</value>
+  </data>
   <data name="AUTHENTICATION_FAILED" xml:space="preserve">
     <value />
   </data>

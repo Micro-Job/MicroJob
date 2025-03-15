@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SharedLibrary.Exceptions;
+using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;
 
 namespace JobCompany.Business.Services.NotificationServices
@@ -48,12 +49,12 @@ namespace JobCompany.Business.Services.NotificationServices
                 .FirstOrDefaultAsync();
 
             if (companyId == Guid.Empty)
-                throw new NotFoundException<Company>();
+                throw new NotFoundException<Company>(MessageHelper.GetMessage("NOT_FOUND"));
 
             var notification =
                 await _context.Notifications.FirstOrDefaultAsync(x =>
                     x.Id == id && x.ReceiverId == companyId
-                ) ?? throw new NotFoundException<Notification>();
+                ) ?? throw new NotFoundException<Notification>(MessageHelper.GetMessage("NOT_FOUND"));
 
             notification.IsSeen = true;
 

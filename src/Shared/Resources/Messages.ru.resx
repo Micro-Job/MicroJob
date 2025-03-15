@@ -120,6 +120,9 @@
   <data name="APPLICATION_ALREADY_EXIST" xml:space="preserve">
     <value>Заявка на данную вакансию уже доступна</value>
   </data>
+  <data name="APPLICATION_IS_DEACTIVE" xml:space="preserve">
+    <value>Это приложение отключено</value>
+  </data>
   <data name="AUTHENTICATION_FAILED" xml:space="preserve">
     <value>Ошибка аутентификации</value>
   </data>

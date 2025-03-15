@@ -120,6 +120,9 @@
   <data name="APPLICATION_ALREADY_EXIST" xml:space="preserve">
     <value>Applications for this vacancy are now available.</value>
   </data>
+  <data name="APPLICATION_IS_DEACTIVE" xml:space="preserve">
+    <value>This application is inactive.</value>
+  </data>
   <data name="AUTHENTICATION_FAILED" xml:space="preserve">
     <value>Authentication failed</value>
   </data>
