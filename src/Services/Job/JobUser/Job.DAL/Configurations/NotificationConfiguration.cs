@@ -9,13 +9,7 @@ namespace Job.DAL.Configurations
         public void Configure(EntityTypeBuilder<Notification> builder)
         {
             builder.HasKey(x => x.Id);
-
             builder.HasIndex(x => x.CreatedDate);
-
-            builder.Property(x => x.Content)
-                .HasMaxLength(500)  
-                .IsRequired();
-
             builder.Property(x => x.CreatedDate)
                 .HasDefaultValueSql("getdate()");
         }
