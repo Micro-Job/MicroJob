@@ -4,19 +4,22 @@ using JobCompany.Business.Dtos.ExamDtos;
 using JobCompany.Business.Dtos.QuestionDtos;
 using JobCompany.Business.Services.QuestionServices;
 using JobCompany.Core.Entites;
+using JobCompany.Core.Enums;
 using JobCompany.DAL.Contexts;
 using MassTransit.Initializers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Shared.Responses;
 using SharedLibrary.Exceptions;
+using SharedLibrary.HelperServices.Current;
 
 namespace JobCompany.Business.Services.ExamServices
 {
     public class ExamService(
         JobCompanyDbContext _context,
         IQuestionService _questionService,
-        IHttpContextAccessor _contextAccessor
+        IHttpContextAccessor _contextAccessor,
+        ICurrentUser _user
     ) : IExamService
     {
         private readonly Guid userGuid = Guid.Parse(
@@ -115,7 +118,7 @@ namespace JobCompany.Business.Services.ExamServices
                         {
                             Id = eq.Question.Id,
                             Title = eq.Question.Title,
-                            Image = eq.Question.Image,
+                            Image = eq.Question.Image != null ? $"{_user.BaseUrl}/{eq.Question.Image}" : null,
                             QuestionType = eq.Question.QuestionType,
                             IsRequired = eq.Question.IsRequired,
                             Answers = eq
@@ -181,5 +184,95 @@ namespace JobCompany.Business.Services.ExamServices
 
             return data;
         }
+
+        public async Task<GetExamQuestionsDetailDto> GetExamQuestionsAsync(string examId)
+        {
+            var examGuid = Guid.Parse(examId);
+            var exam = await _context.Exams
+                .Include(e => e.ExamQuestions)
+                    .ThenInclude(eq => eq.Question)
+                .ThenInclude(q => q.Answers)
+                .Where(x => x.Id == examGuid)
+                .FirstOrDefaultAsync()
+                ?? throw new NotFoundException<Exam>();
+
+            return new GetExamQuestionsDetailDto
+            {
+                TotalQuestions = exam.ExamQuestions.Count,
+                LimitRate = exam.LimitRate,
+                Duration = exam.Duration,
+                Questions = exam.ExamQuestions.Select(eq => new QuestionPublicDto
+                {
+                    Id = eq.Question.Id,
+                    Title = eq.Question.Title,
+                    Image = eq.Question.Image != null ? $"{_user.BaseUrl}/{eq.Question.Image}" : null,
+                    QuestionType = eq.Question.QuestionType,
+                    IsRequired = eq.Question.IsRequired,
+                    Answers = eq.Question.Answers.Select(a => new AnswerPublicDto
+                    {
+                        Id = a.Id,
+                        Text = a.Text
+                    }).ToList()
+                }).ToList()
+            };
+        }
+
+        public async Task<SubmitExamResultDto> EvaluateExamAnswersAsync(SubmitExamAnswersDto dto)
+        {
+            var exam = await _context.Exams
+                .Include(e => e.ExamQuestions)
+                .ThenInclude(eq => eq.Question)
+                .ThenInclude(q => q.Answers)
+                .FirstOrDefaultAsync(x => x.Id == dto.ExamId)
+                ?? throw new NotFoundException<Exam>();
+
+            var answerResults = exam.ExamQuestions
+                .Select(eq =>
+                {
+                    var question = eq.Question;
+                    var userAnswer = dto.Answers.FirstOrDefault(a => a.QuestionId == question.Id);
+                    if (userAnswer == null) return false;
+
+                    var correctAnswers = question.Answers
+                        .Where(a => a.IsCorrect ?? false)
+                        .Select(a => a.Id)
+                        .ToList();
+
+                    return question.QuestionType switch
+                    {
+                        QuestionType.MultipleChoice or QuestionType.SingleChoice =>
+                            userAnswer.AnswerIds?.Count == correctAnswers.Count &&
+                            !userAnswer.AnswerIds.Except(correctAnswers).Any(),
+
+                        QuestionType.OpenEnded =>
+                            !string.IsNullOrEmpty(userAnswer.Text) &&
+                            string.Equals(
+                                userAnswer.Text.Trim(),
+                                question.Answers.FirstOrDefault(a => a.IsCorrect ?? false)?.Text?.Trim(),
+                                StringComparison.OrdinalIgnoreCase
+                            ),
+
+                        _ => false
+                    };
+                })
+                .ToList();
+
+            int trueCount = answerResults.Count(isCorrect => isCorrect);
+            int falseCount = answerResults.Count(isCorrect => !isCorrect);
+
+            int totalQuestions = exam.ExamQuestions.Count;
+            decimal resultRate = totalQuestions > 0 ? (decimal)trueCount / totalQuestions * 100 : 0;
+            bool isPassed = resultRate >= exam.LimitRate;
+
+            return new SubmitExamResultDto
+            {
+                TrueAnswerCount = (byte)trueCount,
+                FalseAnswerCount = (byte)falseCount,
+                ResultRate = resultRate,
+                IsPassed = isPassed
+            };
+        }
+
+
     }
 }

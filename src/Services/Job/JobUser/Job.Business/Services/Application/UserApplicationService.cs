@@ -59,26 +59,26 @@ namespace Job.Business.Services.Application
             _getExamQuestionsRequest = getExamQuestionsRequest;
         }
 
-        //public async Task<GetExamDetailResponse> GetExamIntroAsync(string vacancyId)
-        //{
-        //    var request = new GetExamDetailRequest { VacancyId = vacancyId };
+        public async Task<GetExamDetailResponse> GetExamIntroAsync(string vacancyId)
+        {
+            var request = new GetExamDetailRequest { VacancyId = vacancyId };
 
-        //    var response = await _examRequest.GetResponse<GetExamDetailResponse>(request);
+            var response = await _examRequest.GetResponse<GetExamDetailResponse>(request);
 
-        //    var userDataResponse = await _requestUser.GetResponse<GetUserDataResponse>(
-        //        new GetUserDataRequest { UserId = userGuid }
-        //    );
+            var userDataResponse = await _requestUser.GetResponse<GetUserDataResponse>(
+                new GetUserDataRequest { UserId = userGuid }
+            );
 
-        //    bool isTaken = await CheckUserCompletedExam(Guid.Parse(response.Message.ExamId));
+            bool isTaken = await CheckUserCompletedExam(Guid.Parse(response.Message.ExamId));
 
-        //    var fullName =
-        //        $"{userDataResponse.Message.FirstName} {userDataResponse.Message.LastName}";
+            var fullName =
+                $"{userDataResponse.Message.FirstName} {userDataResponse.Message.LastName}";
 
-        //    response.Message.FullName = fullName;
-        //    response.Message.IsTaken = isTaken;
+            response.Message.FullName = fullName;
+            response.Message.IsTaken = isTaken;
 
-        //    return response.Message;
-        //}
+            return response.Message;
+        }
 
         public async Task<GetExamQuestionsDetailDto> GetExamQuestionsAsync(Guid examId)
         {

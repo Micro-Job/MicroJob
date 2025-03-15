@@ -13,5 +13,7 @@ namespace JobCompany.Business.Services.ExamServices
         Task DeleteExamAsync(string examId);
 
         Task<GetExamDetailResponse> GetExamIntroAsync(string examId);
+        Task<GetExamQuestionsDetailDto> GetExamQuestionsAsync(string examId);
+        Task<SubmitExamResultDto> EvaluateExamAnswersAsync(SubmitExamAnswersDto dto);
     }
 }
