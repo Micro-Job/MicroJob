@@ -2,6 +2,7 @@ using Job.Business.Dtos.ExperienceDtos;
 using Job.Business.Exceptions.Common;
 using Job.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
+using SharedLibrary.Helpers;
 
 namespace Job.Business.Services.Experience;
 
@@ -63,7 +64,7 @@ public class ExperienceService(JobDbContext context) : IExperienceService
         var experience =
             await context.Experiences.FirstOrDefaultAsync(e =>
                 e.ResumeId == resumeId && e.OrganizationName == dto.OrganizationName
-            ) ?? throw new NotFoundException<Core.Entities.Experience>();
+            ) ?? throw new NotFoundException<Core.Entities.Experience>(MessageHelper.GetMessage("NOT_FOUND"));
 
         MapExperienceDtoToEntityForUpdate(experience, dto);
 

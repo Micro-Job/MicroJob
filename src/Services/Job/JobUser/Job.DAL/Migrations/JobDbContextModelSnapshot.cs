@@ -158,11 +158,6 @@ namespace Job.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
                     b.Property<DateTime>("CreatedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
@@ -171,8 +166,14 @@ namespace Job.DAL.Migrations
                     b.Property<Guid>("InformationId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("InformationName")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsSeen")
                         .HasColumnType("bit");
+
+                    b.Property<byte>("NotificationType")
+                        .HasColumnType("tinyint");
 
                     b.Property<Guid>("ReceiverId")
                         .HasColumnType("uniqueidentifier");
@@ -329,57 +330,6 @@ namespace Job.DAL.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("Job.Core.Entities.UserAnswer", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ExamQuestionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool?>("IsCorrect")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Text")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UserAnswers");
-                });
-
-            modelBuilder.Entity("Job.Core.Entities.UserExam", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ExamId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<byte>("FalseAnswerCount")
-                        .HasColumnType("tinyint");
-
-                    b.Property<byte>("TrueAnswerCount")
-                        .HasColumnType("tinyint");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UserExams");
-                });
-
             modelBuilder.Entity("Job.Core.Entities.Certificate", b =>
                 {
                     b.HasOne("Job.Core.Entities.Resume", "Resume")
@@ -487,28 +437,6 @@ namespace Job.DAL.Migrations
                     b.Navigation("Skill");
                 });
 
-            modelBuilder.Entity("Job.Core.Entities.UserAnswer", b =>
-                {
-                    b.HasOne("Job.Core.Entities.User", "User")
-                        .WithMany("UserAnswers")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Job.Core.Entities.UserExam", b =>
-                {
-                    b.HasOne("Job.Core.Entities.User", "User")
-                        .WithMany("UserExams")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Job.Core.Entities.Resume", b =>
                 {
                     b.Navigation("Certificates");
@@ -536,10 +464,6 @@ namespace Job.DAL.Migrations
                     b.Navigation("Notifications");
 
                     b.Navigation("Resume");
-
-                    b.Navigation("UserAnswers");
-
-                    b.Navigation("UserExams");
                 });
 #pragma warning restore 612, 618
         }

@@ -11,14 +11,14 @@ namespace JobCompany.API.Controllers
     public class NotificationController(INotificationService _notificationService) : ControllerBase
     {
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetUserNotificationsAsync(int skip, int take)
+        public async Task<IActionResult> GetUserNotificationsAsync(bool? IsSeen , int skip, int take)
         {
-            var notifications = await _notificationService.GetUserNotificationsAsync(skip , take);
+            var notifications = await _notificationService.GetUserNotificationsAsync(IsSeen , skip , take);
             return Ok(notifications);
         }
 
         [HttpPost("[action]")]
-        public async Task<IActionResult> MarkNotificationAsReadAsync(Guid notificationId)
+        public async Task<IActionResult> MarkNotificationAsReadAsync(string notificationId)
         {
             await _notificationService.MarkNotificationAsReadAsync(notificationId);
             return Ok();

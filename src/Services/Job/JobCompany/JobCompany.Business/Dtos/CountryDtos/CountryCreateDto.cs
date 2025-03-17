@@ -24,3 +24,15 @@ public class CreateCountryLanguageDtoValidator : AbstractValidator<CreateCountry
         RuleFor(x => x.Language).NotEmpty().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"));
     }
 }
+
+
+public class CountryCreateDtoValidator : AbstractValidator<CountryCreateDto>
+{
+    public CountryCreateDtoValidator()
+    {
+        RuleForEach(x => x.Countries).SetValidator(new CreateCountryLanguageDtoValidator());
+        RuleFor(x => x.Countries)
+            .Must(skills => skills.Select(s => s.Language).Distinct().Count() >= 3)
+            .WithMessage(MessageHelper.GetMessage("ALL_LANGUAGES_REQUIRED"));
+    }
+}

@@ -330,11 +330,6 @@ namespace JobCompany.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
                     b.Property<DateTime>("CreatedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
@@ -343,13 +338,19 @@ namespace JobCompany.DAL.Migrations
                     b.Property<Guid>("InformationId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("InformationName")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsSeen")
                         .HasColumnType("bit");
+
+                    b.Property<byte>("NotificationType")
+                        .HasColumnType("tinyint");
 
                     b.Property<Guid>("ReceiverId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("SenderId")
+                    b.Property<Guid?>("SenderId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
@@ -492,6 +493,31 @@ namespace JobCompany.DAL.Migrations
                     b.HasIndex("StatusId");
 
                     b.ToTable("StatusTranslations");
+                });
+
+            modelBuilder.Entity("JobCompany.Core.Entites.UserExam", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ExamId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte>("FalseAnswerCount")
+                        .HasColumnType("tinyint");
+
+                    b.Property<byte>("TrueAnswerCount")
+                        .HasColumnType("tinyint");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExamId");
+
+                    b.ToTable("UserExams");
                 });
 
             modelBuilder.Entity("JobCompany.Core.Entites.Vacancy", b =>
@@ -676,7 +702,7 @@ namespace JobCompany.DAL.Migrations
                     b.HasOne("JobCompany.Core.Entites.Category", "Category")
                         .WithMany("Translations")
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Category");
@@ -698,7 +724,7 @@ namespace JobCompany.DAL.Migrations
                     b.HasOne("JobCompany.Core.Entites.City", "City")
                         .WithMany("Translations")
                         .HasForeignKey("CityId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("City");
@@ -743,7 +769,7 @@ namespace JobCompany.DAL.Migrations
                     b.HasOne("JobCompany.Core.Entites.Country", "Country")
                         .WithMany("Translations")
                         .HasForeignKey("CountryId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Country");
@@ -832,6 +858,17 @@ namespace JobCompany.DAL.Migrations
                         .IsRequired();
 
                     b.Navigation("Status");
+                });
+
+            modelBuilder.Entity("JobCompany.Core.Entites.UserExam", b =>
+                {
+                    b.HasOne("JobCompany.Core.Entites.Exam", "Exam")
+                        .WithMany("UserExams")
+                        .HasForeignKey("ExamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Exam");
                 });
 
             modelBuilder.Entity("JobCompany.Core.Entites.Vacancy", b =>
@@ -945,6 +982,8 @@ namespace JobCompany.DAL.Migrations
             modelBuilder.Entity("JobCompany.Core.Entites.Exam", b =>
                 {
                     b.Navigation("ExamQuestions");
+
+                    b.Navigation("UserExams");
 
                     b.Navigation("Vacancies");
                 });

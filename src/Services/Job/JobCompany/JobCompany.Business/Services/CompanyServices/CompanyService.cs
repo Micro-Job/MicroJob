@@ -13,6 +13,7 @@ using Microsoft.Extensions.Configuration;
 using Shared.Exceptions;
 using Shared.Requests;
 using Shared.Responses;
+using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;
 
 namespace JobCompany.Business.Services.CompanyServices
@@ -42,7 +43,7 @@ namespace JobCompany.Business.Services.CompanyServices
         public async Task UpdateCompanyAsync(CompanyUpdateDto dto,ICollection<UpdateNumberDto>? numbersDto)
         {
             var company = await _context.Companies.Include(c => c.CompanyNumbers).FirstOrDefaultAsync(x => x.UserId == _currentUser.UserGuid)
-                ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>();
+                ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>(MessageHelper.GetMessage("NOT_FOUND"));
 
             company.CompanyName = dto.CompanyName.Trim();
             company.CompanyInformation = dto.CompanyInformation.Trim();
@@ -113,7 +114,7 @@ namespace JobCompany.Business.Services.CompanyServices
             {
                 Datas = companies,
                 TotalCount = count,
-                TotalPage = (int)Math.Ceiling((double)count / take)
+                //TotalPage = (int)Math.Ceiling((double)count / take)
             };
         }
 
@@ -131,16 +132,16 @@ namespace JobCompany.Business.Services.CompanyServices
                             CompanyLogo = $"{_authServiceBaseUrl}/{x.CompanyLogo}",
                             WebLink = x.WebLink,
                             UserId = x.UserId,
-                            CompanyNumbers = x
-                                .CompanyNumbers.Select(cn => new CompanyNumberDto
-                                {
-                                    Id = cn.Id,
-                                    Number = cn.Number,
-                                })
-                                .ToList(),
+                            CompanyNumbers = x.CompanyNumbers
+                                            .Select(cn => new CompanyNumberDto
+                                            {
+                                                Id = cn.Id,
+                                                Number = cn.Number,
+                                            })
+                                            .ToList(),
                         })
                         .FirstOrDefaultAsync()
-                    ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>();
+                    ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>(MessageHelper.GetMessage("NOT_FOUND"));
 
             var response = await _client.GetResponse<GetAllCompaniesDataResponse>(
                 new GetAllCompaniesDataRequest { UserId = company.UserId }

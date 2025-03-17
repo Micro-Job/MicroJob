@@ -4,32 +4,27 @@ using JobCompany.Business.Dtos.ExamDtos;
 using JobCompany.Business.Dtos.QuestionDtos;
 using JobCompany.Business.Services.QuestionServices;
 using JobCompany.Core.Entites;
+using JobCompany.Core.Enums;
 using JobCompany.DAL.Contexts;
 using MassTransit.Initializers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Shared.Responses;
 using SharedLibrary.Exceptions;
+using SharedLibrary.Helpers;
+using SharedLibrary.HelperServices.Current;
 
 namespace JobCompany.Business.Services.ExamServices
 {
-    public class ExamService(
-        JobCompanyDbContext _context,
-        IQuestionService _questionService,
-        IHttpContextAccessor _contextAccessor
-    ) : IExamService
+    public class ExamService(JobCompanyDbContext _context,IQuestionService _questionService,ICurrentUser _currentUser) : IExamService
     {
-        private readonly Guid userGuid = Guid.Parse(
-            _contextAccessor?.HttpContext?.User.FindFirst(ClaimTypes.Sid)?.Value!
-        );
-
         public async Task<Guid> CreateExamAsync(CreateExamDto dto)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
 
             var company =
                 await _context.Companies.FirstOrDefaultAsync(a => a.UserId == userGuid)
-                ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>();
+                ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>(MessageHelper.GetMessage("NOT_FOUND"));
 
             try
             {
@@ -95,7 +90,7 @@ namespace JobCompany.Business.Services.ExamServices
                         Duration = e.Duration,
                     })
                     .FirstOrDefaultAsync(e => e.Id == examGuid)
-                ?? throw new SharedLibrary.Exceptions.NotFoundException<Exam>();
+                ?? throw new SharedLibrary.Exceptions.NotFoundException<Exam>(MessageHelper.GetMessage("NOT_FOUND"));
         }
 
         public async Task<GetQuestionByStepDto> GetExamQuestionByStepAsync(string examId, int step)
@@ -115,7 +110,7 @@ namespace JobCompany.Business.Services.ExamServices
                         {
                             Id = eq.Question.Id,
                             Title = eq.Question.Title,
-                            Image = eq.Question.Image,
+                            Image = eq.Question.Image != null ? $"{_currentUser.BaseUrl}/{eq.Question.Image}" : null,
                             QuestionType = eq.Question.QuestionType,
                             IsRequired = eq.Question.IsRequired,
                             Answers = eq
@@ -128,7 +123,7 @@ namespace JobCompany.Business.Services.ExamServices
                         },
                     })
                     .FirstOrDefaultAsync()
-                ?? throw new SharedLibrary.Exceptions.NotFoundException<Question>();
+                ?? throw new SharedLibrary.Exceptions.NotFoundException<Question>(MessageHelper.GetMessage("NOT_FOUND"));
 
             return question;
         }
@@ -140,7 +135,8 @@ namespace JobCompany.Business.Services.ExamServices
             var exam =
                 await _context.Exams.FirstOrDefaultAsync(e =>
                     e.Id == examGuid && e.Company.UserId == userGuid
-                ) ?? throw new SharedLibrary.Exceptions.NotFoundException<Exam>();
+                ) ?? throw new SharedLibrary.Exceptions.NotFoundException<Exam>(MessageHelper.GetMessage("NOT_FOUND"));
+
 
             _context.Exams.Remove(exam);
 
@@ -164,22 +160,127 @@ namespace JobCompany.Business.Services.ExamServices
             return exams;
         }
 
-        public async Task<GetExamDetailResponse> GetExamIntroAsync(string examId)
+        public async Task<GetExamIntroDto> GetExamIntroAsync(string examId)
         {
             var examGuid = Guid.Parse(examId);
+
+            if (await _context.UserExams.AnyAsync(x => x.ExamId == examGuid && x.UserId == _currentUser.UserGuid && x.Exam.Vacancies.Any(y=> y.ExamId == examGuid)))
+                throw new BadRequestException("Siz bu imtahan");
+
             var data = await _context.Exams.Where(x=> x.Id == examGuid)
-                .Select(x=> new GetExamDetailResponse
+                .Select(x=> new GetExamIntroDto
                 {
                     CompanyName = x.Company.CompanyName,
                     IntroDescription = x.IntroDescription,
                     Duration = x.Duration,
-                    //IsTaken = x.UserExams.Any(ue => ue.ExamId == examId && ue.UserId == userGuid);
                     QuestionCount = x.ExamQuestions.Count,
                     LimitRate = x.LimitRate,
+                    //FullName = ,
                 })
-                .FirstOrDefaultAsync() ?? throw new NotFoundException<Exam>("İmtahan mövcud deyil");
+                .FirstOrDefaultAsync() ?? throw new NotFoundException<Exam>(MessageHelper.GetMessage("NOT_FOUND"));
 
             return data;
+        }
+
+        public async Task<GetExamQuestionsDetailDto> GetExamQuestionsAsync(string examId)
+        {
+            var examGuid = Guid.Parse(examId);
+            var exam = await _context.Exams
+                .Include(e => e.ExamQuestions)
+                    .ThenInclude(eq => eq.Question)
+                .ThenInclude(q => q.Answers)
+                .Where(x => x.Id == examGuid)
+                .FirstOrDefaultAsync()
+                ?? throw new NotFoundException<Exam>(MessageHelper.GetMessage("NOT_FOUND"));
+
+            return new GetExamQuestionsDetailDto
+            {
+                TotalQuestions = exam.ExamQuestions.Count,
+                LimitRate = exam.LimitRate,
+                Duration = exam.Duration,
+                Questions = exam.ExamQuestions.Select(eq => new QuestionPublicDto
+                {
+                    Id = eq.Question.Id,
+                    Title = eq.Question.Title,
+                    Image = eq.Question.Image != null ? $"{_currentUser.BaseUrl}/{eq.Question.Image}" : null,
+                    QuestionType = eq.Question.QuestionType,
+                    IsRequired = eq.Question.IsRequired,
+                    Answers = eq.Question.Answers.Select(a => new AnswerPublicDto
+                    {
+                        Id = a.Id,
+                        Text = a.Text
+                    }).ToList()
+                }).ToList()
+            };
+        }
+
+        public async Task<SubmitExamResultDto> EvaluateExamAnswersAsync(SubmitExamAnswersDto dto)
+        {
+            var userGuid = _user.UserGuid ?? throw new InvalidOperationException("UserId can not be null");
+            var exam = await _context.Exams
+                .Include(e => e.ExamQuestions)
+                .ThenInclude(eq => eq.Question)
+                .ThenInclude(q => q.Answers)
+                .FirstOrDefaultAsync(x => x.Id == dto.ExamId)
+                ?? throw new NotFoundException<Exam>(MessageHelper.GetMessage("NOT_FOUND"));
+
+            var answerResults = exam.ExamQuestions
+                .Select(eq =>
+                {
+                    var question = eq.Question;
+                    var userAnswer = dto.Answers.FirstOrDefault(a => a.QuestionId == question.Id);
+                    if (userAnswer == null) return false;
+
+                    var correctAnswers = question.Answers
+                        .Where(a => a.IsCorrect ?? false)
+                        .Select(a => a.Id)
+                        .ToList();
+
+                    return question.QuestionType switch
+                    {
+                        QuestionType.MultipleChoice or QuestionType.SingleChoice =>
+                            userAnswer.AnswerIds?.Count == correctAnswers.Count &&
+                            !userAnswer.AnswerIds.Except(correctAnswers).Any(),
+
+                        QuestionType.OpenEnded =>
+                            !string.IsNullOrEmpty(userAnswer.Text) &&
+                            string.Equals(
+                                userAnswer.Text.Trim(),
+                                question.Answers.FirstOrDefault(a => a.IsCorrect ?? false)?.Text?.Trim(),
+                                StringComparison.OrdinalIgnoreCase
+                            ),
+
+                        _ => false
+                    };
+                })
+                .ToList();
+
+            int trueCount = answerResults.Count(isCorrect => isCorrect);
+            int falseCount = answerResults.Count(isCorrect => !isCorrect);
+
+            int totalQuestions = exam.ExamQuestions.Count;
+            decimal resultRate = totalQuestions > 0 ? (decimal)trueCount / totalQuestions * 100 : 0;
+            bool isPassed = resultRate >= exam.LimitRate;
+
+            var userExam = new UserExam
+            {
+                UserId = userGuid, 
+                ExamId = dto.ExamId,
+                TrueAnswerCount = (byte)trueCount,
+                FalseAnswerCount = (byte)falseCount, 
+            };
+
+
+            _context.UserExams.Add(userExam);
+            await _context.SaveChangesAsync(); 
+
+            return new SubmitExamResultDto
+            {
+                TrueAnswerCount = (byte)trueCount,
+                FalseAnswerCount = (byte)falseCount,
+                ResultRate = resultRate,
+                IsPassed = isPassed
+            };
         }
     }
 }

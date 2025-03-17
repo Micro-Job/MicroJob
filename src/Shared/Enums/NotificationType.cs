@@ -1,14 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace SharedLibrary.Enums;
 
-namespace SharedLibrary.Enums
+public enum NotificationType : byte
 {
-    public enum NotificationType : byte
-    {
-        Vacancy = 1,
-        Application = 2,
-    }
+    /// <summary>
+    /// Sistem bildirisleri
+    /// </summary>
+    System=1,
+    /// <summary>
+    /// Vacancy paylasim bildirisi
+    /// </summary>
+    Vacancy = 2,
+    /// <summary>
+    /// Vacancynin statusunun deyismesi
+    /// </summary>
+    StatusUpdate = 3,
+    /// <summary>
+    /// Sirkete muraciet apply bildirisi
+    /// </summary>
+    Application = 4,
 }
+

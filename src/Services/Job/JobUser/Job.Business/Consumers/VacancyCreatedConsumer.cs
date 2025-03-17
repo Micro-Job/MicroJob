@@ -19,27 +19,37 @@ namespace Job.Business.Consumers
         {
             var eventMessage = context.Message;
 
-            //TODO : burada skill sayina ve resunedaki skill sayina nisbetde 25 faiz olarsa , o zaman getsin hemin adamlara notification
+            //TODO : burada skill sayina ve resunedaki skill sayina nisbetde 50 faiz olarsa , o zaman getsin hemin adamlara notification
 
             var resumes = await _context
-                .Resumes.Include(r => r.ResumeSkills)
-                .Where(r => r.ResumeSkills.Any(rs => eventMessage.SkillIds.Contains(rs.SkillId)))
-                .ToListAsync();
+                    .Resumes.Include(r => r.ResumeSkills)
+                    .Select(x=> new
+                    {
+                        UserId = x.UserId,
+                        ResumeSkillIds = x.ResumeSkills.Select(x=> x.SkillId).ToList()
+                    })
+                    .AsSplitQuery()
+                    .AsNoTracking()
+                    .ToListAsync();
 
             var notifications = new List<Notification>();
 
             foreach (var resume in resumes)
             {
-                var newNotification = new Notification
-                {
-                    ReceiverId = resume.UserId,
-                    SenderId = eventMessage.SenderId,
-                    Content = eventMessage.Content,
-                    InformationId = eventMessage.InformationId,
-                    IsSeen = false,
-                };
+                var matchingSkillsCount = resume.ResumeSkillIds.Intersect(eventMessage.SkillIds).Count();
 
-                notifications.Add(newNotification);
+                if (matchingSkillsCount >= (eventMessage.SkillIds.Count / 2.0))
+                {
+                    var newNotification = new Notification
+                    {
+                        ReceiverId = resume.UserId,
+                        SenderId = eventMessage.SenderId,
+                        InformationId = eventMessage.InformationId,
+                        IsSeen = false,
+                    };
+
+                    notifications.Add(newNotification);
+                }
             }
 
             if (notifications.Any())

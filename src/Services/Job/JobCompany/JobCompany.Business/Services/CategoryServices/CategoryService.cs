@@ -1,8 +1,10 @@
 using JobCompany.Business.Dtos.CategoryDtos;
+using JobCompany.Business.Exceptions.Common;
 using JobCompany.Business.Extensions;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
+using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;
 
 namespace JobCompany.Business.Services.CategoryServices
@@ -32,7 +34,7 @@ namespace JobCompany.Business.Services.CategoryServices
         {
             var categoryId = Guid.Parse(id);
             var category = await _context.Categories.FindAsync(categoryId) ??
-            throw new Exceptions.Common.NotFoundException<Category>();
+            throw new NotFoundException<Category>(MessageHelper.GetMessage("NOT_FOUND"));
 
             _context.Categories.Remove(category);
             await _context.SaveChangesAsync();

@@ -37,5 +37,6 @@ namespace JobCompany.Business.Dtos.VacancyDtos
         public bool IsActive { get; set; }
         public string CategoryName { get; set; }
         public Guid? ExamId { get; set; }
+        public bool IsSaved { get; set; }
     }
 }
