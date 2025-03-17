@@ -37,7 +37,7 @@ namespace Job.Business.Dtos.EducationDtos
                 .Must((dto, endDate) => dto.IsCurrentEducation || endDate.HasValue)
                 .WithMessage(MessageHelper.GetMessage("END_DATE_MUST_BE"))
                 .When(dto => dto.EndDate.HasValue)
-                .WithMessage(MessageHelper.GetMessage("STARTDATE_MUST_BE_EARL?ER_ENDATE"));
+                .WithMessage(MessageHelper.GetMessage("STARTDATE_MUST_BE_EARLIER_ENDATE"));
             RuleFor(dto => dto.ProfessionDegree)
                 .IsInEnum()
                 .WithMessage(MessageHelper.GetMessage("INVALID_FORMAT"));

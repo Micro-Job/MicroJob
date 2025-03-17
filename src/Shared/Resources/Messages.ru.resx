@@ -129,6 +129,9 @@
   <data name="AUTHENTICATION_FAILED" xml:space="preserve">
     <value>Ошибка аутентификации</value>
   </data>
+  <data name="BIRTHDAY_MUST_BE_IN_THE_PAST" xml:space="preserve">
+    <value>День рождения должен быть в прошлом</value>
+  </data>
   <data name="CANNOT_BE_EMPTY" xml:space="preserve">
     <value>Не может быть пустым</value>
   </data>
@@ -207,7 +210,7 @@
   <data name="SESSION_EXPIRED" xml:space="preserve">
     <value>Время вашей сессии истекло</value>
   </data>
-  <data name="STARTDATE_MUST_BE_EARLİER_ENDATE" xml:space="preserve">
+  <data name="STARTDATE_MUST_BE_EARLIER_ENDATE" xml:space="preserve">
     <value>Время начала должно быть раньше времени окончания.</value>
   </data>
   <data name="START_DATE_CANNOT_BE_IN_THE_FUTURE" xml:space="preserve">

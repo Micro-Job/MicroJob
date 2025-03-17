@@ -38,7 +38,7 @@ namespace Job.Business.Services.Education
                 .ToListAsync();
 
             if (!educations.Any())
-                throw new NotFoundException<Core.Entities.Education>();
+                throw new NotFoundException<Core.Entities.Education>(MessageHelper.GetMessage("NOT_FOUND"));
 
             educations = educations
                 .Select(education =>

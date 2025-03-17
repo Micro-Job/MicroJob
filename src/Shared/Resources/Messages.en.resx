@@ -129,6 +129,9 @@
   <data name="AUTHENTICATION_FAILED" xml:space="preserve">
     <value>Authentication failed</value>
   </data>
+  <data name="BIRTHDAY_MUST_BE_IN_THE_PAST" xml:space="preserve">
+    <value>Birthday date must be in the past</value>
+  </data>
   <data name="CANNOT_BE_EMPTY" xml:space="preserve">
     <value>Cannot be empty</value>
   </data>
@@ -207,7 +210,7 @@
   <data name="SESSION_EXPIRED" xml:space="preserve">
     <value>Your session has expired</value>
   </data>
-  <data name="STARTDATE_MUST_BE_EARLİER_ENDATE" xml:space="preserve">
+  <data name="STARTDATE_MUST_BE_EARLIER_ENDATE" xml:space="preserve">
     <value>Start time must be before end time</value>
   </data>
   <data name="START_DATE_CANNOT_BE_IN_THE_FUTURE" xml:space="preserve">

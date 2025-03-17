@@ -129,6 +129,9 @@
   <data name="AUTHENTICATION_FAILED" xml:space="preserve">
     <value>Giriş uğursuzdur</value>
   </data>
+  <data name="BIRTHDAY_MUST_BE_IN_THE_PAST" xml:space="preserve">
+    <value>Ad günü tarixi keçmişdə olmalıdır</value>
+  </data>
   <data name="CANNOT_BE_EMPTY" xml:space="preserve">
     <value>Boş ola bilməz</value>
   </data>
@@ -207,7 +210,7 @@
   <data name="SESSION_EXPIRED" xml:space="preserve">
     <value>Sessiyanızın müddəti bitmişdir</value>
   </data>
-  <data name="STARTDATE_MUST_BE_EARLİER_ENDATE" xml:space="preserve">
+  <data name="STARTDATE_MUST_BE_EARLIER_ENDATE" xml:space="preserve">
     <value>Başlama vaxtı bitiş vaxtında əvvəl olmalıdır</value>
   </data>
   <data name="START_DATE_CANNOT_BE_IN_THE_FUTURE" xml:space="preserve">
