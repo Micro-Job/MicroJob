@@ -16,17 +16,8 @@ using SharedLibrary.HelperServices.Current;
 
 namespace JobCompany.Business.Services.ExamServices
 {
-    public class ExamService(
-        JobCompanyDbContext _context,
-        IQuestionService _questionService,
-        IHttpContextAccessor _contextAccessor,
-        ICurrentUser _user
-    ) : IExamService
+    public class ExamService(JobCompanyDbContext _context,IQuestionService _questionService,ICurrentUser _currentUser) : IExamService
     {
-        private readonly Guid userGuid = Guid.Parse(
-            _contextAccessor?.HttpContext?.User.FindFirst(ClaimTypes.Sid)?.Value!
-        );
-
         public async Task<Guid> CreateExamAsync(CreateExamDto dto)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
@@ -119,7 +110,7 @@ namespace JobCompany.Business.Services.ExamServices
                         {
                             Id = eq.Question.Id,
                             Title = eq.Question.Title,
-                            Image = eq.Question.Image != null ? $"{_user.BaseUrl}/{eq.Question.Image}" : null,
+                            Image = eq.Question.Image != null ? $"{_currentUser.BaseUrl}/{eq.Question.Image}" : null,
                             QuestionType = eq.Question.QuestionType,
                             IsRequired = eq.Question.IsRequired,
                             Answers = eq
@@ -146,6 +137,7 @@ namespace JobCompany.Business.Services.ExamServices
                     e.Id == examGuid && e.Company.UserId == userGuid
                 ) ?? throw new SharedLibrary.Exceptions.NotFoundException<Exam>(MessageHelper.GetMessage("NOT_FOUND"));
 
+
             _context.Exams.Remove(exam);
 
             await _context.SaveChangesAsync();
@@ -168,18 +160,22 @@ namespace JobCompany.Business.Services.ExamServices
             return exams;
         }
 
-        public async Task<GetExamDetailResponse> GetExamIntroAsync(string examId)
+        public async Task<GetExamIntroDto> GetExamIntroAsync(string examId)
         {
             var examGuid = Guid.Parse(examId);
+
+            if (await _context.UserExams.AnyAsync(x => x.ExamId == examGuid && x.UserId == _currentUser.UserGuid && x.Exam.Vacancies.Any(y=> y.ExamId == examGuid)))
+                throw new BadRequestException("Siz bu imtahan");
+
             var data = await _context.Exams.Where(x=> x.Id == examGuid)
-                .Select(x=> new GetExamDetailResponse
+                .Select(x=> new GetExamIntroDto
                 {
                     CompanyName = x.Company.CompanyName,
                     IntroDescription = x.IntroDescription,
                     Duration = x.Duration,
-                    //IsTaken = x.UserExams.Any(ue => ue.ExamId == examId && ue.UserId == userGuid);
                     QuestionCount = x.ExamQuestions.Count,
                     LimitRate = x.LimitRate,
+                    //FullName = ,
                 })
                 .FirstOrDefaultAsync() ?? throw new NotFoundException<Exam>(MessageHelper.GetMessage("NOT_FOUND"));
 
@@ -206,7 +202,7 @@ namespace JobCompany.Business.Services.ExamServices
                 {
                     Id = eq.Question.Id,
                     Title = eq.Question.Title,
-                    Image = eq.Question.Image != null ? $"{_user.BaseUrl}/{eq.Question.Image}" : null,
+                    Image = eq.Question.Image != null ? $"{_currentUser.BaseUrl}/{eq.Question.Image}" : null,
                     QuestionType = eq.Question.QuestionType,
                     IsRequired = eq.Question.IsRequired,
                     Answers = eq.Question.Answers.Select(a => new AnswerPublicDto

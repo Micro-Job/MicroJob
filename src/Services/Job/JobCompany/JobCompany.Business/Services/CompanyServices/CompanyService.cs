@@ -114,7 +114,7 @@ namespace JobCompany.Business.Services.CompanyServices
             {
                 Datas = companies,
                 TotalCount = count,
-                TotalPage = (int)Math.Ceiling((double)count / take)
+                //TotalPage = (int)Math.Ceiling((double)count / take)
             };
         }
 
@@ -132,13 +132,13 @@ namespace JobCompany.Business.Services.CompanyServices
                             CompanyLogo = $"{_authServiceBaseUrl}/{x.CompanyLogo}",
                             WebLink = x.WebLink,
                             UserId = x.UserId,
-                            CompanyNumbers = x
-                                .CompanyNumbers.Select(cn => new CompanyNumberDto
-                                {
-                                    Id = cn.Id,
-                                    Number = cn.Number,
-                                })
-                                .ToList(),
+                            CompanyNumbers = x.CompanyNumbers
+                                            .Select(cn => new CompanyNumberDto
+                                            {
+                                                Id = cn.Id,
+                                                Number = cn.Number,
+                                            })
+                                            .ToList(),
                         })
                         .FirstOrDefaultAsync()
                     ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>(MessageHelper.GetMessage("NOT_FOUND"));

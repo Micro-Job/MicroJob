@@ -297,6 +297,7 @@ namespace JobCompany.Business.Services.VacancyServices
                         Driver = x.Driver,
                         Citizenship = x.Citizenship,
                         ExamId = x.ExamId,
+                        IsSaved = _currentUser.UserId != null ? x.SavedVacancies.Any(y=> y.UserId == _currentUser.UserGuid && y.VacancyId == vacancyGuid) : false,
                         VacancyNumbers = x
                             .VacancyNumbers.Select(vn => new VacancyNumberDto
                             {
@@ -399,12 +400,11 @@ namespace JobCompany.Business.Services.VacancyServices
                     StartDate = v.StartDate,
                     Location = v.Location,
                     ViewCount = v.ViewCount,
-                    IsActive = v.IsActive,
                     WorkType = v.WorkType,
                     WorkStyle = v.WorkStyle,
                     MainSalary = v.MainSalary,
                     MaxSalary = v.MaxSalary,
-                    IsSaved = v.SavedVacancies.Any(x => x.VacancyId == v.Id && x.UserId == _currentUser.UserGuid)
+                    IsSaved =  _currentUser.UserId != null ? v.SavedVacancies.Any(x=> x.VacancyId == v.Id && x.UserId == _currentUser.UserGuid) : false
                 })
                 .Skip(Math.Max(0, (skip - 1) * take))
                 .Take(take)
