@@ -24,7 +24,7 @@ namespace JobCompany.Business.Services.ExamServices
 
             var company =
                 await _context.Companies.FirstOrDefaultAsync(a => a.UserId == _currentUser.UserGuid)
-                ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>(MessageHelper.GetMessage("NOT_FOUND"));
+                ?? throw new NotFoundException<Company>(MessageHelper.GetMessage("NOT_FOUND"));
 
             try
             {
@@ -90,7 +90,7 @@ namespace JobCompany.Business.Services.ExamServices
                         Duration = e.Duration,
                     })
                     .FirstOrDefaultAsync(e => e.Id == examGuid)
-                ?? throw new SharedLibrary.Exceptions.NotFoundException<Exam>(MessageHelper.GetMessage("NOT_FOUND"));
+                ?? throw new NotFoundException<Exam>(MessageHelper.GetMessage("NOT_FOUND"));
         }
 
         public async Task<GetQuestionByStepDto> GetExamQuestionByStepAsync(string examId, int step)
@@ -123,7 +123,7 @@ namespace JobCompany.Business.Services.ExamServices
                         },
                     })
                     .FirstOrDefaultAsync()
-                ?? throw new SharedLibrary.Exceptions.NotFoundException<Question>(MessageHelper.GetMessage("NOT_FOUND"));
+                ?? throw new NotFoundException<Question>(MessageHelper.GetMessage("NOT_FOUND"));
 
             return question;
         }
@@ -135,7 +135,7 @@ namespace JobCompany.Business.Services.ExamServices
             var exam =
                 await _context.Exams.FirstOrDefaultAsync(e =>
                     e.Id == examGuid && e.Company.UserId == _currentUser.UserGuid
-                ) ?? throw new SharedLibrary.Exceptions.NotFoundException<Exam>(MessageHelper.GetMessage("NOT_FOUND"));
+                ) ?? throw new NotFoundException<Exam>(MessageHelper.GetMessage("NOT_FOUND"));
 
 
             _context.Exams.Remove(exam);

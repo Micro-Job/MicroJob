@@ -9,12 +9,14 @@ using AuthService.DAL.Contexts;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using SharedLibrary.Dtos.EmailDtos;
 using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.Events;
 using SharedLibrary.Exceptions;
 using SharedLibrary.ExternalServices.FileService;
 using SharedLibrary.Helpers;
+using SharedLibrary.HelperServices.Current;
 using SharedLibrary.Statics;
 
 namespace AuthService.Business.Services.Auth
@@ -24,12 +26,13 @@ namespace AuthService.Business.Services.Auth
         ITokenHandler _tokenHandler,
         IHttpContextAccessor _httpContext,
         IPublishEndpoint _publishEndpoint,
-        EmailPublisher _publisher,
-        IFileService _fileService
+        IFileService _fileService,
+        IConfiguration _configuration
     ) : IAuthService
     {
-        private string _ipAddress = _httpContext.HttpContext.Connection.RemoteIpAddress?.ToString();
         private string _userId = _httpContext.HttpContext?.User?.FindFirst(ClaimTypes.Sid)?.Value;
+
+        private readonly string? _authServiceBaseUrl = _configuration["AuthService:BaseUrl"];
 
         public async Task RegisterAsync(RegisterDto dto)
         {
@@ -221,6 +224,7 @@ namespace AuthService.Business.Services.Auth
                 AccessToken = accessToken,
                 RefreshToken = refreshToken.Token,
                 Expires = refreshToken.Expires,
+                UserImage = user.Image != null ? $"{_authServiceBaseUrl}/{user.Image}" : null
             };
         }
 
@@ -255,6 +259,7 @@ namespace AuthService.Business.Services.Auth
                 RefreshToken = newRefreshToken.Token,
                 UserStatusId = (byte)user.UserRole,
                 Expires = newRefreshToken.Expires,
+                UserImage = user.Image != null ? $"{_authServiceBaseUrl}/{user.Image}" : null
             };
         }
 
