@@ -2,6 +2,7 @@ using Job.Business.Dtos.LanguageDtos;
 using Job.Business.Exceptions.Common;
 using Job.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
+using SharedLibrary.Helpers;
 
 namespace Job.Business.Services.Language
 {
@@ -53,7 +54,7 @@ namespace Job.Business.Services.Language
 
             var language = await context.Languages
                 .FirstOrDefaultAsync(x => x.Id == parsedId && x.ResumeId == resumeId)
-                ?? throw new NotFoundException<Core.Entities.Language>();
+                ?? throw new NotFoundException<Core.Entities.Language>(MessageHelper.GetMessage("NOT_FOUND"));
 
             MapLanguageDtoToEntityForUpdate(language, dto);
 

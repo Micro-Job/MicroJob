@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Shared.Responses;
 using SharedLibrary.Exceptions;
+using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;
 using SharedLibrary.Requests;
 using SharedLibrary.Responses;
@@ -25,7 +26,7 @@ namespace Job.Business.Services.Notification
                 SenderId = notificationDto.SenderId,
                 CreatedDate = DateTime.Now,
                 InformationId = notificationDto.InformationId,
-                //Content = notificationDto.Content,
+                InformationName = notificationDto.InformationName,
                 IsSeen = false,
             };
 
@@ -45,6 +46,7 @@ namespace Job.Business.Services.Notification
             {
                 query = query.OrderBy(n => n.IsSeen).ThenByDescending(n => n.CreatedDate);
             }
+
 
             var notifications = await query
             .Select(n => new NotificationListDto
@@ -72,7 +74,7 @@ namespace Job.Business.Services.Notification
         {
             var notification =
                 await _context.Notifications.FirstOrDefaultAsync(x=> x.Id == notificationId)
-                ?? throw new NotFoundException<Core.Entities.Notification>();
+                ?? throw new NotFoundException<Core.Entities.Notification>(MessageHelper.GetMessage("NOT_FOUND"));
 
             notification.IsSeen = true;
 

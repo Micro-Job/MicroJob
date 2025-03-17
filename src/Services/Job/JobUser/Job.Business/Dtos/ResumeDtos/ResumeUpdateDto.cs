@@ -4,6 +4,7 @@ using Job.Core.Enums;
 using Microsoft.AspNetCore.Http;
 using Shared.Enums;
 using SharedLibrary.Enums;
+using SharedLibrary.Helpers;
 
 namespace Job.Business.Dtos.ResumeDtos
 {
@@ -32,22 +33,22 @@ namespace Job.Business.Dtos.ResumeDtos
         public ResumeUpdateDtoValidator()
         {
             RuleFor(x => x.FatherName)
-                .NotEmpty().WithMessage("Father's name is required.")
-                .MaximumLength(50).WithMessage("Father's name cannot exceed 50 characters.");
+                .NotEmpty().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
+                .MaximumLength(50).WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_50"));
 
             RuleFor(x => x.Position)
-                .NotEmpty().WithMessage("Position is required.")
-                .MaximumLength(100).WithMessage("Position cannot exceed 100 characters.");
+                .NotEmpty().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
+                .MaximumLength(100).WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_100"));
 
             RuleFor(x => x.Adress)
-                .MaximumLength(200).WithMessage("Address cannot exceed 200 characters.");
+                .MaximumLength(200).WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_200"));
 
             RuleFor(x => x.BirthDay)
-                .NotEmpty().WithMessage("Birthday is required.")
-                .LessThan(DateTime.Now).WithMessage("Birthday must be in the past.");
+                .NotEmpty().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
+                .LessThan(DateTime.Now).WithMessage(MessageHelper.GetMessage("BIRTHDAY_MUST_BE_IN_THE_PAST"));
 
             RuleFor(x => x.Gender)
-                .IsInEnum().WithMessage("Gender must be a valid option.");
+                .IsInEnum().WithMessage(MessageHelper.GetMessage("INVALID_FORMAT"));
         }
     }
 }

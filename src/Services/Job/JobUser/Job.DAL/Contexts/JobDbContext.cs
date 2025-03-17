@@ -20,8 +20,6 @@ namespace Job.DAL.Contexts
         public DbSet<Notification> Notifications { get; set; }
 
         public DbSet<SkillTranslation> SkillTranslations { get; set; }
-        public DbSet<NotificationTranslation> NotificationTranslations { get; set; }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());

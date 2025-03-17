@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SharedLibrary.Exceptions;
+using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;
 
 namespace JobCompany.Business.Services.NotificationServices
@@ -59,7 +60,7 @@ namespace JobCompany.Business.Services.NotificationServices
             var notificationGuid = Guid.Parse(id);
 
             var notification = await _context.Notifications.FirstOrDefaultAsync(x =>x.Id == notificationGuid && x.Receiver.UserId == _currentUser.UserGuid) 
-                                            ?? throw new NotFoundException<Notification>();
+                                            ?? throw new NotFoundException<Notification>(MessageHelper.GetMessage("NOT_FOUND"));
 
             notification.IsSeen = true;
 
