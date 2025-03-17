@@ -23,7 +23,7 @@ namespace JobCompany.Business.Services.ExamServices
             using var transaction = await _context.Database.BeginTransactionAsync();
 
             var company =
-                await _context.Companies.FirstOrDefaultAsync(a => a.UserId == userGuid)
+                await _context.Companies.FirstOrDefaultAsync(a => a.UserId == _currentUser.UserGuid)
                 ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>(MessageHelper.GetMessage("NOT_FOUND"));
 
             try
@@ -134,7 +134,7 @@ namespace JobCompany.Business.Services.ExamServices
 
             var exam =
                 await _context.Exams.FirstOrDefaultAsync(e =>
-                    e.Id == examGuid && e.Company.UserId == userGuid
+                    e.Id == examGuid && e.Company.UserId == _currentUser.UserGuid
                 ) ?? throw new SharedLibrary.Exceptions.NotFoundException<Exam>(MessageHelper.GetMessage("NOT_FOUND"));
 
 
@@ -216,7 +216,7 @@ namespace JobCompany.Business.Services.ExamServices
 
         public async Task<SubmitExamResultDto> EvaluateExamAnswersAsync(SubmitExamAnswersDto dto)
         {
-            var userGuid = _user.UserGuid ?? throw new InvalidOperationException("UserId can not be null");
+            var userGuid = _currentUser.UserGuid ?? throw new InvalidOperationException("UserId can not be null");
             var exam = await _context.Exams
                 .Include(e => e.ExamQuestions)
                 .ThenInclude(eq => eq.Question)
