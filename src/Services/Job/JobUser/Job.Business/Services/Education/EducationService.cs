@@ -2,6 +2,7 @@
 using Job.Business.Exceptions.Common;
 using Job.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
+using SharedLibrary.Helpers;
 
 namespace Job.Business.Services.Education
 {
@@ -61,7 +62,7 @@ namespace Job.Business.Services.Education
         {
             var education =
                 await context.Educations.FindAsync(dto.Id)
-                ?? throw new NotFoundException<Core.Entities.Education>();
+                ?? throw new NotFoundException<Core.Entities.Education>(MessageHelper.GetMessage("NOT_FOUND"));
 
             MapEducationDtoToEntityForUpdate(education, dto);
         }

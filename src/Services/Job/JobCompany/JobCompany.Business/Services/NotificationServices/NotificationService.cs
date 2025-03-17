@@ -30,8 +30,9 @@ namespace JobCompany.Business.Services.NotificationServices
                     ReceiverId = n.ReceiverId,
                     SenderId = n.SenderId,
                     InformationId = n.InformationId,
+                    InformationName = n.InformationName,
                     CreatedDate = n.CreatedDate,
-                    //Content = n.Content,
+                    
                     IsSeen = n.IsSeen,
                 })
                 .Skip(Math.Max(0,(skip - 1)*take))

@@ -1,9 +1,10 @@
 using FluentValidation;
 using Job.Core.Enums;
+using SharedLibrary.Helpers;
 
 namespace Job.Business.Dtos.EducationDtos
 {
-    public record EducationCreateDto
+    public class EducationCreateDto
     {
         public string InstitutionName { get; set; }
         public string Profession { get; set; }
@@ -19,28 +20,27 @@ namespace Job.Business.Dtos.EducationDtos
         {
             RuleFor(dto => dto.InstitutionName)
                 .NotEmpty()
-                .WithMessage("Institution Name cannot be empty.")
+                .WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
                 .Length(2, 100)
-                .WithMessage("Institution Name must be between 2 and 100 characters.");
+                .WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_100"));
             RuleFor(dto => dto.Profession)
                 .NotEmpty()
-                .WithMessage("Profession cannot be empty.")
+                .WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
                 .Length(2, 50)
-                .WithMessage("Profession must be between 2 and 50 characters.");
+                .WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_50"));
             RuleFor(dto => dto.StartDate)
                 .NotEmpty()
-                .WithMessage("Start Date cannot be empty.")
+                .WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
                 .LessThanOrEqualTo(DateTime.Now)
-                .WithMessage("Start Date cannot be in the future.");
+                .WithMessage(MessageHelper.GetMessage("START_DATE_CANNOT_BE_IN_THE_FUTURE"));
             RuleFor(dto => dto.EndDate)
                 .Must((dto, endDate) => dto.IsCurrentEducation || endDate.HasValue)
-                .WithMessage("End Date must be provided if the education is not current.")
-                .GreaterThan(dto => dto.StartDate)
+                .WithMessage(MessageHelper.GetMessage("END_DATE_MUST_BE"))
                 .When(dto => dto.EndDate.HasValue)
-                .WithMessage("End Date must be after Start Date.");
+                .WithMessage(MessageHelper.GetMessage("STARTDATE_MUST_BE_EARL?ER_ENDATE"));
             RuleFor(dto => dto.ProfessionDegree)
                 .IsInEnum()
-                .WithMessage("Profession Degree must be a valid enum value.");
+                .WithMessage(MessageHelper.GetMessage("INVALID_FORMAT"));
         }
     }
 }

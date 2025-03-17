@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace JobCompany.DAL.Configurations
 {
-    internal class NotificationConfiguration : IEntityTypeConfiguration<Notification>
+    public class NotificationConfiguration : IEntityTypeConfiguration<Notification>
     {
         public void Configure(EntityTypeBuilder<Notification> builder)
         {
@@ -14,7 +14,6 @@ namespace JobCompany.DAL.Configurations
 
             builder.Property(x => x.CreatedDate)
                 .HasDefaultValueSql("getdate()");
-
         }
     }
 }

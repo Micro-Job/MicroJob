@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="ALL_LANGUAGES_REQUIRED" xml:space="preserve">
+    <value>Должен быть добавлен на 3 языках</value>
+  </data>
   <data name="APPLICATION_ALREADY_EXIST" xml:space="preserve">
     <value>Заявка на данную вакансию уже доступна</value>
   </data>
@@ -129,17 +132,41 @@
   <data name="CANNOT_BE_EMPTY" xml:space="preserve">
     <value>Не может быть пустым</value>
   </data>
+  <data name="END_DATE_MUST_BE" xml:space="preserve">
+    <value>Необходимо указать дату окончания, если образование не актуально.</value>
+  </data>
+  <data name="END_DATE_MUST_NOT_BE_IN_THE_PAST" xml:space="preserve">
+    <value>Срок годности не может быть в прошлом</value>
+  </data>
+  <data name="GREATER_THAN_OR_EQUAL_TO_ZERO" xml:space="preserve">
+    <value>Число должно быть больше или равно 0</value>
+  </data>
   <data name="INVALID_FORMAT" xml:space="preserve">
     <value>Неверный формат</value>
   </data>
   <data name="INVALID_USER_STATUS" xml:space="preserve">
     <value>Указанный статус пользователя недействителен</value>
   </data>
+  <data name="LENGTH_MUST_BE_BETWEEN_1_100" xml:space="preserve">
+    <value>Длина должна быть от 1 до 100</value>
+  </data>
+  <data name="LENGTH_MUST_BE_BETWEEN_1_1000" xml:space="preserve">
+    <value>Длина должна быть от 1 до 1000</value>
+  </data>
+  <data name="LENGTH_MUST_BE_BETWEEN_1_200" xml:space="preserve">
+    <value>Длина должна быть от 1 до 200</value>
+  </data>
   <data name="LENGTH_MUST_BE_BETWEEN_1_50" xml:space="preserve">
     <value>Длина должна быть от 1 до 50</value>
   </data>
+  <data name="LENGTH_MUST_BE_BETWEEN_1_500" xml:space="preserve">
+    <value>Длина должна быть от 1 до 500</value>
+  </data>
   <data name="LOGIN_REQUIRED" xml:space="preserve">
     <value>Пожалуйста, войдите снова, чтобы продолжить</value>
+  </data>
+  <data name="MAIN_SALARY" xml:space="preserve">
+    <value>Основная зарплата не может превышать максимальную зарплату</value>
   </data>
   <data name="NOTFOUNDEXCEPTION_USER" xml:space="preserve">
     <value>Пользователь не существует</value>
@@ -179,6 +206,12 @@
   </data>
   <data name="SESSION_EXPIRED" xml:space="preserve">
     <value>Время вашей сессии истекло</value>
+  </data>
+  <data name="STARTDATE_MUST_BE_EARLİER_ENDATE" xml:space="preserve">
+    <value>Время начала должно быть раньше времени окончания.</value>
+  </data>
+  <data name="START_DATE_CANNOT_BE_IN_THE_FUTURE" xml:space="preserve">
+    <value>Время начала не может быть в будущем</value>
   </data>
   <data name="STATUS_PERMISSION" xml:space="preserve">
     <value>Вам не разрешено удалять статус</value>

@@ -25,7 +25,7 @@ namespace Job.Business.Services.Notification
                 SenderId = notificationDto.SenderId,
                 CreatedDate = DateTime.Now,
                 InformationId = notificationDto.InformationId,
-                //Content = notificationDto.Content,
+                InformationName = notificationDto.InformationName,
                 IsSeen = false,
             };
 
@@ -55,7 +55,7 @@ namespace Job.Business.Services.Notification
                     // CompanyLogo = company?.CompanyImage,
                     InformationId = n.InformationId,
                     CreatedDate = n.CreatedDate,
-                    //Content = n.Content,
+                    InformationName = n.InformationName,
                     IsSeen = n.IsSeen,
                 })
                 .OrderByDescending(n => n.CreatedDate)

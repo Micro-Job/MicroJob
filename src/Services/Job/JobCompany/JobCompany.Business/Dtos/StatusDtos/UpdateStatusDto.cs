@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using SharedLibrary.Enums;
+using SharedLibrary.Helpers;
 
 namespace JobCompany.Business.Dtos.StatusDtos;
 
@@ -24,8 +25,8 @@ public class UpdateStatusLanguageDtoValidator : AbstractValidator<UpdateStatusLa
     {
         RuleFor(x => x.Name.Trim())
             .NotEmpty()
-                .WithMessage("Status adı boş ola bilməz!")
+                .WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
             .Length(2, 32)
-                .WithMessage("Adın uzunluğu 2-32 arasında olmalıdır.");
+                .WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_50"));
     }
 }
