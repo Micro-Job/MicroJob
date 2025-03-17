@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using SharedLibrary.Helpers;
 
 namespace JobCompany.Business.Dtos.NumberDtos
 {
@@ -13,7 +14,7 @@ namespace JobCompany.Business.Dtos.NumberDtos
         {
             RuleFor(x => x.PhoneNumber)
                 .Matches(@"^(?:\+\d{1,3})?\d{1,4}\d{7,10}$")
-                .WithMessage("Telefon nömrəsi doğru formatda deyil");
+                .WithMessage(MessageHelper.GetMessage("INVALID_FORMAT"));
         }
     }
 }

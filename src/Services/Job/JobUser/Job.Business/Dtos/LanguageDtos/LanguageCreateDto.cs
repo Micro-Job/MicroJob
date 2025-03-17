@@ -1,4 +1,5 @@
 using FluentValidation;
+using SharedLibrary.Helpers;
 
 namespace Job.Business.Dtos.LanguageDtos
 {
@@ -13,9 +14,9 @@ namespace Job.Business.Dtos.LanguageDtos
         public LanguageCreateDtoValidator()
         {
             RuleFor(x => x.LanguageName)
-                .IsInEnum().WithMessage("Invalid language name.");
+                .IsInEnum().WithMessage(MessageHelper.GetMessage("INVALID_FORMAT"));
             RuleFor(x => x.LanguageLevel)
-                .IsInEnum().WithMessage("Invalid language level.");
+                .IsInEnum().WithMessage(MessageHelper.GetMessage("INVALID_FORMAT"));
         }
     }
 }

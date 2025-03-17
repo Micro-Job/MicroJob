@@ -15,5 +15,6 @@ namespace JobCompany.Core.Entites
         public Guid CompanyId { get; set; }
         public ICollection<ExamQuestion> ExamQuestions { get; set; }
         public byte? Duration { get; set; }
+        public ICollection<UserExam> UserExams { get; set; }
     }
 }

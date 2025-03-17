@@ -10,6 +10,6 @@ public record NotificationListDto
     // public string CompanyName { get; set; }
     // public string CompanyLogo { get; set; }
     public DateTime CreatedDate { get; set; }
-    public string Content { get; set; }
+    public string? InformationName { get; set; }
     public bool IsSeen { get; set; }
 }

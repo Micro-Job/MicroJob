@@ -6,6 +6,6 @@
         public Guid SenderId { get; set; }
         public Guid InformationId { get; set; }
         public DateTime CreatedDate { get; set; }
-        public string Content { get; set; }
+        public string? InformationName { get; set; }
     }
 }

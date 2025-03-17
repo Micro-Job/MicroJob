@@ -2,6 +2,7 @@ using Job.Business.Dtos.NumberDtos;
 using Job.Business.Exceptions.Common;
 using Job.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
+using SharedLibrary.Helpers;
 
 namespace Job.Business.Services.Number
 {
@@ -41,7 +42,7 @@ namespace Job.Business.Services.Number
             {
                 var number = await context.Numbers
                     .FirstOrDefaultAsync(n => n.PhoneNumber == numberUpdateDto.PhoneNumber && n.ResumeId == resumeId)
-                    ?? throw new NotFoundException<Core.Entities.Number>();
+                    ?? throw new NotFoundException<Core.Entities.Number>(MessageHelper.GetMessage("NOT_FOUND"));
                 
                 number.PhoneNumber = numberUpdateDto.PhoneNumber;
                 numbersToUpdate.Add(number);
@@ -57,7 +58,7 @@ namespace Job.Business.Services.Number
         {
             var number = await context.Numbers
                 .FirstOrDefaultAsync(n => n.PhoneNumber == numberUpdateDto.PhoneNumber)
-                ?? throw new NotFoundException<Core.Entities.Number>();
+                ?? throw new NotFoundException<Core.Entities.Number>(MessageHelper.GetMessage("NOT_FOUND"));
 
             number.PhoneNumber = numberUpdateDto.PhoneNumber;
             await context.SaveChangesAsync();

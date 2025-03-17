@@ -24,3 +24,14 @@ public class CreateSkillLanguageDtoValidator : AbstractValidator<CreateSkillLang
         RuleFor(x => x.Language).NotEmpty().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"));
     }
 }
+
+public class SkillCreateDtoValidator : AbstractValidator<SkillCreateDto>
+{
+    public SkillCreateDtoValidator()
+    {
+        RuleForEach(x => x.Skills).SetValidator(new CreateSkillLanguageDtoValidator());
+        RuleFor(x => x.Skills)
+            .Must(skills => skills.Select(s => s.Language).Distinct().Count() >= 3)
+            .WithMessage(MessageHelper.GetMessage("ALL_LANGUAGES_REQUIRED"));
+    }
+}

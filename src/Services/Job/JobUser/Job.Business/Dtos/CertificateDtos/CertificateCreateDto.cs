@@ -1,5 +1,6 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
+using SharedLibrary.Helpers;
 
 namespace Job.Business.Dtos.CertificateDtos
 {
@@ -15,15 +16,15 @@ namespace Job.Business.Dtos.CertificateDtos
         public CertificateCreateDtoValidator()
         {
             RuleFor(x => x.CertificateName)
-                .NotEmpty().WithMessage("Certificate name cannot be empty.")
-                .Length(1, 100).WithMessage("Certificate name must be between 1 and 100 characters.");
+                .NotEmpty().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
+                .Length(1, 100).WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_100"));
 
             RuleFor(x => x.GivenOrganization)
-                .NotEmpty().WithMessage("Given organization cannot be empty.")
-                .Length(1, 100).WithMessage("Given organization must be between 1 and 100 characters.");
+                .NotEmpty().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
+                .Length(1, 100).WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_100"));
 
             RuleFor(x => x.CertificateFile)
-                .NotNull().WithMessage("Certificate file cannot be empty.");
+                .NotNull().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"));
         }
     }
 }

@@ -1,7 +1,6 @@
-﻿namespace SharedLibrary.Requests
+﻿namespace SharedLibrary.Requests;
+
+public class GetUserDataRequest
 {
-    public class GetUserDataRequest
-    {
-        public Guid UserId { get; set; }
-    }
+    public Guid UserId { get; set; }
 }

@@ -1,9 +1,11 @@
 using JobCompany.Business.Dtos.CityDtos;
 using JobCompany.Business.Dtos.CountryDtos;
+using JobCompany.Business.Exceptions.Common;
 using JobCompany.Business.Extensions;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
+using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;
 
 namespace JobCompany.Business.Services.CountryServices
@@ -32,7 +34,8 @@ namespace JobCompany.Business.Services.CountryServices
         public async Task DeleteCountryAsync(string id)
         {
             var countryId = Guid.Parse(id);
-            var country = await _context.Countries.Include(x => x.Translations).Where(x => x.Id == countryId).FirstOrDefaultAsync();
+            var country = await _context.Countries.Include(x => x.Translations).Where(x => x.Id == countryId).FirstOrDefaultAsync()
+                ?? throw new NotFoundException<Country>(MessageHelper.GetMessage("NOT_FOUND"));
 
             var brandTranslations = country.Translations.Select(x => x).ToList();
             _context.CountryTranslations.RemoveRange(brandTranslations);

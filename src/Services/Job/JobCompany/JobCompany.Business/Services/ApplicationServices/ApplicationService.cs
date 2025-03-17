@@ -65,9 +65,9 @@ namespace JobCompany.Business.Services.ApplicationServices
             var existApplication =
                 await _context.Applications.FirstOrDefaultAsync(x =>
                     x.Id == applicationGuid && x.UserId == _currentUser.UserGuid
-                ) ?? throw new NotFoundException<Application>();
+                ) ?? throw new NotFoundException<Application>(MessageHelper.GetMessage("NOT_FOUND"));
             if (existApplication.IsActive == false)
-                throw new ApplicationStatusIsDeactiveException();
+                throw new ApplicationStatusIsDeactiveException(MessageHelper.GetMessage("APPLICATION_IS_DEACTIVE"));
             existApplication.IsActive = false;
             await _context.SaveChangesAsync();
         }
@@ -96,7 +96,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                         },
                     })
                     .FirstOrDefaultAsync()
-                ?? throw new NotFoundException<Application>("Müraciət mövcud deyil!");
+                ?? throw new NotFoundException<Application>(MessageHelper.GetMessage("NOT_FOUND"));
 
             var application = existAppVacancy.Application;
             var vacancy = existAppVacancy.Vacancy;
@@ -202,7 +202,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                             .Select(s => s.GetTranslation(_currentUser.LanguageCode))
                             .ToList(),
                     })
-                    .FirstOrDefaultAsync() ?? throw new NotFoundException<Application>();
+                    .FirstOrDefaultAsync() ?? throw new NotFoundException<Application>(MessageHelper.GetMessage("NOT_FOUND"));
             return application;
         }
 
@@ -235,7 +235,7 @@ namespace JobCompany.Business.Services.ApplicationServices
         {
             var company =
                 await _context.Companies.FirstOrDefaultAsync(c => c.UserId == _currentUser.UserGuid)
-                ?? throw new NotFoundException<Company>();
+                ?? throw new NotFoundException<Company>(MessageHelper.GetMessage("NOT_FOUND"));
             var applications = await _context
                 .Applications.Include(a => a.Vacancy)
                 .ThenInclude(v => v.Company)
@@ -332,7 +332,7 @@ namespace JobCompany.Business.Services.ApplicationServices
 
         public async Task CreateUserApplicationAsync(string vacancyId)
         {
-            var userGuid = _currentUser.UserGuid ?? throw new Exception("UserGuid cannot be null");
+            var userGuid = _currentUser.UserGuid ?? throw new Exception(MessageHelper.GetMessage("NOT_FOUND"));
             var vacancyGuid = Guid.Parse(vacancyId);
             var existApplication = await _context.Applications.Where(a => a.VacancyId == vacancyGuid && a.UserId == userGuid).FirstOrDefaultAsync();
             if (existApplication != null) throw new ApplicationIsAlreadyExistException(MessageHelper.GetMessage("APPLICATION_ALREADY_EXIST"));
@@ -340,10 +340,10 @@ namespace JobCompany.Business.Services.ApplicationServices
             var vacancyInfo = await _context.Vacancies
                 .Where(v => v.Id == vacancyGuid)
                 .Select(v => new { v.CompanyId, v.Title })
-                .FirstOrDefaultAsync() ?? throw new NotFoundException<Company>();
+                .FirstOrDefaultAsync() ?? throw new NotFoundException<Company>("NOT_FOUND");
 
             var status = await _context.Statuses.FirstOrDefaultAsync(s => s.Order == 1)
-                ?? throw new NotFoundException<Status>();
+                ?? throw new NotFoundException<Status>(MessageHelper.GetMessage("NOT_FOUND"));
 
             var responseUser = await _requestUser.GetResponse<GetUserDataResponse>(
                 new GetUserDataRequest { UserId = userGuid }
@@ -375,7 +375,7 @@ namespace JobCompany.Business.Services.ApplicationServices
 
         public async Task<PaginatedApplicationDto> GetUserApplicationsAsync(int skip, int take)
         {
-            var userGuid = _currentUser.UserGuid ?? throw new Exception("User not found");
+            var userGuid = _currentUser.UserGuid;
 
             var query = _context.Applications
                 .Where(a => a.UserId == userGuid);
@@ -424,7 +424,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                 .ThenInclude(c => c.Translations)
                 .Where(a => a.UserId == userGuid && a.Id == applicationGuid)
                 .FirstOrDefaultAsync()
-                ?? throw new NotFoundException<Application>("NOT_FOUND");
+                ?? throw new NotFoundException<Application>(MessageHelper.GetMessage("NOT_FOUND"));
 
             return new GetApplicationDetailResponse
             {

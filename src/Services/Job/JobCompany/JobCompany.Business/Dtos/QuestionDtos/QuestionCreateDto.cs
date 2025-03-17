@@ -2,6 +2,7 @@ using FluentValidation;
 using JobCompany.Business.Dtos.AnswerDtos;
 using JobCompany.Core.Enums;
 using Microsoft.AspNetCore.Http;
+using SharedLibrary.Helpers;
 
 namespace JobCompany.Business.Dtos.QuestionDtos
 {
@@ -18,7 +19,7 @@ namespace JobCompany.Business.Dtos.QuestionDtos
     {
         public QuestionCreateDtoValidator()
         {
-            RuleFor(q => q.Title).NotEmpty().WithMessage("Sual başlığı boş ola bilməz.");
+            RuleFor(q => q.Title).NotEmpty().WithMessage(MessageHelper.GetMessage("NOT_FOUND"));
         }
     }
 }

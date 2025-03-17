@@ -1,5 +1,6 @@
 ﻿using JobCompany.Business.Dtos.ExamDtos;
 using JobCompany.Business.Dtos.QuestionDtos;
+using Shared.Responses;
 
 namespace JobCompany.Business.Services.ExamServices
 {
@@ -10,5 +11,9 @@ namespace JobCompany.Business.Services.ExamServices
         Task<GetExamByIdDto> GetExamByIdAsync(string examId);
         Task<GetQuestionByStepDto> GetExamQuestionByStepAsync(string examId, int step);
         Task DeleteExamAsync(string examId);
+
+        Task<GetExamIntroDto> GetExamIntroAsync(string examId);
+        Task<GetExamQuestionsDetailDto> GetExamQuestionsAsync(string examId);
+        Task<SubmitExamResultDto> EvaluateExamAnswersAsync(SubmitExamAnswersDto dto);
     }
 }

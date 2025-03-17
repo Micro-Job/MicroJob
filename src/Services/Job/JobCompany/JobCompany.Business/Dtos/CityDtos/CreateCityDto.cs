@@ -1,4 +1,5 @@
 using FluentValidation;
+using JobCompany.Business.Dtos.CategoryDtos;
 using SharedLibrary.Enums;
 using SharedLibrary.Helpers;
 
@@ -23,5 +24,17 @@ public class CreateCityLanguageDtoValidator : AbstractValidator<CreateCityLangua
     {
         RuleFor(x => x.Name).NotEmpty().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"));
         RuleFor(x => x.language).NotEmpty().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"));
+    }
+}
+
+
+public class CreateCityDtoValidator : AbstractValidator<CreateCityDto>
+{
+    public CreateCityDtoValidator()
+    {
+        RuleForEach(x => x.Cities).SetValidator(new CreateCityLanguageDtoValidator());
+        RuleFor(x => x.Cities)
+            .Must(skills => skills.Select(s => s.language).Distinct().Count() >= 3)
+            .WithMessage(MessageHelper.GetMessage("ALL_LANGUAGES_REQUIRED"));
     }
 }

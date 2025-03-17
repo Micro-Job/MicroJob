@@ -7,8 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Dtos\ApplicationDtos\**" />
     <Compile Remove="HelperServices\**" />
+    <EmbeddedResource Remove="Dtos\ApplicationDtos\**" />
     <EmbeddedResource Remove="HelperServices\**" />
+    <None Remove="Dtos\ApplicationDtos\**" />
     <None Remove="HelperServices\**" />
   </ItemGroup>
 
@@ -28,10 +31,6 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Dtos\ApplicationDtos\" />
   </ItemGroup>
 
 </Project>

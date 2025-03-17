@@ -5,6 +5,7 @@ using JobCompany.Business.Extensions;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
+using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;
 
 namespace JobCompany.Business.Services.CityServices
@@ -85,7 +86,8 @@ namespace JobCompany.Business.Services.CityServices
         public async Task DeleteCityAsync(string cityId)
         {
             var cityGuid = Guid.Parse(cityId);
-            var city = await _context.Cities.Include(x => x.Translations).Where(x => x.Id == cityGuid).FirstOrDefaultAsync();
+            var city = await _context.Cities.Include(x => x.Translations).Where(x => x.Id == cityGuid).FirstOrDefaultAsync()
+                ?? throw new NotFoundException<City>(MessageHelper.GetMessage("NOT_FOUND"));
 
             var cityTranslations = city.Translations.Select(x => x).ToList();
             _context.CityTranslations.RemoveRange(cityTranslations);

@@ -18,6 +18,6 @@ public class CountryTranslationConfiguration : IEntityTypeConfiguration<CountryT
         builder.HasOne(x => x.Country)
             .WithMany(x => x.Translations)
             .HasForeignKey(x => x.CountryId)
-            .OnDelete(DeleteBehavior.NoAction);
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

@@ -32,7 +32,7 @@ namespace JobCompany.API.Controllers
             return Ok(data);
         }
 
-        [HttpDelete("[action]/{id}")]
+        [HttpDelete("[action]")]
         public async Task<IActionResult> DeleteSkill(string skillId)
         {
             await skillService.DeleteSkillAsync(skillId);

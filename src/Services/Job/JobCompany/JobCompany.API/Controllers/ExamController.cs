@@ -1,6 +1,7 @@
 ﻿using JobCompany.Business.Dtos.ExamDtos;
 using JobCompany.Business.Dtos.QuestionDtos;
 using JobCompany.Business.Services.ExamServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SharedLibrary.Attributes;
 using SharedLibrary.Enums;
@@ -9,7 +10,8 @@ namespace JobCompany.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser)]
+    //[AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser)]
+    [Authorize]
     public class ExamController(IExamService examService) : ControllerBase
     {
         [HttpPost("[action]")]
@@ -41,6 +43,24 @@ namespace JobCompany.API.Controllers
         {
             await examService.DeleteExamAsync(examId);
             return Ok();
+        }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetExamIntro(string examId)
+        {
+            return Ok(await examService.GetExamIntroAsync(examId));
+        }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetExamQuestions(string examId)
+        {
+            return Ok(await examService.GetExamQuestionsAsync(examId));
+        }
+
+        [HttpPost("[action]")]
+        public async Task<IActionResult> EvaluateExamAnswers(SubmitExamAnswersDto dto)
+        {
+            return Ok(await examService.EvaluateExamAnswersAsync(dto));
         }
     }
 }

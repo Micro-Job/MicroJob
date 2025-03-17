@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using JobCompany.Business.Dtos.Common;
 using JobCompany.Business.Dtos.NotificationDtos;
 using JobCompany.Business.Exceptions.UserExceptions;
 using JobCompany.Core.Entites;
@@ -11,67 +12,67 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SharedLibrary.Exceptions;
+using SharedLibrary.Helpers;
+using SharedLibrary.HelperServices.Current;
 
 namespace JobCompany.Business.Services.NotificationServices
 {
-    public class NotificationService : INotificationService
+    public class NotificationService(JobCompanyDbContext _context , ICurrentUser _currentUser) : INotificationService
     {
-        private readonly JobCompanyDbContext _context;
 
-        readonly IHttpContextAccessor _contextAccessor;
-        private readonly Guid userGuid;
-
-        public NotificationService(
-            JobCompanyDbContext context,
-            IHttpContextAccessor contextAccessor
-        )
+        public async Task<DataListDto<NotificationDto>> GetUserNotificationsAsync(bool? IsSeen , int skip , int take)
         {
-            _context = context;
-            _contextAccessor = contextAccessor;
-            userGuid = Guid.Parse(
-                _contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value
-                    ?? throw new UserIsNotLoggedInException()
-            );
+            var query = _context.Notifications.Where(n => n.Receiver.UserId == _currentUser.UserGuid).AsNoTracking().AsQueryable();
+
+            if(IsSeen != null)
+            {
+                query = query.Where(n => n.IsSeen == IsSeen).OrderByDescending(n => n.CreatedDate);
+            }
+            else
+            {
+                query = query.OrderBy(n => n.IsSeen).ThenByDescending(n => n.CreatedDate);
+            }
+
+            var notifications = await query
+            .Select(n => new NotificationDto
+            {
+                Id = n.Id,
+                ReceiverId = n.ReceiverId,
+                SenderId = n.SenderId,
+                InformationId = n.InformationId,
+                CreatedDate = n.CreatedDate,
+                //Content = n.Content,
+                IsSeen = n.IsSeen,
+            })
+            .Skip(Math.Max(0, (skip - 1) * take))
+            .Take(take)
+            .ToListAsync();
+
+            return new DataListDto<NotificationDto>
+            {
+                Datas = notifications,
+                TotalCount = await query.CountAsync()
+            };
         }
 
-        public async Task<List<NotificationDto>> GetUserNotificationsAsync()
+        public async Task MarkNotificationAsReadAsync(string id)
         {
-            var notifications = await _context
-                .Notifications.Where(n => n.Receiver.UserId == userGuid)
-                .OrderByDescending(n => n.CreatedDate)
-                .Select(n => new NotificationDto
-                {
-                    Id = n.Id,
-                    ReceiverId = n.ReceiverId,
-                    SenderId = n.SenderId,
-                    InformationId = n.InformationId,
-                    CreatedDate = n.CreatedDate,
-                    Content = n.Content,
-                    IsSeen = n.IsSeen,
-                })
-                .ToListAsync();
+            var notificationGuid = Guid.Parse(id);
 
-            return notifications;
-        }
-
-        public async Task MarkNotificationAsReadAsync(Guid id)
-        {
-            var companyId = await _context
-                .Companies.Where(x => x.UserId == userGuid)
-                .Select(x => x.Id)
-                .FirstOrDefaultAsync();
-
-            if (companyId == Guid.Empty)
-                throw new NotFoundException<Company>();
-
-            var notification =
-                await _context.Notifications.FirstOrDefaultAsync(x =>
-                    x.Id == id && x.ReceiverId == companyId
-                ) ?? throw new NotFoundException<Notification>();
+            var notification = await _context.Notifications.FirstOrDefaultAsync(x =>x.Id == notificationGuid && x.Receiver.UserId == _currentUser.UserGuid) 
+                                            ?? throw new NotFoundException<Notification>(MessageHelper.GetMessage("NOT_FOUND"));
 
             notification.IsSeen = true;
 
             await _context.SaveChangesAsync();
         }
+
+        public async Task MarkAllNotificationAsReadAsync()
+        {
+            await _context.Notifications    
+                .Where(x => x.Receiver.UserId == _currentUser.UserGuid && x.IsSeen == false)
+                .ExecuteUpdateAsync(x=> x.SetProperty(y=> y.IsSeen , true));
+        }
+
     }
 }

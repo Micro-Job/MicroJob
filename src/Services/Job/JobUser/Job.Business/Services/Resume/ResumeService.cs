@@ -24,6 +24,7 @@ using Microsoft.Extensions.Configuration;
 using Shared.Requests;
 using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.ExternalServices.FileService;
+using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;
 using SharedLibrary.Statics;
 using System.Security.Claims;
@@ -206,7 +207,7 @@ namespace Job.Business.Services.Resume
                 .Include(r => r.Experiences)
                 .Include(r => r.Languages)
                 .FirstOrDefaultAsync(r => r.UserId == userGuid)
-                ?? throw new NotFoundException<Core.Entities.Resume>();
+                ?? throw new NotFoundException<Core.Entities.Resume>(MessageHelper.GetMessage("NOT_FOUND"));
         }
 
         private static void UpdateResumePersonalInfo(Core.Entities.Resume resume, ResumeUpdateDto updateDto)
@@ -336,7 +337,7 @@ namespace Job.Business.Services.Resume
                                             }).ToList()
                                         })
                                         .FirstOrDefaultAsync()
-                                        ?? throw new NotFoundException<Core.Entities.Resume>();
+                                        ?? throw new NotFoundException<Core.Entities.Resume>(MessageHelper.GetMessage("NOT_FOUND"));
 
             var userFullName = await _userInformationService.GetUserDataAsync(userGuid);
             resume.FirstName = userFullName.FirstName;

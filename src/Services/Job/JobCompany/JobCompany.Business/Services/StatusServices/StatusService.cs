@@ -83,9 +83,54 @@ namespace JobCompany.Business.Services.StatusServices
             return statuses;
         }
 
-        public Task UpdateStatusAsync(List<UpdateStatusDto> dtos)
+        public async Task UpdateStatusAsync(List<UpdateStatusDto> dtos)
         {
-            throw new NotImplementedException();
+            var statusIds = dtos.Select(dto => dto.Id).ToList();
+
+            var existingStatuses = await _context.Statuses
+                .Where(s => statusIds.Contains(s.Id))
+                .Include(s => s.Translations)
+                .ToListAsync();
+
+            if (!existingStatuses.Any())
+                throw new SharedLibrary.Exceptions.NotFoundException<Status>();
+
+            existingStatuses.ForEach(existingStatus =>
+            {
+                var dto = dtos.FirstOrDefault(d => d.Id == existingStatus.Id);
+                if (dto == null) return;
+
+                existingStatus.StatusColor = dto.StatusColor.Trim();
+                existingStatus.Order = dto.Order;
+
+                var existingTranslations = existingStatus.Translations.ToDictionary(t => t.Language, t => t);
+
+                var newTranslations = new List<StatusTranslation>();
+
+                foreach (var newTranslation in dto.Statuses)
+                {
+                    if (existingTranslations.TryGetValue(newTranslation.Language, out var existingTranslation))
+                    {
+                        existingTranslation.Name = newTranslation.Name.Trim();
+                    }
+                    else
+                    {
+                        newTranslations.Add(new StatusTranslation
+                        {
+                            StatusId = existingStatus.Id,
+                            Language = newTranslation.Language,
+                            Name = newTranslation.Name.Trim()
+                        });
+                    }
+                }
+
+                _context.StatusTranslations.AddRange(newTranslations);
+
+
+                _context.StatusTranslations.AddRange(newTranslations);
+            });
+
+            await _context.SaveChangesAsync();
         }
     }
 }
