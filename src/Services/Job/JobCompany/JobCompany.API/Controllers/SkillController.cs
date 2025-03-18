@@ -12,9 +12,16 @@ namespace JobCompany.API.Controllers
     public class SkillController(ISkillService skillService) : ControllerBase
     {
         [HttpPost("[action]")]
-        public async Task<IActionResult> CreateSkill(SkillDto dto)
+        public async Task<IActionResult> CreateSkill(SkillCreateDto dto)
         {
             await skillService.CreateSkillAsync(dto);
+            return Ok();
+        }
+
+        [HttpPost("[action]")]
+        public async Task<IActionResult> UpdateSkill(List<SkillUpdateDto> dto)
+        {
+            await skillService.UpdateSkillAsync(dto);
             return Ok();
         }
 
@@ -23,6 +30,13 @@ namespace JobCompany.API.Controllers
         {
             var data = await skillService.GetAllSkillsAsync();
             return Ok(data);
+        }
+
+        [HttpDelete("[action]")]
+        public async Task<IActionResult> DeleteSkill(string skillId)
+        {
+            await skillService.DeleteSkillAsync(skillId);
+            return Ok();
         }
     }
 }

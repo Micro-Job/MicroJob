@@ -82,11 +82,6 @@ namespace JobCompany.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("CategoryName")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("nvarchar(32)");
-
                     b.Property<bool>("IsCompany")
                         .HasColumnType("bit");
 
@@ -95,16 +90,35 @@ namespace JobCompany.DAL.Migrations
                     b.ToTable("Categories");
                 });
 
-            modelBuilder.Entity("JobCompany.Core.Entites.City", b =>
+            modelBuilder.Entity("JobCompany.Core.Entites.CategoryTranslation", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("CityName")
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte>("Language")
+                        .HasColumnType("tinyint");
+
+                    b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("nvarchar(32)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
+
+                    b.ToTable("CategoryTranslations");
+                });
+
+            modelBuilder.Entity("JobCompany.Core.Entites.City", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("CountryId")
                         .HasColumnType("uniqueidentifier");
@@ -114,6 +128,30 @@ namespace JobCompany.DAL.Migrations
                     b.HasIndex("CountryId");
 
                     b.ToTable("Cities");
+                });
+
+            modelBuilder.Entity("JobCompany.Core.Entites.CityTranslation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CityId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte>("Language")
+                        .HasColumnType("tinyint");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CityId");
+
+                    b.ToTable("CityTranslations");
                 });
 
             modelBuilder.Entity("JobCompany.Core.Entites.Company", b =>
@@ -196,14 +234,33 @@ namespace JobCompany.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("CountryName")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("nvarchar(32)");
-
                     b.HasKey("Id");
 
                     b.ToTable("Countries");
+                });
+
+            modelBuilder.Entity("JobCompany.Core.Entites.CountryTranslation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CountryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte>("Language")
+                        .HasColumnType("tinyint");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CountryId");
+
+                    b.ToTable("CountryTranslations");
                 });
 
             modelBuilder.Entity("JobCompany.Core.Entites.Exam", b =>
@@ -273,11 +330,6 @@ namespace JobCompany.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
                     b.Property<DateTime>("CreatedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
@@ -286,13 +338,19 @@ namespace JobCompany.DAL.Migrations
                     b.Property<Guid>("InformationId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("InformationName")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsSeen")
                         .HasColumnType("bit");
+
+                    b.Property<byte>("NotificationType")
+                        .HasColumnType("tinyint");
 
                     b.Property<Guid>("ReceiverId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("SenderId")
+                    b.Property<Guid?>("SenderId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
@@ -355,14 +413,33 @@ namespace JobCompany.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("nvarchar(32)");
-
                     b.HasKey("Id");
 
                     b.ToTable("Skills");
+                });
+
+            modelBuilder.Entity("JobCompany.Core.Entites.SkillTranslation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte>("Language")
+                        .HasColumnType("tinyint");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<Guid>("SkillId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SkillId");
+
+                    b.ToTable("SkillTranslations");
                 });
 
             modelBuilder.Entity("JobCompany.Core.Entites.Status", b =>
@@ -387,16 +464,60 @@ namespace JobCompany.DAL.Migrations
                     b.Property<byte>("StatusEnum")
                         .HasColumnType("tinyint");
 
-                    b.Property<string>("StatusName")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("nvarchar(32)");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CompanyId");
 
                     b.ToTable("Statuses");
+                });
+
+            modelBuilder.Entity("JobCompany.Core.Entites.StatusTranslation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte>("Language")
+                        .HasColumnType("tinyint");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<Guid>("StatusId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StatusId");
+
+                    b.ToTable("StatusTranslations");
+                });
+
+            modelBuilder.Entity("JobCompany.Core.Entites.UserExam", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ExamId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte>("FalseAnswerCount")
+                        .HasColumnType("tinyint");
+
+                    b.Property<byte>("TrueAnswerCount")
+                        .HasColumnType("tinyint");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExamId");
+
+                    b.ToTable("UserExams");
                 });
 
             modelBuilder.Entity("JobCompany.Core.Entites.Vacancy", b =>
@@ -576,6 +697,17 @@ namespace JobCompany.DAL.Migrations
                     b.Navigation("Vacancy");
                 });
 
+            modelBuilder.Entity("JobCompany.Core.Entites.CategoryTranslation", b =>
+                {
+                    b.HasOne("JobCompany.Core.Entites.Category", "Category")
+                        .WithMany("Translations")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+                });
+
             modelBuilder.Entity("JobCompany.Core.Entites.City", b =>
                 {
                     b.HasOne("JobCompany.Core.Entites.Country", "Country")
@@ -585,6 +717,17 @@ namespace JobCompany.DAL.Migrations
                         .IsRequired();
 
                     b.Navigation("Country");
+                });
+
+            modelBuilder.Entity("JobCompany.Core.Entites.CityTranslation", b =>
+                {
+                    b.HasOne("JobCompany.Core.Entites.City", "City")
+                        .WithMany("Translations")
+                        .HasForeignKey("CityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("City");
                 });
 
             modelBuilder.Entity("JobCompany.Core.Entites.Company", b =>
@@ -619,6 +762,17 @@ namespace JobCompany.DAL.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Company");
+                });
+
+            modelBuilder.Entity("JobCompany.Core.Entites.CountryTranslation", b =>
+                {
+                    b.HasOne("JobCompany.Core.Entites.Country", "Country")
+                        .WithMany("Translations")
+                        .HasForeignKey("CountryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Country");
                 });
 
             modelBuilder.Entity("JobCompany.Core.Entites.Exam", b =>
@@ -673,6 +827,17 @@ namespace JobCompany.DAL.Migrations
                     b.Navigation("Vacancy");
                 });
 
+            modelBuilder.Entity("JobCompany.Core.Entites.SkillTranslation", b =>
+                {
+                    b.HasOne("JobCompany.Core.Entites.Skill", "Skill")
+                        .WithMany("Translations")
+                        .HasForeignKey("SkillId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Skill");
+                });
+
             modelBuilder.Entity("JobCompany.Core.Entites.Status", b =>
                 {
                     b.HasOne("JobCompany.Core.Entites.Company", "Company")
@@ -682,6 +847,28 @@ namespace JobCompany.DAL.Migrations
                         .IsRequired();
 
                     b.Navigation("Company");
+                });
+
+            modelBuilder.Entity("JobCompany.Core.Entites.StatusTranslation", b =>
+                {
+                    b.HasOne("JobCompany.Core.Entites.Status", "Status")
+                        .WithMany("Translations")
+                        .HasForeignKey("StatusId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Status");
+                });
+
+            modelBuilder.Entity("JobCompany.Core.Entites.UserExam", b =>
+                {
+                    b.HasOne("JobCompany.Core.Entites.Exam", "Exam")
+                        .WithMany("UserExams")
+                        .HasForeignKey("ExamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Exam");
                 });
 
             modelBuilder.Entity("JobCompany.Core.Entites.Vacancy", b =>
@@ -754,12 +941,16 @@ namespace JobCompany.DAL.Migrations
                 {
                     b.Navigation("Companies");
 
+                    b.Navigation("Translations");
+
                     b.Navigation("Vacancies");
                 });
 
             modelBuilder.Entity("JobCompany.Core.Entites.City", b =>
                 {
                     b.Navigation("Companies");
+
+                    b.Navigation("Translations");
 
                     b.Navigation("Vacancies");
                 });
@@ -783,12 +974,16 @@ namespace JobCompany.DAL.Migrations
 
                     b.Navigation("Companies");
 
+                    b.Navigation("Translations");
+
                     b.Navigation("Vacancies");
                 });
 
             modelBuilder.Entity("JobCompany.Core.Entites.Exam", b =>
                 {
                     b.Navigation("ExamQuestions");
+
+                    b.Navigation("UserExams");
 
                     b.Navigation("Vacancies");
                 });
@@ -802,12 +997,16 @@ namespace JobCompany.DAL.Migrations
 
             modelBuilder.Entity("JobCompany.Core.Entites.Skill", b =>
                 {
+                    b.Navigation("Translations");
+
                     b.Navigation("VacancySkills");
                 });
 
             modelBuilder.Entity("JobCompany.Core.Entites.Status", b =>
                 {
                     b.Navigation("Applications");
+
+                    b.Navigation("Translations");
                 });
 
             modelBuilder.Entity("JobCompany.Core.Entites.Vacancy", b =>

@@ -1,4 +1,5 @@
 using FluentValidation;
+using SharedLibrary.Helpers;
 
 namespace JobCompany.Business.Dtos.ApplicationDtos
 {
@@ -13,10 +14,10 @@ namespace JobCompany.Business.Dtos.ApplicationDtos
         public ApplicationCreateDtoValidator()
         {
             RuleFor(dto => dto.UserId)
-                .NotEmpty().WithMessage("UserId is required.");
+                .NotEmpty().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"));
 
             RuleFor(dto => dto.VacancyId)
-                .NotEmpty().WithMessage("VacancyId is required.");
+                .NotEmpty().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"));
         }
     }
 }

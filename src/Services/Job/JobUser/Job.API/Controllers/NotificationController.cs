@@ -11,9 +11,9 @@ namespace Job.API.Controllers
     public class NotificationController(INotificationService service) : ControllerBase
     {
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetUserNotifications([FromQuery] int skip = 1, [FromQuery] int take = 6)
+        public async Task<IActionResult> GetUserNotifications(bool? IsSeen , int skip = 1,int take = 6)
         {
-            var notifications = await service.GetUserNotificationsAsync(skip, take);
+            var notifications = await service.GetUserNotificationsAsync(IsSeen , skip, take);
             return Ok(notifications);
         }
 
@@ -21,6 +21,13 @@ namespace Job.API.Controllers
         public async Task<IActionResult> MarkNotificationAsRead(Guid notificationId)
         {
             await service.MarkNotificationAsReadAsync(notificationId);
+            return Ok();
+        }
+
+        [HttpPost("[action]")]
+        public async Task<IActionResult> MarkAllNotificationAsRead()
+        {
+            await service.MarkAllNotificationAsReadAsync();
             return Ok();
         }
     }

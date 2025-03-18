@@ -7,13 +7,14 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Shared.Responses;
 using SharedLibrary.Exceptions;
+using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;
 using SharedLibrary.Requests;
 using SharedLibrary.Responses;
 
 namespace Job.Business.Services.Notification
 {
-    public class NotificationService(JobDbContext _context , IRequestClient<GetAllCompaniesRequest> _getCompaniesClient , ICurrentUser _currentUser) : INotificationService
+    public class NotificationService(JobDbContext _context , ICurrentUser _currentUser) : INotificationService
     {
 
         public async Task CreateNotificationAsync(NotificationDto notificationDto)
@@ -25,7 +26,7 @@ namespace Job.Business.Services.Notification
                 SenderId = notificationDto.SenderId,
                 CreatedDate = DateTime.Now,
                 InformationId = notificationDto.InformationId,
-                Content = notificationDto.Content,
+                InformationName = notificationDto.InformationName,
                 IsSeen = false,
             };
 
@@ -33,38 +34,38 @@ namespace Job.Business.Services.Notification
             await _context.SaveChangesAsync();
         }
 
-        public async Task<PaginatedNotificationDto> GetUserNotificationsAsync(int skip = 1,int take = 6)
+        public async Task<PaginatedNotificationDto> GetUserNotificationsAsync(bool? IsSeen , int skip = 1,int take = 6)
         {
-            //var companies = await GetAllCompaniesData();
+            var query = _context.Notifications.Where(n => n.ReceiverId == _currentUser.UserGuid).AsNoTracking().AsQueryable();
 
-            //var companyDictionary = companies
-            //    .Companies.GroupBy(x => x.CompanyUserId)
-            //    .ToDictionary(g => g.Key, g => g.First());
+            if (IsSeen != null)
+            {
+                query = query.Where(n => n.IsSeen == IsSeen).OrderByDescending(n => n.CreatedDate);
+            }
+            else
+            {
+                query = query.OrderBy(n => n.IsSeen).ThenByDescending(n => n.CreatedDate);
+            }
 
-            var query = _context
-                .Notifications.Where(n => n.ReceiverId == _currentUser.UserGuid);
 
-            var notificationDtos = await query
-                .Select(n => new NotificationListDto
-                {
-                    //companyDictionary.TryGetValue(n.SenderId, out var company);
-                    Id = n.Id,
-                    ReceiverId = n.ReceiverId,
-                    SenderId = n.SenderId,
-                    // CompanyName = company?.CompanyName,
-                    // CompanyLogo = company?.CompanyImage,
-                    InformationId = n.InformationId,
-                    CreatedDate = n.CreatedDate,
-                    Content = n.Content,
-                    IsSeen = n.IsSeen,
-                })
-                .OrderByDescending(n => n.CreatedDate)
-                .Skip(Math.Max(0, (skip - 1) * take))
-                .ToListAsync();
+            var notifications = await query
+            .Select(n => new NotificationListDto
+            {
+                Id = n.Id,
+                ReceiverId = n.ReceiverId,
+                SenderId = n.SenderId,
+                InformationId = n.InformationId,
+                CreatedDate = n.CreatedDate,
+                //Content = n.Translations.,
+                IsSeen = n.IsSeen,
+            })
+            .Skip(Math.Max(0, (skip - 1) * take))
+            .Take(take)
+            .ToListAsync();
 
             return new PaginatedNotificationDto
             {
-                Notifications = notificationDtos,
+                Notifications = notifications,
                 TotalCount = await query.CountAsync(),
             };
         }
@@ -73,20 +74,18 @@ namespace Job.Business.Services.Notification
         {
             var notification =
                 await _context.Notifications.FirstOrDefaultAsync(x=> x.Id == notificationId)
-                ?? throw new NotFoundException<Core.Entities.Notification>();
+                ?? throw new NotFoundException<Core.Entities.Notification>(MessageHelper.GetMessage("NOT_FOUND"));
 
             notification.IsSeen = true;
 
             await _context.SaveChangesAsync();
         }
 
-        private async Task<GetAllCompaniesResponse> GetAllCompaniesData()
+        public async Task MarkAllNotificationAsReadAsync()
         {
-            var request = new GetAllCompaniesRequest();
-
-            var response = await _getCompaniesClient.GetResponse<GetAllCompaniesResponse>(request);
-
-            return response.Message;
+            await _context.Notifications
+                .Where(x => x.ReceiverId == _currentUser.UserGuid && x.IsSeen == false)
+                .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsSeen, true));
         }
     }
 }

@@ -5,7 +5,9 @@ namespace JobCompany.Business.Services.SkillServices
 {
     public interface ISkillService
     {
-        Task CreateSkillAsync(SkillDto dto);
+        Task CreateSkillAsync(SkillCreateDto dto);
+        Task UpdateSkillAsync(List<SkillUpdateDto> dtos);
         Task<List<GetAllSkillDto>> GetAllSkillsAsync();
+        Task DeleteSkillAsync(string skillId);
     }
 }

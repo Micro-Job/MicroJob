@@ -18,6 +18,13 @@ namespace JobCompany.API.Controllers
             return Ok();
         }
 
+        [HttpPut("[action]")]
+        public async Task<IActionResult> UpdateStatus(List<UpdateStatusDto> dtos)
+        {
+            await _statusService.UpdateStatusAsync(dtos);
+            return Ok();
+        }
+
         [HttpDelete("[action]/{id}")]
         public async Task<IActionResult> DeleteStatus(string id)
         {

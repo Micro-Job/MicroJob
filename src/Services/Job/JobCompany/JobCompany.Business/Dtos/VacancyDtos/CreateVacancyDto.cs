@@ -4,6 +4,7 @@ using JobCompany.Core.Enums;
 using Microsoft.AspNetCore.Http;
 using Shared.Enums;
 using SharedLibrary.Enums;
+using SharedLibrary.Helpers;
 
 namespace JobCompany.Business.Dtos.VacancyDtos
 {
@@ -38,75 +39,75 @@ namespace JobCompany.Business.Dtos.VacancyDtos
         public CreateVacancyDtoValidator()
         {
             RuleFor(x => x.Title)
-                .NotEmpty().WithMessage("Title cannot be empty.")
-                .MaximumLength(150).WithMessage("Title must not exceed 150 characters.");
+                .NotEmpty().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
+                .MaximumLength(150).WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_100"));
 
             RuleFor(x => x.CompanyLogo)
                 .Must(file => file == null || file.ContentType.StartsWith("image/"))
-                .WithMessage("The company logo must be an image file.");
+                .WithMessage(MessageHelper.GetMessage("INVALID_FORMAT"));
 
             RuleFor(x => x.StartDate)
-                .LessThan(x => x.EndDate)
+                .LessThan(x => x.EndDate) 
                 .When(x => x.EndDate.HasValue)
-                .WithMessage("Start date must be earlier than the end date.")
+                .WithMessage(MessageHelper.GetMessage("STARTDATE_MUST_BE_EARLİER_ENDATE"))
                 .GreaterThanOrEqualTo(DateTime.Now)
-                .WithMessage("Start date cannot be in the past.");
+                .WithMessage(MessageHelper.GetMessage("STARTDATE_MUST_BE_EARLİER_ENDATE"));
 
             RuleFor(x => x.EndDate)
                 .GreaterThan(DateTime.Now)
                 .When(x => x.EndDate.HasValue)
-                .WithMessage("End date cannot be in the past.");
+                .WithMessage(MessageHelper.GetMessage("END_DATE_MUST_NOT_BE_IN_THE_PAST"));
 
             RuleFor(x => x.Location)
-                .MaximumLength(200).WithMessage("Location must not exceed 200 characters.");
+                .MaximumLength(200).WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_200"));
 
             RuleFor(x => x.CountryId)
-                .NotEmpty().WithMessage("Country ID cannot be empty.");
+                .NotEmpty().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"));
 
             RuleFor(x => x.CityId)
-                .NotEmpty().WithMessage("City ID cannot be empty.");
+                .NotEmpty().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"));
 
             RuleFor(x => x.Email)
-                .EmailAddress().WithMessage("Please enter a valid email address.")
+                .EmailAddress().WithMessage(MessageHelper.GetMessage("INVALID_FORMAT"))
                 .When(x => !string.IsNullOrWhiteSpace(x.Email));
 
             RuleFor(x => x.WorkType)
-                .IsInEnum().WithMessage("Invalid work type.");
+                .IsInEnum().WithMessage(MessageHelper.GetMessage("INVALID_FORMAT"));
 
             RuleFor(x => x.MainSalary)
-                .GreaterThanOrEqualTo(0).WithMessage("Main salary cannot be negative.")
+                .GreaterThanOrEqualTo(0).WithMessage(MessageHelper.GetMessage("GREATER_THAN_OR_EQUAL_TO_ZERO"))
                 .LessThanOrEqualTo(x => x.MaxSalary)
                 .When(x => x.MaxSalary.HasValue)
-                .WithMessage("Main salary cannot exceed the maximum salary.");
+                .WithMessage(MessageHelper.GetMessage("MAIN_SALARY"));
 
             RuleFor(x => x.MaxSalary)
-                .GreaterThanOrEqualTo(0).WithMessage("Maximum salary cannot be negative.");
+                .GreaterThanOrEqualTo(0).WithMessage(MessageHelper.GetMessage("GREATER_THAN_OR_EQUAL_TO_ZERO"));
 
             RuleFor(x => x.Requirement)
-                .NotEmpty().WithMessage("Requirement cannot be empty.")
-                .MaximumLength(1000).WithMessage("Requirement must not exceed 1000 characters.");
+                .NotEmpty().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
+                .MaximumLength(1000).WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_1000"));
 
             RuleFor(x => x.Description)
-                .NotEmpty().WithMessage("Description cannot be empty.")
-                .MaximumLength(2000).WithMessage("Description must not exceed 2000 characters.");
+                .NotEmpty().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
+                .MaximumLength(1000).WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_1000"));
 
             RuleFor(x => x.Gender)
-                .IsInEnum().WithMessage("Invalid gender value.");
+                .IsInEnum().WithMessage(MessageHelper.GetMessage("INVALID_FORMAT"));
 
             RuleFor(x => x.Military)
-                .IsInEnum().WithMessage("Invalid military status.");
+                .IsInEnum().WithMessage(MessageHelper.GetMessage("INVALID_FORMAT"));
 
             RuleFor(x => x.Driver)
-                .IsInEnum().WithMessage("Invalid driver status.");
+                .IsInEnum().WithMessage(MessageHelper.GetMessage("INVALID_FORMAT"));
 
             RuleFor(x => x.Family)
-                .IsInEnum().WithMessage("Invalid family situation.");
+                .IsInEnum().WithMessage(MessageHelper.GetMessage("INVALID_FORMAT"));
 
             RuleFor(x => x.Citizenship)
-                .IsInEnum().WithMessage("Invalid citizenship status.");
+                .IsInEnum().WithMessage(MessageHelper.GetMessage("INVALID_FORMAT"));
 
             RuleFor(x => x.CategoryId)
-                .NotEmpty().WithMessage("Category ID cannot be empty.");
+                .IsInEnum().WithMessage(MessageHelper.GetMessage("INVALID_FORMAT"));
         }
     }
 }

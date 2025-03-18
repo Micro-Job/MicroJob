@@ -6,7 +6,7 @@ namespace JobCompany.DAL.Contexts
 {
     public class JobCompanyDbContext : DbContext
     {
-        public JobCompanyDbContext(DbContextOptions options) : base(options)
+        public JobCompanyDbContext(DbContextOptions<JobCompanyDbContext> options) : base(options)
         {
         }
 
@@ -27,6 +27,14 @@ namespace JobCompany.DAL.Contexts
         public DbSet<Skill> Skills { get; set; }
         public DbSet<ExamQuestion> ExamQuestions { get; set; }
         public DbSet<SavedVacancy> SavedVacancies { get; set; }
+
+        public DbSet<SkillTranslation> SkillTranslations { get; set; }
+        public DbSet<CategoryTranslation> CategoryTranslations { get; set; }
+        public DbSet<StatusTranslation> StatusTranslations { get; set; }
+        public DbSet<CountryTranslation> CountryTranslations { get; set; }
+        public DbSet<CityTranslation> CityTranslations { get; set; }
+
+        public DbSet<UserExam> UserExams { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

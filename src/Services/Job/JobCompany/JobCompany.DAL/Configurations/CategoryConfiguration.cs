@@ -10,10 +10,6 @@ namespace JobCompany.DAL.Configurations
         {
             builder.HasKey(p => p.Id);
 
-            builder.Property(c => c.CategoryName)
-                   .IsRequired()
-                   .HasMaxLength(32);
-
             builder.HasMany(c => c.Vacancies)
                    .WithOne(v => v.Category)
                    .HasForeignKey(v => v.CategoryId)

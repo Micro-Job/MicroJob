@@ -1,3 +1,4 @@
+using JobCompany.Business.Dtos.CategoryDtos;
 using JobCompany.Business.Services.CategoryServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,16 +13,16 @@ namespace JobCompany.API.Controllers
     public class CategoryController(ICategoryService service) : ControllerBase
     {
         [HttpPost("[action]")]
-        public async Task<IActionResult> CreateCategory(string categoryName)
+        public async Task<IActionResult> CreateCategory(CategoryCreateDto dto)
         {
-            await service.CreateCategoryAsync(categoryName);
+            await service.CreateCategoryAsync(dto);
             return Ok();
         }
 
         [HttpPut("[action]/{id}")]
-        public async Task<IActionResult> UpdateCategory(string id, string? categoryName)
+        public async Task<IActionResult> UpdateCategory(List<CategoryUpdateDto> dtos)
         {
-            await service.UpdateCategoryAsync(id, categoryName);
+            await service.UpdateCategoryAsync(dtos);
             return Ok();
         }
 
@@ -37,6 +38,13 @@ namespace JobCompany.API.Controllers
         public async Task<IActionResult> GetAllCategories()
         {
             var data = await service.GetAllCategoriesAsync();
+            return Ok(data);
+        }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> CategoryGetById(Guid id)
+        {
+            var data = await service.CategoryGetByIdAsync(id);
             return Ok(data);
         }
     }

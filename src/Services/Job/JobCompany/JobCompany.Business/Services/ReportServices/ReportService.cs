@@ -1,6 +1,8 @@
 using System.Security.Claims;
 using JobCompany.Business.Dtos.ApplicationDtos;
 using JobCompany.Business.Dtos.ReportDtos;
+using JobCompany.Business.Extensions;
+
 // using JobCompany.Business.Exceptions.Common;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
@@ -10,6 +12,8 @@ using Microsoft.EntityFrameworkCore;
 using Shared.Requests;
 using Shared.Responses;
 using SharedLibrary.Exceptions;
+using SharedLibrary.Helpers;
+using SharedLibrary.HelperServices.Current;
 
 namespace JobCompany.Business.Services.ReportServices
 {
@@ -19,12 +23,14 @@ namespace JobCompany.Business.Services.ReportServices
         private readonly IRequestClient<GetUsersDataRequest> _client;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly Guid _userGuid;
+        private readonly ICurrentUser _currentUser;
 
         public ReportService(
             JobCompanyDbContext context,
             IRequestClient<GetUsersDataRequest> client,
             IHttpContextAccessor httpContextAccessor
-        )
+,
+            ICurrentUser currentUser)
         {
             _context = context;
             _client = client;
@@ -32,6 +38,7 @@ namespace JobCompany.Business.Services.ReportServices
             _userGuid = Guid.Parse(
                 _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value
             );
+            _currentUser = currentUser;
         }
 
         /// <summary>
@@ -43,39 +50,39 @@ namespace JobCompany.Business.Services.ReportServices
         /// - Total applications count.
         /// - Accepted applications count.
         /// </returns>
-        public async Task<SummaryDto> GetSummaryAsync()
-        {
-            var acceptedStatusId = await _context
-                .Statuses.Where(s => s.StatusName == "Accepted" && s.IsDefault)
-                .Select(s => s.Id)
-                .FirstOrDefaultAsync();
+        //public async Task<SummaryDto> GetSummaryAsync()
+        //{
+        //var acceptedStatusId = await _context
+        //    .Statuses.Where(s => s.Name == "Accepted" && s.IsDefault)
+        //    .Select(s => s.Id)
+        //    .FirstOrDefaultAsync();
 
-            var result = await _context
-                .Applications.GroupBy(a => new
-                {
-                    a.Vacancy.IsActive,
-                    IsAccepted = a.StatusId == acceptedStatusId,
-                })
-                .Select(g => new
-                {
-                    g.Key.IsActive,
-                    g.Key.IsAccepted,
-                    Count = g.Count(),
-                })
-                .ToListAsync();
+        //var result = await _context
+        //    .Applications.GroupBy(a => new
+        //    {
+        //        a.Vacancy.IsActive,
+        //        IsAccepted = a.StatusId == acceptedStatusId,
+        //    })
+        //    .Select(g => new
+        //    {
+        //        g.Key.IsActive,
+        //        g.Key.IsAccepted,
+        //        Count = g.Count(),
+        //    })
+        //    .ToListAsync();
 
-            var activeVacancies = result.Where(r => r.IsActive).Sum(r => r.Count);
-            var totalApplications = result.Sum(r => r.Count);
-            var acceptedApplications = result.Where(r => r.IsAccepted).Sum(r => r.Count);
+        //var activeVacancies = result.Where(r => r.IsActive).Sum(r => r.Count);
+        //var totalApplications = result.Sum(r => r.Count);
+        //var acceptedApplications = result.Where(r => r.IsAccepted).Sum(r => r.Count);
 
-            var summary = new SummaryDto
-            {
-                ActiveVacancies = activeVacancies,
-                TotalApplications = totalApplications,
-                AcceptedApplications = acceptedApplications,
-            };
-            return summary;
-        }
+        //var summary = new SummaryDto
+        //{
+        //    ActiveVacancies = activeVacancies,
+        //    TotalApplications = totalApplications,
+        //    AcceptedApplications = acceptedApplications,
+        //};
+        //return summary;
+        //}
 
         /// <summary>
         /// admin/dashboard son muracietler
@@ -89,7 +96,7 @@ namespace JobCompany.Business.Services.ReportServices
                 {
                     a.UserId,
                     a.Vacancy.Title,
-                    a.Status.StatusName,
+                    StatusName = a.Status.GetTranslation(_currentUser.LanguageCode),
                     a.Status.StatusColor,
                 })
                 .ToListAsync();
@@ -106,18 +113,18 @@ namespace JobCompany.Business.Services.ReportServices
                     u.UserId == application.UserId
                 );
 
-                if (userData != null)
-                {
-                    recentApplicationDtos.Add(
-                        new RecentApplicationDto
-                        {
-                            Fullname = $"{userData.FirstName} {userData.LastName}",
-                            VacancyName = application.Title,
-                            StatusName = application.StatusName,
-                            StatusColor = application.StatusColor,
-                        }
-                    );
-                }
+                //if (userData != null)
+                //{
+                //    recentApplicationDtos.Add(
+                //        new RecentApplicationDto
+                //        {
+                //            Fullname = $"{userData.FirstName} {userData.LastName}",
+                //            VacancyName = application.Title,
+                //            StatusName = application.StatusName,
+                //            StatusColor = application.StatusColor,
+                //        }
+                //    );
+                //}
             }
             return recentApplicationDtos;
         }
@@ -135,7 +142,7 @@ namespace JobCompany.Business.Services.ReportServices
         {
             var company =
                 await _context.Companies.FirstOrDefaultAsync(c => c.UserId == _userGuid)
-                ?? throw new NotFoundException<Company>();
+                ?? throw new NotFoundException<Company>(MessageHelper.GetMessage("NOT_FOUND"));
             var applications = await _context
                 .Applications.Include(a => a.Vacancy)
                 .Where(a => a.Vacancy.CompanyId == company.Id)
@@ -227,6 +234,11 @@ namespace JobCompany.Business.Services.ReportServices
                 System.Globalization.CalendarWeekRule.FirstDay,
                 DayOfWeek.Monday
             );
+        }
+
+        public Task<SummaryDto> GetSummaryAsync()
+        {
+            throw new NotImplementedException();
         }
     }
 }

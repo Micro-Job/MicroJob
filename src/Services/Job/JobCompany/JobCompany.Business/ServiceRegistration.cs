@@ -60,7 +60,6 @@ namespace JobCompany.Business
                 x.AddConsumer<VacancyApplicationConsumer>();
                 x.AddConsumer<GetAllVacanciesConsumer>();
                 x.AddConsumer<GetCompanyDetailByIdConsumer>();
-                x.AddConsumer<SimilarVacanciesConsumer>();
                 x.AddConsumer<GetVacancyInfoConsumer>();
                 x.AddConsumer<GetAllVacanciesByCompanyIdConsumer>();
                 x.AddConsumer<GetUserApplicationsConsumer>();
@@ -68,8 +67,7 @@ namespace JobCompany.Business
                 x.AddConsumer<CheckCompanyConsumer>();
                 x.AddConsumer<GetOtherVacanciesByCompanyConsumer>();
                 x.AddConsumer<GetApplicationDetailConsumer>();
-                x.AddConsumer<GetExamDetailConsumer>();
-                x.AddConsumer<GetExamQuestionsConsumer>();
+
                 x.SetKebabCaseEndpointNameFormatter();
 
                 x.UsingRabbitMq(

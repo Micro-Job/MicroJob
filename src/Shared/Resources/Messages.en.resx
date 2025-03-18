@@ -117,11 +117,32 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="ALL_LANGUAGES_REQUIRED" xml:space="preserve">
+    <value>It should be added in 3 languages ​​as well</value>
+  </data>
+  <data name="APPLICATION_ALREADY_EXIST" xml:space="preserve">
+    <value>Applications for this vacancy are now available.</value>
+  </data>
+  <data name="APPLICATION_IS_DEACTIVE" xml:space="preserve">
+    <value>This application is inactive.</value>
+  </data>
   <data name="AUTHENTICATION_FAILED" xml:space="preserve">
     <value>Authentication failed</value>
   </data>
+  <data name="BIRTHDAY_MUST_BE_IN_THE_PAST" xml:space="preserve">
+    <value>Birthday date must be in the past</value>
+  </data>
   <data name="CANNOT_BE_EMPTY" xml:space="preserve">
     <value>Cannot be empty</value>
+  </data>
+  <data name="END_DATE_MUST_BE" xml:space="preserve">
+    <value>End Date must be provided if the education is not current</value>
+  </data>
+  <data name="END_DATE_MUST_NOT_BE_IN_THE_PAST" xml:space="preserve">
+    <value>The end time cannot be in the past.</value>
+  </data>
+  <data name="GREATER_THAN_OR_EQUAL_TO_ZERO" xml:space="preserve">
+    <value>Number must be greater than or equal to 0</value>
   </data>
   <data name="INVALID_FORMAT" xml:space="preserve">
     <value>Invalid format</value>
@@ -129,14 +150,32 @@
   <data name="INVALID_USER_STATUS" xml:space="preserve">
     <value>The provided user status is invalid</value>
   </data>
+  <data name="LENGTH_MUST_BE_BETWEEN_1_100" xml:space="preserve">
+    <value>Length must be between 1 and 100</value>
+  </data>
+  <data name="LENGTH_MUST_BE_BETWEEN_1_1000" xml:space="preserve">
+    <value>Length must be between 1 and 1000</value>
+  </data>
+  <data name="LENGTH_MUST_BE_BETWEEN_1_200" xml:space="preserve">
+    <value>Length must be between 1 and 200</value>
+  </data>
   <data name="LENGTH_MUST_BE_BETWEEN_1_50" xml:space="preserve">
     <value>Length must be between 1 and 50</value>
+  </data>
+  <data name="LENGTH_MUST_BE_BETWEEN_1_500" xml:space="preserve">
+    <value>Length must be between 1 and 500</value>
   </data>
   <data name="LOGIN_REQUIRED" xml:space="preserve">
     <value>Please log in again to continue</value>
   </data>
+  <data name="MAIN_SALARY" xml:space="preserve">
+    <value>Main salary cannot exceed the maximum salary</value>
+  </data>
   <data name="NOTFOUNDEXCEPTION_USER" xml:space="preserve">
     <value>User does not exist</value>
+  </data>
+  <data name="NOT_EMPTY" xml:space="preserve">
+    <value>It should not be empty</value>
   </data>
   <data name="NOT_FOUND" xml:space="preserve">
     <value>Not found</value>
@@ -170,6 +209,15 @@
   </data>
   <data name="SESSION_EXPIRED" xml:space="preserve">
     <value>Your session has expired</value>
+  </data>
+  <data name="STARTDATE_MUST_BE_EARLIER_ENDATE" xml:space="preserve">
+    <value>Start time must be before end time</value>
+  </data>
+  <data name="START_DATE_CANNOT_BE_IN_THE_FUTURE" xml:space="preserve">
+    <value>The start time cannot be in the future</value>
+  </data>
+  <data name="STATUS_PERMISSION" xml:space="preserve">
+    <value>You do not have permission to delete status.</value>
   </data>
   <data name="TERMS_NOT_ACCEPTED" xml:space="preserve">
     <value>You cannot register without accepting the terms</value>

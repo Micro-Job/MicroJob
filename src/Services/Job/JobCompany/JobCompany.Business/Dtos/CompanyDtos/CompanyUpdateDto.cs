@@ -1,4 +1,5 @@
 using FluentValidation;
+using SharedLibrary.Helpers;
 
 namespace JobCompany.Business.Dtos.CompanyDtos
 {
@@ -19,30 +20,30 @@ namespace JobCompany.Business.Dtos.CompanyDtos
         public CompanyUpdateDtoValidator()
         {
             RuleFor(x => x.CompanyName)
-                .NotEmpty().WithMessage("Company name is required.")
-                .MaximumLength(100).WithMessage("Company name must not exceed 100 characters.")
+                .NotEmpty().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
+                .MaximumLength(100).WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_100"))
                 .When(x => x.CompanyName != null);
 
             RuleFor(x => x.CompanyInformation)
-                .MaximumLength(500).WithMessage("Company information must not exceed 500 characters.")
+                .MaximumLength(500).WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_500"))
                 .When(x => x.CompanyInformation != null);
 
             RuleFor(x => x.CompanyLocation)
-                .MaximumLength(200).WithMessage("Company location must not exceed 200 characters.")
+                .MaximumLength(200).WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_200"))
                 .When(x => x.CompanyLocation != null);
 
             RuleFor(x => x.CreatedDate)
-                .NotEmpty().WithMessage("CreatedDate is required.")
-                .LessThanOrEqualTo(DateTime.Now).WithMessage("CreatedDate cannot be in the future.")
+                .NotEmpty().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
+                .LessThanOrEqualTo(DateTime.Now).WithMessage(MessageHelper.GetMessage("INVALID_FORMAT"))
                 .When(x => x.CreatedDate.HasValue);
 
             RuleFor(x => x.WebLink)
                 .Matches(@"^(http|https)://[^\s/$.?#].[^\s]*$")
-                .WithMessage("WebLink must be a valid URL.")
+                .WithMessage(MessageHelper.GetMessage("INVALID_FORMAT"))
                 .When(x => x.WebLink != null);
 
             RuleFor(x => x.EmployeeCount)
-                .GreaterThanOrEqualTo(0).WithMessage("Employee count must be at least 0")
+                .GreaterThanOrEqualTo(0).WithMessage(MessageHelper.GetMessage("GREATER_THAN_OR_EQUAL_TO_ZERO"))
                 .When(x => x.EmployeeCount.HasValue);
         }
     }
