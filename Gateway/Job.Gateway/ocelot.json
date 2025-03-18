@@ -35,9 +35,9 @@
       ],
       "UpstreamPathTemplate": "/jobcompany/{everything}",
       "UpstreamHttpMethod": [ "POST", "GET", "PUT", "DELETE" ]
-    },
+    }
   ],
   "GlobalConfiguration": {
-    "BaseUrl": "job-gateway:8080"
+    "BaseUrl": "http://job-gateway:8080"
   }
 }
