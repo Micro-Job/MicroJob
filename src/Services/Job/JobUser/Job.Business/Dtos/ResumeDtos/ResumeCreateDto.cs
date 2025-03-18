@@ -13,18 +13,6 @@ namespace Job.Business.Dtos.ResumeDtos
 {
     public record ResumeCreateDto
     {
-        public TestDto TestDto { get; set; }
-        public ICollection<Guid>? SkillIds { get; set; }
-        public ICollection<CertificateCreateDto>? Certificates { get; set; }
-
-        public ICollection<NumberCreateDto> PhoneNumbers { get; set; }
-        public ICollection<ExperienceCreateDto> Experiences { get; set; }
-        public ICollection<EducationCreateDto> Educations { get; set; }
-        public ICollection<LanguageCreateDto> Languages { get; set; }
-    }
-
-    public class TestDto
-    {
         public string FatherName { get; set; }
         public string Position { get; set; }
         public IFormFile? UserPhoto { get; set; }
@@ -39,28 +27,36 @@ namespace Job.Business.Dtos.ResumeDtos
         public string? ResumeEmail { get; set; }
         public string? Adress { get; set; }
         public DateTime BirthDay { get; set; }
+
+        public ICollection<Guid>? SkillIds { get; set; }
+
+        public ICollection<CertificateCreateDto>? Certificates { get; set; }
+        public ICollection<NumberCreateDto> PhoneNumbers { get; set; }
+        public ICollection<ExperienceCreateDto> Experiences { get; set; }
+        public ICollection<EducationCreateDto> Educations { get; set; }
+        public ICollection<LanguageCreateDto> Languages { get; set; }
     }
 
     public class ResumeCreateDtoValidator : AbstractValidator<ResumeCreateDto>
     {
         public ResumeCreateDtoValidator()
         {
-            RuleFor(x => x.TestDto.FatherName)
+            RuleFor(x => x.FatherName)
                 .NotEmpty().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
                 .MaximumLength(50).WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_50"));
 
-            RuleFor(x => x.TestDto.Position)
+            RuleFor(x => x.Position)
                 .NotEmpty().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
                 .MaximumLength(100).WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_100"));
 
-            RuleFor(x => x.TestDto.Adress)
+            RuleFor(x => x.Adress)
                 .MaximumLength(200).WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_200"));
 
-            RuleFor(x => x.TestDto.BirthDay)
+            RuleFor(x => x.BirthDay)
                 .NotEmpty().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
                 .LessThan(DateTime.Now).WithMessage(MessageHelper.GetMessage("BIRTHDAY_MUST_BE_IN_THE_PAST"));
 
-            RuleFor(x => x.TestDto.Gender)
+            RuleFor(x => x.Gender)
                 .IsInEnum().WithMessage(MessageHelper.GetMessage("INVALID_FORMAT"));
         }
     }

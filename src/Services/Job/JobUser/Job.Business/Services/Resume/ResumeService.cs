@@ -108,13 +108,13 @@ namespace Job.Business.Services.Resume
 
         private async Task<Core.Entities.Resume> BuildResumeAsync(ResumeCreateDto dto)
         {
-            FileDto fileResult = dto.TestDto.UserPhoto != null
-                ? await _fileService.UploadAsync(FilePaths.document, dto.TestDto.UserPhoto)
+            FileDto fileResult = dto.UserPhoto != null
+                ? await _fileService.UploadAsync(FilePaths.document, dto.UserPhoto)
                 : new FileDto();
 
-            string? email = dto.TestDto.IsMainEmail
+            string? email = dto.IsMainEmail
                 ? (await _userInformationService.GetUserDataAsync(userGuid)).Email
-                : dto.TestDto.ResumeEmail;
+                : dto.ResumeEmail;
 
             return MapToResumeEntity(dto, $"{fileResult.FilePath}/{fileResult.FileName}", email);
         }
@@ -124,16 +124,16 @@ namespace Job.Business.Services.Resume
             return new Core.Entities.Resume
             {
                 UserId = userGuid,
-                FatherName = dto.TestDto.FatherName,
-                Position = dto.TestDto.Position,
-                IsDriver = dto.TestDto.IsDriver,
-                IsMarried = dto.TestDto.IsMarried,
-                IsCitizen = dto.TestDto.IsCitizen,
-                MilitarySituation = dto.TestDto.MilitarySituation,
-                IsPublic = dto.TestDto.IsPublic,
-                Gender = dto.TestDto.Gender,
-                Adress = dto.TestDto.Adress,
-                BirthDay = dto.TestDto.BirthDay,
+                FatherName = dto.FatherName,
+                Position = dto.Position,
+                IsDriver = dto.IsDriver,
+                IsMarried = dto.IsMarried,
+                IsCitizen = dto.IsCitizen,
+                MilitarySituation = dto.MilitarySituation,
+                IsPublic = dto.IsPublic,
+                Gender = dto.Gender,
+                Adress = dto.Adress,
+                BirthDay = dto.BirthDay,
                 UserPhoto = filePath,
                 ResumeEmail = email
             };
@@ -141,7 +141,7 @@ namespace Job.Business.Services.Resume
 
         private async Task<List<Core.Entities.Number>> GetPhoneNumbersAsync(ResumeCreateDto dto, Guid resumeId, ResumeCreateDto listsDto)
         {
-            if (!dto.TestDto.IsMainNumber)
+            if (!dto.IsMainNumber)
                 return await _numberService.CreateBulkNumberAsync(listsDto.PhoneNumbers, resumeId);
 
             var mainNumber = (await _userInformationService.GetUserDataAsync(userGuid)).MainPhoneNumber;
@@ -176,7 +176,7 @@ namespace Job.Business.Services.Resume
 
 
 
-        public async Task UpdateResumeAsync(ResumeUpdateDto updateDto, ResumeUpdateListDto updateListsDto)
+        public async Task UpdateResumeAsync(ResumeUpdateDto updateDto)
         {
             var resume = await GetResumeByUserIdAsync(userGuid);
 
@@ -184,13 +184,13 @@ namespace Job.Business.Services.Resume
 
             if (updateDto.UserPhoto != null) UpdateUserPhotoAsync(resume, updateDto.UserPhoto);
 
-            await UpdateResumeEmailAsync(resume, updateDto);
+            await UpdateResumeEmailAsync(resume, updateDto.IsMainEmail , updateDto.ResumeEmail);
 
-            await UpdatePhoneNumbersAsync(resume, updateListsDto, updateDto.IsMainNumber);
+            await UpdatePhoneNumbersAsync(resume, updateDto.PhoneNumbers, updateDto.IsMainNumber);
 
-            resume.Educations = await _educationService.UpdateBulkEducationAsync(updateListsDto.EducationUpdateDtos.Educations, resume.Id);
-            resume.Experiences = await _experienceService.UpdateBulkExperienceAsync(updateListsDto.ExperienceUpdateDtos.Experiences, resume.Id);
-            resume.Languages = await _languageService.UpdateBulkLanguageAsync(updateListsDto.LanguageUpdateDtos.Languages, resume.Id);
+            resume.Educations = await _educationService.UpdateBulkEducationAsync(updateDto.Educations, resume.Id);
+            resume.Experiences = await _experienceService.UpdateBulkExperienceAsync(updateDto.Experiences, resume.Id);
+            resume.Languages = await _languageService.UpdateBulkLanguageAsync(updateDto.Languages, resume.Id);
             resume.Certificates = await UpdateCertificatesAsync(updateDto.Certificates ?? []);
 
             UpdateResumeSkills(resume, updateDto.SkillIds);
@@ -235,14 +235,14 @@ namespace Job.Business.Services.Resume
             resume.UserPhoto = $"{fileResult.FilePath}/{fileResult.FileName}";
         }
 
-        private async Task UpdateResumeEmailAsync(Core.Entities.Resume resume, ResumeUpdateDto updateDto)
+        private async Task UpdateResumeEmailAsync(Core.Entities.Resume resume, bool IsMainEmail , string? resumeEmail)
         {
-            resume.ResumeEmail = updateDto.IsMainEmail
+            resume.ResumeEmail = IsMainEmail
                 ? (await _userInformationService.GetUserDataAsync(userGuid)).Email
-                : updateDto.ResumeEmail;
+                : resumeEmail;
         }
 
-        private async Task UpdatePhoneNumbersAsync(Core.Entities.Resume resume, ResumeUpdateListDto updateListsDto, bool isMainNumber)
+        private async Task UpdatePhoneNumbersAsync(Core.Entities.Resume resume, ICollection<NumberUpdateDto> phoneNumbers, bool isMainNumber)
         {
             if (isMainNumber)
             {
@@ -259,7 +259,7 @@ namespace Job.Business.Services.Resume
             else
             {
                 _context.Numbers.RemoveRange(resume.PhoneNumbers);
-                resume.PhoneNumbers = await _numberService.UpdateBulkNumberAsync(updateListsDto.NumberUpdateDtos.PhoneNumbers, resume.Id);
+                resume.PhoneNumbers = await _numberService.UpdateBulkNumberAsync(phoneNumbers, resume.Id);
             }
         }
 
