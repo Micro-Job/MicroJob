@@ -1,5 +1,4 @@
-﻿using System.Security.Claims;
-using JobCompany.Business.Dtos.AnswerDtos;
+﻿using JobCompany.Business.Dtos.AnswerDtos;
 using JobCompany.Business.Dtos.ExamDtos;
 using JobCompany.Business.Dtos.QuestionDtos;
 using JobCompany.Business.Services.QuestionServices;
@@ -7,9 +6,7 @@ using JobCompany.Core.Entites;
 using JobCompany.Core.Enums;
 using JobCompany.DAL.Contexts;
 using MassTransit.Initializers;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Shared.Responses;
 using SharedLibrary.Exceptions;
 using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;

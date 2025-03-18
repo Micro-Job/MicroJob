@@ -18,5 +18,9 @@ public enum NotificationType : byte
     /// Sirkete muraciet apply bildirisi
     /// </summary>
     Application = 4,
+    /// <summary>
+    /// Vakansiya yenilendi
+    /// </summary>
+    VacancyUpdate = 5
 }
 

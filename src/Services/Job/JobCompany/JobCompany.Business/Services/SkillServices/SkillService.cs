@@ -65,7 +65,7 @@ namespace JobCompany.Business.Services.Skill
             var skillGuid = Guid.Parse(skillId);
             var skill = await _context.Skills.Include(x => x.Translations).Where(x => x.Id == skillGuid).FirstOrDefaultAsync();
 
-            var skillTranslations = skill.Translations.Select(x => x).ToList();
+            var skillTranslations = skill.Translations.ToList();
             _context.SkillTranslations.RemoveRange(skillTranslations);
             _context.Skills.Remove(skill);
             await _context.SaveChangesAsync();

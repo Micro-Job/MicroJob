@@ -1,6 +1,4 @@
-﻿using System.Security.Claims;
-using Job.Core.Entities;
-using JobCompany.Business.Dtos.StatusDtos;
+﻿using JobCompany.Business.Dtos.StatusDtos;
 using JobCompany.Business.Exceptions.StatusExceptions;
 using JobCompany.Business.Extensions;
 using JobCompany.Core.Entites;
@@ -21,7 +19,7 @@ namespace JobCompany.Business.Services.StatusServices
                 .FirstOrDefaultAsync();
 
             if (companyId == Guid.Empty)
-                throw new SharedLibrary.Exceptions.NotFoundException<Company>();
+                throw new SharedLibrary.Exceptions.NotFoundException<Company>(MessageHelper.GetMessage("NOT_FOUND"));
 
             var newStatus = new Status
             {
@@ -55,13 +53,13 @@ namespace JobCompany.Business.Services.StatusServices
                     .FirstOrDefaultAsync(x => x.Id == statusGuid && x.Company.UserId == _currentUser.UserGuid) ?? throw new SharedLibrary.Exceptions.NotFoundException<Status>();
 
             if (existStatus.IsDefault == true)
-                throw new StatusPermissionException();
+                throw new StatusPermissionException(MessageHelper.GetMessage("STATUS_PERMISSION"));
 
             if (existStatus.Applications == null || existStatus.Applications.Count > 0)
                 throw new StatusPermissionException(MessageHelper.GetMessage("STATUS_PERMISSION"));
 
 
-            var statusTranslations = existStatus.Translations.Select(x => x).ToList();
+            var statusTranslations = existStatus.Translations.ToList();
             _context.StatusTranslations.RemoveRange(statusTranslations);
             _context.Statuses.Remove(existStatus);
             await _context.SaveChangesAsync();
@@ -93,7 +91,7 @@ namespace JobCompany.Business.Services.StatusServices
                 .ToListAsync();
 
             if (!existingStatuses.Any())
-                throw new SharedLibrary.Exceptions.NotFoundException<Status>();
+                throw new SharedLibrary.Exceptions.NotFoundException<Status>(MessageHelper.GetMessage("NOT_FOUND"));
 
             existingStatuses.ForEach(existingStatus =>
             {

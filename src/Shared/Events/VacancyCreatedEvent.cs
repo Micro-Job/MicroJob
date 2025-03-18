@@ -1,4 +1,6 @@
-﻿namespace SharedLibrary.Events
+﻿using SharedLibrary.Enums;
+
+namespace SharedLibrary.Events
 {
     public class VacancyCreatedEvent
     {
@@ -6,5 +8,6 @@
         public List<Guid> SkillIds { get; set; }
         public Guid InformationId { get; set; }
         public string? InformatioName { get; set; }
+        public NotificationType NotificationType { get; set; }
     }
 }

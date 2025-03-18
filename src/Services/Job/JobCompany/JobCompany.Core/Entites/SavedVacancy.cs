@@ -10,7 +10,6 @@ namespace JobCompany.Core.Entites
     public class SavedVacancy : BaseEntity
     {
         public Guid? UserId { get; set; }
-
         public Guid VacancyId { get; set; }
         public Vacancy Vacancy { get; set; }
     }

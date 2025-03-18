@@ -1,16 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
 using JobCompany.Business.Dtos.Common;
 using JobCompany.Business.Dtos.NotificationDtos;
-using JobCompany.Business.Exceptions.UserExceptions;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using SharedLibrary.Exceptions;
 using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;
@@ -40,8 +32,8 @@ namespace JobCompany.Business.Services.NotificationServices
                 ReceiverId = n.ReceiverId,
                 SenderId = n.SenderId,
                 InformationId = n.InformationId,
+                InformationName = n.InformationName,
                 CreatedDate = n.CreatedDate,
-                //Content = n.Content,
                 IsSeen = n.IsSeen,
             })
             .Skip(Math.Max(0, (skip - 1) * take))

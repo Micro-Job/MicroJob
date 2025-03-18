@@ -89,7 +89,7 @@ namespace JobCompany.Business.Services.CityServices
             var city = await _context.Cities.Include(x => x.Translations).Where(x => x.Id == cityGuid).FirstOrDefaultAsync()
                 ?? throw new NotFoundException<City>(MessageHelper.GetMessage("NOT_FOUND"));
 
-            var cityTranslations = city.Translations.Select(x => x).ToList();
+            var cityTranslations = city.Translations.ToList();
             _context.CityTranslations.RemoveRange(cityTranslations);
             _context.Cities.Remove(city);
             await _context.SaveChangesAsync();

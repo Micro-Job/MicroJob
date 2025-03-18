@@ -91,8 +91,8 @@ namespace JobCompany.Business.Services.ApplicationServices
                         Vacancy = new
                         {
                             x.Vacancy.Id,
-                            x.Vacancy.CompanyId,
-                            CompanyName = x.Vacancy.Company.CompanyName,
+                            x.Vacancy.Title,
+                            x.Vacancy.CompanyId
                         },
                     })
                     .FirstOrDefaultAsync()
@@ -112,8 +112,8 @@ namespace JobCompany.Business.Services.ApplicationServices
                     UserId = application.UserId,
                     SenderId = (Guid)_currentUser.UserGuid,
                     InformationId = vacancy.Id,
-                    //Content =
-                    //    $"{vacancy.CompanyName} şirkətinin müraciət statusu dəyişdirildi: {application.Status.Name}",
+                    InformationName = vacancy.Title,
+                    NotificationType = SharedLibrary.Enums.NotificationType.StatusUpdate
                 }
             );
         }
@@ -369,7 +369,8 @@ namespace JobCompany.Business.Services.ApplicationServices
                     SenderId = userGuid,
                     VacancyId = vacancyGuid,
                     InformationId = userGuid,
-                Content = $"İstifadəçi {responseUser.Message.FirstName} {responseUser.Message.LastName} {vacancyInfo.Title} vakansiyasına müraciət etdi.",
+                    InformationName = responseUser.Message.FirstName + responseUser.Message.LastName ,
+                    NotificationType = SharedLibrary.Enums.NotificationType.Application
             });
         }
 
@@ -419,9 +420,10 @@ namespace JobCompany.Business.Services.ApplicationServices
             var application = await _context.Applications
                 .Include(a => a.Status.Translations)
                 .Include(a => a.Vacancy)           
-                .ThenInclude(v => v.Company)  
+                .ThenInclude(v => v.Company)
                 .ThenInclude(c => c.Statuses)
                 .ThenInclude(c => c.Translations)
+                .Include(a => a.Vacancy.SavedVacancies)
                 .Where(a => a.UserId == userGuid && a.Id == applicationGuid)
                 .FirstOrDefaultAsync()
                 ?? throw new NotFoundException<Application>(MessageHelper.GetMessage("NOT_FOUND"));
@@ -436,7 +438,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                 WorkType = application.Vacancy.WorkType,
                 WorkStyle = application.Vacancy.WorkStyle,
                 startDate = application.Vacancy.StartDate,
-                //IsSaved = application.,
+                IsSaved = application.Vacancy.SavedVacancies.Any(sv => sv.UserId == userGuid),
                 CompanyStatuses = application.Vacancy.Company != null ? application.Vacancy.Company.Statuses.Select(cs => cs.GetTranslation(_currentUser.LanguageCode)).ToList() : new List<string>(),
                 ApplicationStatus = application.Status.ToString()
             };

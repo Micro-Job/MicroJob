@@ -1,16 +1,9 @@
-﻿using System.Security.Claims;
-using Job.Business.Dtos.NotificationDtos;
-using Job.Business.Exceptions.UserExceptions;
+﻿using Job.Business.Dtos.NotificationDtos;
 using Job.DAL.Contexts;
-using MassTransit;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Shared.Responses;
 using SharedLibrary.Exceptions;
 using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;
-using SharedLibrary.Requests;
-using SharedLibrary.Responses;
 
 namespace Job.Business.Services.Notification
 {
@@ -56,7 +49,8 @@ namespace Job.Business.Services.Notification
                 SenderId = n.SenderId,
                 InformationId = n.InformationId,
                 CreatedDate = n.CreatedDate,
-                //Content = n.Translations.,
+                InformationName= n.InformationName,
+                NotificationType = n.NotificationType,
                 IsSeen = n.IsSeen,
             })
             .Skip(Math.Max(0, (skip - 1) * take))

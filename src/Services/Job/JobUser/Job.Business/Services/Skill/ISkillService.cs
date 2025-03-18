@@ -7,4 +7,5 @@ public interface ISkillService
     Task CreateSkillAsync(SkillCreateDto dto);
     Task UpdateSkillAsync(List<SkillUpdateDto> dto);
     Task<List<GetAllSkillDto>> GetAllSkillsAsync();
+    Task DeleteSkillAsync(string skillId);
 }

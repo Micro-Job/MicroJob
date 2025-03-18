@@ -1,8 +1,5 @@
 ﻿using System.Data;
-using System.Security.Claims;
-using JobCompany.Business.Dtos.CategoryDtos;
 using JobCompany.Business.Dtos.Common;
-using JobCompany.Business.Dtos.CompanyDtos;
 using JobCompany.Business.Dtos.NumberDtos;
 using JobCompany.Business.Dtos.SkillDtos;
 using JobCompany.Business.Dtos.VacancyDtos;
@@ -12,10 +9,8 @@ using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using MassTransit;
 using MassTransit.Initializers;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Shared.Dtos.VacancyDtos;
 using Shared.Events;
 using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.Enums;
@@ -143,6 +138,8 @@ namespace JobCompany.Business.Services.VacancyServices
                         SkillIds = vacancyDto.SkillIds,
                         InformationId = vacancy.Id,
                         InformatioName = vacancy.Title,
+                        NotificationType = NotificationType.Vacancy
+
                     }
                 );
             }
@@ -379,6 +376,8 @@ namespace JobCompany.Business.Services.VacancyServices
                     SenderId = (Guid)_currentUser.UserGuid,
                     UserIds = userIds,
                     InformationName = existingVacancy.Title,
+                    NotificationType = NotificationType.VacancyUpdate
+                    
                 }
             );
         }

@@ -1,4 +1,3 @@
-using JobCompany.Business.Dtos.CityDtos;
 using JobCompany.Business.Dtos.CountryDtos;
 using JobCompany.Business.Exceptions.Common;
 using JobCompany.Business.Extensions;
@@ -37,8 +36,8 @@ namespace JobCompany.Business.Services.CountryServices
             var country = await _context.Countries.Include(x => x.Translations).Where(x => x.Id == countryId).FirstOrDefaultAsync()
                 ?? throw new NotFoundException<Country>(MessageHelper.GetMessage("NOT_FOUND"));
 
-            var brandTranslations = country.Translations.Select(x => x).ToList();
-            _context.CountryTranslations.RemoveRange(brandTranslations);
+            var countryTranslations = country.Translations.ToList();
+            _context.CountryTranslations.RemoveRange(countryTranslations);
             _context.Countries.Remove(country);
             await _context.SaveChangesAsync();
         }

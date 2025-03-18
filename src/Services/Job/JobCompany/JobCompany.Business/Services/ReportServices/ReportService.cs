@@ -1,9 +1,6 @@
 using System.Security.Claims;
-using JobCompany.Business.Dtos.ApplicationDtos;
 using JobCompany.Business.Dtos.ReportDtos;
 using JobCompany.Business.Extensions;
-
-// using JobCompany.Business.Exceptions.Common;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using MassTransit;

@@ -36,6 +36,8 @@ namespace JobCompany.Business.Services.CategoryServices
             var category = await _context.Categories.FindAsync(categoryId) ??
             throw new NotFoundException<Category>(MessageHelper.GetMessage("NOT_FOUND"));
 
+            var categoryTranslations = category.Translations.ToList();
+            _context.CategoryTranslations.RemoveRange(categoryTranslations);
             _context.Categories.Remove(category);
             await _context.SaveChangesAsync();
         }

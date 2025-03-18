@@ -1,8 +1,6 @@
-using System.Security.Claims;
 using JobCompany.Business.Dtos.Common;
 using JobCompany.Business.Dtos.CompanyDtos;
 using JobCompany.Business.Dtos.NumberDtos;
-using JobCompany.Business.Exceptions.Common;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using MassTransit;
@@ -10,7 +8,6 @@ using MassTransit.Initializers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Shared.Exceptions;
 using Shared.Requests;
 using Shared.Responses;
 using SharedLibrary.Helpers;
