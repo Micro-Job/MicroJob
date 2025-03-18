@@ -16,6 +16,7 @@ namespace AuthService.Business.Dtos
         public string AccessToken { get; set; }
         public DateTime Expires { get; set; }
         public string RefreshToken { get; set; }
+        public string? UserImage { get; set; }
         //public byte UserRole { get; set; }
     }
 }
