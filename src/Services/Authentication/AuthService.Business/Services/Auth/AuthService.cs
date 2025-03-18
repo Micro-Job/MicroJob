@@ -152,62 +152,11 @@ namespace AuthService.Business.Services.Auth
             if (user == null)
                 throw new LoginFailedException();
 
-            // hesabin hal hazirda bloklanmadigini yoxla
-            //if (user.LockDownDate.HasValue && user.LockDownDate.Value > DateTime.Now)
-            //    throw new AccountLockedException(user.LockDownDate.Value);
-
             var hashedPassword = _tokenHandler.GeneratePasswordHash(dto.Password);
             if (user.Password != hashedPassword)
             {
                 throw new LoginFailedException();
-                #region LoginLog
-                //await _context.LoginLogs.AddAsync(
-                //    new LoginLog
-                //    {
-                //        UserId = user.Id,
-                //        Date = DateTime.Now,
-                //        IsSucceed = false,
-                //        IP = _ipAddress,
-                //    }
-                //);
-
-                //// sonuncu ugurlu login saatini al
-                //var lastSuccessfulLogin =
-                //    user.LoginLogs.Where(l => l.IsSucceed)
-                //        .OrderByDescending(l => l.Date)
-                //        .FirstOrDefault()
-                //        ?.Date ?? DateTime.MinValue;
-
-                //// user bloklanma vaxti kecibse failedAttempts ucun lockDownDate-e gore hesablama apar
-                //if (user.LockDownDate.HasValue && user.LockDownDate.Value < DateTime.Now)
-                //    lastSuccessfulLogin = user.LockDownDate.Value;
-
-                //// sonuncu ugurlu login cehdinden sonraki ugursuz cehdlerin sayini al
-                //var failedAttempts = user
-                //    .LoginLogs.Where(l => !l.IsSucceed && l.Date > lastSuccessfulLogin)
-                //    .Count();
-
-                //if (failedAttempts >= 3)
-                //{
-                //    user.LockDownDate = DateTime.Now.AddHours(1);
-                //}
-
-                //await _context.SaveChangesAsync();
-                #endregion
             }
-
-            //await _context.LoginLogs.AddAsync(
-            //    new LoginLog
-            //    {
-            //        UserId = user.Id,
-            //        Date = DateTime.Now,
-            //        IsSucceed = true,
-            //        IP = _ipAddress,
-            //    }
-            //);
-            // ugurlu loginden sonra bloklanma vaxtini sifirla
-            //user.LockDownDate = null;
-            //await _context.SaveChangesAsync();
 
             var accessToken = _tokenHandler.CreateToken(user, 60);
             var refreshToken = _tokenHandler.GenerateRefreshToken(accessToken, 1440);

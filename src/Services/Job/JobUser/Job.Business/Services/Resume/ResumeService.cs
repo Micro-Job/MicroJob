@@ -79,7 +79,7 @@ namespace Job.Business.Services.Resume
             _currentUser = currentUser;
         }
 
-        public async Task CreateResumeAsync(ResumeCreateDto resumeCreateDto, ResumeCreateListsDto resumeCreateListsDto)
+        public async Task CreateResumeAsync(ResumeCreateDto resumeCreateDto)
         {
             if (await _context.Resumes.AnyAsync(x => x.UserId == userGuid))
                 throw new IsAlreadyExistException<Core.Entities.Resume>();
@@ -89,10 +89,10 @@ namespace Job.Business.Services.Resume
             await _context.Resumes.AddAsync(resume);
             await _context.SaveChangesAsync();
 
-            var phoneNumbers = await GetPhoneNumbersAsync(resumeCreateDto, resume.Id, resumeCreateListsDto);
-            var educations = await _educationService.CreateBulkEducationAsync(resumeCreateListsDto.EducationCreateDtos.Educations, resume.Id);
-            var experiences = await _experienceService.CreateBulkExperienceAsync(resumeCreateListsDto.ExperienceCreateDtos.Experiences, resume.Id);
-            var languages = await _languageService.CreateBulkLanguageAsync(resumeCreateListsDto.LanguageCreateDtos.Languages, resume.Id);
+            var phoneNumbers = await GetPhoneNumbersAsync(resumeCreateDto, resume.Id, resumeCreateDto);
+            var educations = await _educationService.CreateBulkEducationAsync(resumeCreateDto.Educations, resume.Id);
+            var experiences = await _experienceService.CreateBulkExperienceAsync(resumeCreateDto.Experiences, resume.Id);
+            var languages = await _languageService.CreateBulkLanguageAsync(resumeCreateDto.Languages, resume.Id);
             var certificates = await GetCertificatesAsync(resumeCreateDto);
             var resumeSkills = GetResumeSkills(resumeCreateDto.SkillIds, resume.Id);
 
@@ -139,10 +139,10 @@ namespace Job.Business.Services.Resume
             };
         }
 
-        private async Task<List<Core.Entities.Number>> GetPhoneNumbersAsync(ResumeCreateDto dto, Guid resumeId, ResumeCreateListsDto listsDto)
+        private async Task<List<Core.Entities.Number>> GetPhoneNumbersAsync(ResumeCreateDto dto, Guid resumeId, ResumeCreateDto listsDto)
         {
             if (!dto.IsMainNumber)
-                return await _numberService.CreateBulkNumberAsync(listsDto.NumberCreateDtos.PhoneNumbers, resumeId);
+                return await _numberService.CreateBulkNumberAsync(listsDto.PhoneNumbers, resumeId);
 
             var mainNumber = (await _userInformationService.GetUserDataAsync(userGuid)).MainPhoneNumber;
 
