@@ -2,7 +2,7 @@ name: Deploy to Server
 on:
   push:
     branches:
-      - deploy  
+      - test  
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -15,9 +15,9 @@ jobs:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }} 
     - name: Deploy to Server
       run: |
-        ssh -o StrictHostKeyChecking=no root@142.132.214.238 << 'EOF'
+        ssh -o StrictHostKeyChecking=no root@65.108.38.170 << 'EOF'
           cd /home/projects/MicroJob && \
-          git pull origin deploy && \
+          git pull origin test && \
           docker-compose down && \
           docker-compose up --build -d
         EOF
