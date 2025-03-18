@@ -13,7 +13,7 @@ namespace Job.API.Controllers
     public class ResumeController(IResumeService service) : ControllerBase
     {
         [HttpPost("[action]")]
-        public async Task<IActionResult> CreateResume([FromForm] ResumeCreateDto resumeCreateDto)
+        public async Task<IActionResult> CreateResume(ResumeCreateDto resumeCreateDto)
         {
             await service.CreateResumeAsync(resumeCreateDto);
             return Ok();

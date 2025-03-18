@@ -108,13 +108,13 @@ namespace Job.Business.Services.Resume
 
         private async Task<Core.Entities.Resume> BuildResumeAsync(ResumeCreateDto dto)
         {
-            FileDto fileResult = dto.UserPhoto != null
-                ? await _fileService.UploadAsync(FilePaths.document, dto.UserPhoto)
+            FileDto fileResult = dto.TestDto.UserPhoto != null
+                ? await _fileService.UploadAsync(FilePaths.document, dto.TestDto.UserPhoto)
                 : new FileDto();
 
-            string? email = dto.IsMainEmail
+            string? email = dto.TestDto.IsMainEmail
                 ? (await _userInformationService.GetUserDataAsync(userGuid)).Email
-                : dto.ResumeEmail;
+                : dto.TestDto.ResumeEmail;
 
             return MapToResumeEntity(dto, $"{fileResult.FilePath}/{fileResult.FileName}", email);
         }
@@ -124,16 +124,16 @@ namespace Job.Business.Services.Resume
             return new Core.Entities.Resume
             {
                 UserId = userGuid,
-                FatherName = dto.FatherName,
-                Position = dto.Position,
-                IsDriver = dto.IsDriver,
-                IsMarried = dto.IsMarried,
-                IsCitizen = dto.IsCitizen,
-                MilitarySituation = dto.MilitarySituation,
-                IsPublic = dto.IsPublic,
-                Gender = dto.Gender,
-                Adress = dto.Adress,
-                BirthDay = dto.BirthDay,
+                FatherName = dto.TestDto.FatherName,
+                Position = dto.TestDto.Position,
+                IsDriver = dto.TestDto.IsDriver,
+                IsMarried = dto.TestDto.IsMarried,
+                IsCitizen = dto.TestDto.IsCitizen,
+                MilitarySituation = dto.TestDto.MilitarySituation,
+                IsPublic = dto.TestDto.IsPublic,
+                Gender = dto.TestDto.Gender,
+                Adress = dto.TestDto.Adress,
+                BirthDay = dto.TestDto.BirthDay,
                 UserPhoto = filePath,
                 ResumeEmail = email
             };
@@ -141,7 +141,7 @@ namespace Job.Business.Services.Resume
 
         private async Task<List<Core.Entities.Number>> GetPhoneNumbersAsync(ResumeCreateDto dto, Guid resumeId, ResumeCreateDto listsDto)
         {
-            if (!dto.IsMainNumber)
+            if (!dto.TestDto.IsMainNumber)
                 return await _numberService.CreateBulkNumberAsync(listsDto.PhoneNumbers, resumeId);
 
             var mainNumber = (await _userInformationService.GetUserDataAsync(userGuid)).MainPhoneNumber;
