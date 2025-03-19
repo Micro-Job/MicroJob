@@ -7,6 +7,6 @@ namespace JobCompany.Business.Services.QuestionServices
     public interface IQuestionService
     {
         Task CreateQuestionAsync(QuestionCreateDto dto, CreateListAnswersDto dtos);
-        Task<ICollection<Question>> CreateBulkQuestionAsync(ICollection<QuestionCreateDto> dtos, string examId);
+        Task<ICollection<Question>> CreateBulkQuestionAsync(ICollection<QuestionCreateDto> dtos);
     }
 }

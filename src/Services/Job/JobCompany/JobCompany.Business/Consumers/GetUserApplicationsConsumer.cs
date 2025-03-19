@@ -52,9 +52,9 @@ public class GetUserApplicationsConsumer(JobCompanyDbContext jobCompanyDbContext
             {
                 ApplicationId = a.Id,
                 VacancyId = a.VacancyId,
-                title = a.Vacancy.Title ?? "No Title",
+                Title = a.Vacancy.Title ?? "No Title",
                 CompanyName = a.Vacancy.Company?.CompanyName ?? "No Company",
-                companyLogo = string.IsNullOrEmpty(a.Vacancy.Company?.CompanyLogo)
+                CompanyLogo = string.IsNullOrEmpty(a.Vacancy.Company?.CompanyLogo)
                     ? $"{_authServiceBaseUrl}/default-logo.png"
                     : $"{_authServiceBaseUrl}/{a.Vacancy.Company.CompanyLogo}",
                 CompanyId = a.Vacancy.CompanyId,
@@ -63,7 +63,7 @@ public class GetUserApplicationsConsumer(JobCompanyDbContext jobCompanyDbContext
                 //StatusName = a.Status?.Name ?? "Pending",
                 StatusColor = a.Status?.StatusColor ?? "#CCCCCC",
                 ViewCount = a.Vacancy.ViewCount,
-                startDate = a.CreatedDate
+                StartDate = a.CreatedDate
             }).ToList(),
             TotalCount = totalCount
         };
