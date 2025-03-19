@@ -4,7 +4,6 @@ using SharedLibrary.Responses;
 
 namespace Job.Business.Services.User
 {
-    //TODO : Bu lazimsizdir auth-dan gedib goturulsun
     public class UserInformationService(IRequestClient<GetUserDataRequest> _client) : IUserInformationService
     {
         public async Task<GetUserDataResponse> GetUserDataAsync(Guid userId)

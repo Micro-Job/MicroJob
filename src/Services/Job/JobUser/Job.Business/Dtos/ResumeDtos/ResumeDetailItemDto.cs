@@ -28,9 +28,9 @@ namespace Job.Business.Dtos.ResumeDtos
 
         //public UserInformationDto User { get; set; }
         public string? ResumeEmail { get; set; }
-        public ICollection<SkillGetByIdDto> Skills { get; set; }
-        public ICollection<NumberGetByIdDto> PhoneNumbers { get; set; }
-        public ICollection<EducationGetByIdDto> Educations { get; set; }
+        public ICollection<SkillGetByIdDto>? Skills { get; set; }
+        public ICollection<NumberGetByIdDto>? PhoneNumbers { get; set; }
+        public ICollection<EducationGetByIdDto>? Educations { get; set; }
         public ICollection<ExperienceGetByIdDto>? Experiences { get; set; }
         public ICollection<LanguageGetByIdDto>? Languages { get; set; }
         public ICollection<CertificateGetByIdDto>? Certificates { get; set; }
