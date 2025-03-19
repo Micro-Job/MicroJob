@@ -203,6 +203,7 @@ namespace Job.Business.Services.Resume
                                             }).ToList(),
                                             Educations = resume.Educations.Select(e => new EducationGetByIdDto
                                             {
+                                                EducationId = e.Id,
                                                 InstitutionName = e.InstitutionName,
                                                 Profession = e.Profession,
                                                 StartDate = e.StartDate,
@@ -212,6 +213,7 @@ namespace Job.Business.Services.Resume
                                             }).ToList(),
                                             Experiences = resume.Experiences.Select(ex => new ExperienceGetByIdDto
                                             {
+                                                ExperienceId = ex.Id,
                                                 OrganizationName = ex.OrganizationName,
                                                 PositionName = ex.PositionName,
                                                 PositionDescription = ex.PositionDescription,
@@ -221,11 +223,13 @@ namespace Job.Business.Services.Resume
                                             }).ToList(),
                                             Languages = resume.Languages.Select(l => new LanguageGetByIdDto
                                             {
+                                                LanguageId = l.Id,
                                                 LanguageName = l.LanguageName,
                                                 LanguageLevel = l.LanguageLevel
                                             }).ToList(),
                                             Certificates = resume.Certificates.Select(c => new CertificateGetByIdDto
                                             {
+                                                CertificateId = c.Id,
                                                 CertificateName = c.CertificateName,
                                                 GivenOrganization = c.GivenOrganization,
                                                 CertificateFile = $"{_baseUrl}/{c.CertificateFile}"

@@ -101,8 +101,9 @@ namespace JobCompany.Business.Services.VacancyServices
                 Family = vacancyDto.Family,
                 Citizenship = vacancyDto.Citizenship,
                 CategoryId = vacancyDto.CategoryId,
+                ExamId = vacancyDto.ExamId,
                 IsActive = true,
-                ViewCount = 0,
+                ViewCount = 0
             };
 
             var numbers = new List<VacancyNumber>();
@@ -145,13 +146,6 @@ namespace JobCompany.Business.Services.VacancyServices
                         InformatioName = vacancy.Title,
                     }
                 );
-            }
-
-            if (vacancyDto.Exam is not null)
-            {
-                var examId = await _examService.CreateExamAsync(vacancyDto.Exam);
-
-                vacancy.ExamId = examId;
             }
 
             await _context.SaveChangesAsync();
@@ -273,8 +267,7 @@ namespace JobCompany.Business.Services.VacancyServices
         {
             var vacancyGuid = Guid.Parse(id);
 
-            var vacancyDto =
-                await _context
+            var vacancyDto = await _context
                     .Vacancies.Where(x => x.Id == vacancyGuid)
                     .Select(x => new VacancyGetByIdDto
                     {
@@ -306,12 +299,17 @@ namespace JobCompany.Business.Services.VacancyServices
                             .ToList(),
                         Skills = x
                             .VacancySkills.Where(vc => vc.Skill != null)
-                            .Select(vc => new SkillDto { Name = vc.Skill.GetTranslation(_currentUser.LanguageCode) })
+                            .Select(vc => new SkillDto { Name = vc.Skill.Translations.GetTranslation(_currentUser.LanguageCode) })
                             .ToList(),
                         CompanyName = x.CompanyName,
                         CategoryName = x.Category.GetTranslation(_currentUser.LanguageCode),
                     })
                     .FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
+
+            var existVacancy = await _context.Vacancies.FirstOrDefaultAsync(x => x.Id == vacancyGuid);
+
+            existVacancy.ViewCount++;
+            await _context.SaveChangesAsync();
 
             return vacancyDto;
         }

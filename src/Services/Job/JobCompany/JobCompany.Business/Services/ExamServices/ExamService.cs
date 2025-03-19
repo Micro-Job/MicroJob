@@ -22,9 +22,10 @@ namespace JobCompany.Business.Services.ExamServices
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
 
-            var company =
-                await _context.Companies.FirstOrDefaultAsync(a => a.UserId == _currentUser.UserGuid)
-                ?? throw new NotFoundException<Company>(MessageHelper.GetMessage("NOT_FOUND"));
+            var companyId = await _context.Companies
+                .Where(a => a.UserId == _currentUser.UserGuid)
+                .Select(x => x.Id)
+                .FirstOrDefaultAsync();
 
             try
             {
@@ -35,33 +36,23 @@ namespace JobCompany.Business.Services.ExamServices
                     LastDescription = dto.LastDescription,
                     Result = dto.Result,
                     LimitRate = dto.LimitRate,
-                    CompanyId = company.Id,
+                    CompanyId = companyId,
                     IsTemplate = dto.IsTemplate,
                     Duration = dto.Duration,
                 };
 
                 await _context.Exams.AddAsync(exam);
-
                 await _context.SaveChangesAsync();
 
-                var examId = exam.Id.ToString();
+                var questions = await _questionService.CreateBulkQuestionAsync(dto.Questions);
 
-                var questions = await _questionService.CreateBulkQuestionAsync(
-                    dto.Questions,
-                    examId
-                );
-
-                foreach (var question in questions)
+                var examQuestions = questions.Select(x => new ExamQuestion
                 {
-                    var examQuestion = new ExamQuestion
-                    {
-                        ExamId = exam.Id,
-                        QuestionId = question.Id,
-                    };
+                    ExamId = exam.Id,
+                    QuestionId = x.Id
+                }).ToList();
 
-                    await _context.ExamQuestions.AddAsync(examQuestion);
-                }
-
+                await _context.ExamQuestions.AddRangeAsync(examQuestions);
                 await _context.SaveChangesAsync();
 
                 await transaction.CommitAsync();
