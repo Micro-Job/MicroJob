@@ -119,9 +119,7 @@ namespace JobCompany.Business.Services.ApplicationServices
         }
 
         /// <summary> Müraciətlərin statusu ilə birlikdə gətirilməsi </summary>
-        public async Task<List<StatusListDtoWithApps>> GetAllApplicationWithStatusAsync(
-            string vacancyId
-        )
+        public async Task<List<StatusListDtoWithApps>> GetAllApplicationWithStatusAsync(string vacancyId)
         {
             var vacancyGuid = Guid.Parse(vacancyId);
 
@@ -184,9 +182,8 @@ namespace JobCompany.Business.Services.ApplicationServices
         {
             var applicationGuid = Guid.Parse(applicationId);
 
-            var application =
-                await _context
-                    .Applications.Include(a => a.Status.Translations).Where(a => a.Id == applicationGuid && a.IsActive)
+            var application = await _context.Applications
+                    .Where(a => a.Id == applicationGuid && a.IsActive)
                     .Select(a => new ApplicationGetByIdDto
                     {
                         VacancyId = a.VacancyId,
@@ -195,6 +192,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                         CompanyName = a.Vacancy.CompanyName,
                         CreatedDate = a.CreatedDate,
                         Description = a.Vacancy.Description,
+
                         StatusName = a.Status.GetTranslation(_currentUser.LanguageCode),
                         StatusColor = a.Status.StatusColor,
                         Steps = _context
@@ -203,6 +201,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                             .ToList(),
                     })
                     .FirstOrDefaultAsync() ?? throw new NotFoundException<Application>(MessageHelper.GetMessage("NOT_FOUND"));
+
             return application;
         }
 

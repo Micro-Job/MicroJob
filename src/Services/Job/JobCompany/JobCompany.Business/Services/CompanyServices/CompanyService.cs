@@ -101,7 +101,7 @@ namespace JobCompany.Business.Services.CompanyServices
                 {
                     CompanyId = c.Id,
                     CompanyName = c.CompanyName,
-                    CompanyImage = $"{_authServiceBaseUrl}/{c.CompanyLogo}",
+                    CompanyImage = c.CompanyLogo != null ? $"{_authServiceBaseUrl}/{c.CompanyLogo}" : null,
                     CompanyVacancyCount = c.Vacancies != null ? c.Vacancies.Count(v => v.IsActive) : 0,
                 })
                 .Skip(Math.Max(0, (skip - 1) * take))
