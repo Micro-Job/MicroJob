@@ -28,8 +28,7 @@ namespace Job.Business.Services.Education
         }
 
         //TODO : Burada kod optimizasiyasına ehtiyyac var 
-        public async Task<ICollection<Core.Entities.Education>> UpdateBulkEducationAsync(
-            ICollection<EducationUpdateDto> dtos, Guid resumeId)
+        public async Task<ICollection<Core.Entities.Education>> UpdateBulkEducationAsync(ICollection<EducationUpdateDto> dtos, Guid resumeId)
         {
             var institutionNames = dtos.Select(d => d.InstitutionName).ToList();
 
