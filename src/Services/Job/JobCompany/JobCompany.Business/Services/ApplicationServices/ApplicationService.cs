@@ -351,7 +351,7 @@ namespace JobCompany.Business.Services.ApplicationServices
         public async Task<PaginatedApplicationDto> GetUserApplicationsAsync(int skip, int take)
         {
             var query = _context.Applications
-                .Where(a => a.UserId == _currentUser.UserGuid);
+                .Where(a => a.UserId == _currentUser.UserGuid && a.IsActive);
 
             int totalCount = await query.CountAsync();
 
