@@ -5,14 +5,12 @@ namespace JobCompany.Business.Extensions;
 
 public static class TranslationExtensions
 {
-    public static IQueryable<T> IncludeTranslations<T>(this IQueryable<T> query)
-        where T : class
+    public static IQueryable<T> IncludeTranslations<T>(this IQueryable<T> query) where T : class
     {
         return query.Include("Translations");
     }
 
-    public static string GetTranslation<T>(this T entity, LanguageCode languageCode)
-        where T : class
+    public static string GetTranslation<T>(this T entity, LanguageCode languageCode) where T : class
     {
         var propertyInfo = typeof(T).GetProperty("Translations");
 
@@ -26,8 +24,7 @@ public static class TranslationExtensions
             .FirstOrDefault();
     }
 
-    public static string GetTranslationForComment<T>(this T entity, LanguageCode languageCode)
-where T : class
+    public static string GetTranslationForComment<T>(this T entity, LanguageCode languageCode) where T : class
     {
         var propertyInfo = typeof(T).GetProperty("Translations");
 

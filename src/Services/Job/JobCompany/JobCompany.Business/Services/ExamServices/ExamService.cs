@@ -1,5 +1,6 @@
 ﻿using System.Security.Claims;
 using JobCompany.Business.Dtos.AnswerDtos;
+using JobCompany.Business.Dtos.Common;
 using JobCompany.Business.Dtos.ExamDtos;
 using JobCompany.Business.Dtos.QuestionDtos;
 using JobCompany.Business.Services.QuestionServices;
@@ -39,6 +40,7 @@ namespace JobCompany.Business.Services.ExamServices
                     CompanyId = companyId,
                     IsTemplate = dto.IsTemplate,
                     Duration = dto.Duration,
+                    CreatedDate = DateTime.Now
                 };
 
                 await _context.Exams.AddAsync(exam);
@@ -134,10 +136,18 @@ namespace JobCompany.Business.Services.ExamServices
             await _context.SaveChangesAsync();
         }
 
-        public Task<List<ExamListDto>> GetExamsAsync(int skip, int take)
+        public async Task<DataListDto<ExamListDto>> GetExamsAsync(string? examName, int skip, int take)
         {
-            var exams = _context
-                .Exams.Where(e => e.IsTemplate == true)
+            var query = _context.Exams
+                .Where(e => e.IsTemplate == true && e.Company.UserId == _currentUser.UserGuid)
+                .OrderByDescending(x => x.CreatedDate)
+                .AsNoTracking()
+                .AsQueryable();
+
+            if (examName != null)
+                query = query.Where(x => x.Title.Contains(examName));
+
+            var exams = await query
                 .Select(e => new ExamListDto
                 {
                     Id = e.Id,
@@ -148,7 +158,11 @@ namespace JobCompany.Business.Services.ExamServices
                 .Take(take)
                 .ToListAsync();
 
-            return exams;
+            return new DataListDto<ExamListDto>
+            {
+                Datas = exams,
+                TotalCount = await query.CountAsync(),   
+            };
         }
 
         public async Task<GetExamIntroDto> GetExamIntroAsync(string examId)

@@ -1,4 +1,5 @@
 ﻿using JobCompany.Business.Dtos.ApplicationDtos;
+using JobCompany.Business.Dtos.Common;
 using JobCompany.Business.Dtos.StatusDtos;
 using Shared.Responses;
 using SharedLibrary.Dtos.ApplicationDtos;
@@ -15,7 +16,7 @@ namespace JobCompany.Business.Services.ApplicationServices
             int skip = 1,
             int take = 9
         );
-        Task<ICollection<AllApplicationListDto>> GetAllApplicationsListAsync(
+        Task<DataListDto<AllApplicationListDto>> GetAllApplicationsListAsync(
             int skip = 1,
             int take = 10
         );
