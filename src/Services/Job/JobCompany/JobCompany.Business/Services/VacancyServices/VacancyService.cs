@@ -241,10 +241,12 @@ namespace JobCompany.Business.Services.VacancyServices
             var vacancies = await query
                 .Select(x => new VacancyGetByCompanyIdDto
                 {
+                    VacancyId = x.Id,
                     CompanyName = x.CompanyName,
                     Title = x.Title,
                     Location = x.Location,
                     CompanyLogo = $"{_authServiceBaseUrl}/{x.Company.CompanyLogo}",
+                    WorkStyle = x.WorkStyle,
                     WorkType = x.WorkType,
                     StartDate = x.StartDate,
                     ViewCount = x.ViewCount,
