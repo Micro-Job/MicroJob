@@ -1,0 +1,22 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO.Pipelines;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Job.Business.Dtos.ResumeDtos
+{
+    public class ResumeListDto
+    {
+        public Guid Id { get; set; }
+        public bool IsSaved { get; set; }
+        public string? ProfileImage { get; set; }
+        public string FullName { get; set; }
+        public string? Profession { get; set; }
+        public byte? JobStatus { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+        public ICollection<string>? SkillsName { get; set; }
+    }
+}

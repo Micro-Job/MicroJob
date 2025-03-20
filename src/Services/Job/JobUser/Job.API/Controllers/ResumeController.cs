@@ -10,26 +10,35 @@ namespace Job.API.Controllers
     [ApiController]
     [Route("api/[controller]")]
     //[AuthorizeRole(UserRole.SimpleUser)]
-    public class ResumeController(IResumeService service) : ControllerBase
+    public class ResumeController(IResumeService _resumeService) : ControllerBase
     {
         [HttpPost("[action]")]
         public async Task<IActionResult> CreateResume(ResumeCreateDto resumeCreateDto)
         {
-            await service.CreateResumeAsync(resumeCreateDto);
+            await _resumeService.CreateResumeAsync(resumeCreateDto);
             return Ok();
         }
 
         [HttpPut("[action]")]
         public async Task<IActionResult> UpdateResume(ResumeUpdateDto resumeUpdateDto)
         {
-            await service.UpdateResumeAsync(resumeUpdateDto);
+            await _resumeService.UpdateResumeAsync(resumeUpdateDto);
             return Ok();
         }
 
         [HttpGet("[action]")]
         public async Task<IActionResult> GetOwnResume()
         {
-            return Ok(await service.GetOwnResumeAsync());
+            return Ok(await _resumeService.GetOwnResumeAsync());
+        }
+
+
+
+        [HttpPost]
+        public async Task<IActionResult> ToggleSaveResume(string resumeId)
+        {
+            await _resumeService.ToggleSaveResumeAsync(resumeId);
+            return Ok();
         }
     }
 }
