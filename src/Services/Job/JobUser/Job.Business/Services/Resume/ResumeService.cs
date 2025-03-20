@@ -204,14 +204,31 @@ namespace Job.Business.Services.Resume
         }
 
         //Sirket hissəsində resumelerin metodlari
-        public async Task<DataListDto<ResumeListDto>> GetAllResumesAsync(int skip, int take)
+        public async Task<DataListDto<ResumeListDto>> GetAllResumesAsync(string? fullname, int skip, int take)
         {
             var query = _context.Resumes.Where(x=> x.IsPublic).AsQueryable().AsNoTracking();
 
+            if (fullname != null)
+                query = query.Where(x=> (x.FirstName + x.LastName).Contains(fullname));
+
             var resumes = await query.Select(x => new ResumeListDto
             {
-
-            }).ToListAsync();
+                Id = x.Id,
+                FullName = $"{x.FirstName} {x.LastName}",
+                ProfileImage = x.UserPhoto != null ? $"{_baseUrl}/{x.UserPhoto}" : null,
+                JobStatus = x.User.JobStatus,
+                IsSaved = x.SavedResumes.Any(sr => sr.ResumeId == x.Id && sr.CompanyUserId == _currentUser.UserGuid),
+                Position = x.Position,
+                StartDate = x.Experiences != null ? x.Experiences.FirstOrDefault().StartDate : null,  
+                EndDate = x.Experiences != null ? x.Experiences.FirstOrDefault().EndDate : null,  
+                //SkillsName = x.ResumeSkills.Select(x=> new
+                //{
+                //    x.
+                //})
+            })
+            .Skip(Math.Max(0, (skip - 1) * take))
+            .Take(take) 
+            .ToListAsync();
 
             return new DataListDto<ResumeListDto> 
             {
@@ -220,9 +237,25 @@ namespace Job.Business.Services.Resume
             };
         }
 
-        public Task<DataListDto<SavedResumeListDto>> GetSavedResumesAsync(string? fullName, int skip, int take)
+
+        //TODO : bu hisse qalib
+        public async Task<DataListDto<SavedResumeListDto>> GetSavedResumesAsync(string? fullName, int skip, int take)
         {
-            throw new NotImplementedException();
+            var query = _context.SavedResumes.Where(x => x.CompanyUserId == _currentUser.UserGuid);
+
+            var resumes = await query.Select(x => new SavedResumeListDto
+            {
+
+            })
+            .Skip(Math.Max(0, (skip - 1) * take))
+            .Take(take)
+            .ToListAsync();
+
+            return new DataListDto<SavedResumeListDto>
+            {
+                Datas = resumes,
+                TotalCount = await query.CountAsync()
+            };
         }
 
         public async Task ToggleSaveResumeAsync(string resumeId)

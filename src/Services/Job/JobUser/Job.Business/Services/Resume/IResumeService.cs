@@ -10,7 +10,7 @@ namespace Job.Business.Services.Resume
         Task UpdateResumeAsync(ResumeUpdateDto resumeUpdateDto);
         Task<ResumeDetailItemDto> GetOwnResumeAsync();
 
-        Task<DataListDto<ResumeListDto>> GetAllResumesAsync(int skip , int take);
+        Task<DataListDto<ResumeListDto>> GetAllResumesAsync(string? fullname, int skip , int take);
         Task<DataListDto<SavedResumeListDto>> GetSavedResumesAsync(string? fullName , int skip , int take);
         Task ToggleSaveResumeAsync(string resumeId);
 

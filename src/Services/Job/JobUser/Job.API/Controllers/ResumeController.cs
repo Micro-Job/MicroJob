@@ -32,7 +32,17 @@ namespace Job.API.Controllers
             return Ok(await _resumeService.GetOwnResumeAsync());
         }
 
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetAllResumes(string? fullname, int skip, int take)
+        {
+            return Ok(await _resumeService.GetAllResumesAsync(fullname,skip,take));
+        }
 
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetSavedResumes(string? fullname, int skip, int take)
+        {
+            return Ok(await _resumeService.GetSavedResumesAsync(fullname, skip, take));
+        }
 
         [HttpPost]
         public async Task<IActionResult> ToggleSaveResume(string resumeId)
