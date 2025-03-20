@@ -18,6 +18,7 @@ namespace Job.DAL.Contexts
         public DbSet<Skill> Skills { get; set; }
         public DbSet<ResumeSkill> ResumeSkills { get; set; }
         public DbSet<Notification> Notifications { get; set; }
+        public DbSet<SavedResume> SavedResumes { get; set; }
 
         public DbSet<SkillTranslation> SkillTranslations { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
