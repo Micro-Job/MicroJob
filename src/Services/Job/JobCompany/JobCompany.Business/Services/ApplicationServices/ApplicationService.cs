@@ -27,8 +27,6 @@ namespace JobCompany.Business.Services.ApplicationServices
     public class ApplicationService : IApplicationService
     {
         private readonly JobCompanyDbContext _context;
-        private readonly IHttpContextAccessor _contextAccessor;
-        private readonly string _baseUrl;
         readonly IRequestClient<GetUsersDataRequest> _getUserDataClient;
         readonly IRequestClient<GetResumeDataRequest> _getResumeDataClient;
         readonly IPublishEndpoint _publishEndpoint;
@@ -41,7 +39,6 @@ namespace JobCompany.Business.Services.ApplicationServices
             JobCompanyDbContext context,
             IRequestClient<GetUsersDataRequest> client,
             IRequestClient<GetResumeDataRequest> requestClient,
-            IHttpContextAccessor contextAccessor,
             IPublishEndpoint publishEndpoint,
             IConfiguration configuration,
             ICurrentUser currentUser,
@@ -49,11 +46,8 @@ namespace JobCompany.Business.Services.ApplicationServices
         {
             _currentUser = currentUser;
             _context = context;
-            _contextAccessor = contextAccessor;
             _getUserDataClient = client;
             _getResumeDataClient = requestClient;
-            _baseUrl =
-                $"{_contextAccessor.HttpContext.Request.Scheme}://{_contextAccessor.HttpContext.Request.Host.Value}{_contextAccessor.HttpContext.Request.PathBase.Value}";
             _publishEndpoint = publishEndpoint;
             _configuration = configuration;
             _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
@@ -83,38 +77,27 @@ namespace JobCompany.Business.Services.ApplicationServices
             var statusGuid = Guid.Parse(statusId);
             var applicationGuid = Guid.Parse(applicationId);
 
-            var existAppVacancy =
-                await _context
-                    .Applications.Where(x =>
-                        x.Id == applicationGuid && x.Vacancy.Company.UserId == _currentUser.UserGuid
-                    )
-                    .Select(x => new
-                    {
-                        Application = x,
-                        Vacancy = new
-                        {
-                            x.Vacancy.Id,
-                            x.Vacancy.CompanyId,
-                            CompanyName = x.Vacancy.Company.CompanyName,
-                        },
-                    })
-                    .FirstOrDefaultAsync()
-                ?? throw new NotFoundException<Application>(MessageHelper.GetMessage("NOT_FOUND"));
+            var existAppVacancy = await _context.Applications
+                .Where(x =>x.Id == applicationGuid && x.Vacancy.Company.UserId == _currentUser.UserGuid)
+                .Select(x => new
+                {
+                    Application = x,
+                    VacancyId = x.VacancyId
+                })
+                .FirstOrDefaultAsync()
+            ?? throw new NotFoundException<Application>(MessageHelper.GetMessage("NOT_FOUND"));
 
             var application = existAppVacancy.Application;
-            var vacancy = existAppVacancy.Vacancy;
 
             application.StatusId = statusGuid;
             await _context.SaveChangesAsync();
-
-            await _context.Entry(application).Reference(x => x.Status).LoadAsync();
 
             await _publishEndpoint.Publish(
                 new UpdateUserApplicationStatusEvent
                 {
                     UserId = application.UserId,
                     SenderId = (Guid)_currentUser.UserGuid,
-                    InformationId = vacancy.Id,
+                    InformationId = existAppVacancy.VacancyId,
                     //Content =
                     //    $"{vacancy.CompanyName} şirkətinin müraciət statusu dəyişdirildi: {application.Status.Name}",
                 }
@@ -420,7 +403,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                 })
                 .FirstOrDefaultAsync()
                 ?? throw new NotFoundException<Application>(MessageHelper.GetMessage("NOT_FOUND"));
-
+                
             application.CompanyStatuses = await _context.Statuses.Where(x => x.CompanyId == application.CompanyId || x.IsDefault)
                 .Include(x => x.Translations)
                 .OrderBy(x => x.Order)

@@ -32,7 +32,6 @@ namespace JobCompany.Business.Services.VacancyServices
     {
         private readonly JobCompanyDbContext _context;
         private readonly IFileService _fileService;
-        private readonly IExamService _examService;
         private readonly IPublishEndpoint _publishEndpoint;
         readonly IConfiguration _configuration;
         private readonly string? _authServiceBaseUrl;
@@ -49,7 +48,6 @@ namespace JobCompany.Business.Services.VacancyServices
         {
             this._context = _context;
             _fileService = fileService;
-            _examService = examService;
             _publishEndpoint = publishEndpoint;
             _configuration = configuration;
             _authServiceBaseUrl = configuration["AuthService:BaseUrl"];

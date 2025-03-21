@@ -1,5 +1,4 @@
-﻿using AuthService.Core.Enums;
-using FluentValidation;
+﻿using FluentValidation;
 using SharedLibrary.Enums;
 using SharedLibrary.Helpers;
 

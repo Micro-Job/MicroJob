@@ -1,2 +1,0 @@
-﻿namespace AuthService.Core.Enums;
-

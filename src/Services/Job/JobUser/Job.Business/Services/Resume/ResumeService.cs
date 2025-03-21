@@ -32,57 +32,19 @@ using System.Security.Claims;
 
 namespace Job.Business.Services.Resume
 {
-    public class ResumeService : IResumeService
+    public class ResumeService(JobDbContext _context,
+            IFileService _fileService,
+            INumberService _numberService,
+            IEducationService _educationService,
+            IExperienceService _experienceService,
+            ILanguageService _languageService,
+            ICertificateService _certificateService,
+            IUserInformationService _userInformationService,
+            ICurrentUser _currentUser) : IResumeService
     {
-        readonly JobDbContext _context;
-        readonly IFileService _fileService;
-        readonly ICurrentUser _currentUser;
-        readonly INumberService _numberService;
-        readonly IEducationService _educationService;
-        readonly IExperienceService _experienceService;
-        readonly ILanguageService _languageService;
-        readonly ICertificateService _certificateService;
-        readonly IUserInformationService _userInformationService;
-        readonly IHttpContextAccessor _contextAccessor;
-        private readonly Guid userGuid;
-        private readonly string? _baseUrl;
-        private readonly IRequestClient<GetResumeUserPhotoRequest> _resumeUser;
-        readonly IConfiguration _configuration;
-        private readonly string? _authServiceBaseUrl;
-
-        public ResumeService(JobDbContext context,
-            IFileService fileService,
-            INumberService numberService,
-            IEducationService educationService,
-            IExperienceService experienceService,
-            ILanguageService languageService,
-            ICertificateService certificateService,
-            IHttpContextAccessor httpContextAccess,
-            IUserInformationService userInformationService,
-            IRequestClient<GetResumeUserPhotoRequest> resumeUser,
-            IConfiguration configuration,
-            ICurrentUser currentUser)
-        {
-            _context = context;
-            _fileService = fileService;
-            _numberService = numberService;
-            _educationService = educationService;
-            _experienceService = experienceService;
-            _languageService = languageService;
-            _certificateService = certificateService;
-            _userInformationService = userInformationService;
-            _contextAccessor = httpContextAccess;
-            userGuid = Guid.Parse(_contextAccessor?.HttpContext?.User.FindFirst(ClaimTypes.Sid)?.Value ?? throw new UserIsNotLoggedInException());
-            _baseUrl = $"{_contextAccessor.HttpContext.Request.Scheme}://{_contextAccessor.HttpContext.Request.Host.Value}{_contextAccessor.HttpContext.Request.PathBase.Value}";
-            _resumeUser = resumeUser;
-            _configuration = configuration;
-            _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
-            _currentUser = currentUser;
-        }
-
         public async Task CreateResumeAsync(ResumeCreateDto resumeCreateDto)
         {
-            if (await _context.Resumes.AnyAsync(x => x.UserId == userGuid))
+            if (await _context.Resumes.AnyAsync(x => x.UserId == _currentUser.UserGuid))
                 throw new IsAlreadyExistException<Core.Entities.Resume>();
 
             var resume = await BuildResumeAsync(resumeCreateDto);
@@ -110,7 +72,7 @@ namespace Job.Business.Services.Resume
         public async Task<ResumeDetailItemDto> GetOwnResumeAsync()
         {
             var resume = await _context.Resumes
-                                        .Where(x => x.UserId == userGuid)
+                                        .Where(x => x.UserId == _currentUser.UserGuid)
                                         .Select(resume => new ResumeDetailItemDto
                                         {
                                             UserId = resume.UserId,
@@ -126,7 +88,7 @@ namespace Job.Business.Services.Resume
                                             Adress = resume.Adress,
                                             BirthDay = resume.BirthDay,
                                             ResumeEmail = resume.ResumeEmail,
-                                            UserPhoto = resume.UserPhoto != null ? $"{_baseUrl}/{resume.UserPhoto}" : null,
+                                            UserPhoto = resume.UserPhoto != null ? $"{_currentUser.BaseUrl}/{resume.UserPhoto}" : null,
                                             Skills = resume.ResumeSkills.Select(s => new SkillGetByIdDto
                                             {
                                                 Id = s.SkillId,
@@ -167,14 +129,14 @@ namespace Job.Business.Services.Resume
                                                 CertificateId = c.Id,
                                                 CertificateName = c.CertificateName,
                                                 GivenOrganization = c.GivenOrganization,
-                                                CertificateFile = $"{_baseUrl}/{c.CertificateFile}"
+                                                CertificateFile = $"{_currentUser.BaseUrl}/{c.CertificateFile}"
                                             }).ToList()
                                         })
-                                        .FirstOrDefaultAsync() ?? throw new Exception();
+                                        .FirstOrDefaultAsync();
 
-            //if (resume is null) return new ResumeDetailItemDto();
+            if (resume is null) return new ResumeDetailItemDto();
 
-            var userData = await _userInformationService.GetUserDataAsync(userGuid);
+            var userData = await _userInformationService.GetUserDataAsync((Guid)_currentUser.UserGuid);
             resume.FirstName = userData.FirstName;
             resume.LastName = userData.LastName;
 
@@ -183,7 +145,7 @@ namespace Job.Business.Services.Resume
 
         public async Task UpdateResumeAsync(ResumeUpdateDto updateDto)
         {
-            var resume = await GetResumeByUserIdAsync(userGuid);
+            var resume = await GetResumeByUserIdAsync((Guid)_currentUser.UserGuid);
 
             UpdateResumePersonalInfo(resume, updateDto);
 
@@ -215,7 +177,7 @@ namespace Job.Business.Services.Resume
             {
                 Id = x.Id,
                 FullName = $"{x.FirstName} {x.LastName}",
-                ProfileImage = x.UserPhoto != null ? $"{_baseUrl}/{x.UserPhoto}" : null,
+                ProfileImage = x.UserPhoto != null ? $"{_currentUser.BaseUrl}/{x.UserPhoto}" : null,
                 JobStatus = x.User.JobStatus,
                 IsSaved = x.SavedResumes.Any(sr => sr.ResumeId == x.Id && sr.CompanyUserId == _currentUser.UserGuid),
                 Position = x.Position,
@@ -237,21 +199,26 @@ namespace Job.Business.Services.Resume
             };
         }
 
-
-        //TODO : bu hisse qalib
-        public async Task<DataListDto<SavedResumeListDto>> GetSavedResumesAsync(string? fullName, int skip, int take)
+        public async Task<DataListDto<ResumeListDto>> GetSavedResumesAsync(string? fullName, int skip, int take)
         {
             var query = _context.SavedResumes.Where(x => x.CompanyUserId == _currentUser.UserGuid);
 
-            var resumes = await query.Select(x => new SavedResumeListDto
+            var resumes = await query.Select(x => new ResumeListDto
             {
-
+                Id = x.Id,
+                FullName = $"{x.Resume.FirstName} {x.Resume.LastName}",
+                ProfileImage = x.Resume.UserPhoto != null ? $"{_currentUser.BaseUrl}/{x.Resume.UserPhoto}" : null,
+                JobStatus = x.Resume.User.JobStatus,
+                IsSaved = true,
+                Position = x.Resume.Position,
+                StartDate = x.Resume.Experiences != null ? x.Resume.Experiences.FirstOrDefault().StartDate : null,
+                EndDate = x.Resume.Experiences != null ? x.Resume.Experiences.FirstOrDefault().EndDate : null,
             })
             .Skip(Math.Max(0, (skip - 1) * take))
             .Take(take)
             .ToListAsync();
 
-            return new DataListDto<SavedResumeListDto>
+            return new DataListDto<ResumeListDto>
             {
                 Datas = resumes,
                 TotalCount = await query.CountAsync()
@@ -284,7 +251,7 @@ namespace Job.Business.Services.Resume
         }
 
 
-
+        #region Private Methods
         private async Task<Core.Entities.Resume> BuildResumeAsync(ResumeCreateDto dto)
         {
             FileDto fileResult = dto.UserPhoto != null
@@ -292,7 +259,7 @@ namespace Job.Business.Services.Resume
                 : new FileDto();
 
             string? email = dto.IsMainEmail
-                ? (await _userInformationService.GetUserDataAsync(userGuid)).Email
+                ? (await _userInformationService.GetUserDataAsync((Guid)_currentUser.UserGuid)).Email
                 : dto.ResumeEmail;
 
             return MapToResumeEntity(dto, $"{fileResult.FilePath}/{fileResult.FileName}", email);
@@ -302,7 +269,7 @@ namespace Job.Business.Services.Resume
         {
             return new Core.Entities.Resume
             {
-                UserId = userGuid,
+                UserId = (Guid)_currentUser.UserGuid,
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
                 FatherName = dto.FatherName,
@@ -325,7 +292,7 @@ namespace Job.Business.Services.Resume
             if (!dto.IsMainNumber)
                 return await _numberService.CreateBulkNumberAsync(listsDto.PhoneNumbers, resumeId);
 
-            var mainNumber = (await _userInformationService.GetUserDataAsync(userGuid)).MainPhoneNumber;
+            var mainNumber = (await _userInformationService.GetUserDataAsync((Guid)_currentUser.UserGuid)).MainPhoneNumber;
 
             return
             [
@@ -395,7 +362,7 @@ namespace Job.Business.Services.Resume
         private async Task UpdateResumeEmailAsync(Core.Entities.Resume resume, bool IsMainEmail , string? resumeEmail)
         {
             resume.ResumeEmail = IsMainEmail
-                ? (await _userInformationService.GetUserDataAsync(userGuid)).Email
+                ? (await _userInformationService.GetUserDataAsync((Guid)_currentUser.UserGuid)).Email
                 : resumeEmail;
         }
 
@@ -406,7 +373,7 @@ namespace Job.Business.Services.Resume
                 var mainNumber = new List<Core.Entities.Number>
                 {
                     new() {
-                        PhoneNumber = _userInformationService.GetUserDataAsync(userGuid).Result.MainPhoneNumber,
+                        PhoneNumber = _userInformationService.GetUserDataAsync((Guid)_currentUser.UserGuid).Result.MainPhoneNumber,
                         ResumeId = resume.Id
                     }
                 };
@@ -435,5 +402,6 @@ namespace Job.Business.Services.Resume
                 ResumeId = resume.Id
             }).ToList() ?? [];
         }
+        #endregion
     }
 }

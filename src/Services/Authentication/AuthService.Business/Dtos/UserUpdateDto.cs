@@ -1,5 +1,4 @@
-﻿using AuthService.Core.Enums;
-using FluentValidation;
+﻿using FluentValidation;
 using SharedLibrary.Helpers;
 
 namespace AuthService.Business.Dtos
