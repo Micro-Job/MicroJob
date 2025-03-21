@@ -385,7 +385,10 @@ namespace JobCompany.Business.Services.VacancyServices
 
         public async Task<DataListDto<VacancyGetAllDto>> GetAllVacanciesAsync(string? titleName, string? categoryId, string? countryId, string? cityId, decimal? minSalary, decimal? maxSalary, string? companyId, byte? workStyle, byte? workType, int skip = 1, int take = 9)
         {
-            var query = _context.Vacancies.AsNoTracking().AsQueryable();
+            var query = _context.Vacancies.Where(x=> x.IsActive && x.EndDate > DateTime.Now)
+                .AsNoTracking()
+                .AsQueryable();
+
             query = ApplyVacancyFilters(query, titleName, categoryId, countryId, cityId, true, minSalary, maxSalary, companyId, workStyle, workType);
 
             var vacancies = await query

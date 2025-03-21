@@ -393,7 +393,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                     VacancyName = application.Vacancy.Title,
                     CompanyId = application.Vacancy.CompanyId,
                     CompanyName = application.Vacancy.Company.CompanyName,
-                    CompanyLogo = application.Vacancy.Company.CompanyLogo,
+                    CompanyLogo =  $"{_currentUser.BaseUrl}/{application.Vacancy.Company.CompanyLogo}",
                     Location = application.Vacancy.Company.CompanyLocation,
                     WorkType = application.Vacancy.WorkType,
                     WorkStyle = application.Vacancy.WorkStyle,
