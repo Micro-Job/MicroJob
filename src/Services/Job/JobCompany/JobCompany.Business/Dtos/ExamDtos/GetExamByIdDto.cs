@@ -13,6 +13,6 @@ namespace JobCompany.Business.Dtos.ExamDtos
         public string? Result { get; set; }
         public byte CurrentStep { get; set; }
         //public ICollection<QuestionDetailDto> ExamQuestions { get; set; }
-        public byte? Duration { get; set; }
+        public short? Duration { get; set; }
     }
 }

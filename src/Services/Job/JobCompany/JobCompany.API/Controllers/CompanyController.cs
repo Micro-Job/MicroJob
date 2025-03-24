@@ -31,5 +31,11 @@ namespace JobCompany.API.Controllers
         {
             return Ok(await service.GetCompanyDetailAsync(companyId));
         }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetCompanyName(string companyId)
+        {
+            return Ok(await service.GetCompanyNameAsync(companyId));
+        }
     }
 }

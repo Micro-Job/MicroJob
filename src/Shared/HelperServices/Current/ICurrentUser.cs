@@ -11,8 +11,9 @@ namespace SharedLibrary.HelperServices.Current
     {
         public string? UserId { get; }
         public Guid? UserGuid { get; }
-        public string? UserName { get; }
+        public string? UserFullName { get; }
         public string? BaseUrl { get; }
+        public byte UserRole { get;}
         public LanguageCode LanguageCode { get; }
     }
 }

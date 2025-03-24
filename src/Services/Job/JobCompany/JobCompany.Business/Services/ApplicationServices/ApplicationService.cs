@@ -307,17 +307,13 @@ namespace JobCompany.Business.Services.ApplicationServices
                 .Select(v => new { v.CompanyId, v.Title })
                 .FirstOrDefaultAsync() ?? throw new NotFoundException<Company>("NOT_FOUND");
 
-            var status = await _context.Statuses.FirstOrDefaultAsync(s => s.StatusEnum == StatusEnum.Pending && s.IsDefault);
-
-            var responseUser = await _requestUser.GetResponse<GetUserDataResponse>(
-                new GetUserDataRequest { UserId = userGuid }
-            );
+            Guid statusId = await _context.Statuses.Where(s => s.StatusEnum == StatusEnum.Pending && s.IsDefault).Select(x=> x.Id).FirstOrDefaultAsync();
 
             var newApplication = new Application
             {
                 UserId = userGuid,
                 VacancyId = vacancyGuid,
-                StatusId = status.Id,
+                StatusId = statusId,
                 IsActive = true,
                 CreatedDate = DateTime.Now
             };
@@ -331,7 +327,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                 SenderId = userGuid,
                 VacancyId = vacancyGuid,
                 InformationId = userGuid,
-                Content = $"İstifadəçi {responseUser.Message.FirstName} {responseUser.Message.LastName} {vacancyInfo.Title} vakansiyasına müraciət etdi.",
+                Content = $"İstifadəçi {_currentUser.UserFullName} {vacancyInfo.Title} vakansiyasına müraciət etdi.",
             });
         }
 

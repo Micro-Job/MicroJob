@@ -59,7 +59,12 @@ namespace JobCompany.Business.Services.VacancyServices
         public async Task CreateVacancyAsync(CreateVacancyDto vacancyDto, ICollection<CreateNumberDto>? numberDto)
         {
             string? companyLogoPath = null;
-            var company = await _context.Companies.FirstOrDefaultAsync(x => x.UserId == _currentUser.UserGuid);
+            var company = await _context.Companies.Where(x => x.UserId == _currentUser.UserGuid).Select(x => new
+            {
+                x.Id,
+                x.CompanyName,
+                x.CompanyLogo
+            }).FirstOrDefaultAsync();
 
             if (company != null && !string.IsNullOrEmpty(company.CompanyLogo))
             {
@@ -67,17 +72,14 @@ namespace JobCompany.Business.Services.VacancyServices
             }
             else if (vacancyDto.CompanyLogo != null)
             {
-                FileDto fileResult = await _fileService.UploadAsync(
-                    FilePaths.image,
-                    vacancyDto.CompanyLogo
-                );
+                FileDto fileResult = await _fileService.UploadAsync(FilePaths.image,vacancyDto.CompanyLogo);
                 companyLogoPath = $"{fileResult.FilePath}/{fileResult.FileName}";
             }
 
             var vacancy = new Vacancy
             {
                 Id = Guid.NewGuid(),
-                CompanyName = company.CompanyName,
+                CompanyName = _currentUser.UserRole == (byte)UserRole.CompanyUser ? company.CompanyName : vacancyDto.CompanyName.Trim(),
                 CompanyId = company?.Id,
                 Title = vacancyDto.Title.Trim(),
                 CompanyLogo = companyLogoPath,
@@ -234,7 +236,7 @@ namespace JobCompany.Business.Services.VacancyServices
         {
             var companyGuid = Guid.Parse(companyId);
 
-            var query = _context.Vacancies.Where(x => x.CompanyId == companyGuid && x.IsActive).AsQueryable().AsNoTracking();
+            var query = _context.Vacancies.Where(x => x.CompanyId == companyGuid && x.IsActive && x.EndDate >= DateTime.Now).AsQueryable().AsNoTracking();
 
             var vacancies = await query
                 .Select(x => new VacancyGetByCompanyIdDto
@@ -276,6 +278,7 @@ namespace JobCompany.Business.Services.VacancyServices
                         CompanyId = x.CompanyId,
                         CompanyLogo = $"{_authServiceBaseUrl}/{x.Company.CompanyLogo}",
                         StartDate = x.StartDate,
+                        EndDate = x.EndDate,
                         Location = x.Location,
                         ViewCount = x.ViewCount,
                         WorkType = x.WorkType,
