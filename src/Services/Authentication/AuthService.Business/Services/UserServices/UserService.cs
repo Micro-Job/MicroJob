@@ -1,12 +1,12 @@
 ﻿using AuthService.Business.Dtos;
 using AuthService.Business.Exceptions.UserException;
 using AuthService.Core.Entities;
-using AuthService.Core.Enums;
 using AuthService.DAL.Contexts;
 using MassTransit;
 using MassTransit.Initializers;
 using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Dtos.FileDtos;
+using SharedLibrary.Enums;
 using SharedLibrary.Exceptions;
 using SharedLibrary.ExternalServices.FileService;
 using SharedLibrary.Helpers;

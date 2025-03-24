@@ -1,5 +1,5 @@
 ﻿using AuthService.Business.Dtos;
-using AuthService.Core.Enums;
+using SharedLibrary.Enums;
 
 namespace AuthService.Business.Services.UserServices
 {

@@ -1,4 +1,4 @@
-﻿using AuthService.Core.Enums;
+﻿using SharedLibrary.Enums;
 
 namespace AuthService.Business.Dtos
 {

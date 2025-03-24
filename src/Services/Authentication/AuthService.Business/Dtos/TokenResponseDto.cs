@@ -1,5 +1,4 @@
 ﻿using AuthService.Core.Entities;
-using AuthService.Core.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;

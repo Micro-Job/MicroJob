@@ -11,6 +11,8 @@ namespace Job.DAL.Configurations
                         builder.Property(r => r.FatherName).HasMaxLength(32).IsRequired();
                         builder.Property(r => r.UserPhoto).HasMaxLength(255);
                         builder.Property(r => r.Adress).HasMaxLength(128);
+                        builder.Property(x=> x.FirstName).HasMaxLength(32);
+                        builder.Property(x=> x.LastName).HasMaxLength(32);
 
                         builder.HasMany(r => r.Educations)
                                .WithOne(e => e.Resume)
@@ -45,7 +47,12 @@ namespace Job.DAL.Configurations
                         builder.HasOne(r => r.User)
                                .WithOne(u => u.Resume)
                                .HasForeignKey<Resume>(r => r.UserId)
-                               .OnDelete(DeleteBehavior.Cascade);
+                               .OnDelete(DeleteBehavior.NoAction);
+
+                        builder.HasMany(x=> x.SavedResumes)
+                                .WithOne(x => x.Resume)
+                                .HasForeignKey(x=> x.ResumeId)
+                                .OnDelete(DeleteBehavior.NoAction);
                 }
         }
 }

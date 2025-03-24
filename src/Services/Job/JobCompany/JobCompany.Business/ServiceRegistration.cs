@@ -50,7 +50,6 @@ namespace JobCompany.Business
             password = Uri.EscapeDataString(password);
             string cString = $"amqp://{username}:{password}@{hostname}:{port}/";
 
-            //var rabbitMqConfig = configuration.GetSection("RabbitMQ");
             services.AddMassTransit(x =>
             {
                 x.AddConsumer<CompanyRegisteredConsumer>();
@@ -66,14 +65,12 @@ namespace JobCompany.Business
                 x.AddConsumer<CheckVacancyConsumer>();
                 x.AddConsumer<CheckCompanyConsumer>();
                 x.AddConsumer<GetOtherVacanciesByCompanyConsumer>();
-                x.AddConsumer<GetApplicationDetailConsumer>();
 
                 x.SetKebabCaseEndpointNameFormatter();
 
                 x.UsingRabbitMq(
                     (context, cfg) =>
                     {
-                        //var rabbitMqConnectionString = configuration["RabbitMQ:ConnectionString"];
                         cfg.Host(cString);
 
                         cfg.ConfigureEndpoints(context);

@@ -14,9 +14,15 @@ namespace Job.Business.Consumers
         {
             var userIds = context.Message.UserIds;
 
-            var resumes = await _context
-                .Resumes.Where(r => userIds.Contains(r.UserId))
-                .Select(r => new GetResumeDataResponse { UserId = r.UserId, Position = r.Position })
+            var resumes = await _context.Resumes.Where(r => userIds.Contains(r.UserId))
+                .Select(r => new GetResumeDataResponse
+                {
+                    UserId = r.UserId,
+                    Position = r.Position,
+                    FirstName = r.FirstName,
+                    LastName = r.LastName,
+                    ProfileImage = r.UserPhoto
+                })
                 .ToListAsync();
 
             await context.RespondAsync(new GetResumesDataResponse { Users = resumes });

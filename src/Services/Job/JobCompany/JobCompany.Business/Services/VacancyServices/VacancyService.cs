@@ -32,7 +32,6 @@ namespace JobCompany.Business.Services.VacancyServices
     {
         private readonly JobCompanyDbContext _context;
         private readonly IFileService _fileService;
-        private readonly IExamService _examService;
         private readonly IPublishEndpoint _publishEndpoint;
         readonly IConfiguration _configuration;
         private readonly string? _authServiceBaseUrl;
@@ -49,7 +48,6 @@ namespace JobCompany.Business.Services.VacancyServices
         {
             this._context = _context;
             _fileService = fileService;
-            _examService = examService;
             _publishEndpoint = publishEndpoint;
             _configuration = configuration;
             _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
@@ -101,8 +99,9 @@ namespace JobCompany.Business.Services.VacancyServices
                 Family = vacancyDto.Family,
                 Citizenship = vacancyDto.Citizenship,
                 CategoryId = vacancyDto.CategoryId,
+                ExamId = vacancyDto.ExamId,
                 IsActive = true,
-                ViewCount = 0,
+                ViewCount = 0
             };
 
             var numbers = new List<VacancyNumber>();
@@ -145,13 +144,6 @@ namespace JobCompany.Business.Services.VacancyServices
                         InformatioName = vacancy.Title,
                     }
                 );
-            }
-
-            if (vacancyDto.Exam is not null)
-            {
-                var examId = await _examService.CreateExamAsync(vacancyDto.Exam);
-
-                vacancy.ExamId = examId;
             }
 
             await _context.SaveChangesAsync();
@@ -247,10 +239,12 @@ namespace JobCompany.Business.Services.VacancyServices
             var vacancies = await query
                 .Select(x => new VacancyGetByCompanyIdDto
                 {
+                    VacancyId = x.Id,
                     CompanyName = x.CompanyName,
                     Title = x.Title,
                     Location = x.Location,
                     CompanyLogo = $"{_authServiceBaseUrl}/{x.Company.CompanyLogo}",
+                    WorkStyle = x.WorkStyle,
                     WorkType = x.WorkType,
                     StartDate = x.StartDate,
                     ViewCount = x.ViewCount,
@@ -273,8 +267,7 @@ namespace JobCompany.Business.Services.VacancyServices
         {
             var vacancyGuid = Guid.Parse(id);
 
-            var vacancyDto =
-                await _context
+            var vacancyDto = await _context
                     .Vacancies.Where(x => x.Id == vacancyGuid)
                     .Select(x => new VacancyGetByIdDto
                     {
@@ -306,12 +299,17 @@ namespace JobCompany.Business.Services.VacancyServices
                             .ToList(),
                         Skills = x
                             .VacancySkills.Where(vc => vc.Skill != null)
-                            .Select(vc => new SkillDto { Name = vc.Skill.GetTranslation(_currentUser.LanguageCode) })
+                            .Select(vc => new SkillDto { Name = vc.Skill.Translations.GetTranslation(_currentUser.LanguageCode) })
                             .ToList(),
                         CompanyName = x.CompanyName,
                         CategoryName = x.Category.GetTranslation(_currentUser.LanguageCode),
                     })
                     .FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
+
+            var existVacancy = await _context.Vacancies.FirstOrDefaultAsync(x => x.Id == vacancyGuid);
+
+            existVacancy.ViewCount++;
+            await _context.SaveChangesAsync();
 
             return vacancyDto;
         }
@@ -387,7 +385,10 @@ namespace JobCompany.Business.Services.VacancyServices
 
         public async Task<DataListDto<VacancyGetAllDto>> GetAllVacanciesAsync(string? titleName, string? categoryId, string? countryId, string? cityId, decimal? minSalary, decimal? maxSalary, string? companyId, byte? workStyle, byte? workType, int skip = 1, int take = 9)
         {
-            var query = _context.Vacancies.AsNoTracking().AsQueryable();
+            var query = _context.Vacancies.Where(x=> x.IsActive && x.EndDate > DateTime.Now)
+                .AsNoTracking()
+                .AsQueryable();
+
             query = ApplyVacancyFilters(query, titleName, categoryId, countryId, cityId, true, minSalary, maxSalary, companyId, workStyle, workType);
 
             var vacancies = await query

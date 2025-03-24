@@ -40,13 +40,8 @@ namespace JobCompany.Business.Services.QuestionServices
         }
 
         ///<summary> Question yaradılması bulk method + answers_bulk /// </summary>
-        public async Task<ICollection<Question>> CreateBulkQuestionAsync(
-            ICollection<QuestionCreateDto> dtos,
-            string examId
-        )
+        public async Task<ICollection<Question>> CreateBulkQuestionAsync(ICollection<QuestionCreateDto> dtos)
         {
-            var guidExam = Guid.Parse(examId);
-
             var tasks = dtos.Select(async dto =>
             {
                 FileDto fileResult =

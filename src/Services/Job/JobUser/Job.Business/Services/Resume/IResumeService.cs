@@ -1,4 +1,5 @@
 ﻿using Job.Business.Dtos.CertificateDtos;
+using Job.Business.Dtos.Common;
 using Job.Business.Dtos.ResumeDtos;
 
 namespace Job.Business.Services.Resume
@@ -8,5 +9,10 @@ namespace Job.Business.Services.Resume
         Task CreateResumeAsync(ResumeCreateDto resumeCreateDto);
         Task UpdateResumeAsync(ResumeUpdateDto resumeUpdateDto);
         Task<ResumeDetailItemDto> GetOwnResumeAsync();
+
+        Task<DataListDto<ResumeListDto>> GetAllResumesAsync(string? fullname, int skip , int take);
+        Task<DataListDto<ResumeListDto>> GetSavedResumesAsync(string? fullName , int skip , int take);
+        Task ToggleSaveResumeAsync(string resumeId);
+
     }
 }
