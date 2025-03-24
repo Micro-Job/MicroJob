@@ -420,7 +420,10 @@ namespace JobCompany.Business.Services.VacancyServices
         private static IQueryable<Vacancy> ApplyVacancyFilters(IQueryable<Vacancy> query, string? titleName, string? categoryId, string? countryId, string? cityId, bool? isActive, decimal? minSalary, decimal? maxSalary, string? companyId, byte? workStyle, byte? workType)
         {
             if (titleName != null)
-                query = query.Where(x => x.Title.ToLower().Contains(titleName.ToLower()));
+            {
+                titleName = titleName.Trim();
+                query = query.Where(x => x.Title.Contains(titleName));
+            }
 
             if (isActive != null)
                 query = query.Where(x => x.IsActive == isActive);
@@ -483,9 +486,9 @@ namespace JobCompany.Business.Services.VacancyServices
             await _context.SaveChangesAsync();
         }
 
-        public async Task<List<VacancyGetAllDto>> SimilarVacanciesAsync(string vacancyId, int take = 6)
+        public async Task<List<VacancyGetAllDto>> SimilarVacanciesAsync(string vacancyId, int take = 8)
         {
-            var mainVacancy = await _context.Vacancies.Where(x => x.Id == Guid.Parse(vacancyId))
+            var mainVacancy = await _context.Vacancies.Where(x => x.Id == Guid.Parse(vacancyId) && x.IsActive && x.EndDate > DateTime.Now)
             .Select(x => new
             {
                 x.Id,
@@ -504,7 +507,6 @@ namespace JobCompany.Business.Services.VacancyServices
                 StartDate = x.StartDate,
                 Location = x.Location,
                 ViewCount = x.ViewCount,
-                IsActive = x.IsActive,
                 WorkType = x.WorkType,
                 WorkStyle = x.WorkStyle,
                 MainSalary = x.MainSalary,
@@ -533,7 +535,6 @@ namespace JobCompany.Business.Services.VacancyServices
                 StartDate = x.Vacancy.StartDate,
                 Location = x.Vacancy.Location,
                 ViewCount = x.Vacancy.ViewCount,
-                IsActive = x.Vacancy.IsActive,
                 WorkType = x.Vacancy.WorkType,
                 WorkStyle = x.Vacancy.WorkStyle,
                 MainSalary = x.Vacancy.MainSalary,

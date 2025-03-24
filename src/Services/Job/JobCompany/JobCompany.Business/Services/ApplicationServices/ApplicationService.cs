@@ -1,4 +1,4 @@
-﻿using JobCompany.Business.Dtos.ApplicationDtos;
+﻿    using JobCompany.Business.Dtos.ApplicationDtos;
 using JobCompany.Business.Dtos.Common;
 using JobCompany.Business.Dtos.StatusDtos;
 using JobCompany.Business.Exceptions.ApplicationExceptions;
@@ -347,8 +347,8 @@ namespace JobCompany.Business.Services.ApplicationServices
                     ApplicationId = a.Id,
                     VacancyId = a.VacancyId,
                     Title = a.Vacancy.Title,
-                    CompanyId = a.Vacancy.CompanyId,    
-                    CompanyLogo = a.Vacancy.Company.CompanyLogo,
+                    CompanyId = a.Vacancy.CompanyId,
+                    CompanyLogo = a.Vacancy.Company.CompanyLogo != null ? $"{_authServiceBaseUrl}/{a.Vacancy.Company.CompanyLogo}": null,
                     CompanyName = a.Vacancy.Company.CompanyName,
                     WorkType = a.Vacancy.WorkType != null ? a.Vacancy.WorkType.GetDisplayName() : null, 
                     IsActive = a.IsActive,
@@ -384,13 +384,13 @@ namespace JobCompany.Business.Services.ApplicationServices
                     VacancyName = application.Vacancy.Title,
                     CompanyId = application.Vacancy.CompanyId,
                     CompanyName = application.Vacancy.Company.CompanyName,
-                    CompanyLogo =  $"{_currentUser.BaseUrl}/{application.Vacancy.Company.CompanyLogo}",
+                    CompanyLogo =  $"{_authServiceBaseUrl}/{application.Vacancy.Company.CompanyLogo}",
                     Location = application.Vacancy.Company.CompanyLocation,
                     WorkType = application.Vacancy.WorkType,
                     WorkStyle = application.Vacancy.WorkStyle,
                     CreatedDate = application.CreatedDate,
                     ApplicationStatusId = application.StatusId,
-                    ApplicationStatusName = application.Status.IsDefault ? application.Status.GetTranslation(_currentUser.LanguageCode) : application.Status.Translations.FirstOrDefault().Name
+                    //ApplicationStatusName = application.Status.IsDefault ? application.Status.GetTranslation(_currentUser.LanguageCode) : application.Status.Translations.FirstOrDefault().Name
                 })
                 .FirstOrDefaultAsync()
                 ?? throw new NotFoundException<Application>(MessageHelper.GetMessage("NOT_FOUND"));
