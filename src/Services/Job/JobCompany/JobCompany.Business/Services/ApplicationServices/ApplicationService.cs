@@ -196,9 +196,8 @@ namespace JobCompany.Business.Services.ApplicationServices
             var company =
                 await _context.Companies.FirstOrDefaultAsync(c => c.UserId == _currentUser.UserGuid)
                 ?? throw new NotFoundException<Company>(MessageHelper.GetMessage("NOT_FOUND"));
-            var applications = await _context
-                .Applications.Include(a => a.Vacancy)
-                .ThenInclude(v => v.Company)
+
+            var applications = await _context.Applications
                 .Where(a => a.Vacancy.Company.UserId == _currentUser.UserGuid)
                 .Select(a => new ApplicationInfoDto
                 {
@@ -210,16 +209,12 @@ namespace JobCompany.Business.Services.ApplicationServices
 
             var userIds = applications.Select(a => a.UserId).ToList();
 
-            var userDataResponse = await GetUserDataResponseAsync(userIds);
             var userResumeResponse = await GetResumeDataResponseAsync(userIds);
 
             var applicationList = applications
                 .GroupBy(a => a.UserId)
                 .SelectMany(group =>
                 {
-                    var userData = userDataResponse.Users.FirstOrDefault(u =>
-                        u.UserId == group.Key
-                    );
                     var userResume = userResumeResponse.Users.FirstOrDefault(r =>
                         r.UserId == group.Key
                     );
@@ -227,8 +222,8 @@ namespace JobCompany.Business.Services.ApplicationServices
                     return group.Select(application => new ApplicationInfoListDto
                     {
                         ApplicationId = application.ApplicationId,
-                        FullName = $"{userData?.FirstName} {userData?.LastName}",
-                        ImageUrl = $"{_authServiceBaseUrl}/{userData?.ProfileImage}",
+                        FullName = $"{userResume?.FirstName} {userResume?.LastName}",
+                        ImageUrl = $"{_authServiceBaseUrl}/{userResume?.ProfileImage}",
                         Position = userResume?.Position,
                         CreatedDate = application.CreatedDate,
                     });
@@ -417,6 +412,5 @@ namespace JobCompany.Business.Services.ApplicationServices
 
             return application;
         }
-
     }
 }
