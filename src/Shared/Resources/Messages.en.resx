@@ -231,6 +231,9 @@
   <data name="USER_PHONE_OR_EMAIL_EXISTS" xml:space="preserve">
     <value>User phone number or email already exists</value>
   </data>
+  <data name="VACANCY_UPDATE" xml:space="preserve">
+    <value>The vacancy cannot be updated because it is blocked.</value>
+  </data>
   <data name="WELCOME" xml:space="preserve">
     <value>Welcome</value>
   </data>

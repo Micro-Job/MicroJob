@@ -352,7 +352,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                     CompanyLogo = a.Vacancy.Company.CompanyLogo != null ? $"{_authServiceBaseUrl}/{a.Vacancy.Company.CompanyLogo}": null,
                     CompanyName = a.Vacancy.Company.CompanyName,
                     WorkType = a.Vacancy.WorkType != null ? a.Vacancy.WorkType.GetDisplayName() : null, 
-                    IsActive = a.IsActive,
+                    IsActive = a.Vacancy.VacancyStatus,
                     StatusName = a.Status.IsDefault ? a.Status.GetTranslation(_currentUser.LanguageCode) : a.Status.Translations.FirstOrDefault().Name,
                     StatusColor = a.Status.StatusColor,
                     ViewCount = a.Vacancy.ViewCount,

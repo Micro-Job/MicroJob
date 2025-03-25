@@ -54,7 +54,7 @@ public class GetOtherVacanciesByCompanyConsumer(JobCompanyDbContext dbContext, I
                     Location = x.Location,
                     Title = x.Title,
                     WorkType = x.WorkType,
-                    IsActive = x.IsActive,
+                    IsActive = x.VacancyStatus,
                     IsVip = x.IsVip,
                     ViewCount = x.ViewCount,
                     MainSalary = x.MainSalary,
