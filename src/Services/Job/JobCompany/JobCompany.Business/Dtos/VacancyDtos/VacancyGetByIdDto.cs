@@ -34,7 +34,6 @@ namespace JobCompany.Business.Dtos.VacancyDtos
         public FamilySituation Family { get; set; }
         public Citizenship Citizenship { get; set; }
         public ICollection<SkillDto> Skills { get; set; }
-        public bool IsActive { get; set; }
         public string CategoryName { get; set; }
         public Guid? ExamId { get; set; }
         public bool IsSaved { get; set; }
