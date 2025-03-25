@@ -1,6 +1,4 @@
-﻿using System.Security.Claims;
-using Job.Core.Entities;
-using JobCompany.Business.Dtos.StatusDtos;
+﻿using JobCompany.Business.Dtos.StatusDtos;
 using JobCompany.Business.Exceptions.StatusExceptions;
 using JobCompany.Business.Extensions;
 using JobCompany.Core.Entites;
@@ -91,49 +89,52 @@ namespace JobCompany.Business.Services.StatusServices
 
             var existingStatuses = await _context.Statuses
                 .Where(s => statusIds.Contains(s.Id))
-                .Include(s => s.Translations)
+                .Include(s => s.Translations) 
                 .ToListAsync();
 
-            if (!existingStatuses.Any())
+            if (existingStatuses.Count == 0)
                 throw new SharedLibrary.Exceptions.NotFoundException<Status>();
 
-            existingStatuses.ForEach(existingStatus =>
+            var existingStatusesDict = existingStatuses.ToDictionary(s => s.Id);
+
+            var newTranslations = new List<StatusTranslation>();
+
+            foreach (var dto in dtos)
             {
-                var dto = dtos.FirstOrDefault(d => d.Id == existingStatus.Id);
-                if (dto == null) return;
-
-                existingStatus.StatusColor = dto.StatusColor.Trim();
-                existingStatus.Order = dto.Order;
-
-                var existingTranslations = existingStatus.Translations.ToDictionary(t => t.Language, t => t);
-
-                var newTranslations = new List<StatusTranslation>();
-
-                foreach (var newTranslation in dto.Statuses)
+                if (existingStatusesDict.TryGetValue(dto.Id, out var existingStatus))
                 {
-                    if (existingTranslations.TryGetValue(newTranslation.Language, out var existingTranslation))
+                    existingStatus.StatusColor = dto.StatusColor.Trim();
+                    existingStatus.Order = dto.Order;
+
+                    var existingTranslations = existingStatus.Translations.ToDictionary(t => t.Language, t => t);
+
+                    foreach (var newTranslation in dto.Statuses)
                     {
-                        existingTranslation.Name = newTranslation.Name.Trim();
-                    }
-                    else
-                    {
-                        newTranslations.Add(new StatusTranslation
+                        if (existingTranslations.TryGetValue(newTranslation.Language, out var existingTranslation))
                         {
-                            StatusId = existingStatus.Id,
-                            Language = newTranslation.Language,
-                            Name = newTranslation.Name.Trim()
-                        });
+                            existingTranslation.Name = newTranslation.Name.Trim();
+                        }
+                        else
+                        {
+                            newTranslations.Add(new StatusTranslation
+                            {
+                                StatusId = existingStatus.Id,
+                                Language = newTranslation.Language,
+                                Name = newTranslation.Name.Trim()
+                            });
+                        }
                     }
                 }
+            }
 
-                _context.StatusTranslations.AddRange(newTranslations);
-
-
-                _context.StatusTranslations.AddRange(newTranslations);
-            });
+            if (newTranslations.Count != 0)
+            {
+                await _context.StatusTranslations.AddRangeAsync(newTranslations);
+            }
 
             await _context.SaveChangesAsync();
         }
+
 
         public async Task ChangeSatusOrderAsync(List<ChangeStatusOrderDto> dto)
         {
