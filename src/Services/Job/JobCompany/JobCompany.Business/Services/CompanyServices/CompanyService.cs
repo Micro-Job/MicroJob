@@ -102,7 +102,7 @@ namespace JobCompany.Business.Services.CompanyServices
                     CompanyId = c.Id,
                     CompanyName = c.CompanyName,
                     CompanyImage = c.CompanyLogo != null ? $"{_authServiceBaseUrl}/{c.CompanyLogo}" : null,
-                    CompanyVacancyCount = c.Vacancies != null ? c.Vacancies.Count(v => v.IsActive == SharedLibrary.Enums.VacancyStatus.Active) : 0,
+                    CompanyVacancyCount = c.Vacancies != null ? c.Vacancies.Count(v => v.VacancyStatus == SharedLibrary.Enums.VacancyStatus.Active) : 0,
                 })
                 .Skip(Math.Max(0, (skip - 1) * take))
                 .Take(take)

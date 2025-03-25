@@ -59,7 +59,7 @@ public class GetUserApplicationsConsumer(JobCompanyDbContext jobCompanyDbContext
                     : $"{_authServiceBaseUrl}/{a.Vacancy.Company.CompanyLogo}",
                 CompanyId = a.Vacancy.CompanyId,
                 WorkType = a.Vacancy.WorkType.HasValue ? Enum.GetName(typeof(WorkType), a.Vacancy.WorkType) : "Unknown",
-                IsActive = a.Vacancy.IsActive,
+                IsActive = a.Vacancy.VacancyStatus,
                 //StatusName = a.Status?.Name ?? "Pending",
                 StatusColor = a.Status?.StatusColor ?? "#CCCCCC",
                 ViewCount = a.Vacancy.ViewCount,

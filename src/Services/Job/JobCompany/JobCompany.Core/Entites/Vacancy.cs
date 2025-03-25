@@ -25,7 +25,7 @@ namespace JobCompany.Core.Entites
         public Driver Driver { get; set; }
         public FamilySituation Family { get; set; }
         public Citizenship Citizenship { get; set; }
-        public VacancyStatus IsActive { get; set; }
+        public VacancyStatus VacancyStatus { get; set; }
         public bool IsVip { get; set; }
 
         public Guid? CompanyId { get; set; }

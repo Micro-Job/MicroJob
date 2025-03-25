@@ -6,5 +6,6 @@ public enum VacancyStatus
     Active,
     Deactive,
     Reject,
-    Block
+    Block,
+    Update
 }
