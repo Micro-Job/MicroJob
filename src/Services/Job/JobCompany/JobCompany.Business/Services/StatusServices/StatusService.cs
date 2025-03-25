@@ -50,33 +50,35 @@ namespace JobCompany.Business.Services.StatusServices
             var statusGuid = Guid.Parse(statusId);
 
             var existStatus =
-                await _context
-                    .Statuses.Include(s => s.Applications).Include(x => x.Translations)
-                    .FirstOrDefaultAsync(x => x.Id == statusGuid && x.Company.UserId == _currentUser.UserGuid) ?? throw new SharedLibrary.Exceptions.NotFoundException<Status>();
+                await _context.Statuses
+                    .Include(s => s.Applications)
+                    .FirstOrDefaultAsync(x => x.Id == statusGuid)
+                                    ?? throw new SharedLibrary.Exceptions.NotFoundException<Status>();
 
-            if (existStatus.IsDefault == true)
+            if (existStatus.IsDefault)
+                throw new StatusPermissionException();
+
+            if (existStatus.Company.UserId != _currentUser.UserGuid)
                 throw new StatusPermissionException();
 
             if (existStatus.Applications == null || existStatus.Applications.Count > 0)
                 throw new StatusPermissionException(MessageHelper.GetMessage("STATUS_PERMISSION"));
 
-
-            var statusTranslations = existStatus.Translations.Select(x => x).ToList();
-            _context.StatusTranslations.RemoveRange(statusTranslations);
             _context.Statuses.Remove(existStatus);
             await _context.SaveChangesAsync();
         }
 
         public async Task<List<StatusListDto>> GetAllStatusesAsync()
         {
-            var statuses = await _context.Statuses
-            .IncludeTranslations()
-            .Select(b => new StatusListDto
+            var statuses = await _context.Statuses.Where(x => x.Company.UserId == _currentUser.UserGuid || x.IsDefault)
+            .Include(x => x.Translations)
+            .Select(s => new StatusListDto
             {
-                StatusId = b.Id,
-                StatusName = b.GetTranslation(_currentUser.LanguageCode),
-                StatusColor = b.StatusColor,
-                Order = b.Order,
+                StatusId = s.Id,
+                StatusName = s.GetTranslation(_currentUser.LanguageCode),
+                StatusColor = s.StatusColor,
+                Order = s.Order,
+                IsDefault = s.IsDefault
             })
             .ToListAsync();
 
@@ -129,6 +131,23 @@ namespace JobCompany.Business.Services.StatusServices
 
                 _context.StatusTranslations.AddRange(newTranslations);
             });
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task ChangeSatusOrderAsync(List<ChangeStatusOrderDto> dto)
+        {
+            var companyStatuses = await _context.Statuses.Where(x => x.Company.UserId == _currentUser.UserGuid).ToListAsync();
+
+            foreach (var statusDto in dto)
+            {
+                var statusEntity = companyStatuses.FirstOrDefault(x => x.Id == statusDto.StatusId);
+
+                if (statusEntity != null)
+                {
+                    statusEntity.Order = statusDto.Order;
+                }
+            }
 
             await _context.SaveChangesAsync();
         }

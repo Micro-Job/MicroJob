@@ -6,5 +6,6 @@
         public string StatusName { get; set; }
         public string StatusColor { get; set; }
         public byte Order { get; set; }
+        public bool IsDefault { get; set; }
     }
 }

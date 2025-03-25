@@ -8,7 +8,7 @@ using SharedLibrary.Requests;
 using SharedLibrary.Responses;
 
 namespace JobCompany.Business.Consumers;
-
+//TODO : Bu metoda neye gore ehtiyyac var.Varsa bele optimize edilmelidir
 public class GetUserApplicationsConsumer(JobCompanyDbContext jobCompanyDbContext, IConfiguration configuration) : IConsumer<GetUserApplicationsRequest>
 {
     private readonly JobCompanyDbContext _jobCompanyDbContext = jobCompanyDbContext ?? throw new ArgumentNullException(nameof(jobCompanyDbContext));
@@ -54,12 +54,12 @@ public class GetUserApplicationsConsumer(JobCompanyDbContext jobCompanyDbContext
                 VacancyId = a.VacancyId,
                 Title = a.Vacancy.Title ?? "No Title",
                 CompanyName = a.Vacancy.Company?.CompanyName ?? "No Company",
-                CompanyLogo = string.IsNullOrEmpty(a.Vacancy.Company?.CompanyLogo)
+                CompanyLogo = a.Vacancy.Company?.CompanyLogo == null
                     ? $"{_authServiceBaseUrl}/default-logo.png"
                     : $"{_authServiceBaseUrl}/{a.Vacancy.Company.CompanyLogo}",
                 CompanyId = a.Vacancy.CompanyId,
                 WorkType = a.Vacancy.WorkType.HasValue ? Enum.GetName(typeof(WorkType), a.Vacancy.WorkType) : "Unknown",
-                IsActive = a.Vacancy.VacancyStatus,
+                VacancyStatus = a.Vacancy.VacancyStatus,
                 //StatusName = a.Status?.Name ?? "Pending",
                 StatusColor = a.Status?.StatusColor ?? "#CCCCCC",
                 ViewCount = a.Vacancy.ViewCount,

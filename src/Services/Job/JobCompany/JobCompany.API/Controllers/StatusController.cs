@@ -37,5 +37,12 @@ namespace JobCompany.API.Controllers
         {
             return Ok(await _statusService.GetAllStatusesAsync());
         }
+
+        [HttpPut("[action]")]
+        public async Task<IActionResult> ChangeSatusOrderAsync(List<ChangeStatusOrderDto> dtos)
+        {
+            await _statusService.ChangeSatusOrderAsync(dtos);
+            return Ok();
+        }
     }
 }

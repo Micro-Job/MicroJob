@@ -104,40 +104,6 @@ namespace JobCompany.Business.Services.ApplicationServices
             );
         }
 
-        /// <summary> Müraciətlərin statusu ilə birlikdə gətirilməsi </summary>
-        public async Task<List<StatusListDtoWithApps>> GetAllApplicationWithStatusAsync(string vacancyId)
-        {
-            var vacancyGuid = Guid.Parse(vacancyId);
-
-            var groupedData = await _context
-                .Statuses.Where(status => status.Company.UserId == _currentUser.UserGuid)
-                .Select(status => new StatusListDtoWithApps
-                {
-                    StatusId = status.Id,
-                    StatusName = status.GetTranslation(_currentUser.LanguageCode),
-                    StatusColor = status.StatusColor,
-                    IsDefault = status.IsDefault,
-                    Applications = _context
-                        .Applications.Where(app =>
-                            app.VacancyId == vacancyGuid
-                            && app.IsActive
-                            && app.StatusId == status.Id
-                        )
-                        .Take(5)
-                        .Select(app => new ApplicationListDto
-                        {
-                            ApplicationId = app.Id,
-                            UserId = app.UserId,
-                            VacancyId = app.VacancyId,
-                            IsActive = app.IsActive,
-                        })
-                        .ToList(),
-                })
-                .ToListAsync();
-
-            return groupedData;
-        }
-
         /// <summary> Id'yə görə müraciətin gətirilməsi </summary>
         public async Task<ApplicationGetByIdDto> GetApplicationByIdAsync(string applicationId)
         {
@@ -352,7 +318,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                     CompanyLogo = a.Vacancy.Company.CompanyLogo != null ? $"{_authServiceBaseUrl}/{a.Vacancy.Company.CompanyLogo}": null,
                     CompanyName = a.Vacancy.Company.CompanyName,
                     WorkType = a.Vacancy.WorkType != null ? a.Vacancy.WorkType.GetDisplayName() : null, 
-                    IsActive = a.Vacancy.VacancyStatus,
+                    VacancyStatus = a.Vacancy.VacancyStatus,
                     StatusName = a.Status.IsDefault ? a.Status.GetTranslation(_currentUser.LanguageCode) : a.Status.Translations.FirstOrDefault().Name,
                     StatusColor = a.Status.StatusColor,
                     ViewCount = a.Vacancy.ViewCount,
@@ -362,7 +328,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                 })
                 .Skip(Math.Max(0, (skip - 1) * take))
                 .Take(take)
-                .ToListAsync();
+                .ToListAsync(); 
 
             return new PaginatedApplicationDto
             {

@@ -11,7 +11,7 @@ public class ApplicationDto
     public string CompanyLogo { get; set; }
     public string CompanyName { get; set; }
     public string? WorkType { get; set; }
-    public VacancyStatus IsActive { get; set; }
+    public VacancyStatus VacancyStatus { get; set; }
     public string? StatusName { get; set; }
     public string? StatusColor { get; set; }
     public int? ViewCount { get; set; }

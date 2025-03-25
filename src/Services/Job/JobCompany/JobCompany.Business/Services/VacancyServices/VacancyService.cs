@@ -375,7 +375,7 @@ namespace JobCompany.Business.Services.VacancyServices
             await _context.SaveChangesAsync();
 
             var userIds = await _context
-                .Applications.Where(a => a.VacancyId == vacancyGuid && a.Status.StatusEnum != SharedLibrary.Enums.StatusEnum.Rejected)
+                .Applications.Where(a => a.VacancyId == vacancyGuid && a.Status.StatusEnum != StatusEnum.Rejected)
                 .Select(a => a.UserId)
                 .ToListAsync();
 

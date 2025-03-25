@@ -8,5 +8,7 @@ namespace JobCompany.Business.Services.StatusServices
         Task UpdateStatusAsync(List<UpdateStatusDto> dtos);
         Task DeleteStatusAsync(string statusId);
         Task<List<StatusListDto>> GetAllStatusesAsync();
+
+        Task ChangeSatusOrderAsync(List<ChangeStatusOrderDto> dto);
     }
 }
