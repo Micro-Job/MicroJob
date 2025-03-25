@@ -251,6 +251,10 @@ namespace Job.Business.Services.Resume
             await _context.SaveChangesAsync();
         }
 
+        public async Task<bool> IsExistResumeAsync()
+        {
+            return await _context.Resumes.AnyAsync(x => x.UserId == _currentUser.UserGuid);
+        }
 
         #region Private Methods
         private async Task<Core.Entities.Resume> BuildResumeAsync(ResumeCreateDto dto)
@@ -403,6 +407,8 @@ namespace Job.Business.Services.Resume
                 ResumeId = resume.Id
             }).ToList() ?? [];
         }
+
+        
         #endregion
     }
 }
