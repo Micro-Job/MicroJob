@@ -150,5 +150,15 @@ namespace JobCompany.Business.Services.CompanyServices
             company.PhoneNumber = response.Message.PhoneNumber;
             return company;
         }
+
+        public async Task<string?> GetCompanyNameAsync(string companyId)
+        {
+            var companyGuid = Guid.Parse(companyId);
+
+            return await _context.Companies.Where(x => x.Id == companyGuid)
+                .Select(x => x.CompanyName)
+                .FirstOrDefaultAsync() 
+                ?? throw new NotFoundException<Company>("Şirkət mövcud deyil");
+        }
     }
 }

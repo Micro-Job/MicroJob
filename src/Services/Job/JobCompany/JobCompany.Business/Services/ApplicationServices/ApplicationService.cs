@@ -1,4 +1,4 @@
-﻿using JobCompany.Business.Dtos.ApplicationDtos;
+﻿    using JobCompany.Business.Dtos.ApplicationDtos;
 using JobCompany.Business.Dtos.Common;
 using JobCompany.Business.Dtos.StatusDtos;
 using JobCompany.Business.Exceptions.ApplicationExceptions;
@@ -267,6 +267,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                         LastName = user.LastName,
                         Email = user.Email,
                         PhoneNumber = user.PhoneNumber,
+                        StatusId = a.StatusId,
                         StatusName = a.Status.GetTranslation(_currentUser.LanguageCode),
                         VacancyId = a.VacancyId,
                         VacancyName = a.Vacancy.Title,
@@ -307,17 +308,13 @@ namespace JobCompany.Business.Services.ApplicationServices
                 .Select(v => new { v.CompanyId, v.Title })
                 .FirstOrDefaultAsync() ?? throw new NotFoundException<Company>("NOT_FOUND");
 
-            var status = await _context.Statuses.FirstOrDefaultAsync(s => s.StatusEnum == StatusEnum.Pending && s.IsDefault);
-
-            var responseUser = await _requestUser.GetResponse<GetUserDataResponse>(
-                new GetUserDataRequest { UserId = userGuid }
-            );
+            Guid statusId = await _context.Statuses.Where(s => s.StatusEnum == StatusEnum.Pending && s.IsDefault).Select(x=> x.Id).FirstOrDefaultAsync();
 
             var newApplication = new Application
             {
                 UserId = userGuid,
                 VacancyId = vacancyGuid,
-                StatusId = status.Id,
+                StatusId = statusId,
                 IsActive = true,
                 CreatedDate = DateTime.Now
             };
@@ -331,7 +328,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                 SenderId = userGuid,
                 VacancyId = vacancyGuid,
                 InformationId = userGuid,
-                Content = $"İstifadəçi {responseUser.Message.FirstName} {responseUser.Message.LastName} {vacancyInfo.Title} vakansiyasına müraciət etdi.",
+                Content = $"İstifadəçi {_currentUser.UserFullName} {vacancyInfo.Title} vakansiyasına müraciət etdi.",
             });
         }
 
@@ -351,8 +348,8 @@ namespace JobCompany.Business.Services.ApplicationServices
                     ApplicationId = a.Id,
                     VacancyId = a.VacancyId,
                     Title = a.Vacancy.Title,
-                    CompanyId = a.Vacancy.CompanyId,    
-                    CompanyLogo = a.Vacancy.Company.CompanyLogo,
+                    CompanyId = a.Vacancy.CompanyId,
+                    CompanyLogo = a.Vacancy.Company.CompanyLogo != null ? $"{_authServiceBaseUrl}/{a.Vacancy.Company.CompanyLogo}": null,
                     CompanyName = a.Vacancy.Company.CompanyName,
                     WorkType = a.Vacancy.WorkType != null ? a.Vacancy.WorkType.GetDisplayName() : null, 
                     IsActive = a.IsActive,
@@ -388,13 +385,13 @@ namespace JobCompany.Business.Services.ApplicationServices
                     VacancyName = application.Vacancy.Title,
                     CompanyId = application.Vacancy.CompanyId,
                     CompanyName = application.Vacancy.Company.CompanyName,
-                    CompanyLogo =  $"{_currentUser.BaseUrl}/{application.Vacancy.Company.CompanyLogo}",
+                    CompanyLogo =  $"{_authServiceBaseUrl}/{application.Vacancy.Company.CompanyLogo}",
                     Location = application.Vacancy.Company.CompanyLocation,
                     WorkType = application.Vacancy.WorkType,
                     WorkStyle = application.Vacancy.WorkStyle,
                     CreatedDate = application.CreatedDate,
                     ApplicationStatusId = application.StatusId,
-                    ApplicationStatusName = application.Status.IsDefault ? application.Status.GetTranslation(_currentUser.LanguageCode) : application.Status.Translations.FirstOrDefault().Name
+                    //ApplicationStatusName = application.Status.IsDefault ? application.Status.GetTranslation(_currentUser.LanguageCode) : application.Status.Translations.FirstOrDefault().Name
                 })
                 .FirstOrDefaultAsync()
                 ?? throw new NotFoundException<Application>(MessageHelper.GetMessage("NOT_FOUND"));

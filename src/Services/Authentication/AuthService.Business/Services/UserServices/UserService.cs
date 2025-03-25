@@ -116,7 +116,7 @@ namespace AuthService.Business.Services.UserServices
             return new UserProfileImageUpdateResponseDto
             {
                 UserId = user.Id,
-                ImageUrl = user.Image,
+                ImageUrl = $"{_currentUser.BaseUrl}/{user.Image}",
             };
         }
 

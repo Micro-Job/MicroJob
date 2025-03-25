@@ -11,6 +11,7 @@ namespace JobCompany.Business.Dtos.VacancyDtos
     public record CreateVacancyDto
     {
         public string Title { get; set; }
+        public string? CompanyName { get; set; }
         public IFormFile? CompanyLogo { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime? EndDate { get; set; }

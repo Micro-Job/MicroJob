@@ -72,6 +72,7 @@ namespace Job.Business.Services.Resume
         public async Task<ResumeDetailItemDto> GetOwnResumeAsync()
         {
             var resume = await _context.Resumes
+                                        .Include(x=> x.ResumeSkills).ThenInclude(x=> x.Skill).ThenInclude(x=> x.Translations)
                                         .Where(x => x.UserId == _currentUser.UserGuid)
                                         .Select(resume => new ResumeDetailItemDto
                                         {
