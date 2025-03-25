@@ -10,7 +10,7 @@ namespace JobCompany.Core.Entites
         public string LastDescription { get; set; }
         
         //public string? Result { get; set; } laz?ms?zd?r dey? silindi
-        public decimal LimitRate { get; set; }
+        public float LimitRate { get; set; }
         public short? Duration { get; set; }
         public DateTime? CreatedDate { get; set; }
 

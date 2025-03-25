@@ -80,6 +80,7 @@ namespace JobCompany.Business.Services.ExamServices
                         IntroDescription = e.IntroDescription,
                         LastDescription = e.LastDescription,
                         Duration = e.Duration,
+                        //CurrentStep = e.LimitRate
                     })
                     .FirstOrDefaultAsync(e => e.Id == examGuid)
                 ?? throw new NotFoundException<Exam>(MessageHelper.GetMessage("NOT_FOUND"));
@@ -263,7 +264,7 @@ namespace JobCompany.Business.Services.ExamServices
             int falseCount = answerResults.Count(isCorrect => !isCorrect);
 
             int totalQuestions = exam.ExamQuestions.Count;
-            decimal resultRate = totalQuestions > 0 ? (decimal)trueCount / totalQuestions * 100 : 0;
+            float resultRate = totalQuestions > 0 ? (float)trueCount / totalQuestions * 100 : 0;
             bool isPassed = resultRate >= exam.LimitRate;
 
             var userExam = new UserExam

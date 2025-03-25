@@ -11,7 +11,7 @@ namespace JobCompany.Business.Dtos.ExamDtos
         public string CompanyName { get; set; }
         public int QuestionCount { get; set; }
         public short? Duration { get; set; }
-        public decimal LimitRate { get; set; }
+        public float LimitRate { get; set; }
         public string FullName { get; set; }
         public string IntroDescription { get; set; }
     }

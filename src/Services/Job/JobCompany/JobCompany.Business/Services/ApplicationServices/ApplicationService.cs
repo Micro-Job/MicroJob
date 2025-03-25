@@ -267,6 +267,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                         LastName = user.LastName,
                         Email = user.Email,
                         PhoneNumber = user.PhoneNumber,
+                        StatusId = a.StatusId,
                         StatusName = a.Status.GetTranslation(_currentUser.LanguageCode),
                         VacancyId = a.VacancyId,
                         VacancyName = a.Vacancy.Title,
