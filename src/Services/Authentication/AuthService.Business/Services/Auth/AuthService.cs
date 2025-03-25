@@ -89,13 +89,10 @@ namespace AuthService.Business.Services.Auth
             if (!dto.Policy)
                 throw new PolicyException();
 
-            var userCheck = await _context.Users.FirstOrDefaultAsync(x =>
-                x.Email == dto.Email || x.MainPhoneNumber == dto.MainPhoneNumber
-            );
-
             // email veya istifadeci adı tekrarlanmasını yoxla
-            if (userCheck != null)
+            if (await _context.Users.AnyAsync(x => x.Email == dto.Email || x.MainPhoneNumber == dto.MainPhoneNumber))
                 throw new UserExistException();
+
             if (dto.Password != dto.ConfirmPassword)
                 throw new WrongPasswordException();
 

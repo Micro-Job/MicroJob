@@ -27,7 +27,7 @@ namespace SharedLibrary.Responses
         public Driver Driver { get; set; }
         public FamilySituation Family { get; set; }
         public Citizenship Citizenship { get; set; }
-        public bool IsActive { get; set; }
+        public VacancyStatus IsActive { get; set; }
         public bool IsSaved { get; set; }
         public string CategoryName { get; set; }
         public Guid? CompanyId { get; set; }

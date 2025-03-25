@@ -27,7 +27,7 @@ public class GetAllVacanciesConsumer(JobCompanyDbContext context, IConfiguration
 
         if (request.IsActive.HasValue)
         {
-            query = query.Where(v => v.IsActive == request.IsActive);
+            query = query.Where(v => v.VacancyStatus == request.IsActive);
         }
 
         if (!string.IsNullOrWhiteSpace(request.CategoryId))
@@ -88,7 +88,7 @@ public class GetAllVacanciesConsumer(JobCompanyDbContext context, IConfiguration
                 WorkType = v.WorkType,
                 WorkStyle = v.WorkStyle,
                 IsVip = v.IsVip,
-                IsActive = v.IsActive,
+                IsActive = v.VacancyStatus,
                 CategoryId = v.CategoryId,
             })
             .ToListAsync();

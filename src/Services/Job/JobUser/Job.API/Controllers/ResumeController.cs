@@ -50,5 +50,12 @@ namespace Job.API.Controllers
             await _resumeService.ToggleSaveResumeAsync(resumeId);
             return Ok();
         }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> IsExistResume()
+        {
+            return Ok(await _resumeService.IsExistResumeAsync());
+        }
+
     }
 }

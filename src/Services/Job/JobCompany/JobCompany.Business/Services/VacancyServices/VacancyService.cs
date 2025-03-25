@@ -6,6 +6,7 @@ using JobCompany.Business.Dtos.CompanyDtos;
 using JobCompany.Business.Dtos.NumberDtos;
 using JobCompany.Business.Dtos.SkillDtos;
 using JobCompany.Business.Dtos.VacancyDtos;
+using JobCompany.Business.Exceptions.VacancyExceptions;
 using JobCompany.Business.Extensions;
 using JobCompany.Business.Services.ExamServices;
 using JobCompany.Core.Entites;
@@ -102,7 +103,7 @@ namespace JobCompany.Business.Services.VacancyServices
                 Citizenship = vacancyDto.Citizenship,
                 CategoryId = vacancyDto.CategoryId,
                 ExamId = vacancyDto.ExamId,
-                IsActive = true,
+                VacancyStatus = VacancyStatus.Pending,
                 ViewCount = 0
             };
 
@@ -165,14 +166,14 @@ namespace JobCompany.Business.Services.VacancyServices
 
             var deletedCount = await _context
                 .Vacancies.Where(x => vacancyGuids.Contains(x.Id) && x.Company.UserId == _currentUser.UserGuid)
-                .ExecuteUpdateAsync(x => x.SetProperty(v => v.IsActive, false));
+                .ExecuteUpdateAsync(x => x.SetProperty(v => v.VacancyStatus, VacancyStatus.Deactive));
 
             if (deletedCount == 0)
                 throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
         }
 
         /// <summary> Şirkətin profilində bütün vakansiyalarını gətirmək(Filterlerle birlikde) </summary>
-        public async Task<List<VacancyGetAllDto>> GetAllOwnVacanciesAsync(string? titleName, string? categoryId, string? countryId, string? cityId, bool? IsActive, decimal? minSalary, decimal? maxSalary, int skip = 1, int take = 6)
+        public async Task<List<VacancyGetAllDto>> GetAllOwnVacanciesAsync(string? titleName, string? categoryId, string? countryId, string? cityId, VacancyStatus? IsActive, decimal? minSalary, decimal? maxSalary, int skip = 1, int take = 6)
         {
             var query = _context
                 .Vacancies.Where(x => x.Company.UserId == _currentUser.UserGuid)
@@ -207,7 +208,6 @@ namespace JobCompany.Business.Services.VacancyServices
                     WorkStyle = x.WorkStyle,
                     MainSalary = x.MainSalary,
                     MaxSalary = x.MaxSalary,
-                    IsActive = x.IsActive,
                 })
                 .Skip(Math.Max(0, (skip - 1) * take))
                 .Take(take)
@@ -220,7 +220,7 @@ namespace JobCompany.Business.Services.VacancyServices
         public async Task<List<VacancyListDtoForAppDto>> GetAllVacanciesForAppAsync()
         {
             var vacancies = await _context
-                .Vacancies.Where(x => x.Company.UserId == _currentUser.UserGuid && x.IsActive == true)
+                .Vacancies.Where(x => x.Company.UserId == _currentUser.UserGuid && x.VacancyStatus == VacancyStatus.Active)
                 .Select(x => new VacancyListDtoForAppDto
                 {
                     VacancyId = x.Id,
@@ -236,7 +236,7 @@ namespace JobCompany.Business.Services.VacancyServices
         {
             var companyGuid = Guid.Parse(companyId);
 
-            var query = _context.Vacancies.Where(x => x.CompanyId == companyGuid && x.IsActive && x.EndDate >= DateTime.Now).AsQueryable().AsNoTracking();
+            var query = _context.Vacancies.Where(x => x.CompanyId == companyGuid && x.VacancyStatus == VacancyStatus.Active && x.EndDate >= DateTime.Now).AsQueryable().AsNoTracking();
 
             var vacancies = await query
                 .Select(x => new VacancyGetByCompanyIdDto
@@ -326,6 +326,9 @@ namespace JobCompany.Business.Services.VacancyServices
                     .Vacancies.Where(v => v.Id == vacancyGuid && v.Company.UserId == _currentUser.UserGuid)
                     .FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
 
+            if (existingVacancy.VacancyStatus == VacancyStatus.Block)
+                throw new VacancyUpdateException(MessageHelper.GetMessage("VACANCY_UPDATE"));
+
             existingVacancy.CompanyId = Guid.Parse(vacancyDto.CompanyId);
             existingVacancy.CompanyName = vacancyDto.CompanyName;
             existingVacancy.Title = vacancyDto.Title;
@@ -348,6 +351,7 @@ namespace JobCompany.Business.Services.VacancyServices
             existingVacancy.Driver = vacancyDto.Driver;
             existingVacancy.Family = vacancyDto.Family;
             existingVacancy.Citizenship = vacancyDto.Citizenship;
+            existingVacancy.VacancyStatus = VacancyStatus.Update;
             existingVacancy.CategoryId = Guid.Parse(
                 vacancyDto.CategoryId ?? throw new Exception(MessageHelper.GetMessage("NOT_FOUND"))
             );
@@ -366,6 +370,8 @@ namespace JobCompany.Business.Services.VacancyServices
                     }
                 }
             }
+            
+
             await _context.SaveChangesAsync();
 
             var userIds = await _context
@@ -388,11 +394,11 @@ namespace JobCompany.Business.Services.VacancyServices
 
         public async Task<DataListDto<VacancyGetAllDto>> GetAllVacanciesAsync(string? titleName, string? categoryId, string? countryId, string? cityId, decimal? minSalary, decimal? maxSalary, string? companyId, byte? workStyle, byte? workType, int skip = 1, int take = 9)
         {
-            var query = _context.Vacancies.Where(x=> x.IsActive && x.EndDate > DateTime.Now)
+            var query = _context.Vacancies.Where(x=> x.VacancyStatus == VacancyStatus.Active && x.EndDate > DateTime.Now)
                 .AsNoTracking()
                 .AsQueryable();
 
-            query = ApplyVacancyFilters(query, titleName, categoryId, countryId, cityId, true, minSalary, maxSalary, companyId, workStyle, workType);
+            query = ApplyVacancyFilters(query, titleName, categoryId, countryId, cityId, VacancyStatus.Active, minSalary, maxSalary, companyId, workStyle, workType);
 
             var vacancies = await query
                 .Select(v => new VacancyGetAllDto
@@ -417,7 +423,7 @@ namespace JobCompany.Business.Services.VacancyServices
             return new DataListDto<VacancyGetAllDto> { Datas = vacancies, TotalCount = await query.CountAsync() };
         }
 
-        private static IQueryable<Vacancy> ApplyVacancyFilters(IQueryable<Vacancy> query, string? titleName, string? categoryId, string? countryId, string? cityId, bool? isActive, decimal? minSalary, decimal? maxSalary, string? companyId, byte? workStyle, byte? workType)
+        private static IQueryable<Vacancy> ApplyVacancyFilters(IQueryable<Vacancy> query, string? titleName, string? categoryId, string? countryId, string? cityId, VacancyStatus? isActive, decimal? minSalary, decimal? maxSalary, string? companyId, byte? workStyle, byte? workType)
         {
             if (titleName != null)
             {
@@ -426,7 +432,7 @@ namespace JobCompany.Business.Services.VacancyServices
             }
 
             if (isActive != null)
-                query = query.Where(x => x.IsActive == isActive);
+                query = query.Where(x => x.VacancyStatus == isActive);
 
             if (minSalary != null && maxSalary != null)
                 query = query.Where(x => x.MainSalary >= minSalary && x.MaxSalary <= maxSalary);
@@ -488,7 +494,7 @@ namespace JobCompany.Business.Services.VacancyServices
 
         public async Task<List<VacancyGetAllDto>> SimilarVacanciesAsync(string vacancyId, int take = 8)
         {
-            var mainVacancy = await _context.Vacancies.Where(x => x.Id == Guid.Parse(vacancyId) && x.IsActive && x.EndDate > DateTime.Now)
+            var mainVacancy = await _context.Vacancies.Where(x => x.Id == Guid.Parse(vacancyId) && x.VacancyStatus == VacancyStatus.Active && x.EndDate > DateTime.Now)
             .Select(x => new
             {
                 x.Id,

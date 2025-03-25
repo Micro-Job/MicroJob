@@ -35,7 +35,7 @@ namespace JobCompany.Business.Consumers
                         Location = v.Company.CompanyLocation,
                         Title = v.Title,
                         WorkType = v.WorkType,
-                        IsActive = v.IsActive,
+                        IsActive = v.VacancyStatus,
                         IsVip = v.IsVip,
                         ViewCount = v.ViewCount,
                         MainSalary = v.MainSalary,
