@@ -8,7 +8,7 @@ namespace Shared.Requests
         public string? CategoryId { get; set; }
         public string? CountryId { get; set; }
         public string? CityId { get; set; }
-        public bool? IsActive { get; set; }
+        public VacancyStatus? IsActive { get; set; }
         public decimal? MinSalary { get; set; }
         public decimal? MaxSalary { get; set; }
         public string? CompanyId { get; set; }
