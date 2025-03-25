@@ -13,6 +13,7 @@ using JobCompany.Business.Services.ReportServices;
 using JobCompany.Business.Services.Skill;
 using JobCompany.Business.Services.SkillServices;
 using JobCompany.Business.Services.StatusServices;
+using JobCompany.Business.Services.VacancyComment;
 using JobCompany.Business.Services.VacancyServices;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
@@ -42,6 +43,7 @@ namespace JobCompany.Business
             services.AddScoped<ISkillService, SkillService>();
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<ICurrentUser, CurrentUser>();
+            services.AddScoped<IVacancyCommentService, VacancyCommentService>();
 
         }
 

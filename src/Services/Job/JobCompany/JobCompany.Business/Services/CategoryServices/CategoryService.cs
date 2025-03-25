@@ -1,6 +1,7 @@
 using JobCompany.Business.Dtos.CategoryDtos;
 using JobCompany.Business.Exceptions.Common;
 using JobCompany.Business.Extensions;
+using JobCompany.Business.Statistics;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
@@ -47,7 +48,7 @@ namespace JobCompany.Business.Services.CategoryServices
             .Select(b => new CategoryListDto
             {
                 Id = b.Id,
-                CategoryName = b.GetTranslation(_user.LanguageCode)
+                CategoryName = b.GetTranslation(_user.LanguageCode,GetTranslationPropertyName.Name)
             })
             .ToListAsync();
 

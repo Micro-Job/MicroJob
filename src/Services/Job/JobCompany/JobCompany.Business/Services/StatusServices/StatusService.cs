@@ -3,6 +3,7 @@ using Job.Core.Entities;
 using JobCompany.Business.Dtos.StatusDtos;
 using JobCompany.Business.Exceptions.StatusExceptions;
 using JobCompany.Business.Extensions;
+using JobCompany.Business.Statistics;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
@@ -74,7 +75,7 @@ namespace JobCompany.Business.Services.StatusServices
             .Select(b => new StatusListDto
             {
                 StatusId = b.Id,
-                StatusName = b.GetTranslation(_currentUser.LanguageCode),
+                StatusName = b.GetTranslation(_currentUser.LanguageCode,GetTranslationPropertyName.Name),
                 StatusColor = b.StatusColor,
                 Order = b.Order,
             })

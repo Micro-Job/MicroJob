@@ -3,6 +3,7 @@ using JobCompany.Business.Dtos.Common;
 using JobCompany.Business.Dtos.StatusDtos;
 using JobCompany.Business.Exceptions.ApplicationExceptions;
 using JobCompany.Business.Extensions;
+using JobCompany.Business.Statistics;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using MassTransit;
@@ -114,7 +115,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                 .Select(status => new StatusListDtoWithApps
                 {
                     StatusId = status.Id,
-                    StatusName = status.GetTranslation(_currentUser.LanguageCode),
+                    StatusName = status.GetTranslation(_currentUser.LanguageCode,GetTranslationPropertyName.Name),
                     StatusColor = status.StatusColor,
                     IsDefault = status.IsDefault,
                     Applications = _context
@@ -154,11 +155,11 @@ namespace JobCompany.Business.Services.ApplicationServices
                         CreatedDate = a.CreatedDate,
                         Description = a.Vacancy.Description,
 
-                        StatusName = a.Status.GetTranslation(_currentUser.LanguageCode),
+                        StatusName = a.Status.GetTranslation(_currentUser.LanguageCode,GetTranslationPropertyName.Name),
                         StatusColor = a.Status.StatusColor,
                         Steps = _context
                             .Statuses.OrderBy(s => s.Order)
-                            .Select(s => s.GetTranslation(_currentUser.LanguageCode))
+                            .Select(s => s.GetTranslation(_currentUser.LanguageCode,GetTranslationPropertyName.Name))
                             .ToList(),
                     })
                     .FirstOrDefaultAsync() ?? throw new NotFoundException<Application>(MessageHelper.GetMessage("NOT_FOUND"));
@@ -268,7 +269,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                         Email = user.Email,
                         PhoneNumber = user.PhoneNumber,
                         StatusId = a.StatusId,
-                        StatusName = a.Status.GetTranslation(_currentUser.LanguageCode),
+                        StatusName = a.Status.GetTranslation(_currentUser.LanguageCode,GetTranslationPropertyName.Name),
                         VacancyId = a.VacancyId,
                         VacancyName = a.Vacancy.Title,
                     };
@@ -353,7 +354,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                     CompanyName = a.Vacancy.Company.CompanyName,
                     WorkType = a.Vacancy.WorkType != null ? a.Vacancy.WorkType.GetDisplayName() : null, 
                     IsActive = a.Vacancy.VacancyStatus,
-                    StatusName = a.Status.IsDefault ? a.Status.GetTranslation(_currentUser.LanguageCode) : a.Status.Translations.FirstOrDefault().Name,
+                    StatusName = a.Status.IsDefault ? a.Status.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name) : a.Status.Translations.FirstOrDefault().Name,
                     StatusColor = a.Status.StatusColor,
                     ViewCount = a.Vacancy.ViewCount,
                     StartDate = a.CreatedDate,
@@ -402,7 +403,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                 .Select(x => new ApplicationStatusesListDto
                 {
                     CompanyStatusId = x.Id,
-                    CompanyStatusName = x.IsDefault ? x.GetTranslation(_currentUser.LanguageCode) : x.Translations.FirstOrDefault().Name,
+                    CompanyStatusName = x.IsDefault ? x.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name) : x.Translations.FirstOrDefault().Name,
                     Order = x.Order
                 })
                 .ToListAsync();
