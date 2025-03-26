@@ -20,7 +20,7 @@ namespace JobCompany.API.Controllers
 
         [AuthorizeRole(UserRole.CompanyUser , UserRole.EmployeeUser)]
         [HttpPut("[action]")]
-        public async Task<IActionResult> ChangeSatusOrderAsync(List<ChangeStatusOrderDto> dtos)
+        public async Task<IActionResult> ChangeStatusOrderAsync([FromBody]List<ChangeStatusOrderDto> dtos)
         {
             await _statusService.ChangeSatusOrderAsync(dtos);
             return Ok();
