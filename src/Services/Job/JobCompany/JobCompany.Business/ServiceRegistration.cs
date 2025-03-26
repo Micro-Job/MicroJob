@@ -7,12 +7,14 @@ using JobCompany.Business.Services.CityServices;
 using JobCompany.Business.Services.CompanyServices;
 using JobCompany.Business.Services.CountryServices;
 using JobCompany.Business.Services.ExamServices;
+using JobCompany.Business.Services.ManageService;
 using JobCompany.Business.Services.NotificationServices;
 using JobCompany.Business.Services.QuestionServices;
 using JobCompany.Business.Services.ReportServices;
 using JobCompany.Business.Services.Skill;
 using JobCompany.Business.Services.SkillServices;
 using JobCompany.Business.Services.StatusServices;
+using JobCompany.Business.Services.VacancyComment;
 using JobCompany.Business.Services.VacancyServices;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
@@ -42,6 +44,8 @@ namespace JobCompany.Business
             services.AddScoped<ISkillService, SkillService>();
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<ICurrentUser, CurrentUser>();
+            services.AddScoped<IVacancyCommentService, VacancyCommentService>();
+            services.AddScoped<IManageService, ManageService>();
 
         }
 

@@ -3,6 +3,7 @@ using JobCompany.Business.Dtos.Common;
 using JobCompany.Business.Dtos.StatusDtos;
 using JobCompany.Business.Exceptions.ApplicationExceptions;
 using JobCompany.Business.Extensions;
+using JobCompany.Business.Statistics;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using MassTransit;
@@ -120,11 +121,11 @@ namespace JobCompany.Business.Services.ApplicationServices
                         CreatedDate = a.CreatedDate,
                         Description = a.Vacancy.Description,
 
-                        StatusName = a.Status.GetTranslation(_currentUser.LanguageCode),
+                        StatusName = a.Status.GetTranslation(_currentUser.LanguageCode,GetTranslationPropertyName.Name),
                         StatusColor = a.Status.StatusColor,
                         Steps = _context
                             .Statuses.OrderBy(s => s.Order)
-                            .Select(s => s.GetTranslation(_currentUser.LanguageCode))
+                            .Select(s => s.GetTranslation(_currentUser.LanguageCode,GetTranslationPropertyName.Name))
                             .ToList(),
                     })
                     .FirstOrDefaultAsync() ?? throw new NotFoundException<Application>(MessageHelper.GetMessage("NOT_FOUND"));
@@ -234,7 +235,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                         Email = user.Email,
                         PhoneNumber = user.PhoneNumber,
                         StatusId = a.StatusId,
-                        StatusName = a.Status.GetTranslation(_currentUser.LanguageCode),
+                        StatusName = a.Status.GetTranslation(_currentUser.LanguageCode,GetTranslationPropertyName.Name),
                         VacancyId = a.VacancyId,
                         VacancyName = a.Vacancy.Title,
                     };

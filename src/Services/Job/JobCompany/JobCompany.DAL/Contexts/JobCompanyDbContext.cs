@@ -34,6 +34,8 @@ namespace JobCompany.DAL.Contexts
         public DbSet<CityTranslation> CityTranslations { get; set; }
 
         public DbSet<UserExam> UserExams { get; set; }
+        public DbSet<VacancyComment> VacancyComments { get; set; }
+        public DbSet<VacancyCommentTranslation> VacancyCommentTranslations { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

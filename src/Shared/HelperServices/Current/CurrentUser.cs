@@ -24,12 +24,13 @@ namespace SharedLibrary.HelperServices.Current
             {
                 var roleClaim = _contextAccessor.HttpContext?.User.FindFirst(ClaimTypes.Role)?.Value;
 
-                if (Enum.TryParse<UserRole>(roleClaim, out var roleEnum))
+                if (Enum.TryParse(roleClaim, out UserRole role))
                 {
-                    return (byte)roleEnum;
+                    return (byte)role;
                 }
 
-                return (byte)Enums.UserRole.SimpleUser;
+                return 0;
+
             }
         }
 

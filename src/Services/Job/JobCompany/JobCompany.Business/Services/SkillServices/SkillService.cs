@@ -1,6 +1,7 @@
 ﻿ using JobCompany.Business.Dtos.SkillDtos;
 using JobCompany.Business.Extensions;
 using JobCompany.Business.Services.SkillServices;
+using JobCompany.Business.Statistics;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
@@ -36,7 +37,7 @@ namespace JobCompany.Business.Services.Skill
             .Select(b => new GetAllSkillDto
             {
                 Id = b.Id,
-                Name = b.GetTranslation(_user.LanguageCode),
+                Name = b.GetTranslation(_user.LanguageCode,GetTranslationPropertyName.Name),
             })
             .ToListAsync();
 
