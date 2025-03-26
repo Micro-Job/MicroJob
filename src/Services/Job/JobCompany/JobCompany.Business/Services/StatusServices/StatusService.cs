@@ -1,6 +1,4 @@
-﻿using System.Security.Claims;
-using Job.Core.Entities;
-using JobCompany.Business.Dtos.StatusDtos;
+﻿using JobCompany.Business.Dtos.StatusDtos;
 using JobCompany.Business.Exceptions.StatusExceptions;
 using JobCompany.Business.Extensions;
 using JobCompany.Core.Entites;
