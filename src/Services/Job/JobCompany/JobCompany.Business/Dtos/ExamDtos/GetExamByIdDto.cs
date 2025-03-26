@@ -10,9 +10,7 @@ namespace JobCompany.Business.Dtos.ExamDtos
         public bool IsTemplate { get; set; }
         public string IntroDescription { get; set; }
         public string LastDescription { get; set; }
-        public string? Result { get; set; }
-        //public byte CurrentStep { get; set; }
-        //public ICollection<QuestionDetailDto> ExamQuestions { get; set; }
         public short? Duration { get; set; }
+        public float LimitRate { get; set; }
     }
 }
