@@ -13,6 +13,6 @@ namespace Job.Business.Services.Resume
         Task<DataListDto<ResumeListDto>> GetAllResumesAsync(string? fullname, int skip , int take);
         Task<DataListDto<ResumeListDto>> GetSavedResumesAsync(string? fullName , int skip , int take);
         Task ToggleSaveResumeAsync(string resumeId);
-
+        Task<bool> IsExistResumeAsync();
     }
 }

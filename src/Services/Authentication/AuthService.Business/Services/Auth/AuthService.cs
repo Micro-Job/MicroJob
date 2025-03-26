@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using AuthService.Business.Dtos;
 using AuthService.Business.Exceptions.UserException;
+using AuthService.Business.HelperServices.Email;
 using AuthService.Business.HelperServices.TokenHandler;
 using AuthService.Business.Publishers;
 using AuthService.Core.Entities;
@@ -27,7 +28,8 @@ namespace AuthService.Business.Services.Auth
         IHttpContextAccessor _httpContext,
         IPublishEndpoint _publishEndpoint,
         IFileService _fileService,
-        IConfiguration _configuration
+        IConfiguration _configuration,
+        IEmailService _emailService
     ) : IAuthService
     {
         private string _userId = _httpContext.HttpContext?.User?.FindFirst(ClaimTypes.Sid)?.Value;
@@ -89,13 +91,10 @@ namespace AuthService.Business.Services.Auth
             if (!dto.Policy)
                 throw new PolicyException();
 
-            var userCheck = await _context.Users.FirstOrDefaultAsync(x =>
-                x.Email == dto.Email || x.MainPhoneNumber == dto.MainPhoneNumber
-            );
-
             // email veya istifadeci adı tekrarlanmasını yoxla
-            if (userCheck != null)
+            if (await _context.Users.AnyAsync(x => x.Email == dto.Email || x.MainPhoneNumber == dto.MainPhoneNumber))
                 throw new UserExistException();
+
             if (dto.Password != dto.ConfirmPassword)
                 throw new WrongPasswordException();
 
@@ -117,9 +116,6 @@ namespace AuthService.Business.Services.Auth
                 UserRole = UserRole.CompanyUser,
             };
 
-
-            //var company = new Company { Id = Guid.NewGuid(), UserId = user.Id };
-            //await _context.Companies.AddAsync(company);
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
 
@@ -220,10 +216,9 @@ namespace AuthService.Business.Services.Auth
         /// <exception cref="UserNotFoundException"></exception>
         public async Task ResetPasswordAsync(string email)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(x => x.Email == email);
-            if (user == null)
-                throw new NotFoundException<User>(MessageHelper.GetMessage("NOTFOUNDEXCEPTION_USER"));
-
+            var user = await _context.Users.FirstOrDefaultAsync(x => x.Email == email) 
+                ?? throw new NotFoundException<User>(MessageHelper.GetMessage("NOTFOUNDEXCEPTION_USER"));
+            
             var token = _tokenHandler.CreatePasswordResetToken(user);
 
             var passwordToken = new PasswordToken
@@ -231,14 +226,12 @@ namespace AuthService.Business.Services.Auth
                 Token = token,
                 UserId = user.Id,
                 ExpireTime = DateTime.Now.AddHours(1),
-                //ExpireTime = DateTime.Now.AddMinutes(3),
             };
 
             await _context.PasswordTokens.AddAsync(passwordToken);
             await _context.SaveChangesAsync();
 
-            //Console.WriteLine($" Email : {email} /n UserName : {user.UserName} /n Token : {token}");
-            //await _emailService.SendChangePassword(email, user.UserName, token);
+            await _emailService.SendResetPassword(email, token);
         }
 
         /// <summary>

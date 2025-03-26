@@ -30,6 +30,7 @@ namespace SharedLibrary.HelperServices.Current
                 }
 
                 return 0;
+
             }
         }
 

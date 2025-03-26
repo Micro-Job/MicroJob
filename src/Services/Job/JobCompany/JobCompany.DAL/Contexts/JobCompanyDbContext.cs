@@ -30,7 +30,6 @@ namespace JobCompany.DAL.Contexts
 
         public DbSet<SkillTranslation> SkillTranslations { get; set; }
         public DbSet<CategoryTranslation> CategoryTranslations { get; set; }
-        public DbSet<StatusTranslation> StatusTranslations { get; set; }
         public DbSet<CountryTranslation> CountryTranslations { get; set; }
         public DbSet<CityTranslation> CityTranslations { get; set; }
 

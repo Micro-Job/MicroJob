@@ -4,6 +4,7 @@ using JobCompany.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JobCompany.DAL.Migrations
 {
     [DbContext(typeof(JobCompanyDbContext))]
-    partial class JobCompanyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250326080910_RemovedStatusTranslationTableAndChangedStatusTableLogic")]
+    partial class RemovedStatusTranslationTableAndChangedStatusTableLogic
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -579,9 +582,6 @@ namespace JobCompany.DAL.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("nvarchar(64)");
 
-                    b.Property<Guid?>("VacancyCommentId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<int>("VacancyStatus")
                         .HasColumnType("int");
 
@@ -606,47 +606,7 @@ namespace JobCompany.DAL.Migrations
 
                     b.HasIndex("ExamId");
 
-                    b.HasIndex("VacancyCommentId");
-
                     b.ToTable("Vacancies");
-                });
-
-            modelBuilder.Entity("JobCompany.Core.Entites.VacancyComment", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("CommentType")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("VacancyComments");
-                });
-
-            modelBuilder.Entity("JobCompany.Core.Entites.VacancyCommentTranslation", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Comment")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
-
-                    b.Property<byte>("Language")
-                        .HasColumnType("tinyint");
-
-                    b.Property<Guid>("VacancyCommentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("VacancyCommentId");
-
-                    b.ToTable("VacancyCommentTranslations");
                 });
 
             modelBuilder.Entity("JobCompany.Core.Entites.VacancyNumber", b =>
@@ -905,11 +865,6 @@ namespace JobCompany.DAL.Migrations
                         .WithMany("Vacancies")
                         .HasForeignKey("ExamId");
 
-                    b.HasOne("JobCompany.Core.Entites.VacancyComment", "VacancyComment")
-                        .WithMany("Vacancies")
-                        .HasForeignKey("VacancyCommentId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
                     b.Navigation("Category");
 
                     b.Navigation("City");
@@ -919,19 +874,6 @@ namespace JobCompany.DAL.Migrations
                     b.Navigation("Country");
 
                     b.Navigation("Exam");
-
-                    b.Navigation("VacancyComment");
-                });
-
-            modelBuilder.Entity("JobCompany.Core.Entites.VacancyCommentTranslation", b =>
-                {
-                    b.HasOne("JobCompany.Core.Entites.VacancyComment", "VacancyComment")
-                        .WithMany("Translations")
-                        .HasForeignKey("VacancyCommentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("VacancyComment");
                 });
 
             modelBuilder.Entity("JobCompany.Core.Entites.VacancyNumber", b =>
@@ -1042,13 +984,6 @@ namespace JobCompany.DAL.Migrations
                     b.Navigation("VacancyNumbers");
 
                     b.Navigation("VacancySkills");
-                });
-
-            modelBuilder.Entity("JobCompany.Core.Entites.VacancyComment", b =>
-                {
-                    b.Navigation("Translations");
-
-                    b.Navigation("Vacancies");
                 });
 #pragma warning restore 612, 618
         }
