@@ -24,9 +24,9 @@ namespace JobCompany.API.Controllers
         }
 
         [HttpPost("[action]")]
-        public async Task<IActionResult> VacancyBlock(VacancyStatusUpdateDto dto)
+        public async Task<IActionResult> ToggleBlockVacancyStatus(VacancyStatusUpdateDto dto)
         {
-            await _service.VacancyBlockAsync(dto);
+            await _service.ToggleBlockVacancyStatusAsync(dto);
             return Ok();
         }
     }

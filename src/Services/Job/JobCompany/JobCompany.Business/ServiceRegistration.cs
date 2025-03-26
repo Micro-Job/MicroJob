@@ -7,6 +7,7 @@ using JobCompany.Business.Services.CityServices;
 using JobCompany.Business.Services.CompanyServices;
 using JobCompany.Business.Services.CountryServices;
 using JobCompany.Business.Services.ExamServices;
+using JobCompany.Business.Services.ManageService;
 using JobCompany.Business.Services.NotificationServices;
 using JobCompany.Business.Services.QuestionServices;
 using JobCompany.Business.Services.ReportServices;
@@ -44,6 +45,7 @@ namespace JobCompany.Business
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<ICurrentUser, CurrentUser>();
             services.AddScoped<IVacancyCommentService, VacancyCommentService>();
+            services.AddScoped<IManageService, ManageService>();
 
         }
 

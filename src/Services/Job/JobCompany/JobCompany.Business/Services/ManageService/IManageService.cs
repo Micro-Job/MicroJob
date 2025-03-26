@@ -6,5 +6,5 @@ public interface IManageService
 {
     Task VacancyAcceptAsync(VacancyAcceptDto dto);
     Task VacancyRejectAsync(VacancyStatusUpdateDto dto);
-    Task VacancyBlockAsync(VacancyStatusUpdateDto dto);
+    Task ToggleBlockVacancyStatusAsync(VacancyStatusUpdateDto dto);
 }

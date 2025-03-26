@@ -31,15 +31,29 @@ public class ManageService(JobCompanyDbContext _context) : IManageService
         await _context.SaveChangesAsync();
     }
 
-    public async Task VacancyBlockAsync(VacancyStatusUpdateDto dto)
+    public async Task ToggleBlockVacancyStatusAsync(VacancyStatusUpdateDto dto)
     {
         var vacancyGuid = Guid.Parse(dto.VacancyId);
-        var vacancyCommenGuid = Guid.Parse(dto.VacancyCommentId);
-        var vacancy = await _context.Vacancies.Where(v => v.Id == vacancyGuid).FirstOrDefaultAsync()
+        var vacancy = await _context.Vacancies
+            .Where(v => v.Id == vacancyGuid)
+            .FirstOrDefaultAsync()
             ?? throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
 
-        vacancy.VacancyCommentId = vacancyCommenGuid;
-        vacancy.VacancyStatus = SharedLibrary.Enums.VacancyStatus.Block;
+        if (vacancy.VacancyStatus != SharedLibrary.Enums.VacancyStatus.Block)
+        {
+            vacancy.VacancyStatus = SharedLibrary.Enums.VacancyStatus.Block;
+            vacancy.VacancyCommentId = Guid.Parse(dto.VacancyCommentId);
+        }
+        else
+        {
+            vacancy.VacancyStatus = SharedLibrary.Enums.VacancyStatus.Deactive;
+
+            if (vacancy.VacancyCommentId != null)
+            {
+                vacancy.VacancyCommentId = null;
+            }
+        }
+
         await _context.SaveChangesAsync();
     }
 }

@@ -3,6 +3,6 @@
 public class VacancyStatusUpdateDto
 {
     public string VacancyId { get; set; }
-    public string VacancyCommentId { get; set; }
+    public string? VacancyCommentId { get; set; }
 }
 
