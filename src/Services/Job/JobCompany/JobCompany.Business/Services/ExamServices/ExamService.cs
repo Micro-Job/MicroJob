@@ -71,8 +71,7 @@ namespace JobCompany.Business.Services.ExamServices
         {
             var examGuid = Guid.Parse(examId);
 
-            return await _context
-                    .Exams.AsNoTracking()
+            return await _context.Exams.AsNoTracking()
                     .Select(e => new GetExamByIdDto
                     {
                         Id = e.Id,
@@ -80,7 +79,8 @@ namespace JobCompany.Business.Services.ExamServices
                         IntroDescription = e.IntroDescription,
                         LastDescription = e.LastDescription,
                         Duration = e.Duration,
-                        //CurrentStep = e.LimitRate
+                        LimitRate = e.LimitRate,
+                        IsTemplate = e.IsTemplate
                     })
                     .FirstOrDefaultAsync(e => e.Id == examGuid)
                 ?? throw new NotFoundException<Exam>(MessageHelper.GetMessage("NOT_FOUND"));
@@ -213,7 +213,8 @@ namespace JobCompany.Business.Services.ExamServices
                     Answers = eq.Question.Answers.Select(a => new AnswerPublicDto
                     {
                         Id = a.Id,
-                        Text = a.Text
+                        Text = a.Text,
+                        IsCorrect = a.IsCorrect
                     }).ToList()
                 }).ToList()
             };
