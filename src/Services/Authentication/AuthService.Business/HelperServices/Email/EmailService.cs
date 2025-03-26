@@ -5,6 +5,9 @@ using AuthService.Core.Entities;
 using SharedLibrary.Exceptions;
 using SharedLibrary.Dtos.EmailDtos;
 using SharedLibrary.Helpers;
+using AuthService.Business.Templates;
+using System.Net.Mail;
+using System.Net;
 
 namespace AuthService.Business.HelperServices.Email
 {
@@ -16,12 +19,37 @@ namespace AuthService.Business.HelperServices.Email
 
         public async Task SendSetPassword(string toEmail, string token)
         {
-            //await SendEmailAsync( new EmailMessage
-            //{
-            //    Email = toEmail,
-            //    Subject = "Şifrənizi müəyyən edin...",
-            //    Content = EmailTemplate.ResetPassword(toEmail, token)
-            //});
+            await SendEmailAsync(toEmail, new EmailMessage
+            {
+                Subject = "Şifrənizi müəyyən edin...",
+                Content = EmailTemplate.ResetPassword(toEmail, token)
+            });
+        }
+
+        public async Task SendEmailAsync(string toEmail, EmailMessage emailMessage)
+        {
+            var fromAddress = new MailAddress(_smtpSettings.Username, "Siesco");
+            var toAddress = new MailAddress(toEmail);
+            string fromPassword = _smtpSettings.Password;
+            string subject = emailMessage.Subject;
+            string body = emailMessage.Content;
+
+            var smtp = new SmtpClient
+            {
+                Host = _smtpSettings.Server,
+                Port = _smtpSettings.Port,
+                EnableSsl = true,
+                UseDefaultCredentials = false,
+                Credentials = new NetworkCredential(fromAddress.Address, fromPassword)
+            };
+
+            using (var message = new MailMessage(fromAddress, toAddress)
+            {
+                Subject = subject,
+                IsBodyHtml = true,
+                Body = body,
+            })
+                smtp.Send(message);
         }
 
         public async Task SendResetPassword(string toEmail, string token)
@@ -30,19 +58,20 @@ namespace AuthService.Business.HelperServices.Email
                 .Where(pt => pt.Token == token && pt.ExpireTime > DateTime.Now)
                 .Select(pt => new
                 {
-                    //pt.User.UserName,
-                    pt.User.Email
+                    Email = pt.User.Email
                 })
                 .SingleOrDefaultAsync();
 
             if (user == null || user.Email != toEmail) throw new NotFoundException<User>(MessageHelper.GetMessage("NOTFOUNDEXCEPTION_USER"));
-            
-            //await SendEmailAsync(new EmailMessage
-            //{
-            //    Email = toEmail,
-            //    Subject = "Şifrənizi yeniləyin...",
-            //    Content = EmailTemplate.ResetPassword(token, user.UserName)
-            //});
-        }       
+
+            string email = user.Email;
+
+            await SendEmailAsync(toEmail, new EmailMessage
+            {
+                Subject = "Şifrənizi yeniləyin...",
+                Content = EmailTemplate.ResetPassword(token, email)
+            });
+
+        }
     }
 }

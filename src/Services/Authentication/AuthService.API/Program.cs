@@ -49,7 +49,7 @@ builder.Services.AddSwaggerGen(opt =>
 });
 
 
-builder.Services.AddAuthServices();
+builder.Services.AddAuthServices(builder.Configuration);
 
 var IconBuilder = builder.Configuration.SetBasePath(Directory.GetCurrentDirectory())
                                     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
