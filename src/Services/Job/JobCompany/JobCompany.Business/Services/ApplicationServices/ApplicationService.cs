@@ -274,7 +274,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                 .Select(v => new { v.CompanyId, v.Title })
                 .FirstOrDefaultAsync() ?? throw new NotFoundException<Company>("NOT_FOUND");
 
-            Guid statusId = await _context.Statuses.Where(s => s.StatusEnum == StatusEnum.Pending && s.IsDefault).Select(x=> x.Id).FirstOrDefaultAsync();
+            Guid statusId = await _context.Statuses.Where(s => s.StatusEnum == StatusEnum.Pending && s.Company.UserId == _currentUser.UserGuid).Select(x=> x.Id).FirstOrDefaultAsync();
 
             var newApplication = new Application
             {
@@ -307,7 +307,6 @@ namespace JobCompany.Business.Services.ApplicationServices
 
             var applications = await query
                 .Include(x=> x.Status)
-                    .ThenInclude(x=>x.Translations)
                 .OrderByDescending(a => a.CreatedDate)
                 .Select(a => new ApplicationDto
                 {
@@ -319,7 +318,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                     CompanyName = a.Vacancy.Company.CompanyName,
                     WorkType = a.Vacancy.WorkType != null ? a.Vacancy.WorkType.GetDisplayName() : null, 
                     VacancyStatus = a.Vacancy.VacancyStatus,
-                    StatusName = a.Status.IsDefault ? a.Status.GetTranslation(_currentUser.LanguageCode) : a.Status.Translations.FirstOrDefault().Name,
+                    Status = a.Status.StatusEnum,
                     StatusColor = a.Status.StatusColor,
                     ViewCount = a.Vacancy.ViewCount,
                     StartDate = a.CreatedDate,
@@ -343,7 +342,6 @@ namespace JobCompany.Business.Services.ApplicationServices
     
             var application = await _context.Applications
                 .Include(x=> x.Status)
-                    .ThenInclude(x=> x.Translations)
                 .Where(a => a.UserId == _currentUser.UserGuid && a.Id == applicationGuid)
                 .Select(application => new ApplicationDetailDto
                 {
@@ -357,18 +355,16 @@ namespace JobCompany.Business.Services.ApplicationServices
                     WorkStyle = application.Vacancy.WorkStyle,
                     CreatedDate = application.CreatedDate,
                     ApplicationStatusId = application.StatusId,
-                    //ApplicationStatusName = application.Status.IsDefault ? application.Status.GetTranslation(_currentUser.LanguageCode) : application.Status.Translations.FirstOrDefault().Name
                 })
                 .FirstOrDefaultAsync()
                 ?? throw new NotFoundException<Application>(MessageHelper.GetMessage("NOT_FOUND"));
                 
-            application.CompanyStatuses = await _context.Statuses.Where(x => x.CompanyId == application.CompanyId || x.IsDefault)
-                .Include(x => x.Translations)
+            application.CompanyStatuses = await _context.Statuses.Where(x => x.CompanyId == application.CompanyId)
                 .OrderBy(x => x.Order)
                 .Select(x => new ApplicationStatusesListDto
                 {
                     CompanyStatusId = x.Id,
-                    CompanyStatusName = x.IsDefault ? x.GetTranslation(_currentUser.LanguageCode) : x.Translations.FirstOrDefault().Name,
+                    CompanyStatus = x.StatusEnum,
                     Order = x.Order
                 })
                 .ToListAsync();

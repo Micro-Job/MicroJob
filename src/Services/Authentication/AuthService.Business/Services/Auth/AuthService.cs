@@ -114,9 +114,6 @@ namespace AuthService.Business.Services.Auth
                 UserRole = UserRole.CompanyUser,
             };
 
-
-            //var company = new Company { Id = Guid.NewGuid(), UserId = user.Id };
-            //await _context.Companies.AddAsync(company);
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
 
