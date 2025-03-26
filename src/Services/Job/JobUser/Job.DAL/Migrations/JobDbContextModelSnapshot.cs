@@ -229,6 +229,11 @@ namespace Job.DAL.Migrations
                         .HasMaxLength(32)
                         .HasColumnType("nvarchar(32)");
 
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
                     b.Property<byte>("Gender")
                         .HasColumnType("tinyint");
 
@@ -243,6 +248,11 @@ namespace Job.DAL.Migrations
 
                     b.Property<bool>("IsPublic")
                         .HasColumnType("bit");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
 
                     b.Property<byte>("MilitarySituation")
                         .HasColumnType("tinyint");
@@ -282,6 +292,30 @@ namespace Job.DAL.Migrations
                     b.HasIndex("SkillId");
 
                     b.ToTable("ResumeSkills");
+                });
+
+            modelBuilder.Entity("Job.Core.Entities.SavedResume", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CompanyUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ResumeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("SaveDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompanyUserId");
+
+                    b.HasIndex("ResumeId");
+
+                    b.ToTable("SavedResumes");
                 });
 
             modelBuilder.Entity("Job.Core.Entities.Skill", b =>
@@ -401,7 +435,7 @@ namespace Job.DAL.Migrations
                     b.HasOne("Job.Core.Entities.User", "User")
                         .WithOne("Resume")
                         .HasForeignKey("Job.Core.Entities.Resume", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("User");
@@ -424,6 +458,25 @@ namespace Job.DAL.Migrations
                     b.Navigation("Resume");
 
                     b.Navigation("Skill");
+                });
+
+            modelBuilder.Entity("Job.Core.Entities.SavedResume", b =>
+                {
+                    b.HasOne("Job.Core.Entities.User", "CompanyUser")
+                        .WithMany("SavedResumes")
+                        .HasForeignKey("CompanyUserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Job.Core.Entities.Resume", "Resume")
+                        .WithMany("SavedResumes")
+                        .HasForeignKey("ResumeId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("CompanyUser");
+
+                    b.Navigation("Resume");
                 });
 
             modelBuilder.Entity("Job.Core.Entities.SkillTranslation", b =>
@@ -450,6 +503,8 @@ namespace Job.DAL.Migrations
                     b.Navigation("PhoneNumbers");
 
                     b.Navigation("ResumeSkills");
+
+                    b.Navigation("SavedResumes");
                 });
 
             modelBuilder.Entity("Job.Core.Entities.Skill", b =>
@@ -464,6 +519,8 @@ namespace Job.DAL.Migrations
                     b.Navigation("Notifications");
 
                     b.Navigation("Resume");
+
+                    b.Navigation("SavedResumes");
                 });
 #pragma warning restore 612, 618
         }

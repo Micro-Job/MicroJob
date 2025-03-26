@@ -231,6 +231,9 @@
   <data name="USER_PHONE_OR_EMAIL_EXISTS" xml:space="preserve">
     <value>Номер пользователя или email уже существует</value>
   </data>
+  <data name="VACANCY_UPDATE" xml:space="preserve">
+    <value>Вакансия не может быть обновлена, так как она заблокирована</value>
+  </data>
   <data name="WELCOME" xml:space="preserve">
     <value>Добро пожаловать</value>
   </data>

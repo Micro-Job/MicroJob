@@ -11,6 +11,7 @@ namespace JobCompany.Business.Dtos.VacancyDtos
     public record CreateVacancyDto
     {
         public string Title { get; set; }
+        public string? CompanyName { get; set; }
         public IFormFile? CompanyLogo { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime? EndDate { get; set; }
@@ -19,15 +20,15 @@ namespace JobCompany.Business.Dtos.VacancyDtos
         public Guid CityId { get; set; }
         public string? Email { get; set; }
         public WorkType? WorkType { get; set; }
-        public WorkStyle? WorkStyle { get; set; }
+        public WorkStyle? WorkStyle { get; set; } 
         public decimal? MainSalary { get; set; }
         public decimal? MaxSalary { get; set; }
         public string Requirement { get; set; }
         public string Description { get; set; }
-        public Gender Gender { get; set; }
-        public Military Military { get; set; }
-        public Driver Driver { get; set; }
-        public FamilySituation Family { get; set; }
+        public Gender Gender { get; set; } 
+        public Military Military { get; set; } 
+        public Driver Driver { get; set; } 
+        public FamilySituation Family { get; set; } 
         public Citizenship Citizenship { get; set; }
         public Guid CategoryId { get; set; }
         public Guid? ExamId { get; set; }
@@ -47,7 +48,7 @@ namespace JobCompany.Business.Dtos.VacancyDtos
                 .WithMessage(MessageHelper.GetMessage("INVALID_FORMAT"));
 
             RuleFor(x => x.StartDate)
-                .LessThan(x => x.EndDate) 
+                .LessThan(x => x.EndDate)
                 .When(x => x.EndDate.HasValue)
                 .WithMessage(MessageHelper.GetMessage("STARTDATE_MUST_BE_EARLİER_ENDATE"))
                 .GreaterThanOrEqualTo(DateTime.Now)
@@ -104,9 +105,6 @@ namespace JobCompany.Business.Dtos.VacancyDtos
                 .IsInEnum().WithMessage(MessageHelper.GetMessage("INVALID_FORMAT"));
 
             RuleFor(x => x.Citizenship)
-                .IsInEnum().WithMessage(MessageHelper.GetMessage("INVALID_FORMAT"));
-
-            RuleFor(x => x.CategoryId)
                 .IsInEnum().WithMessage(MessageHelper.GetMessage("INVALID_FORMAT"));
         }
     }

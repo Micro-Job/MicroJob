@@ -231,6 +231,9 @@
   <data name="USER_PHONE_OR_EMAIL_EXISTS" xml:space="preserve">
     <value>İstifadəçi nömrəsi və ya email mövcuddur</value>
   </data>
+  <data name="VACANCY_UPDATE" xml:space="preserve">
+    <value>Vakansiya block olunduğu üçün update edilə bilməz</value>
+  </data>
   <data name="WELCOME" xml:space="preserve">
     <value>Xoş gəlmisiniz</value>
   </data>

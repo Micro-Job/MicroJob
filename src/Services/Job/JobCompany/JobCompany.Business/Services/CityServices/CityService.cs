@@ -2,6 +2,7 @@ using JobCompany.Business.Dtos.CategoryDtos;
 using JobCompany.Business.Dtos.CityDtos;
 using JobCompany.Business.Exceptions.Common;
 using JobCompany.Business.Extensions;
+using JobCompany.Business.Statistics;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
@@ -41,7 +42,7 @@ namespace JobCompany.Business.Services.CityServices
             .Select(b => new CityListDto
             {
                 Id = b.Id,
-                CityName = b.GetTranslation(_user.LanguageCode),
+                CityName = b.GetTranslation(_user.LanguageCode,GetTranslationPropertyName.Name),
                 CountryId = b.CountryId,
             })
             .ToListAsync();
@@ -76,7 +77,7 @@ namespace JobCompany.Business.Services.CityServices
                 .Select(b => new CityNameDto
                 {
                     Id = b.Id,
-                    CityName = b.GetTranslation(_user.LanguageCode),
+                    CityName = b.GetTranslation(_user.LanguageCode,GetTranslationPropertyName.Name),
                 })
                 .ToListAsync();
 

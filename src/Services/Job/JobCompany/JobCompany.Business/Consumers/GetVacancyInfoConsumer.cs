@@ -43,7 +43,7 @@ namespace Job.Business.Consumers
                 Military = vacancy.Vacancy.Military,
                 Driver = vacancy.Vacancy.Driver,
                 Citizenship = vacancy.Vacancy.Citizenship,
-                IsActive = vacancy.Vacancy.IsActive,
+                IsActive = vacancy.Vacancy.VacancyStatus,
                 Gender = vacancy.Vacancy.Gender,
                 Family = vacancy.Vacancy.Family,
                 CompanyName = vacancy.Vacancy.CompanyName,

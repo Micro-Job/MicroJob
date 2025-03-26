@@ -272,8 +272,11 @@ namespace JobCompany.DAL.Migrations
                     b.Property<Guid>("CompanyId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<byte?>("Duration")
-                        .HasColumnType("tinyint");
+                    b.Property<DateTime?>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<short?>("Duration")
+                        .HasColumnType("smallint");
 
                     b.Property<string>("IntroDescription")
                         .IsRequired()
@@ -286,11 +289,8 @@ namespace JobCompany.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("LimitRate")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("Result")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<float>("LimitRate")
+                        .HasColumnType("real");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -451,7 +451,7 @@ namespace JobCompany.DAL.Migrations
                     b.Property<Guid>("CompanyId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<bool>("IsDefault")
+                    b.Property<bool>("IsVisible")
                         .HasColumnType("bit");
 
                     b.Property<byte>("Order")
@@ -469,30 +469,6 @@ namespace JobCompany.DAL.Migrations
                     b.HasIndex("CompanyId");
 
                     b.ToTable("Statuses");
-                });
-
-            modelBuilder.Entity("JobCompany.Core.Entites.StatusTranslation", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<byte>("Language")
-                        .HasColumnType("tinyint");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
-
-                    b.Property<Guid>("StatusId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("StatusId");
-
-                    b.ToTable("StatusTranslations");
                 });
 
             modelBuilder.Entity("JobCompany.Core.Entites.UserExam", b =>
@@ -574,9 +550,6 @@ namespace JobCompany.DAL.Migrations
                     b.Property<byte>("Gender")
                         .HasColumnType("tinyint");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("IsVip")
                         .HasColumnType("bit");
 
@@ -606,6 +579,12 @@ namespace JobCompany.DAL.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("nvarchar(64)");
 
+                    b.Property<Guid?>("VacancyCommentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("VacancyStatus")
+                        .HasColumnType("int");
+
                     b.Property<int>("ViewCount")
                         .HasColumnType("int");
 
@@ -627,7 +606,47 @@ namespace JobCompany.DAL.Migrations
 
                     b.HasIndex("ExamId");
 
+                    b.HasIndex("VacancyCommentId");
+
                     b.ToTable("Vacancies");
+                });
+
+            modelBuilder.Entity("JobCompany.Core.Entites.VacancyComment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("CommentType")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("VacancyComments");
+                });
+
+            modelBuilder.Entity("JobCompany.Core.Entites.VacancyCommentTranslation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Comment")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<byte>("Language")
+                        .HasColumnType("tinyint");
+
+                    b.Property<Guid>("VacancyCommentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VacancyCommentId");
+
+                    b.ToTable("VacancyCommentTranslations");
                 });
 
             modelBuilder.Entity("JobCompany.Core.Entites.VacancyNumber", b =>
@@ -849,17 +868,6 @@ namespace JobCompany.DAL.Migrations
                     b.Navigation("Company");
                 });
 
-            modelBuilder.Entity("JobCompany.Core.Entites.StatusTranslation", b =>
-                {
-                    b.HasOne("JobCompany.Core.Entites.Status", "Status")
-                        .WithMany("Translations")
-                        .HasForeignKey("StatusId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Status");
-                });
-
             modelBuilder.Entity("JobCompany.Core.Entites.UserExam", b =>
                 {
                     b.HasOne("JobCompany.Core.Entites.Exam", "Exam")
@@ -897,6 +905,11 @@ namespace JobCompany.DAL.Migrations
                         .WithMany("Vacancies")
                         .HasForeignKey("ExamId");
 
+                    b.HasOne("JobCompany.Core.Entites.VacancyComment", "VacancyComment")
+                        .WithMany("Vacancies")
+                        .HasForeignKey("VacancyCommentId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.Navigation("Category");
 
                     b.Navigation("City");
@@ -906,6 +919,19 @@ namespace JobCompany.DAL.Migrations
                     b.Navigation("Country");
 
                     b.Navigation("Exam");
+
+                    b.Navigation("VacancyComment");
+                });
+
+            modelBuilder.Entity("JobCompany.Core.Entites.VacancyCommentTranslation", b =>
+                {
+                    b.HasOne("JobCompany.Core.Entites.VacancyComment", "VacancyComment")
+                        .WithMany("Translations")
+                        .HasForeignKey("VacancyCommentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("VacancyComment");
                 });
 
             modelBuilder.Entity("JobCompany.Core.Entites.VacancyNumber", b =>
@@ -1005,8 +1031,6 @@ namespace JobCompany.DAL.Migrations
             modelBuilder.Entity("JobCompany.Core.Entites.Status", b =>
                 {
                     b.Navigation("Applications");
-
-                    b.Navigation("Translations");
                 });
 
             modelBuilder.Entity("JobCompany.Core.Entites.Vacancy", b =>
@@ -1018,6 +1042,13 @@ namespace JobCompany.DAL.Migrations
                     b.Navigation("VacancyNumbers");
 
                     b.Navigation("VacancySkills");
+                });
+
+            modelBuilder.Entity("JobCompany.Core.Entites.VacancyComment", b =>
+                {
+                    b.Navigation("Translations");
+
+                    b.Navigation("Vacancies");
                 });
 #pragma warning restore 612, 618
         }

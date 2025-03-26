@@ -19,7 +19,7 @@ namespace JobCompany.Business.Dtos.ApplicationDtos
         public WorkType? WorkType { get; set; }
         public WorkStyle? WorkStyle { get; set; }
         public DateTime CreatedDate { get; set; }
-        public string? ApplicationStatusName { get; set; }
+        //public string? ApplicationStatusName { get; set; }
         public Guid? ApplicationStatusId { get; set; }
         public ICollection<ApplicationStatusesListDto>? CompanyStatuses { get; set; }
     }

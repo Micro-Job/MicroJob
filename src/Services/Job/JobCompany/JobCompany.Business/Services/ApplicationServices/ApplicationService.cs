@@ -1,7 +1,9 @@
-﻿using JobCompany.Business.Dtos.ApplicationDtos;
+﻿    using JobCompany.Business.Dtos.ApplicationDtos;
+using JobCompany.Business.Dtos.Common;
 using JobCompany.Business.Dtos.StatusDtos;
 using JobCompany.Business.Exceptions.ApplicationExceptions;
 using JobCompany.Business.Extensions;
+using JobCompany.Business.Statistics;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using MassTransit;
@@ -26,8 +28,6 @@ namespace JobCompany.Business.Services.ApplicationServices
     public class ApplicationService : IApplicationService
     {
         private readonly JobCompanyDbContext _context;
-        private readonly IHttpContextAccessor _contextAccessor;
-        private readonly string _baseUrl;
         readonly IRequestClient<GetUsersDataRequest> _getUserDataClient;
         readonly IRequestClient<GetResumeDataRequest> _getResumeDataClient;
         readonly IPublishEndpoint _publishEndpoint;
@@ -40,7 +40,6 @@ namespace JobCompany.Business.Services.ApplicationServices
             JobCompanyDbContext context,
             IRequestClient<GetUsersDataRequest> client,
             IRequestClient<GetResumeDataRequest> requestClient,
-            IHttpContextAccessor contextAccessor,
             IPublishEndpoint publishEndpoint,
             IConfiguration configuration,
             ICurrentUser currentUser,
@@ -48,11 +47,8 @@ namespace JobCompany.Business.Services.ApplicationServices
         {
             _currentUser = currentUser;
             _context = context;
-            _contextAccessor = contextAccessor;
             _getUserDataClient = client;
             _getResumeDataClient = requestClient;
-            _baseUrl =
-                $"{_contextAccessor.HttpContext.Request.Scheme}://{_contextAccessor.HttpContext.Request.Host.Value}{_contextAccessor.HttpContext.Request.PathBase.Value}";
             _publishEndpoint = publishEndpoint;
             _configuration = configuration;
             _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
@@ -82,76 +78,31 @@ namespace JobCompany.Business.Services.ApplicationServices
             var statusGuid = Guid.Parse(statusId);
             var applicationGuid = Guid.Parse(applicationId);
 
-            var existAppVacancy =
-                await _context
-                    .Applications.Where(x =>
-                        x.Id == applicationGuid && x.Vacancy.Company.UserId == _currentUser.UserGuid
-                    )
-                    .Select(x => new
-                    {
-                        Application = x,
-                        Vacancy = new
-                        {
-                            x.Vacancy.Id,
-                            x.Vacancy.CompanyId,
-                            CompanyName = x.Vacancy.Company.CompanyName,
-                        },
-                    })
-                    .FirstOrDefaultAsync()
-                ?? throw new NotFoundException<Application>(MessageHelper.GetMessage("NOT_FOUND"));
+            var existAppVacancy = await _context.Applications
+                .Where(x =>x.Id == applicationGuid && x.Vacancy.Company.UserId == _currentUser.UserGuid)
+                .Select(x => new
+                {
+                    Application = x,
+                    VacancyId = x.VacancyId
+                })
+                .FirstOrDefaultAsync()
+            ?? throw new NotFoundException<Application>(MessageHelper.GetMessage("NOT_FOUND"));
 
             var application = existAppVacancy.Application;
-            var vacancy = existAppVacancy.Vacancy;
 
             application.StatusId = statusGuid;
             await _context.SaveChangesAsync();
-
-            await _context.Entry(application).Reference(x => x.Status).LoadAsync();
 
             await _publishEndpoint.Publish(
                 new UpdateUserApplicationStatusEvent
                 {
                     UserId = application.UserId,
                     SenderId = (Guid)_currentUser.UserGuid,
-                    InformationId = vacancy.Id,
+                    InformationId = existAppVacancy.VacancyId,
                     //Content =
                     //    $"{vacancy.CompanyName} şirkətinin müraciət statusu dəyişdirildi: {application.Status.Name}",
                 }
             );
-        }
-
-        /// <summary> Müraciətlərin statusu ilə birlikdə gətirilməsi </summary>
-        public async Task<List<StatusListDtoWithApps>> GetAllApplicationWithStatusAsync(string vacancyId)
-        {
-            var vacancyGuid = Guid.Parse(vacancyId);
-
-            var groupedData = await _context
-                .Statuses.Where(status => status.Company.UserId == _currentUser.UserGuid)
-                .Select(status => new StatusListDtoWithApps
-                {
-                    StatusId = status.Id,
-                    StatusName = status.GetTranslation(_currentUser.LanguageCode),
-                    StatusColor = status.StatusColor,
-                    IsDefault = status.IsDefault,
-                    Applications = _context
-                        .Applications.Where(app =>
-                            app.VacancyId == vacancyGuid
-                            && app.IsActive
-                            && app.StatusId == status.Id
-                        )
-                        .Take(5)
-                        .Select(app => new ApplicationListDto
-                        {
-                            ApplicationId = app.Id,
-                            UserId = app.UserId,
-                            VacancyId = app.VacancyId,
-                            IsActive = app.IsActive,
-                        })
-                        .ToList(),
-                })
-                .ToListAsync();
-
-            return groupedData;
         }
 
         /// <summary> Id'yə görə müraciətin gətirilməsi </summary>
@@ -170,11 +121,11 @@ namespace JobCompany.Business.Services.ApplicationServices
                         CreatedDate = a.CreatedDate,
                         Description = a.Vacancy.Description,
 
-                        StatusName = a.Status.GetTranslation(_currentUser.LanguageCode),
+                        StatusName = a.Status.GetTranslation(_currentUser.LanguageCode,GetTranslationPropertyName.Name),
                         StatusColor = a.Status.StatusColor,
                         Steps = _context
                             .Statuses.OrderBy(s => s.Order)
-                            .Select(s => s.GetTranslation(_currentUser.LanguageCode))
+                            .Select(s => s.GetTranslation(_currentUser.LanguageCode,GetTranslationPropertyName.Name))
                             .ToList(),
                     })
                     .FirstOrDefaultAsync() ?? throw new NotFoundException<Application>(MessageHelper.GetMessage("NOT_FOUND"));
@@ -212,9 +163,8 @@ namespace JobCompany.Business.Services.ApplicationServices
             var company =
                 await _context.Companies.FirstOrDefaultAsync(c => c.UserId == _currentUser.UserGuid)
                 ?? throw new NotFoundException<Company>(MessageHelper.GetMessage("NOT_FOUND"));
-            var applications = await _context
-                .Applications.Include(a => a.Vacancy)
-                .ThenInclude(v => v.Company)
+
+            var applications = await _context.Applications
                 .Where(a => a.Vacancy.Company.UserId == _currentUser.UserGuid)
                 .Select(a => new ApplicationInfoDto
                 {
@@ -226,16 +176,12 @@ namespace JobCompany.Business.Services.ApplicationServices
 
             var userIds = applications.Select(a => a.UserId).ToList();
 
-            var userDataResponse = await GetUserDataResponseAsync(userIds);
             var userResumeResponse = await GetResumeDataResponseAsync(userIds);
 
             var applicationList = applications
                 .GroupBy(a => a.UserId)
                 .SelectMany(group =>
                 {
-                    var userData = userDataResponse.Users.FirstOrDefault(u =>
-                        u.UserId == group.Key
-                    );
                     var userResume = userResumeResponse.Users.FirstOrDefault(r =>
                         r.UserId == group.Key
                     );
@@ -243,8 +189,8 @@ namespace JobCompany.Business.Services.ApplicationServices
                     return group.Select(application => new ApplicationInfoListDto
                     {
                         ApplicationId = application.ApplicationId,
-                        FullName = $"{userData?.FirstName} {userData?.LastName}",
-                        ImageUrl = $"{_authServiceBaseUrl}/{userData?.ProfileImage}",
+                        FullName = $"{userResume?.FirstName} {userResume?.LastName}",
+                        ImageUrl = $"{_authServiceBaseUrl}/{userResume?.ProfileImage}",
                         Position = userResume?.Position,
                         CreatedDate = application.CreatedDate,
                     });
@@ -257,15 +203,21 @@ namespace JobCompany.Business.Services.ApplicationServices
         }
 
         /// <summary> Şirkətə daxil olan bütün müraciətlərin filterlə birlikdə detallı şəkildə gətirilməsi </summary>
-        public async Task<ICollection<AllApplicationListDto>> GetAllApplicationsListAsync(int skip = 1,int take = 10)
+        public async Task<DataListDto<AllApplicationListDto>> GetAllApplicationsListAsync(int skip = 1,int take = 10)
         {
             var applications = await GetPaginatedApplicationsAsync(skip, take);
 
-            var userIds = applications.Select(a => a.UserId).ToList();
+            var userIds = applications.Item1.Select(a => a.UserId).ToList();
 
             var userDataResponse = await GetUserDataResponseAsync(userIds);
 
-            return MapApplicationsToDto(applications, userDataResponse);
+            var data = MapApplicationsToDto(applications.Item1, userDataResponse);
+
+            return new DataListDto<AllApplicationListDto> 
+            { 
+                Datas = data,
+                TotalCount = applications.Item2
+            };
         }
 
         private List<AllApplicationListDto> MapApplicationsToDto(List<Application> applications,GetUsersDataResponse usersDataResponse)
@@ -282,7 +234,8 @@ namespace JobCompany.Business.Services.ApplicationServices
                         LastName = user.LastName,
                         Email = user.Email,
                         PhoneNumber = user.PhoneNumber,
-                        StatusName = a.Status.GetTranslation(_currentUser.LanguageCode),
+                        StatusId = a.StatusId,
+                        StatusName = a.Status.GetTranslation(_currentUser.LanguageCode,GetTranslationPropertyName.Name),
                         VacancyId = a.VacancyId,
                         VacancyName = a.Vacancy.Title,
                     };
@@ -292,18 +245,20 @@ namespace JobCompany.Business.Services.ApplicationServices
             return response;
         }
 
-        private async Task<List<Application>> GetPaginatedApplicationsAsync(int skip, int take)
+        private async Task<(List<Application> , int)> GetPaginatedApplicationsAsync(int skip, int take)
         {
-            var applications =await _context.Applications
+            var query = _context.Applications
                 .Include(a => a.Vacancy)
                 .Include(a => a.Status)
                 .Where(a => a.Vacancy.Company.UserId == _currentUser.UserGuid)
-                .OrderByDescending(a => a.CreatedDate)
+                .OrderByDescending(a => a.CreatedDate);
+
+            var applications = await query
                 .Skip(Math.Max(0, (skip - 1) * take))
                 .Take(take)
                 .ToListAsync();
 
-            return applications;
+            return (applications , await query.CountAsync());
         }
 
         public async Task CreateUserApplicationAsync(string vacancyId)
@@ -320,17 +275,13 @@ namespace JobCompany.Business.Services.ApplicationServices
                 .Select(v => new { v.CompanyId, v.Title })
                 .FirstOrDefaultAsync() ?? throw new NotFoundException<Company>("NOT_FOUND");
 
-            var status = await _context.Statuses.FirstOrDefaultAsync(s => s.StatusEnum == StatusEnum.Pending && s.IsDefault);
-
-            var responseUser = await _requestUser.GetResponse<GetUserDataResponse>(
-                new GetUserDataRequest { UserId = userGuid }
-            );
+            Guid statusId = await _context.Statuses.Where(s => s.StatusEnum == StatusEnum.Pending && s.Company.UserId == _currentUser.UserGuid).Select(x=> x.Id).FirstOrDefaultAsync();
 
             var newApplication = new Application
             {
                 UserId = userGuid,
                 VacancyId = vacancyGuid,
-                StatusId = status.Id,
+                StatusId = statusId,
                 IsActive = true,
                 CreatedDate = DateTime.Now
             };
@@ -344,30 +295,31 @@ namespace JobCompany.Business.Services.ApplicationServices
                 SenderId = userGuid,
                 VacancyId = vacancyGuid,
                 InformationId = userGuid,
-                Content = $"İstifadəçi {responseUser.Message.FirstName} {responseUser.Message.LastName} {vacancyInfo.Title} vakansiyasına müraciət etdi.",
+                Content = $"İstifadəçi {_currentUser.UserFullName} {vacancyInfo.Title} vakansiyasına müraciət etdi.",
             });
         }
 
         public async Task<PaginatedApplicationDto> GetUserApplicationsAsync(int skip, int take)
         {
             var query = _context.Applications
-                .Where(a => a.UserId == _currentUser.UserGuid);
+                .Where(a => a.UserId == _currentUser.UserGuid && a.IsActive);
 
             int totalCount = await query.CountAsync();
 
             var applications = await query
+                .Include(x=> x.Status)
                 .OrderByDescending(a => a.CreatedDate)
                 .Select(a => new ApplicationDto
                 {
                     ApplicationId = a.Id,
                     VacancyId = a.VacancyId,
                     Title = a.Vacancy.Title,
-                    CompanyId = a.Vacancy.CompanyId,    
-                    CompanyLogo = a.Vacancy.Company.CompanyLogo,
+                    CompanyId = a.Vacancy.CompanyId,
+                    CompanyLogo = a.Vacancy.Company.CompanyLogo != null ? $"{_authServiceBaseUrl}/{a.Vacancy.Company.CompanyLogo}": null,
                     CompanyName = a.Vacancy.Company.CompanyName,
                     WorkType = a.Vacancy.WorkType != null ? a.Vacancy.WorkType.GetDisplayName() : null, 
-                    IsActive = a.IsActive,
-                    StatusName = a.Status.IsDefault ? a.Status.StatusEnum.GetDisplayName() : a.Status.GetTranslation(_currentUser.LanguageCode),
+                    VacancyStatus = a.Vacancy.VacancyStatus,
+                    Status = a.Status.StatusEnum,
                     StatusColor = a.Status.StatusColor,
                     ViewCount = a.Vacancy.ViewCount,
                     StartDate = a.CreatedDate,
@@ -376,7 +328,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                 })
                 .Skip(Math.Max(0, (skip - 1) * take))
                 .Take(take)
-                .ToListAsync();
+                .ToListAsync(); 
 
             return new PaginatedApplicationDto
             {
@@ -390,6 +342,7 @@ namespace JobCompany.Business.Services.ApplicationServices
             var applicationGuid = Guid.Parse(applicationId);
     
             var application = await _context.Applications
+                .Include(x=> x.Status)
                 .Where(a => a.UserId == _currentUser.UserGuid && a.Id == applicationGuid)
                 .Select(application => new ApplicationDetailDto
                 {
@@ -397,29 +350,27 @@ namespace JobCompany.Business.Services.ApplicationServices
                     VacancyName = application.Vacancy.Title,
                     CompanyId = application.Vacancy.CompanyId,
                     CompanyName = application.Vacancy.Company.CompanyName,
-                    CompanyLogo = application.Vacancy.Company.CompanyLogo,
+                    CompanyLogo =  $"{_authServiceBaseUrl}/{application.Vacancy.Company.CompanyLogo}",
                     Location = application.Vacancy.Company.CompanyLocation,
                     WorkType = application.Vacancy.WorkType,
                     WorkStyle = application.Vacancy.WorkStyle,
                     CreatedDate = application.CreatedDate,
                     ApplicationStatusId = application.StatusId,
-                    ApplicationStatusName = application.Status.IsDefault ? application.Status.StatusEnum.GetDisplayName() : application.GetTranslation(_currentUser.LanguageCode)
                 })
                 .FirstOrDefaultAsync()
                 ?? throw new NotFoundException<Application>(MessageHelper.GetMessage("NOT_FOUND"));
-
-            application.CompanyStatuses = await _context.Statuses.Where(x => x.CompanyId == application.CompanyId || x.IsDefault)
+                
+            application.CompanyStatuses = await _context.Statuses.Where(x => x.CompanyId == application.CompanyId)
                 .OrderBy(x => x.Order)
                 .Select(x => new ApplicationStatusesListDto
                 {
                     CompanyStatusId = x.Id,
-                    CompanyStatusName = x.IsDefault ? x.StatusEnum.GetDisplayName() : x.GetTranslation(_currentUser.LanguageCode),
+                    CompanyStatus = x.StatusEnum,
                     Order = x.Order
                 })
                 .ToListAsync();
 
             return application;
         }
-
     }
 }

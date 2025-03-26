@@ -17,7 +17,7 @@ namespace Shared.Dtos.VacancyDtos
         public WorkStyle? WorkStyle { get; set; }
         public bool IsSaved { get; set; }
         public bool IsVip { get; set; }
-        public bool IsActive { get; set; }
+        public VacancyStatus IsActive { get; set; }
         public Guid? CategoryId { get; set; }
         // public CompanyDetailDto Company { get; set; }
     }

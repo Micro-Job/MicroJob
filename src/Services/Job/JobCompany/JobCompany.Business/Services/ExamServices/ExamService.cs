@@ -1,5 +1,6 @@
 ﻿using System.Security.Claims;
 using JobCompany.Business.Dtos.AnswerDtos;
+using JobCompany.Business.Dtos.Common;
 using JobCompany.Business.Dtos.ExamDtos;
 using JobCompany.Business.Dtos.QuestionDtos;
 using JobCompany.Business.Services.QuestionServices;
@@ -34,11 +35,11 @@ namespace JobCompany.Business.Services.ExamServices
                     Title = dto.Title,
                     IntroDescription = dto.IntroDescription,
                     LastDescription = dto.LastDescription,
-                    Result = dto.Result,
                     LimitRate = dto.LimitRate,
                     CompanyId = companyId,
                     IsTemplate = dto.IsTemplate,
                     Duration = dto.Duration,
+                    CreatedDate = DateTime.Now
                 };
 
                 await _context.Exams.AddAsync(exam);
@@ -79,6 +80,7 @@ namespace JobCompany.Business.Services.ExamServices
                         IntroDescription = e.IntroDescription,
                         LastDescription = e.LastDescription,
                         Duration = e.Duration,
+                        //CurrentStep = e.LimitRate
                     })
                     .FirstOrDefaultAsync(e => e.Id == examGuid)
                 ?? throw new NotFoundException<Exam>(MessageHelper.GetMessage("NOT_FOUND"));
@@ -134,10 +136,18 @@ namespace JobCompany.Business.Services.ExamServices
             await _context.SaveChangesAsync();
         }
 
-        public Task<List<ExamListDto>> GetExamsAsync(int skip, int take)
+        public async Task<DataListDto<ExamListDto>> GetExamsAsync(string? examName, int skip, int take)
         {
-            var exams = _context
-                .Exams.Where(e => e.IsTemplate == true)
+            var query = _context.Exams
+                .Where(e => e.IsTemplate == true && e.Company.UserId == _currentUser.UserGuid)
+                .OrderByDescending(x => x.CreatedDate)
+                .AsNoTracking()
+                .AsQueryable();
+
+            if (examName != null)
+                query = query.Where(x => x.Title.Contains(examName));
+
+            var exams = await query
                 .Select(e => new ExamListDto
                 {
                     Id = e.Id,
@@ -148,7 +158,11 @@ namespace JobCompany.Business.Services.ExamServices
                 .Take(take)
                 .ToListAsync();
 
-            return exams;
+            return new DataListDto<ExamListDto>
+            {
+                Datas = exams,
+                TotalCount = await query.CountAsync(),   
+            };
         }
 
         public async Task<GetExamIntroDto> GetExamIntroAsync(string examId)
@@ -250,7 +264,7 @@ namespace JobCompany.Business.Services.ExamServices
             int falseCount = answerResults.Count(isCorrect => !isCorrect);
 
             int totalQuestions = exam.ExamQuestions.Count;
-            decimal resultRate = totalQuestions > 0 ? (decimal)trueCount / totalQuestions * 100 : 0;
+            float resultRate = totalQuestions > 0 ? (float)trueCount / totalQuestions * 100 : 0;
             bool isPassed = resultRate >= exam.LimitRate;
 
             var userExam = new UserExam

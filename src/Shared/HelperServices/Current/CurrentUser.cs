@@ -12,11 +12,27 @@ namespace SharedLibrary.HelperServices.Current
 {
     public class CurrentUser(IHttpContextAccessor _contextAccessor) : ICurrentUser
     {
-        public string? UserId => _contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value;
+        public string? UserId => _contextAccessor.HttpContext?.User.FindFirst(ClaimTypes.Sid)?.Value;
         public Guid? UserGuid => UserId != null ? Guid.Parse(UserId) : null;
-        public string? UserName => _contextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.Name);
+        public string? UserFullName => _contextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.Name);
         public string? BaseUrl =>
             $"{_contextAccessor.HttpContext?.Request.Scheme}://{_contextAccessor.HttpContext?.Request.Host.Value}{_contextAccessor.HttpContext?.Request.PathBase.Value}";
+
+        public byte UserRole
+        {
+            get
+            {
+                var roleClaim = _contextAccessor.HttpContext?.User.FindFirst(ClaimTypes.Role)?.Value;
+
+                if (Enum.TryParse(roleClaim, out UserRole role))
+                {
+                    return (byte)role;
+                }
+
+                return 0;
+
+            }
+        }
 
         public LanguageCode LanguageCode
         {
@@ -32,5 +48,6 @@ namespace SharedLibrary.HelperServices.Current
                 return languageEnum;
             }
         }
+
     }
 }

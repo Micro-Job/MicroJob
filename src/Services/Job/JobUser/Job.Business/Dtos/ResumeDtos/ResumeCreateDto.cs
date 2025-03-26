@@ -13,6 +13,8 @@ namespace Job.Business.Dtos.ResumeDtos
 {
     public record ResumeCreateDto
     {
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
         public string FatherName { get; set; }
         public string Position { get; set; }
         public IFormFile? UserPhoto { get; set; }

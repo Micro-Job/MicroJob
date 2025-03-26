@@ -1,5 +1,5 @@
 ﻿using AuthService.Core.Entities.Base;
-using AuthService.Core.Enums;
+using SharedLibrary.Enums;
 
 namespace AuthService.Core.Entities
 {

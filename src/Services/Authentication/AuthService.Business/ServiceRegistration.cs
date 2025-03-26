@@ -7,6 +7,7 @@ using AuthService.Business.Services.UserServices;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using SharedLibrary.Dtos.EmailDtos;
 using SharedLibrary.ExternalServices.FileService;
 using SharedLibrary.HelperServices.Current;
 
@@ -14,8 +15,10 @@ namespace AuthService.Business
 {
     public static class ServiceRegistration
     {
-        public static void AddAuthServices(this IServiceCollection services)
+        public static void AddAuthServices(this IServiceCollection services, IConfiguration configuration)
         {
+            services.Configure<SmtpSettings>(configuration.GetSection("SmtpSettings"));
+
             services.AddHttpContextAccessor();
             services.AddScoped<ITokenHandler, TokenHandler>();
             services.AddScoped<IEmailService, EmailService>();

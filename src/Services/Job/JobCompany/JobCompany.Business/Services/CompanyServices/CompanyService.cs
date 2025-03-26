@@ -102,7 +102,7 @@ namespace JobCompany.Business.Services.CompanyServices
                     CompanyId = c.Id,
                     CompanyName = c.CompanyName,
                     CompanyImage = c.CompanyLogo != null ? $"{_authServiceBaseUrl}/{c.CompanyLogo}" : null,
-                    CompanyVacancyCount = c.Vacancies != null ? c.Vacancies.Count(v => v.IsActive) : 0,
+                    CompanyVacancyCount = c.Vacancies != null ? c.Vacancies.Count(v => v.VacancyStatus == SharedLibrary.Enums.VacancyStatus.Active) : 0,
                 })
                 .Skip(Math.Max(0, (skip - 1) * take))
                 .Take(take)
@@ -149,6 +149,16 @@ namespace JobCompany.Business.Services.CompanyServices
             company.Email = response.Message.Email;
             company.PhoneNumber = response.Message.PhoneNumber;
             return company;
+        }
+
+        public async Task<string?> GetCompanyNameAsync(string companyId)
+        {
+            var companyGuid = Guid.Parse(companyId);
+
+            return await _context.Companies.Where(x => x.Id == companyGuid)
+                .Select(x => x.CompanyName)
+                .FirstOrDefaultAsync() 
+                ?? throw new NotFoundException<Company>("Şirkət mövcud deyil");
         }
     }
 }

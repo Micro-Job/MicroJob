@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using JobCompany.Business.Dtos.ReportDtos;
 using JobCompany.Business.Extensions;
+using JobCompany.Business.Statistics;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using MassTransit;
@@ -93,7 +94,7 @@ namespace JobCompany.Business.Services.ReportServices
                 {
                     a.UserId,
                     a.Vacancy.Title,
-                    StatusName = a.Status.GetTranslation(_currentUser.LanguageCode),
+                    StatusName = a.Status.GetTranslation(_currentUser.LanguageCode,GetTranslationPropertyName.Name),
                     a.Status.StatusColor,
                 })
                 .ToListAsync();

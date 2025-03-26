@@ -2,6 +2,7 @@ using JobCompany.Business.Dtos.CityDtos;
 using JobCompany.Business.Dtos.CountryDtos;
 using JobCompany.Business.Exceptions.Common;
 using JobCompany.Business.Extensions;
+using JobCompany.Business.Statistics;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
@@ -50,7 +51,7 @@ namespace JobCompany.Business.Services.CountryServices
             .Select(b => new CountryListDto
             {
                 Id = b.Id,
-                CountryName = b.GetTranslation(_user.LanguageCode),
+                CountryName = b.GetTranslation(_user.LanguageCode,GetTranslationPropertyName.Name),
             })
             .ToListAsync();
 
