@@ -22,7 +22,7 @@ namespace JobCompany.API.Controllers
         [HttpPut("[action]")]
         public async Task<IActionResult> ChangeStatusOrderAsync([FromBody]List<ChangeStatusOrderDto> dtos)
         {
-            await _statusService.ChangeSatusOrderAsync(dtos);
+            await _statusService.ChangeStatusOrderAsync(dtos);
             return Ok();
         }
 

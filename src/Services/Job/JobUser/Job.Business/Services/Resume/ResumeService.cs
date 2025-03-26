@@ -250,6 +250,8 @@ namespace Job.Business.Services.Resume
 
             await _context.SaveChangesAsync();
         }
+        //
+
 
         public async Task<bool> IsExistResumeAsync()
         {

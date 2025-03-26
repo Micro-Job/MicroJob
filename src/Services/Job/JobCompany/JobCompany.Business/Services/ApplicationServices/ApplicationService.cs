@@ -121,7 +121,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                         CreatedDate = a.CreatedDate,
                         Description = a.Vacancy.Description,
 
-                        StatusName = a.Status.GetTranslation(_currentUser.LanguageCode,GetTranslationPropertyName.Name),
+                        Status = a.Status.StatusEnum,
                         StatusColor = a.Status.StatusColor,
                         Steps = _context
                             .Statuses.OrderBy(s => s.Order)

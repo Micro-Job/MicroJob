@@ -32,7 +32,7 @@ namespace JobCompany.Business.Services.StatusServices
             return statuses;
         }
 
-        public async Task ChangeSatusOrderAsync(List<ChangeStatusOrderDto> dto)
+        public async Task ChangeStatusOrderAsync(List<ChangeStatusOrderDto> dto)
         {
             if (dto.GroupBy(x => x.Order).Any(x => x.Count() > 1)) throw new BadRequestException("Təkrar sıra var");
 
