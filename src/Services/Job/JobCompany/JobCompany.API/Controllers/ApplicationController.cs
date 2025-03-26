@@ -24,13 +24,13 @@ namespace JobCompany.API.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetAllApplicationsList(int skip = 1, int take = 10)
+        public async Task<IActionResult> GetAllApplicationsList(Gender gender, Guid statusId, Guid vacancyId, Guid skillId, int skip = 1, int take = 10)
         {
-            return Ok(await service.GetAllApplicationsListAsync(skip, take));
+            return Ok(await service.GetAllApplicationsListAsync(gender, statusId, vacancyId, skillId, skip, take));
         }
 
         [HttpPatch("[action]")]
-        public async Task<IActionResult> ChangeApplicationStatus(string applicationId,string statusId)
+        public async Task<IActionResult> ChangeApplicationStatus(string applicationId, string statusId)
         {
             await service.ChangeApplicationStatusAsync(applicationId, statusId);
             return Ok();
