@@ -18,7 +18,21 @@ namespace SharedLibrary.HelperServices.Current
         public string? BaseUrl =>
             $"{_contextAccessor.HttpContext?.Request.Scheme}://{_contextAccessor.HttpContext?.Request.Host.Value}{_contextAccessor.HttpContext?.Request.PathBase.Value}";
 
-        public byte UserRole => Convert.ToByte(_contextAccessor.HttpContext?.User.FindFirst(ClaimTypes.Role)?.Value);
+        public byte UserRole
+        {
+            get
+            {
+                var roleClaim = _contextAccessor.HttpContext?.User.FindFirst(ClaimTypes.Role)?.Value;
+
+                if (Enum.TryParse(roleClaim, out UserRole role))
+                {
+                    return (byte)role;
+                }
+
+                return 0;
+
+            }
+        }
 
         public LanguageCode LanguageCode
         {

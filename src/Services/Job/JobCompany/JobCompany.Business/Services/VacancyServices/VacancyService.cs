@@ -9,6 +9,7 @@ using JobCompany.Business.Dtos.VacancyDtos;
 using JobCompany.Business.Exceptions.VacancyExceptions;
 using JobCompany.Business.Extensions;
 using JobCompany.Business.Services.ExamServices;
+using JobCompany.Business.Statistics;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using MassTransit;
@@ -302,10 +303,10 @@ namespace JobCompany.Business.Services.VacancyServices
                             .ToList(),
                         Skills = x
                             .VacancySkills.Where(vc => vc.Skill != null)
-                            .Select(vc => new SkillDto { Name = vc.Skill.Translations.GetTranslation(_currentUser.LanguageCode) })
+                            .Select(vc => new SkillDto { Name = vc.Skill.Translations.GetTranslation(_currentUser.LanguageCode,GetTranslationPropertyName.Name) })
                             .ToList(),
                         CompanyName = x.CompanyName,
-                        CategoryName = x.Category.GetTranslation(_currentUser.LanguageCode),
+                        CategoryName = x.Category.GetTranslation(_currentUser.LanguageCode,GetTranslationPropertyName.Name),
                     })
                     .FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
 
@@ -375,7 +376,7 @@ namespace JobCompany.Business.Services.VacancyServices
             await _context.SaveChangesAsync();
 
             var userIds = await _context
-                .Applications.Where(a => a.VacancyId == vacancyGuid && a.Status.StatusEnum != SharedLibrary.Enums.StatusEnum.Rejected)
+                .Applications.Where(a => a.VacancyId == vacancyGuid && a.Status.StatusEnum != StatusEnum.Rejected)
                 .Select(a => a.UserId)
                 .ToListAsync();
 

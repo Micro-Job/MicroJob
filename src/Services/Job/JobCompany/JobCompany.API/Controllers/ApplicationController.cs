@@ -18,12 +18,6 @@ namespace JobCompany.API.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetAllApplicationWithStatus(string vacancyId)
-        {
-            return Ok(await service.GetAllApplicationWithStatusAsync(vacancyId));
-        }
-
-        [HttpGet("[action]")]
         public async Task<IActionResult> GetAllApplication(int skip = 1, int take = 9)
         {
             return Ok(await service.GetAllApplicationAsync(skip, take));
