@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SharedLibrary.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,7 +10,7 @@ namespace JobCompany.Business.Dtos.StatusDtos
     public class ApplicationStatusesListDto
     {
         public Guid CompanyStatusId { get; set; }
-        public int Order { get; set; }
-        public string CompanyStatusName { get; set; }
+        public byte Order { get; set; }
+        public StatusEnum CompanyStatus { get; set; }
     }
 }
