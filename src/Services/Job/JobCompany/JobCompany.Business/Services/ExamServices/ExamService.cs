@@ -34,7 +34,6 @@ namespace JobCompany.Business.Services.ExamServices
                 {
                     Title = dto.Title,
                     IntroDescription = dto.IntroDescription,
-                    LastDescription = dto.LastDescription,
                     LimitRate = dto.LimitRate,
                     CompanyId = companyId,
                     IsTemplate = dto.IsTemplate,
@@ -77,7 +76,6 @@ namespace JobCompany.Business.Services.ExamServices
                         Id = e.Id,
                         Title = e.Title,
                         IntroDescription = e.IntroDescription,
-                        LastDescription = e.LastDescription,
                         Duration = e.Duration,
                         LimitRate = e.LimitRate,
                         IsTemplate = e.IsTemplate
