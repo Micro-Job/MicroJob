@@ -196,6 +196,7 @@ namespace Job.Business.Services.Resume
                 FullName = $"{x.FirstName} {x.LastName}",
                 ProfileImage = x.UserPhoto != null ? $"{_currentUser.BaseUrl}/{x.UserPhoto}" : null,
                 IsSaved = x.SavedResumes.Any(sr => sr.ResumeId == x.Id && sr.CompanyUserId == _currentUser.UserGuid),
+                JobStatus = x.User.JobStatus,
                 LastWork = x.Experiences
                     .OrderByDescending(e => e.StartDate)
                     .Select(e => new LastWorkDto
@@ -207,8 +208,8 @@ namespace Job.Business.Services.Resume
                     })
                     .FirstOrDefault(),
                 Position = x.Position,
-                StartDate = x.Experiences.Any() ? x.Experiences.OrderByDescending(e => e.StartDate).FirstOrDefault().StartDate : null,
-                EndDate = x.Experiences.Any() ? x.Experiences.OrderByDescending(e => e.StartDate).FirstOrDefault().EndDate : null,
+                //StartDate = x.Experiences.Any() ? x.Experiences.OrderByDescending(e => e.StartDate).FirstOrDefault().StartDate : null,
+                //EndDate = x.Experiences.Any() ? x.Experiences.OrderByDescending(e => e.StartDate).FirstOrDefault().EndDate : null,
             })
             .Skip(Math.Max(0, (skip - 1) * take))
             .Take(take)
@@ -289,11 +290,11 @@ namespace Job.Business.Services.Resume
                 Id = x.Id,
                 FullName = $"{x.Resume.FirstName} {x.Resume.LastName}",
                 ProfileImage = x.Resume.UserPhoto != null ? $"{_currentUser.BaseUrl}/{x.Resume.UserPhoto}" : null,
-                //JobStatus = x.Resume.User.JobStatus,
+                JobStatus = x.Resume.User.JobStatus,
                 IsSaved = true,
                 Position = x.Resume.Position,
-                StartDate = x.Resume.Experiences != null ? x.Resume.Experiences.FirstOrDefault().StartDate : null,
-                EndDate = x.Resume.Experiences != null ? x.Resume.Experiences.FirstOrDefault().EndDate : null,
+                //StartDate = x.Resume.Experiences != null ? x.Resume.Experiences.FirstOrDefault().StartDate : null,
+                //EndDate = x.Resume.Experiences != null ? x.Resume.Experiences.FirstOrDefault().EndDate : null,
             })
             .Skip(Math.Max(0, (skip - 1) * take))
             .Take(take)

@@ -36,15 +36,15 @@ namespace Job.API.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetAllResumes(string? fullname,
-            bool? isPublic,
-            ProfessionDegree? professionDegree,
-            Citizenship? citizenship,
-            bool? isExperience,
-            JobStatus? jobStatus,
+        public async Task<IActionResult> GetAllResumes([FromQuery] string? fullname,
+            [FromQuery] bool? isPublic,
+            [FromQuery] ProfessionDegree? professionDegree,
+            [FromQuery] Citizenship? citizenship,
+            [FromQuery] bool? isExperience,
+            [FromQuery] JobStatus? jobStatus,
             [FromQuery] List<string>? skillIds,
             [FromQuery] List<LanguageFilterDto>? languages,
-            int skip = 1, int take = 9)
+            [FromQuery] int skip = 1, [FromQuery] int take = 9)
         {
             return Ok(await _resumeService.GetAllResumesAsync(fullname,
                 isPublic, professionDegree, citizenship,isExperience,jobStatus, skillIds,languages,
