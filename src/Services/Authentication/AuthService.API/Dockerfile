@@ -1,11 +1,11 @@
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
-EXPOSE 5001
+EXPOSE 5002
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 COPY . .
-WORKDIR "/src/Services/Authentication/AuthService.API"
+WORKDIR "./src/Services/Authentication/AuthService.API"
 RUN dotnet restore "AuthService.API.csproj"
 RUN dotnet build "AuthService.API.csproj" -c Release -o /app/build
 
