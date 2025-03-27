@@ -63,7 +63,7 @@ namespace Job.API.Controllers
             return Ok(await _resumeService.GetSavedResumesAsync(fullname, skip, take));
         }
 
-        [HttpPost]
+        [HttpPost("[action]")]
         public async Task<IActionResult> ToggleSaveResume(string resumeId)
         {
             await _resumeService.ToggleSaveResumeAsync(resumeId);

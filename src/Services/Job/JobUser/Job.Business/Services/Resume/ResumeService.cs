@@ -198,7 +198,9 @@ namespace Job.Business.Services.Resume
             {
                 Id = x.Id,
                 FullName = x.IsPublic ? $"{x.FirstName} {x.LastName}" : null,
-                ProfileImage = x.IsPublic ? x.UserPhoto != null ? $"{_currentUser.BaseUrl}/{x.UserPhoto}" : null : null,
+                ProfileImage = x.IsPublic && x.UserPhoto != null
+                ? $"{_currentUser.BaseUrl}/{x.UserPhoto}"
+                : null,
                 IsSaved = x.SavedResumes.Any(sr => sr.ResumeId == x.Id && sr.CompanyUserId == _currentUser.UserGuid),
                 JobStatus = x.User.JobStatus,
                 LastWork = x.Experiences
@@ -288,16 +290,31 @@ namespace Job.Business.Services.Resume
 
         public async Task<DataListDto<ResumeListDto>> GetSavedResumesAsync(string? fullName, int skip, int take)
         {
-            var query = _context.SavedResumes.Where(x => x.CompanyUserId == _currentUser.UserGuid);
+            var query = _context.SavedResumes.Include(sr => sr.Resume).ThenInclude(r => r.ResumeSkills).ThenInclude(rs => rs.Skill.Translations).Where(x => x.CompanyUserId == _currentUser.UserGuid);
 
             var resumes = await query.Select(x => new ResumeListDto
             {
                 Id = x.Id,
                 FullName = x.Resume.IsPublic ? $"{x.Resume.FirstName} {x.Resume.LastName}" : null,
-                ProfileImage = x.Resume.IsPublic && x.Resume.UserPhoto != null ? $"{_currentUser.BaseUrl}/{x.Resume.UserPhoto}" : null,
+                ProfileImage = x.Resume.IsPublic && x.Resume.UserPhoto != null
+                ? $"{_currentUser.BaseUrl}/{x.Resume.UserPhoto}"
+                : null,
+                IsSaved = x.Resume.SavedResumes.Any(sr => sr.ResumeId == x.Id && sr.CompanyUserId == _currentUser.UserGuid),
                 JobStatus = x.Resume.User.JobStatus,
-                IsSaved = true,
-                //Position = x.Resume.Position,
+                LastWork = x.Resume.Experiences
+                    .OrderByDescending(e => e.StartDate)
+                    .Select(e => new LastWorkDto
+                    {
+                        CompanyName = e.OrganizationName,
+                        Position = e.PositionName,
+                        StartDate = e.StartDate,
+                        EndDate = e.EndDate
+                    })
+                    .FirstOrDefault(),
+                //Position = x.Position,
+                SkillsName = x.Resume.ResumeSkills
+                .Select(s => s.Skill.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name))
+                .ToList()
             })
             .Skip(Math.Max(0, (skip - 1) * take))
             .Take(take)
@@ -310,12 +327,11 @@ namespace Job.Business.Services.Resume
             };
         }
 
-
         public async Task ToggleSaveResumeAsync(string resumeId)
         {
             var resumeGuid = Guid.Parse(resumeId);
 
-            if (!await _context.Resumes.AnyAsync(x => x.Id == resumeGuid && x.IsPublic))
+            if (!await _context.Resumes.AnyAsync(x => x.Id == resumeGuid))
                 throw new NotFoundException<Core.Entities.Resume>("CV mövcud deyil");
 
             var existSaveResume = await _context.SavedResumes.FirstOrDefaultAsync(x => x.ResumeId == resumeGuid && x.CompanyUserId == _currentUser.UserGuid);
@@ -335,8 +351,6 @@ namespace Job.Business.Services.Resume
 
             await _context.SaveChangesAsync();
         }
-        //
-
 
         public async Task<bool> IsExistResumeAsync()
         {
