@@ -13,6 +13,7 @@ using Job.Business.Services.Education;
 using Job.Business.Services.Experience;
 using Job.Business.Services.Language;
 using Job.Business.Services.Number;
+using Job.Business.Services.Position;
 using Job.Business.Services.User;
 using Job.Core.Entities;
 using Job.Core.Enums;
@@ -20,17 +21,14 @@ using Job.DAL.Contexts;
 using MassTransit.Initializers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Shared.Enums;
-using Shared.Requests;
 using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.Enums;
 using SharedLibrary.ExternalServices.FileService;
 using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;
 using SharedLibrary.Statics;
-using System.Linq;
-using System.Security.Claims;
+using static MassTransit.ValidationResultExtensions;
 
 namespace Job.Business.Services.Resume
 {
@@ -42,14 +40,15 @@ namespace Job.Business.Services.Resume
             ILanguageService _languageService,
             ICertificateService _certificateService,
             IUserInformationService _userInformationService,
-            ICurrentUser _currentUser) : IResumeService
+            ICurrentUser _currentUser, 
+            IPositionService _positionService) : IResumeService
     {
         public async Task CreateResumeAsync(ResumeCreateDto resumeCreateDto)
         {
             if (await _context.Resumes.AnyAsync(x => x.UserId == _currentUser.UserGuid))
                 throw new IsAlreadyExistException<Core.Entities.Resume>();
 
-            var positionId = await GetOrCreatePositionAsync(resumeCreateDto.Position,resumeCreateDto.PositionId, resumeCreateDto.ParentPositionId);
+            var positionId = await _positionService.GetOrCreatePositionAsync(resumeCreateDto.Position,resumeCreateDto.PositionId, resumeCreateDto.ParentPositionId);
 
             var resume = await BuildResumeAsync(resumeCreateDto, positionId);
 
@@ -157,11 +156,10 @@ namespace Job.Business.Services.Resume
 
             UpdateResumePersonalInfo(resume, updateDto);
 
-            var positionId = await GetOrCreatePositionAsync(updateDto.Position, updateDto.PositionId);
+            var positionId = await _positionService.GetOrCreatePositionAsync(updateDto.Position, updateDto.PositionId);
 
             if (positionId != Guid.Empty)
                 resume.PositionId = positionId;
-
 
             if (updateDto.UserPhoto != null) UpdateUserPhotoAsync(resume, updateDto.UserPhoto);
 
@@ -216,7 +214,7 @@ namespace Job.Business.Services.Resume
                         EndDate = e.EndDate
                     })
                     .FirstOrDefault(),
-                Position = x.Position,
+                Position = x.Position != null ? x.Position.Name : null,
                 //StartDate = x.Experiences.Any() ? x.Experiences.OrderByDescending(e => e.StartDate).FirstOrDefault().StartDate : null,
                 //EndDate = x.Experiences.Any() ? x.Experiences.OrderByDescending(e => e.StartDate).FirstOrDefault().EndDate : null,
             })
@@ -301,7 +299,7 @@ namespace Job.Business.Services.Resume
                 ProfileImage = x.Resume.UserPhoto != null ? $"{_currentUser.BaseUrl}/{x.Resume.UserPhoto}" : null,
                 JobStatus = x.Resume.User.JobStatus,
                 IsSaved = true,
-                Position = x.Resume.Position,
+                Position = x.Resume.Position != null ? x.Resume.Position.Name : null,
                 //StartDate = x.Resume.Experiences != null ? x.Resume.Experiences.FirstOrDefault().StartDate : null,
                 //EndDate = x.Resume.Experiences != null ? x.Resume.Experiences.FirstOrDefault().EndDate : null,
             })
@@ -495,45 +493,6 @@ namespace Job.Business.Services.Resume
                 SkillId = skillId,
                 ResumeId = resume.Id
             }).ToList() ?? [];
-        }
-
-        /// <summary>
-        /// Position varsa onun id-sini qaytarır, yoxdursa yaradır və yenisinin id-sini geriyə qaytarır.
-        /// </summary>
-        private async Task<Guid> GetOrCreatePositionAsync(string? positionName, Guid? selectedPositionId, Guid? parentPositionId = null)
-        {
-            if (selectedPositionId != null)
-            {
-                var isPositionExist = await _context.Positions.AnyAsync(p => p.Id == selectedPositionId);
-
-                if (isPositionExist)
-                    return selectedPositionId.Value;
-                else
-                    throw new NotFoundException<Position>(MessageHelper.GetMessage("NOT_FOUND"));
-            }
-
-            else
-            {
-                if (!string.IsNullOrEmpty(positionName))
-                {
-
-                    var positionId = await _context.Positions.Where(p => p.Name == positionName).Select(x => x.Id).FirstOrDefaultAsync();
-
-                    if (positionId != Guid.Empty) return positionId;
-
-                    var newPosition = new Position
-                    {
-                        Name = positionName,
-                        IsActive = false,
-                        ParentPositionId = parentPositionId
-                    };
-
-                    await _context.Positions.AddAsync(newPosition);
-                    await _context.SaveChangesAsync();
-                    return newPosition.Id;
-                }
-            }
-            return Guid.Empty;
         }
 
         #endregion
