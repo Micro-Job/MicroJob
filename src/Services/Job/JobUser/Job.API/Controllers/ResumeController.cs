@@ -52,7 +52,13 @@ namespace Job.API.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetSavedResumes(string? fullname, int skip, int take)
+        public async Task<IActionResult> GetByIdResume(string id)
+        {
+            return Ok(await _resumeService.GetByIdResumeAysnc(id));
+        }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetSavedResumes(string? fullname, int skip = 1, int take = 9)
         {
             return Ok(await _resumeService.GetSavedResumesAsync(fullname, skip, take));
         }

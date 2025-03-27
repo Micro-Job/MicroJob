@@ -12,7 +12,7 @@ namespace Job.Core.Entities
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string FatherName { get; set; }
-        public string Position { get; set; }
+        //public string Position { get; set; }
         public string? UserPhoto { get; set; }
         public Driver IsDriver { get; set; }
         public FamilySituation IsMarried { get; set; }

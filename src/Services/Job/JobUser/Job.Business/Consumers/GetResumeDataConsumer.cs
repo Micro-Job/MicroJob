@@ -18,7 +18,7 @@ namespace Job.Business.Consumers
                 .Select(r => new GetResumeDataResponse
                 {
                     UserId = r.UserId,
-                    Position = r.Position,
+                    //Position = r.Position,
                     FirstName = r.FirstName,
                     LastName = r.LastName,
                     ProfileImage = r.UserPhoto
