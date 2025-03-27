@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using Job.Business.Dtos.CertificateDtos;
 using Job.Business.Dtos.EducationDtos;
 using Job.Business.Dtos.ExperienceDtos;
@@ -15,7 +15,8 @@ namespace Job.Business.Dtos.ResumeDtos
     public record ResumeUpdateDto
     {
         public string FatherName { get; set; }
-        public string Position { get; set; }
+        public string? Position { get; set; } //Əgər position yoxdursa bu adda olan bir position yaradılır db-də
+        public Guid? PositionId { get; set; } //Əgər position varsa db-də onun id-si yazılmalıdır
         public IFormFile? UserPhoto { get; set; }
         public Driver IsDriver { get; set; }
         public FamilySituation IsMarried { get; set; }

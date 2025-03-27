@@ -42,7 +42,7 @@ namespace AuthService.API.Controllers
             return Ok();
         }
 
-        [HttpPost("[action]")]
+        [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword(PasswordResetDto resetDto)
         {
             await _authService.ConfirmPasswordResetAsync(resetDto);
