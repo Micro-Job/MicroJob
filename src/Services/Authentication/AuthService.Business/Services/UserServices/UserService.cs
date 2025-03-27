@@ -119,19 +119,5 @@ namespace AuthService.Business.Services.UserServices
                 ImageUrl = $"{_currentUser.BaseUrl}/{user.Image}",
             };
         }
-
-        /// <summary> İstifadəçinin iş statusunun update olunması </summary>
-        public async Task<JobStatus> UpdateUserJobStatusAsync(UserJobStatusUpdateDto dto)
-        {
-            var user =
-                await _context.Users.FirstOrDefaultAsync(u => u.Id == _currentUser.UserGuid)
-                ?? throw new NotFoundException<User>(MessageHelper.GetMessage("NOTFOUNDEXCEPTION_USER"));
-
-            user.JobStatus = dto.JobStatus;
-
-            await _context.SaveChangesAsync();
-
-            return user.JobStatus;
-        }
     }
 }

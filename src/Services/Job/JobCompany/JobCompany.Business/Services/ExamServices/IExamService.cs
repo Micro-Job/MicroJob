@@ -15,6 +15,7 @@ namespace JobCompany.Business.Services.ExamServices
 
         Task<GetExamIntroDto> GetExamIntroAsync(string examId);
         Task<GetExamQuestionsDetailDto> GetExamQuestionsAsync(string examId);
+        Task<GetExamQuestionsDetailDto> GetExamQuestionsForUserAsync(string examId);
         Task<SubmitExamResultDto> EvaluateExamAnswersAsync(SubmitExamAnswersDto dto);
     }
 }

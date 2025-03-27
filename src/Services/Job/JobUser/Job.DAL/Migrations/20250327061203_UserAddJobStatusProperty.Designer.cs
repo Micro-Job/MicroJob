@@ -4,6 +4,7 @@ using Job.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Job.DAL.Migrations
 {
     [DbContext(typeof(JobDbContext))]
-    partial class JobDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250327061203_UserAddJobStatusProperty")]
+    partial class UserAddJobStatusProperty
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -211,32 +214,6 @@ namespace Job.DAL.Migrations
                     b.ToTable("Numbers");
                 });
 
-            modelBuilder.Entity("Job.Core.Entities.Position", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<Guid?>("ParentPositionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ParentPositionId");
-
-                    b.ToTable("Positions", (string)null);
-                });
-
             modelBuilder.Entity("Job.Core.Entities.Resume", b =>
                 {
                     b.Property<Guid>("Id")
@@ -283,8 +260,9 @@ namespace Job.DAL.Migrations
                     b.Property<byte>("MilitarySituation")
                         .HasColumnType("tinyint");
 
-                    b.Property<Guid?>("PositionId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("Position")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ResumeEmail")
                         .HasColumnType("nvarchar(max)");
@@ -297,8 +275,6 @@ namespace Job.DAL.Migrations
                         .HasColumnType("nvarchar(255)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("PositionId");
 
                     b.HasIndex("UserId")
                         .IsUnique();
@@ -460,30 +436,13 @@ namespace Job.DAL.Migrations
                     b.Navigation("Resume");
                 });
 
-            modelBuilder.Entity("Job.Core.Entities.Position", b =>
-                {
-                    b.HasOne("Job.Core.Entities.Position", "ParentPosition")
-                        .WithMany("SubPositions")
-                        .HasForeignKey("ParentPositionId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("ParentPosition");
-                });
-
             modelBuilder.Entity("Job.Core.Entities.Resume", b =>
                 {
-                    b.HasOne("Job.Core.Entities.Position", "Position")
-                        .WithMany("Resumes")
-                        .HasForeignKey("PositionId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
                     b.HasOne("Job.Core.Entities.User", "User")
                         .WithOne("Resume")
                         .HasForeignKey("Job.Core.Entities.Resume", "UserId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
-
-                    b.Navigation("Position");
 
                     b.Navigation("User");
                 });
@@ -535,13 +494,6 @@ namespace Job.DAL.Migrations
                         .IsRequired();
 
                     b.Navigation("Skill");
-                });
-
-            modelBuilder.Entity("Job.Core.Entities.Position", b =>
-                {
-                    b.Navigation("Resumes");
-
-                    b.Navigation("SubPositions");
                 });
 
             modelBuilder.Entity("Job.Core.Entities.Resume", b =>

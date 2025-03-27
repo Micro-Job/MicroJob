@@ -60,6 +60,7 @@ namespace AuthService.Business.Services.Auth
                 LastName = dto.LastName,
                 MainPhoneNumber = dto.MainPhoneNumber,
                 RegistrationDate = DateTime.Now,
+                JobStatus = JobStatus.ActivelySeekingJob,
                 Password = _tokenHandler.GeneratePasswordHash(dto.Password),
                 Image = dto.Image != null ? $"{fileResult.FilePath}/{fileResult.FileName}" : null,
                 UserRole =
@@ -71,7 +72,7 @@ namespace AuthService.Business.Services.Auth
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
 
-            await _publishEndpoint.Publish(new UserRegisteredEvent { UserId = user.Id });
+            await _publishEndpoint.Publish(new UserRegisteredEvent { UserId = user.Id , JobStatus = user.JobStatus });
 
             //await _publisher.SendEmail(
             //    new EmailMessage

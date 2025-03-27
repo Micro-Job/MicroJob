@@ -15,15 +15,22 @@ using Job.Business.Services.Language;
 using Job.Business.Services.Number;
 using Job.Business.Services.User;
 using Job.Core.Entities;
+using Job.Core.Enums;
 using Job.DAL.Contexts;
 using MassTransit.Initializers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Shared.Enums;
+using Shared.Requests;
 using SharedLibrary.Dtos.FileDtos;
+using SharedLibrary.Enums;
 using SharedLibrary.ExternalServices.FileService;
 using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;
 using SharedLibrary.Statics;
+using System.Linq;
+using System.Security.Claims;
 
 namespace Job.Business.Services.Resume
 {
@@ -173,38 +180,115 @@ namespace Job.Business.Services.Resume
         }
 
         //Sirket hissəsində resumelerin metodlari
-        public async Task<DataListDto<ResumeListDto>> GetAllResumesAsync(string? fullname, int skip, int take)
+        public async Task<DataListDto<ResumeListDto>> GetAllResumesAsync(
+            string? fullname,
+            bool? isPublic,
+            ProfessionDegree? professionDegree,
+            Citizenship? citizenship,
+            bool? isExperience,
+            JobStatus? jobStatus,
+            List<string>? skillIds,
+            List<LanguageFilterDto>? languages,
+            int skip,
+            int take)
         {
-            var query = _context.Resumes.Where(x => x.IsPublic).AsQueryable().AsNoTracking();
+            var query = _context.Resumes
+                .Include(r => r.Languages)
+                .AsQueryable()
+                .AsNoTracking();
 
-            if (fullname != null)
-                query = query.Where(x => (x.FirstName + x.LastName).Contains(fullname));
+            query = ApplyFilters(query, fullname, isPublic, professionDegree, citizenship, isExperience, skillIds, languages);
 
             var resumes = await query.Select(x => new ResumeListDto
             {
                 Id = x.Id,
                 FullName = $"{x.FirstName} {x.LastName}",
                 ProfileImage = x.UserPhoto != null ? $"{_currentUser.BaseUrl}/{x.UserPhoto}" : null,
-                JobStatus = x.User.JobStatus,
                 IsSaved = x.SavedResumes.Any(sr => sr.ResumeId == x.Id && sr.CompanyUserId == _currentUser.UserGuid),
-                Position = x.Position != null ? x.Position.Name : null,
-                StartDate = x.Experiences != null ? x.Experiences.FirstOrDefault().StartDate : null,
-                EndDate = x.Experiences != null ? x.Experiences.FirstOrDefault().EndDate : null,
-                //SkillsName = x.ResumeSkills.Select(x=> new
-                //{
-                //    x.
-                //})
+                JobStatus = x.User.JobStatus,
+                LastWork = x.Experiences
+                    .OrderByDescending(e => e.StartDate)
+                    .Select(e => new LastWorkDto
+                    {
+                        CompanyName = e.OrganizationName,
+                        Position = e.PositionName,
+                        StartDate = e.StartDate,
+                        EndDate = e.EndDate
+                    })
+                    .FirstOrDefault(),
+                Position = x.Position,
+                //StartDate = x.Experiences.Any() ? x.Experiences.OrderByDescending(e => e.StartDate).FirstOrDefault().StartDate : null,
+                //EndDate = x.Experiences.Any() ? x.Experiences.OrderByDescending(e => e.StartDate).FirstOrDefault().EndDate : null,
             })
             .Skip(Math.Max(0, (skip - 1) * take))
             .Take(take)
             .ToListAsync();
 
+            var totalCount = await query.CountAsync();
+
             return new DataListDto<ResumeListDto>
             {
                 Datas = resumes,
-                TotalCount = await query.CountAsync()
+                TotalCount = totalCount
             };
         }
+
+
+
+        private IQueryable<Core.Entities.Resume> ApplyFilters(
+        IQueryable<Core.Entities.Resume> query,
+        string? fullname,
+        bool? isPublic,
+        ProfessionDegree? professionDegree,
+        Citizenship? citizenship,
+        bool? isExperience,
+        List<string>? skillIds,
+        List<LanguageFilterDto>? languages)
+        {
+            if (isPublic.HasValue)
+            {
+                query = query.Where(x => x.IsPublic == isPublic.Value);
+            }
+
+            if (!string.IsNullOrEmpty(fullname))
+            {
+                query = query.Where(x => (x.FirstName + " " + x.LastName).Contains(fullname));
+            }
+
+            if (professionDegree != null)
+            {
+                query = query.Where(x => x.Educations.Any(e => e.ProfessionDegree == professionDegree));
+            }
+
+            if (citizenship != null)
+            {
+                query = query.Where(x => x.IsCitizen == citizenship);
+            }
+
+            if (isExperience.HasValue)
+            {
+                if (isExperience.Value)
+                    query = query.Where(x => x.Experiences.Any());
+                else
+                    query = query.Where(x => !x.Experiences.Any());
+            }
+
+            if (skillIds != null && skillIds.Any())
+            {
+                query = query.Where(x => x.ResumeSkills.Any(rs => skillIds.Contains(rs.SkillId.ToString())));
+            }
+
+            if (languages != null && languages.Any())
+            {
+                query = query.Where(x => languages.All(lang =>
+                    x.Languages.Any(rl =>
+                        rl.LanguageName == lang.Language &&
+                        rl.LanguageLevel == lang.LanguageLevel)));
+            }
+
+            return query;
+        }
+
 
         public async Task<DataListDto<ResumeListDto>> GetSavedResumesAsync(string? fullName, int skip, int take)
         {
@@ -217,9 +301,9 @@ namespace Job.Business.Services.Resume
                 ProfileImage = x.Resume.UserPhoto != null ? $"{_currentUser.BaseUrl}/{x.Resume.UserPhoto}" : null,
                 JobStatus = x.Resume.User.JobStatus,
                 IsSaved = true,
-                Position = x.Resume.Position != null ? x.Resume.Position.Name : null,
-                StartDate = x.Resume.Experiences != null ? x.Resume.Experiences.FirstOrDefault().StartDate : null,
-                EndDate = x.Resume.Experiences != null ? x.Resume.Experiences.FirstOrDefault().EndDate : null,
+                Position = x.Resume.Position,
+                //StartDate = x.Resume.Experiences != null ? x.Resume.Experiences.FirstOrDefault().StartDate : null,
+                //EndDate = x.Resume.Experiences != null ? x.Resume.Experiences.FirstOrDefault().EndDate : null,
             })
             .Skip(Math.Max(0, (skip - 1) * take))
             .Take(take)
