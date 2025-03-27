@@ -57,6 +57,12 @@ namespace JobCompany.API.Controllers
             return Ok(await examService.GetExamQuestionsAsync(examId));
         }
 
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetExamQuestionsForUser(string examId)
+        {
+            return Ok(await examService.GetExamQuestionsForUserAsync(examId));
+        }
+
         [HttpPost("[action]")]
         public async Task<IActionResult> EvaluateExamAnswers(SubmitExamAnswersDto dto)
         {
