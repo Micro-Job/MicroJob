@@ -7,32 +7,27 @@ using Job.Business.Dtos.NumberDtos;
 using Job.Business.Dtos.ResumeDtos;
 using Job.Business.Dtos.SkillDtos;
 using Job.Business.Exceptions.Common;
-using Job.Business.Exceptions.UserExceptions;
 using Job.Business.Extensions;
 using Job.Business.Services.Certificate;
 using Job.Business.Services.Education;
 using Job.Business.Services.Experience;
 using Job.Business.Services.Language;
 using Job.Business.Services.Number;
+using Job.Business.Services.Position;
 using Job.Business.Services.User;
 using Job.Core.Entities;
 using Job.Core.Enums;
 using Job.DAL.Contexts;
-using MassTransit;
 using MassTransit.Initializers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Shared.Enums;
-using Shared.Requests;
 using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.Enums;
 using SharedLibrary.ExternalServices.FileService;
 using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;
 using SharedLibrary.Statics;
-using System.Linq;
-using System.Security.Claims;
 
 namespace Job.Business.Services.Resume
 {
@@ -44,14 +39,21 @@ namespace Job.Business.Services.Resume
             ILanguageService _languageService,
             ICertificateService _certificateService,
             IUserInformationService _userInformationService,
-            ICurrentUser _currentUser) : IResumeService
+            ICurrentUser _currentUser, 
+            IPositionService _positionService) : IResumeService
     {
         public async Task CreateResumeAsync(ResumeCreateDto resumeCreateDto)
         {
             if (await _context.Resumes.AnyAsync(x => x.UserId == _currentUser.UserGuid))
                 throw new IsAlreadyExistException<Core.Entities.Resume>();
 
-            var resume = await BuildResumeAsync(resumeCreateDto);
+            var positionId = await _positionService.GetOrCreatePositionAsync(resumeCreateDto.Position, resumeCreateDto.PositionId, resumeCreateDto.ParentPositionId);
+
+            var resume = await BuildResumeAsync(resumeCreateDto, positionId);
+
+            if (positionId != Guid.Empty)
+                resume.PositionId = positionId;
+
 
             await _context.Resumes.AddAsync(resume);
             await _context.SaveChangesAsync();
@@ -84,7 +86,7 @@ namespace Job.Business.Services.Resume
                                             FirstName = resume.FirstName,
                                             LastName = resume.LastName,
                                             FatherName = resume.FatherName,
-                                            Position = resume.Position,
+                                            Position = resume.Position != null ? resume.Position.Name : null,
                                             IsDriver = resume.IsDriver,
                                             IsMarried = resume.IsMarried,
                                             IsCitizen = resume.IsCitizen,
@@ -154,6 +156,11 @@ namespace Job.Business.Services.Resume
 
             UpdateResumePersonalInfo(resume, updateDto);
 
+            var positionId = await _positionService.GetOrCreatePositionAsync(updateDto.Position, updateDto.PositionId);
+
+            if (positionId != Guid.Empty)
+                resume.PositionId = positionId;
+
             if (updateDto.UserPhoto != null) UpdateUserPhotoAsync(resume, updateDto.UserPhoto);
 
             await UpdateResumeEmailAsync(resume, updateDto.IsMainEmail, updateDto.ResumeEmail);
@@ -207,7 +214,7 @@ namespace Job.Business.Services.Resume
                         EndDate = e.EndDate
                     })
                     .FirstOrDefault(),
-                Position = x.Position,
+                Position = x.Position != null ? x.Position.Name : null,
                 //StartDate = x.Experiences.Any() ? x.Experiences.OrderByDescending(e => e.StartDate).FirstOrDefault().StartDate : null,
                 //EndDate = x.Experiences.Any() ? x.Experiences.OrderByDescending(e => e.StartDate).FirstOrDefault().EndDate : null,
             })
@@ -292,7 +299,7 @@ namespace Job.Business.Services.Resume
                 ProfileImage = x.Resume.UserPhoto != null ? $"{_currentUser.BaseUrl}/{x.Resume.UserPhoto}" : null,
                 JobStatus = x.Resume.User.JobStatus,
                 IsSaved = true,
-                Position = x.Resume.Position,
+                Position = x.Resume.Position != null ? x.Resume.Position.Name : null,
                 //StartDate = x.Resume.Experiences != null ? x.Resume.Experiences.FirstOrDefault().StartDate : null,
                 //EndDate = x.Resume.Experiences != null ? x.Resume.Experiences.FirstOrDefault().EndDate : null,
             })
@@ -340,7 +347,7 @@ namespace Job.Business.Services.Resume
         }
 
         #region Private Methods
-        private async Task<Core.Entities.Resume> BuildResumeAsync(ResumeCreateDto dto)
+        private async Task<Core.Entities.Resume> BuildResumeAsync(ResumeCreateDto dto, Guid positionId)
         {
             FileDto fileResult = dto.UserPhoto != null
                 ? await _fileService.UploadAsync(FilePaths.document, dto.UserPhoto)
@@ -350,10 +357,10 @@ namespace Job.Business.Services.Resume
                 ? (await _userInformationService.GetUserDataAsync((Guid)_currentUser.UserGuid)).Email
                 : dto.ResumeEmail;
 
-            return MapToResumeEntity(dto, $"{fileResult.FilePath}/{fileResult.FileName}", email);
+            return MapToResumeEntity(dto, $"{fileResult.FilePath}/{fileResult.FileName}", email, positionId);
         }
 
-        private Core.Entities.Resume MapToResumeEntity(ResumeCreateDto dto, string? filePath, string? email)
+        private Core.Entities.Resume MapToResumeEntity(ResumeCreateDto dto, string? filePath, string? email, Guid positionId)
         {
             return new Core.Entities.Resume
             {
@@ -361,7 +368,7 @@ namespace Job.Business.Services.Resume
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
                 FatherName = dto.FatherName,
-                Position = dto.Position,
+                PositionId = dto.PositionId,
                 IsDriver = dto.IsDriver,
                 IsMarried = dto.IsMarried,
                 IsCitizen = dto.IsCitizen,
@@ -425,7 +432,6 @@ namespace Job.Business.Services.Resume
         private static void UpdateResumePersonalInfo(Core.Entities.Resume resume, ResumeUpdateDto updateDto)
         {
             resume.FatherName = updateDto.FatherName;
-            resume.Position = updateDto.Position;
             resume.IsDriver = updateDto.IsDriver;
             resume.IsMarried = updateDto.IsMarried;
             resume.IsCitizen = updateDto.IsCitizen;

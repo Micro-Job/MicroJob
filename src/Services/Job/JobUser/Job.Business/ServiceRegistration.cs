@@ -5,6 +5,7 @@ using Job.Business.Services.Experience;
 using Job.Business.Services.Language;
 using Job.Business.Services.Notification;
 using Job.Business.Services.Number;
+using Job.Business.Services.Position;
 using Job.Business.Services.Resume;
 using Job.Business.Services.Skill;
 using Job.Business.Services.User;
@@ -30,6 +31,7 @@ namespace Job.Business
             services.AddScoped<ISkillService, SkillService>();
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<ICurrentUser, CurrentUser>();
+            services.AddScoped<IPositionService, PositionService>();
         }
 
         public static IServiceCollection AddMassTransit(this IServiceCollection services, string username, string password, string hostname, string port)
