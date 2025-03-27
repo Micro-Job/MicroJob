@@ -32,7 +32,7 @@ namespace Job.Business.Services.User
 
             await _context.SaveChangesAsync();
 
-            //await _endPoint.Publish(new UpdateUserJobStatusEvent {  UserId = user.Id, JobStatus = user.JobStatus });
+            await _endPoint.Publish(new UpdateUserJobStatusEvent {  UserId = user.Id, JobStatus = user.JobStatus });
             return user.JobStatus;
         }
     }
