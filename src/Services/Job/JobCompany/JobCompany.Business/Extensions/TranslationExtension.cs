@@ -33,6 +33,7 @@ public static class TranslationExtensions
     public static string GetTranslation<T>(this T entity, LanguageCode languageCode, string propName)
         where T : class
     {
+        if(entity == null) return null;
         var propertyInfo = typeof(T).GetProperty("Translations");
 
         if (propertyInfo == null) return null;

@@ -4,7 +4,7 @@ namespace JobCompany.Business.Dtos.CompanyDtos
 {
     public record UpdateCompanyRequest
     {
-        public CompanyUpdateDto Dto { get; set; }
-        public ICollection<UpdateNumberDto>? numbersDto { get; set; }
+        public CompanyUpdateDto CompanyDto { get; set; }
+        public ICollection<UpdateNumberDto>? NumbersDto { get; set; }
     }
 }
