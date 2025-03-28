@@ -7,7 +7,6 @@ namespace JobCompany.Business.Dtos.ExamDtos
     {
         public string? Title { get; set; }
         public string? IntroDescription { get; set; }
-        public string? LastDescription { get; set; }
         public float LimitRate { get; set; }
         public ICollection<QuestionCreateDto>? Questions { get; set; }
         public bool IsTemplate { get; set; }

@@ -8,6 +8,5 @@ namespace AuthService.Business.Services.UserServices
         Task<UserInformationDto> GetUserInformationAsync();
         Task<UserUpdateResponseDto> UpdateUserInformationAsync(UserUpdateDto dto);
         Task<UserProfileImageUpdateResponseDto> UpdateUserProfileImageAsync(UserProfileImageUpdateDto dto);
-        Task<JobStatus> UpdateUserJobStatusAsync(UserJobStatusUpdateDto dto);
     }
 }

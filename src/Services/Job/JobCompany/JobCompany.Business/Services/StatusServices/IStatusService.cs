@@ -10,7 +10,7 @@ namespace JobCompany.Business.Services.StatusServices
 
         Task<List<StatusListDto>> GetAllStatusesAsync();
 
-        Task ChangeSatusOrderAsync(List<ChangeStatusOrderDto> dto);
+        Task ChangeStatusOrderAsync(List<ChangeStatusOrderDto> dto);
 
         Task ToggleChangeStatusVisibilityAsync(string statusId);
     }

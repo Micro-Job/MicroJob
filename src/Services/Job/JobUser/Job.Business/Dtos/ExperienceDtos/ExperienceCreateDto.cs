@@ -26,9 +26,7 @@ namespace Job.Business.Dtos.ExperienceDtos
                 .Length(1, 50).WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_50"));
 
             RuleFor(dto => dto.StartDate)
-                .NotEmpty().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
-                .LessThanOrEqualTo(DateTime.Now)
-                .WithMessage(MessageHelper.GetMessage("START_DATE_CANNOT_BE_IN_THE_FUTURE"));
+                .NotEmpty().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"));
 
             RuleFor(dto => dto.EndDate)
                 .Must((dto, endDate) => dto.IsCurrentOrganization || endDate.HasValue)

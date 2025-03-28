@@ -2,9 +2,9 @@
 using SharedLibrary.Enums;
 using SharedLibrary.Helpers;
 
-namespace AuthService.Business.Dtos;
+namespace Job.Business.Dtos.UserDtos;
 
-public record UserJobStatusUpdateDto
+public class UserJobStatusUpdateDto
 {
     public JobStatus JobStatus { get; set; }
 }

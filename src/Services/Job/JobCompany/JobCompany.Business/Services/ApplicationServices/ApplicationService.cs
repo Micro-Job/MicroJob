@@ -121,7 +121,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                         CreatedDate = a.CreatedDate,
                         Description = a.Vacancy.Description,
 
-                        StatusName = a.Status.GetTranslation(_currentUser.LanguageCode,GetTranslationPropertyName.Name),
+                        Status = a.Status.StatusEnum,
                         StatusColor = a.Status.StatusColor,
                         Steps = _context
                             .Statuses.OrderBy(s => s.Order)
@@ -356,20 +356,18 @@ namespace JobCompany.Business.Services.ApplicationServices
                     WorkStyle = application.Vacancy.WorkStyle,
                     CreatedDate = application.CreatedDate,
                     ApplicationStatusId = application.StatusId,
+                    CompanyStatuses = application.Vacancy.Company.Statuses.Where(x=> x.IsVisible).Select(x=> new ApplicationStatusesListDto
+                    {
+                        CompanyStatusId = x.Id,
+                        CompanyStatus = x.StatusEnum,
+                        Order = x.Order
+                    })
+                    .OrderBy(x=> x.Order)
+                    .ToList()
                 })
                 .FirstOrDefaultAsync()
                 ?? throw new NotFoundException<Application>(MessageHelper.GetMessage("NOT_FOUND"));
                 
-            application.CompanyStatuses = await _context.Statuses.Where(x => x.CompanyId == application.CompanyId)
-                .OrderBy(x => x.Order)
-                .Select(x => new ApplicationStatusesListDto
-                {
-                    CompanyStatusId = x.Id,
-                    CompanyStatus = x.StatusEnum,
-                    Order = x.Order
-                })
-                .ToListAsync();
-
             return application;
         }
     }
