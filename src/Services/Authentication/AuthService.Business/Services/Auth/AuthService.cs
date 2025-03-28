@@ -22,18 +22,8 @@ using SharedLibrary.Statics;
 
 namespace AuthService.Business.Services.Auth
 {
-    public class AuthService(
-        AppDbContext _context,
-        ITokenHandler _tokenHandler,
-        IHttpContextAccessor _httpContext,
-        IPublishEndpoint _publishEndpoint,
-        IFileService _fileService,
-        IConfiguration _configuration,
-        IEmailService _emailService
-    ) : IAuthService
+    public class AuthService(AppDbContext _context,ITokenHandler _tokenHandler,IPublishEndpoint _publishEndpoint,IConfiguration _configuration,IEmailService _emailService) : IAuthService
     {
-        private string _userId = _httpContext.HttpContext?.User?.FindFirst(ClaimTypes.Sid)?.Value;
-
         private readonly string? _authServiceBaseUrl = _configuration["AuthService:BaseUrl"];
 
         public async Task RegisterAsync(RegisterDto dto)
@@ -102,10 +92,7 @@ namespace AuthService.Business.Services.Auth
                 RegistrationDate = DateTime.Now,
                 Password = _tokenHandler.GeneratePasswordHash(dto.Password),
                 Image = fileResult.FilePath + "/" + fileResult.FileName,
-                UserRole =
-                    dto.UserStatus == 3 ? UserRole.CompanyUser
-                    : dto.UserStatus == 2 ? UserRole.EmployeeUser
-                    : throw new InvalidUserStatusException(),
+                UserRole = dto.IsCompany ? UserRole.CompanyUser : UserRole.EmployeeUser
             };
 
             await _context.Users.AddAsync(user);
@@ -116,7 +103,7 @@ namespace AuthService.Business.Services.Auth
                 {
                     CompanyId = Guid.NewGuid(),
                     UserId = user.Id,
-                    CompanyName = dto.CompanyName.Trim(),
+                    CompanyName = dto.IsCompany ? dto.CompanyName.Trim() : null,
                     CompanyLogo = user.Image,
                     IsCompany = dto.IsCompany,
                 }
