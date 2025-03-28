@@ -399,7 +399,7 @@ namespace JobCompany.Business.Services.VacancyServices
                 .AsNoTracking()
                 .AsQueryable();
 
-            query = ApplyVacancyFilters(query, titleName, categoryId, countryId, cityId, VacancyStatus.Active, minSalary, maxSalary, companyId, workStyle, workType);
+            query = ApplyVacancyFilters(query, titleName, categoryId, countryId, cityId, null, minSalary, maxSalary, companyId, workStyle, workType);
 
             var vacancies = await query
                 .Select(v => new VacancyGetAllDto
