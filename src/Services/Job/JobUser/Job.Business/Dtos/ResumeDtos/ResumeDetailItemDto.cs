@@ -26,7 +26,6 @@ namespace Job.Business.Dtos.ResumeDtos
         public string? Adress { get; set; }
         public DateTime BirthDay { get; set; }
 
-        //public UserInformationDto User { get; set; }
         public string? ResumeEmail { get; set; }
         public ICollection<SkillGetByIdDto>? Skills { get; set; }
         public ICollection<NumberGetByIdDto>? PhoneNumbers { get; set; }
