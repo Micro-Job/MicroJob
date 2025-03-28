@@ -54,7 +54,7 @@ namespace JobCompany.Business.Services.StatusServices
 
         public async Task ToggleChangeStatusVisibilityAsync(string statusId)
         {
-            var existStatus = await _context.Statuses.FirstOrDefaultAsync(x=> x.Id == Guid.Parse(statusId))
+            var existStatus = await _context.Statuses.FirstOrDefaultAsync(x => x.Id == Guid.Parse(statusId) && x.Company.UserId == _currentUser.UserGuid)
                 ?? throw new NotFoundException<Status>("Status mövcud deyil");
 
             if (existStatus.StatusEnum == StatusEnum.Pending)
