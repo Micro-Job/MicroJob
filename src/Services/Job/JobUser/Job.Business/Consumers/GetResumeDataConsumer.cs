@@ -6,19 +6,17 @@ using Shared.Responses;
 
 namespace Job.Business.Consumers
 {
-    public class GetResumeDataConsumer(JobDbContext context) : IConsumer<GetResumeDataRequest>
+    public class GetResumeDataConsumer(JobDbContext _jobDbContext) : IConsumer<GetResumeDataRequest>
     {
-        private readonly JobDbContext _context = context;
-
         public async Task Consume(ConsumeContext<GetResumeDataRequest> context)
         {
             var userIds = context.Message.UserIds;
 
-            var resumes = await _context.Resumes.Where(r => userIds.Contains(r.UserId))
+            var resumes = await _jobDbContext.Resumes.Where(r => userIds.Contains(r.UserId))
                 .Select(r => new GetResumeDataResponse
                 {
                     UserId = r.UserId,
-                    //Position = r.Position,
+                    Position = r.Position != null ? r.Position.Name : null,
                     FirstName = r.FirstName,
                     LastName = r.LastName,
                     ProfileImage = r.UserPhoto

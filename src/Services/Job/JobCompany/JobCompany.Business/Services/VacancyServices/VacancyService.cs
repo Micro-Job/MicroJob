@@ -61,7 +61,7 @@ namespace JobCompany.Business.Services.VacancyServices
         public async Task CreateVacancyAsync(CreateVacancyDto vacancyDto, ICollection<CreateNumberDto>? numberDto)
         {
             string? companyLogoPath = null;
-            var company = await _context.Companies.Where(x => x.UserId == _currentUser.UserGuid).Select(x => new
+                var company = await _context.Companies.Where(x => x.UserId == _currentUser.UserGuid).Select(x => new
             {
                 x.Id,
                 x.CompanyName,
@@ -503,8 +503,7 @@ namespace JobCompany.Business.Services.VacancyServices
             }).FirstOrDefaultAsync();
 
             var vacancies = await _context.Vacancies
-            .OrderByDescending(x => x.StartDate)
-            .Where(x => x.CategoryId == mainVacancy.CategoryId && x.Id != mainVacancy.Id)
+            .Where(x => x.CategoryId == mainVacancy.CategoryId && x.Id != mainVacancy.Id && x.VacancyStatus == VacancyStatus.Active && x.EndDate > DateTime.Now)
             .Select(x => new VacancyGetAllDto
             {
                 Id = x.Id,
@@ -520,6 +519,7 @@ namespace JobCompany.Business.Services.VacancyServices
                 MaxSalary = x.MaxSalary,
                 IsSaved = x.SavedVacancies.Any(y => y.VacancyId == x.Id && y.UserId == _currentUser.UserGuid)
             })
+            .OrderByDescending(x => x.StartDate)
             .Take(take)
             .ToListAsync();
 
