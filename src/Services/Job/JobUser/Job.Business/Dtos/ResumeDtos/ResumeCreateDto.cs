@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using Job.Business.Dtos.CertificateDtos;
 using Job.Business.Dtos.EducationDtos;
 using Job.Business.Dtos.ExperienceDtos;
@@ -16,7 +16,9 @@ namespace Job.Business.Dtos.ResumeDtos
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string FatherName { get; set; }
-        public string Position { get; set; }
+        public Guid? PositionId { get; set; } //Əgər position varsa db-də onun id-si yazılmalıdır
+        public string? Position { get; set; } //Əgər position yoxdursa bu adda olan bir position yaradılır db-də
+        public Guid? ParentPositionId { get; set; }
         public IFormFile? UserPhoto { get; set; }
         public Driver IsDriver { get; set; }
         public FamilySituation IsMarried { get; set; }
@@ -49,7 +51,8 @@ namespace Job.Business.Dtos.ResumeDtos
 
             RuleFor(x => x.Position)
                 .NotEmpty().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
-                .MaximumLength(100).WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_100"));
+                .MaximumLength(100).WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_100"))
+                .When(x => !string.IsNullOrEmpty(x.Position));
 
             RuleFor(x => x.Adress)
                 .MaximumLength(200).WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_200"));

@@ -23,505 +23,559 @@ namespace Job.DAL.Migrations
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.Entity("Job.Core.Entities.Certificate", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("CertificateFile")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                b.Property<string>("CertificateFile")
+                    .IsRequired()
+                    .HasMaxLength(255)
+                    .HasColumnType("nvarchar(255)");
 
-                    b.Property<string>("CertificateName")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                b.Property<string>("CertificateName")
+                    .IsRequired()
+                    .HasMaxLength(128)
+                    .HasColumnType("nvarchar(128)");
 
-                    b.Property<string>("GivenOrganization")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                b.Property<string>("GivenOrganization")
+                    .IsRequired()
+                    .HasMaxLength(128)
+                    .HasColumnType("nvarchar(128)");
 
-                    b.Property<Guid>("ResumeId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("ResumeId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("ResumeId");
+                b.HasIndex("ResumeId");
 
-                    b.ToTable("Certificates");
-                });
+                b.ToTable("Certificates");
+            });
 
             modelBuilder.Entity("Job.Core.Entities.Education", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime?>("EndDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime?>("EndDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<string>("InstitutionName")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                b.Property<string>("InstitutionName")
+                    .IsRequired()
+                    .HasMaxLength(128)
+                    .HasColumnType("nvarchar(128)");
 
-                    b.Property<bool>("IsCurrentEducation")
-                        .HasColumnType("bit");
+                b.Property<bool>("IsCurrentEducation")
+                    .HasColumnType("bit");
 
-                    b.Property<string>("Profession")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                b.Property<string>("Profession")
+                    .IsRequired()
+                    .HasMaxLength(128)
+                    .HasColumnType("nvarchar(128)");
 
-                    b.Property<byte>("ProfessionDegree")
-                        .HasColumnType("tinyint");
+                b.Property<byte>("ProfessionDegree")
+                    .HasColumnType("tinyint");
 
-                    b.Property<Guid>("ResumeId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("ResumeId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("StartDate")
+                    .HasColumnType("datetime2");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("ResumeId");
+                b.HasIndex("ResumeId");
 
-                    b.ToTable("Educations");
-                });
+                b.ToTable("Educations");
+            });
 
             modelBuilder.Entity("Job.Core.Entities.Experience", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime?>("EndDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime?>("EndDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsCurrentOrganization")
-                        .HasColumnType("bit");
+                b.Property<bool>("IsCurrentOrganization")
+                    .HasColumnType("bit");
 
-                    b.Property<string>("OrganizationName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                b.Property<string>("OrganizationName")
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("PositionDescription")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                b.Property<string>("PositionDescription")
+                    .HasMaxLength(500)
+                    .HasColumnType("nvarchar(500)");
 
-                    b.Property<string>("PositionName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                b.Property<string>("PositionName")
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .HasColumnType("nvarchar(100)");
 
-                    b.Property<Guid>("ResumeId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("ResumeId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("StartDate")
+                    .HasColumnType("datetime2");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("ResumeId");
+                b.HasIndex("ResumeId");
 
-                    b.ToTable("Experiences");
-                });
+                b.ToTable("Experiences");
+            });
 
             modelBuilder.Entity("Job.Core.Entities.Language", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<byte>("LanguageLevel")
-                        .HasColumnType("tinyint");
+                b.Property<byte>("LanguageLevel")
+                    .HasColumnType("tinyint");
 
-                    b.Property<byte>("LanguageName")
-                        .HasColumnType("tinyint");
+                b.Property<byte>("LanguageName")
+                    .HasColumnType("tinyint");
 
-                    b.Property<Guid>("ResumeId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("ResumeId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("ResumeId");
+                b.HasIndex("ResumeId");
 
-                    b.ToTable("Languages");
-                });
+                b.ToTable("Languages");
+            });
 
             modelBuilder.Entity("Job.Core.Entities.Notification", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("getdate()");
+                b.Property<DateTime>("CreatedDate")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("datetime2")
+                    .HasDefaultValueSql("getdate()");
 
-                    b.Property<Guid>("InformationId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("InformationId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("InformationName")
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("InformationName")
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("IsSeen")
-                        .HasColumnType("bit");
+                b.Property<bool>("IsSeen")
+                    .HasColumnType("bit");
 
-                    b.Property<byte>("NotificationType")
-                        .HasColumnType("tinyint");
+                b.Property<byte>("NotificationType")
+                    .HasColumnType("tinyint");
 
-                    b.Property<Guid>("ReceiverId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("ReceiverId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("SenderId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("SenderId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("CreatedDate");
+                b.HasIndex("CreatedDate");
 
-                    b.HasIndex("ReceiverId");
+                b.HasIndex("ReceiverId");
 
-                    b.ToTable("Notifications");
-                });
+                b.ToTable("Notifications");
+            });
 
             modelBuilder.Entity("Job.Core.Entities.Number", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("PhoneNumber")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("nvarchar(32)");
+                b.Property<string>("PhoneNumber")
+                    .IsRequired()
+                    .HasMaxLength(32)
+                    .HasColumnType("nvarchar(32)");
 
-                    b.Property<Guid>("ResumeId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("ResumeId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("ResumeId");
+                b.HasIndex("ResumeId");
 
-                    b.ToTable("Numbers");
-                });
+                b.ToTable("Numbers");
+            });
+
+            modelBuilder.Entity("Job.Core.Entities.Position", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<bool>("IsActive")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("bit")
+                    .HasDefaultValue(false);
+
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasMaxLength(200)
+                    .HasColumnType("nvarchar(200)");
+
+                b.Property<Guid?>("ParentPositionId")
+                    .HasColumnType("uniqueidentifier");
+
+                b.HasKey("Id");
+
+                b.HasIndex("ParentPositionId");
+
+                b.ToTable("Positions", (string)null);
+            });
 
             modelBuilder.Entity("Job.Core.Entities.Resume", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Adress")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                b.Property<string>("Adress")
+                    .HasMaxLength(128)
+                    .HasColumnType("nvarchar(128)");
 
-                    b.Property<DateTime>("BirthDay")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("BirthDay")
+                    .HasColumnType("datetime2");
 
-                    b.Property<string>("FatherName")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("nvarchar(32)");
+                b.Property<string>("FatherName")
+                    .IsRequired()
+                    .HasMaxLength(32)
+                    .HasColumnType("nvarchar(32)");
 
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("nvarchar(32)");
+                b.Property<string>("FirstName")
+                    .IsRequired()
+                    .HasMaxLength(32)
+                    .HasColumnType("nvarchar(32)");
 
-                    b.Property<byte>("Gender")
-                        .HasColumnType("tinyint");
+                b.Property<byte>("Gender")
+                    .HasColumnType("tinyint");
 
-                    b.Property<byte>("IsCitizen")
-                        .HasColumnType("tinyint");
+                b.Property<byte>("IsCitizen")
+                    .HasColumnType("tinyint");
 
-                    b.Property<byte>("IsDriver")
-                        .HasColumnType("tinyint");
+                b.Property<byte>("IsDriver")
+                    .HasColumnType("tinyint");
 
-                    b.Property<byte>("IsMarried")
-                        .HasColumnType("tinyint");
+                b.Property<byte>("IsMarried")
+                    .HasColumnType("tinyint");
 
-                    b.Property<bool>("IsPublic")
-                        .HasColumnType("bit");
+                b.Property<bool>("IsPublic")
+                    .HasColumnType("bit");
 
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("nvarchar(32)");
+                b.Property<string>("LastName")
+                    .IsRequired()
+                    .HasMaxLength(32)
+                    .HasColumnType("nvarchar(32)");
 
-                    b.Property<byte>("MilitarySituation")
-                        .HasColumnType("tinyint");
+                b.Property<byte>("MilitarySituation")
+                    .HasColumnType("tinyint");
 
-                    b.Property<string>("Position")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<Guid?>("PositionId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("ResumeEmail")
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("ResumeEmail")
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("UserId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("UserPhoto")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                b.Property<string>("UserPhoto")
+                    .HasMaxLength(255)
+                    .HasColumnType("nvarchar(255)");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("UserId")
-                        .IsUnique();
+                b.HasIndex("PositionId");
 
-                    b.ToTable("Resumes");
-                });
+                b.HasIndex("UserId")
+                    .IsUnique();
+
+                b.ToTable("Resumes");
+            });
 
             modelBuilder.Entity("Job.Core.Entities.ResumeSkill", b =>
-                {
-                    b.Property<Guid>("ResumeId")
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("ResumeId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("SkillId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("SkillId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("ResumeId", "SkillId");
+                b.HasKey("ResumeId", "SkillId");
 
-                    b.HasIndex("SkillId");
+                b.HasIndex("SkillId");
 
-                    b.ToTable("ResumeSkills");
-                });
+                b.ToTable("ResumeSkills");
+            });
 
             modelBuilder.Entity("Job.Core.Entities.SavedResume", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CompanyUserId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CompanyUserId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("ResumeId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("ResumeId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime?>("SaveDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime?>("SaveDate")
+                    .HasColumnType("datetime2");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("CompanyUserId");
+                b.HasIndex("CompanyUserId");
 
-                    b.HasIndex("ResumeId");
+                b.HasIndex("ResumeId");
 
-                    b.ToTable("SavedResumes");
-                });
+                b.ToTable("SavedResumes");
+            });
 
             modelBuilder.Entity("Job.Core.Entities.Skill", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.ToTable("Skills");
-                });
+                b.ToTable("Skills");
+            });
 
             modelBuilder.Entity("Job.Core.Entities.SkillTranslation", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<byte>("Language")
-                        .HasColumnType("tinyint");
+                b.Property<byte>("Language")
+                    .HasColumnType("tinyint");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasMaxLength(128)
+                    .HasColumnType("nvarchar(128)");
 
-                    b.Property<Guid>("SkillId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("SkillId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("SkillId");
+                b.HasIndex("SkillId");
 
-                    b.ToTable("SkillTranslations");
-                });
+                b.ToTable("SkillTranslations");
+            });
 
             modelBuilder.Entity("Job.Core.Entities.User", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("Id");
+                b.Property<byte>("JobStatus")
+                    .HasColumnType("tinyint");
 
-                    b.ToTable("Users");
-                });
+                b.HasKey("Id");
+
+                b.ToTable("Users");
+            });
 
             modelBuilder.Entity("Job.Core.Entities.Certificate", b =>
-                {
-                    b.HasOne("Job.Core.Entities.Resume", "Resume")
-                        .WithMany("Certificates")
-                        .HasForeignKey("ResumeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("Job.Core.Entities.Resume", "Resume")
+                    .WithMany("Certificates")
+                    .HasForeignKey("ResumeId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Resume");
-                });
+                b.Navigation("Resume");
+            });
 
             modelBuilder.Entity("Job.Core.Entities.Education", b =>
-                {
-                    b.HasOne("Job.Core.Entities.Resume", "Resume")
-                        .WithMany("Educations")
-                        .HasForeignKey("ResumeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("Job.Core.Entities.Resume", "Resume")
+                    .WithMany("Educations")
+                    .HasForeignKey("ResumeId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Resume");
-                });
+                b.Navigation("Resume");
+            });
 
             modelBuilder.Entity("Job.Core.Entities.Experience", b =>
-                {
-                    b.HasOne("Job.Core.Entities.Resume", "Resume")
-                        .WithMany("Experiences")
-                        .HasForeignKey("ResumeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("Job.Core.Entities.Resume", "Resume")
+                    .WithMany("Experiences")
+                    .HasForeignKey("ResumeId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Resume");
-                });
+                b.Navigation("Resume");
+            });
 
             modelBuilder.Entity("Job.Core.Entities.Language", b =>
-                {
-                    b.HasOne("Job.Core.Entities.Resume", "Resume")
-                        .WithMany("Languages")
-                        .HasForeignKey("ResumeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("Job.Core.Entities.Resume", "Resume")
+                    .WithMany("Languages")
+                    .HasForeignKey("ResumeId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Resume");
-                });
+                b.Navigation("Resume");
+            });
 
             modelBuilder.Entity("Job.Core.Entities.Notification", b =>
-                {
-                    b.HasOne("Job.Core.Entities.User", "Receiver")
-                        .WithMany("Notifications")
-                        .HasForeignKey("ReceiverId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+            {
+                b.HasOne("Job.Core.Entities.User", "Receiver")
+                    .WithMany("Notifications")
+                    .HasForeignKey("ReceiverId")
+                    .OnDelete(DeleteBehavior.NoAction)
+                    .IsRequired();
 
-                    b.Navigation("Receiver");
-                });
+                b.Navigation("Receiver");
+            });
 
             modelBuilder.Entity("Job.Core.Entities.Number", b =>
-                {
-                    b.HasOne("Job.Core.Entities.Resume", "Resume")
-                        .WithMany("PhoneNumbers")
-                        .HasForeignKey("ResumeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("Job.Core.Entities.Resume", "Resume")
+                    .WithMany("PhoneNumbers")
+                    .HasForeignKey("ResumeId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Resume");
-                });
+                b.Navigation("Resume");
+            });
+
+            modelBuilder.Entity("Job.Core.Entities.Position", b =>
+            {
+                b.HasOne("Job.Core.Entities.Position", "ParentPosition")
+                    .WithMany("SubPositions")
+                    .HasForeignKey("ParentPositionId")
+                    .OnDelete(DeleteBehavior.NoAction);
+
+                b.Navigation("ParentPosition");
+            });
 
             modelBuilder.Entity("Job.Core.Entities.Resume", b =>
-                {
-                    b.HasOne("Job.Core.Entities.User", "User")
-                        .WithOne("Resume")
-                        .HasForeignKey("Job.Core.Entities.Resume", "UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+            {
+                b.HasOne("Job.Core.Entities.Position", "Position")
+                    .WithMany("Resumes")
+                    .HasForeignKey("PositionId")
+                    .OnDelete(DeleteBehavior.SetNull);
 
-                    b.Navigation("User");
-                });
+                b.HasOne("Job.Core.Entities.User", "User")
+                    .WithOne("Resume")
+                    .HasForeignKey("Job.Core.Entities.Resume", "UserId")
+                    .OnDelete(DeleteBehavior.NoAction)
+                    .IsRequired();
+
+                b.Navigation("Position");
+
+                b.Navigation("User");
+            });
 
             modelBuilder.Entity("Job.Core.Entities.ResumeSkill", b =>
-                {
-                    b.HasOne("Job.Core.Entities.Resume", "Resume")
-                        .WithMany("ResumeSkills")
-                        .HasForeignKey("ResumeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("Job.Core.Entities.Resume", "Resume")
+                    .WithMany("ResumeSkills")
+                    .HasForeignKey("ResumeId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("Job.Core.Entities.Skill", "Skill")
-                        .WithMany("ResumeSkills")
-                        .HasForeignKey("SkillId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.HasOne("Job.Core.Entities.Skill", "Skill")
+                    .WithMany("ResumeSkills")
+                    .HasForeignKey("SkillId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Resume");
+                b.Navigation("Resume");
 
-                    b.Navigation("Skill");
-                });
+                b.Navigation("Skill");
+            });
 
             modelBuilder.Entity("Job.Core.Entities.SavedResume", b =>
-                {
-                    b.HasOne("Job.Core.Entities.User", "CompanyUser")
-                        .WithMany("SavedResumes")
-                        .HasForeignKey("CompanyUserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+            {
+                b.HasOne("Job.Core.Entities.User", "CompanyUser")
+                    .WithMany("SavedResumes")
+                    .HasForeignKey("CompanyUserId")
+                    .OnDelete(DeleteBehavior.NoAction)
+                    .IsRequired();
 
-                    b.HasOne("Job.Core.Entities.Resume", "Resume")
-                        .WithMany("SavedResumes")
-                        .HasForeignKey("ResumeId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                b.HasOne("Job.Core.Entities.Resume", "Resume")
+                    .WithMany("SavedResumes")
+                    .HasForeignKey("ResumeId")
+                    .OnDelete(DeleteBehavior.NoAction)
+                    .IsRequired();
 
-                    b.Navigation("CompanyUser");
+                b.Navigation("CompanyUser");
 
-                    b.Navigation("Resume");
-                });
+                b.Navigation("Resume");
+            });
 
             modelBuilder.Entity("Job.Core.Entities.SkillTranslation", b =>
-                {
-                    b.HasOne("Job.Core.Entities.Skill", "Skill")
-                        .WithMany("Translations")
-                        .HasForeignKey("SkillId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+            {
+                b.HasOne("Job.Core.Entities.Skill", "Skill")
+                    .WithMany("Translations")
+                    .HasForeignKey("SkillId")
+                    .OnDelete(DeleteBehavior.NoAction)
+                    .IsRequired();
 
-                    b.Navigation("Skill");
-                });
+                b.Navigation("Skill");
+            });
+
+            modelBuilder.Entity("Job.Core.Entities.Position", b =>
+            {
+                b.Navigation("Resumes");
+
+                b.Navigation("SubPositions");
+            });
 
             modelBuilder.Entity("Job.Core.Entities.Resume", b =>
-                {
-                    b.Navigation("Certificates");
+            {
+                b.Navigation("Certificates");
 
-                    b.Navigation("Educations");
+                b.Navigation("Educations");
 
-                    b.Navigation("Experiences");
+                b.Navigation("Experiences");
 
-                    b.Navigation("Languages");
+                b.Navigation("Languages");
 
-                    b.Navigation("PhoneNumbers");
+                b.Navigation("PhoneNumbers");
 
-                    b.Navigation("ResumeSkills");
+                b.Navigation("ResumeSkills");
 
-                    b.Navigation("SavedResumes");
-                });
+                b.Navigation("SavedResumes");
+            });
 
             modelBuilder.Entity("Job.Core.Entities.Skill", b =>
-                {
-                    b.Navigation("ResumeSkills");
+            {
+                b.Navigation("ResumeSkills");
 
-                    b.Navigation("Translations");
-                });
+                b.Navigation("Translations");
+            });
 
             modelBuilder.Entity("Job.Core.Entities.User", b =>
-                {
-                    b.Navigation("Notifications");
+            {
+                b.Navigation("Notifications");
 
-                    b.Navigation("Resume");
+                b.Navigation("Resume");
 
-                    b.Navigation("SavedResumes");
-                });
+                b.Navigation("SavedResumes");
+            });
 #pragma warning restore 612, 618
         }
     }

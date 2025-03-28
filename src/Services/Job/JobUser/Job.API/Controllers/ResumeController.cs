@@ -1,6 +1,9 @@
+using Job.Business.Dtos.LanguageDtos;
 using Job.Business.Dtos.ResumeDtos;
 using Job.Business.Services.Resume;
+using Job.Core.Enums;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Enums;
 using SharedLibrary.Attributes;
 using SharedLibrary.Enums;
 
@@ -33,18 +36,34 @@ namespace Job.API.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetAllResumes(string? fullname, int skip, int take)
+        public async Task<IActionResult> GetAllResumes([FromQuery] string? fullname,
+            [FromQuery] bool? isPublic,
+            [FromQuery] ProfessionDegree? professionDegree,
+            [FromQuery] Citizenship? citizenship,
+            [FromQuery] bool? isExperience,
+            [FromQuery] JobStatus? jobStatus,
+            [FromQuery] List<string>? skillIds,
+            [FromQuery] List<LanguageFilterDto>? languages,
+            [FromQuery] int skip = 1, [FromQuery] int take = 9)
         {
-            return Ok(await _resumeService.GetAllResumesAsync(fullname,skip,take));
+            return Ok(await _resumeService.GetAllResumesAsync(fullname,
+                isPublic, professionDegree, citizenship,isExperience,jobStatus, skillIds,languages,
+                skip,take));
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetSavedResumes(string? fullname, int skip, int take)
+        public async Task<IActionResult> GetByIdResume(string id)
+        {
+            return Ok(await _resumeService.GetByIdResumeAysnc(id));
+        }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetSavedResumes(string? fullname, int skip = 1, int take = 9)
         {
             return Ok(await _resumeService.GetSavedResumesAsync(fullname, skip, take));
         }
 
-        [HttpPost]
+        [HttpPost("[action]")]
         public async Task<IActionResult> ToggleSaveResume(string resumeId)
         {
             await _resumeService.ToggleSaveResumeAsync(resumeId);

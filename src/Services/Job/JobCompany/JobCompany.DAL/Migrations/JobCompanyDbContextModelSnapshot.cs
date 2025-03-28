@@ -285,10 +285,6 @@ namespace JobCompany.DAL.Migrations
                     b.Property<bool>("IsTemplate")
                         .HasColumnType("bit");
 
-                    b.Property<string>("LastDescription")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<float>("LimitRate")
                         .HasColumnType("real");
 

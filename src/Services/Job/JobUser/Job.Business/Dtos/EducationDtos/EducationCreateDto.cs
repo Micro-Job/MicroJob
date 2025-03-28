@@ -30,14 +30,14 @@ namespace Job.Business.Dtos.EducationDtos
                 .WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_50"));
             RuleFor(dto => dto.StartDate)
                 .NotEmpty()
-                .WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
-                .LessThanOrEqualTo(DateTime.Now)
-                .WithMessage(MessageHelper.GetMessage("START_DATE_CANNOT_BE_IN_THE_FUTURE"));
+                .WithMessage(MessageHelper.GetMessage("NOT_EMPTY"));
+
             RuleFor(dto => dto.EndDate)
-                .Must((dto, endDate) => dto.IsCurrentEducation || endDate.HasValue)
+                .Must((dto, endDate) => dto.IsCurrentEducation && endDate.HasValue)
                 .WithMessage(MessageHelper.GetMessage("END_DATE_MUST_BE"))
                 .When(dto => dto.EndDate.HasValue)
                 .WithMessage(MessageHelper.GetMessage("STARTDATE_MUST_BE_EARLIER_ENDATE"));
+
             RuleFor(dto => dto.ProfessionDegree)
                 .IsInEnum()
                 .WithMessage(MessageHelper.GetMessage("INVALID_FORMAT"));

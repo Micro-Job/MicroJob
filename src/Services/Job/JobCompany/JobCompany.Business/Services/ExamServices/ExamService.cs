@@ -34,7 +34,6 @@ namespace JobCompany.Business.Services.ExamServices
                 {
                     Title = dto.Title,
                     IntroDescription = dto.IntroDescription,
-                    LastDescription = dto.LastDescription,
                     LimitRate = dto.LimitRate,
                     CompanyId = companyId,
                     IsTemplate = dto.IsTemplate,
@@ -71,16 +70,15 @@ namespace JobCompany.Business.Services.ExamServices
         {
             var examGuid = Guid.Parse(examId);
 
-            return await _context
-                    .Exams.AsNoTracking()
+            return await _context.Exams.AsNoTracking()
                     .Select(e => new GetExamByIdDto
                     {
                         Id = e.Id,
                         Title = e.Title,
                         IntroDescription = e.IntroDescription,
-                        LastDescription = e.LastDescription,
                         Duration = e.Duration,
-                        //CurrentStep = e.LimitRate
+                        LimitRate = e.LimitRate,
+                        IsTemplate = e.IsTemplate
                     })
                     .FirstOrDefaultAsync(e => e.Id == examGuid)
                 ?? throw new NotFoundException<Exam>(MessageHelper.GetMessage("NOT_FOUND"));
@@ -180,7 +178,6 @@ namespace JobCompany.Business.Services.ExamServices
                     Duration = x.Duration,
                     QuestionCount = x.ExamQuestions.Count,
                     LimitRate = x.LimitRate,
-                    //FullName = ,
                 })
                 .FirstOrDefaultAsync() ?? throw new NotFoundException<Exam>(MessageHelper.GetMessage("NOT_FOUND"));
 
@@ -190,15 +187,9 @@ namespace JobCompany.Business.Services.ExamServices
         public async Task<GetExamQuestionsDetailDto> GetExamQuestionsAsync(string examId)
         {
             var examGuid = Guid.Parse(examId);
-            var exam = await _context.Exams
-                .Include(e => e.ExamQuestions)
-                    .ThenInclude(eq => eq.Question)
-                .ThenInclude(q => q.Answers)
-                .Where(x => x.Id == examGuid)
-                .FirstOrDefaultAsync()
-                ?? throw new NotFoundException<Exam>(MessageHelper.GetMessage("NOT_FOUND"));
 
-            return new GetExamQuestionsDetailDto
+            var examQuestions = await _context.Exams.Where(x => x.Id == examGuid)
+            .Select(exam => new GetExamQuestionsDetailDto
             {
                 TotalQuestions = exam.ExamQuestions.Count,
                 LimitRate = exam.LimitRate,
@@ -213,10 +204,41 @@ namespace JobCompany.Business.Services.ExamServices
                     Answers = eq.Question.Answers.Select(a => new AnswerPublicDto
                     {
                         Id = a.Id,
-                        Text = a.Text
+                        Text = a.Text,
+                        IsCorrect = a.IsCorrect
                     }).ToList()
                 }).ToList()
-            };
+            }).FirstOrDefaultAsync() ?? throw new NotFoundException<Exam>(MessageHelper.GetMessage("NOT_FOUND"));
+
+            return examQuestions;
+        }
+
+        public async Task<GetExamQuestionsDetailDto> GetExamQuestionsForUserAsync(string examId)
+        {
+            var examGuid = Guid.Parse(examId);
+
+            var examQuestions = await _context.Exams.Where(x => x.Id == examGuid)
+            .Select(exam => new GetExamQuestionsDetailDto
+            {
+                TotalQuestions = exam.ExamQuestions.Count,
+                LimitRate = exam.LimitRate,
+                Duration = exam.Duration,
+                Questions = exam.ExamQuestions.Select(eq => new QuestionPublicDto
+                {
+                    Id = eq.Question.Id,
+                    Title = eq.Question.Title,
+                    Image = eq.Question.Image != null ? $"{_currentUser.BaseUrl}/{eq.Question.Image}" : null,
+                    QuestionType = eq.Question.QuestionType,
+                    IsRequired = eq.Question.IsRequired,
+                    Answers = eq.Question.Answers.Select(a => new AnswerPublicDto
+                    {
+                        Id = a.Id,
+                        Text = a.Text,
+                    }).ToList()
+                }).ToList()
+            }).FirstOrDefaultAsync() ?? throw new NotFoundException<Exam>(MessageHelper.GetMessage("NOT_FOUND"));
+
+            return examQuestions;
         }
 
         public async Task<SubmitExamResultDto> EvaluateExamAnswersAsync(SubmitExamAnswersDto dto)

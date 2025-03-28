@@ -121,7 +121,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                         CreatedDate = a.CreatedDate,
                         Description = a.Vacancy.Description,
 
-                        StatusName = a.Status.GetTranslation(_currentUser.LanguageCode,GetTranslationPropertyName.Name),
+                        Status = a.Status.StatusEnum,
                         StatusColor = a.Status.StatusColor,
                         Steps = _context
                             .Statuses.OrderBy(s => s.Order)
@@ -267,21 +267,25 @@ namespace JobCompany.Business.Services.ApplicationServices
 
             var vacancyGuid = Guid.Parse(vacancyId);
 
-            if (await _context.Applications.AnyAsync(x=> x.VacancyId == vacancyGuid && x.UserId == userGuid)) 
+            if (await _context.Applications.AnyAsync(x => x.VacancyId == vacancyGuid && x.UserId == userGuid))
                 throw new ApplicationIsAlreadyExistException(MessageHelper.GetMessage("APPLICATION_ALREADY_EXIST"));
 
             var vacancyInfo = await _context.Vacancies
+                .Include(v => v.Company)
+                .ThenInclude(c => c.Statuses)
                 .Where(v => v.Id == vacancyGuid)
-                .Select(v => new { v.CompanyId, v.Title })
+                .Select(v => new { v.Company, v.Title })
                 .FirstOrDefaultAsync() ?? throw new NotFoundException<Company>("NOT_FOUND");
 
-            Guid statusId = await _context.Statuses.Where(s => s.StatusEnum == StatusEnum.Pending && s.Company.UserId == _currentUser.UserGuid).Select(x=> x.Id).FirstOrDefaultAsync();
+            var companyStatus = vacancyInfo.Company.Statuses
+                .FirstOrDefault(s => s.StatusEnum == StatusEnum.Pending) ??
+                throw new NotFoundException<StatusEnum>(MessageHelper.GetMessage("NOT_FOUND"));
 
             var newApplication = new Application
             {
                 UserId = userGuid,
                 VacancyId = vacancyGuid,
-                StatusId = statusId,
+                StatusId = companyStatus.Id,
                 IsActive = true,
                 CreatedDate = DateTime.Now
             };
@@ -291,7 +295,7 @@ namespace JobCompany.Business.Services.ApplicationServices
 
             await _publishEndpoint.Publish(new VacancyApplicationEvent
             {
-                UserId = (Guid)vacancyInfo.CompanyId,
+                UserId = vacancyInfo.Company.Id,
                 SenderId = userGuid,
                 VacancyId = vacancyGuid,
                 InformationId = userGuid,
@@ -356,20 +360,18 @@ namespace JobCompany.Business.Services.ApplicationServices
                     WorkStyle = application.Vacancy.WorkStyle,
                     CreatedDate = application.CreatedDate,
                     ApplicationStatusId = application.StatusId,
+                    CompanyStatuses = application.Vacancy.Company.Statuses.Where(x=> x.IsVisible).Select(x=> new ApplicationStatusesListDto
+                    {
+                        CompanyStatusId = x.Id,
+                        CompanyStatus = x.StatusEnum,
+                        Order = x.Order
+                    })
+                    .OrderBy(x=> x.Order)
+                    .ToList()
                 })
                 .FirstOrDefaultAsync()
                 ?? throw new NotFoundException<Application>(MessageHelper.GetMessage("NOT_FOUND"));
                 
-            application.CompanyStatuses = await _context.Statuses.Where(x => x.CompanyId == application.CompanyId)
-                .OrderBy(x => x.Order)
-                .Select(x => new ApplicationStatusesListDto
-                {
-                    CompanyStatusId = x.Id,
-                    CompanyStatus = x.StatusEnum,
-                    Order = x.Order
-                })
-                .ToListAsync();
-
             return application;
         }
     }
