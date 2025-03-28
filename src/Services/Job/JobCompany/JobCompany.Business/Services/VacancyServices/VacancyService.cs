@@ -178,7 +178,6 @@ namespace JobCompany.Business.Services.VacancyServices
         {
             var query = _context
                 .Vacancies.Where(x => x.Company.UserId == _currentUser.UserGuid)
-                .Include(x => x.Company)
                 .AsNoTracking();
 
             query = ApplyVacancyFilters(
