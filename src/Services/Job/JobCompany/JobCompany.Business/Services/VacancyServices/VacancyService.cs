@@ -209,6 +209,7 @@ namespace JobCompany.Business.Services.VacancyServices
                     WorkStyle = x.WorkStyle,
                     MainSalary = x.MainSalary,
                     MaxSalary = x.MaxSalary,
+                    VacancyStatus = x.VacancyStatus
                 })
                 .Skip(Math.Max(0, (skip - 1) * take))
                 .Take(take)
