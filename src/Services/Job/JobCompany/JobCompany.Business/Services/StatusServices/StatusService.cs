@@ -7,6 +7,7 @@ using JobCompany.DAL.Contexts;
 using MassTransit.NewIdProviders;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
+using SharedLibrary.Enums;
 using SharedLibrary.Exceptions;
 using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;
@@ -53,8 +54,11 @@ namespace JobCompany.Business.Services.StatusServices
 
         public async Task ToggleChangeStatusVisibilityAsync(string statusId)
         {
-            var existStatus = await _context.Statuses.FirstOrDefaultAsync(x=> x.Id == Guid.Parse(statusId) && x.Company.UserId == _currentUser.UserGuid)
+            var existStatus = await _context.Statuses.FirstOrDefaultAsync(x => x.Id == Guid.Parse(statusId) && x.Company.UserId == _currentUser.UserGuid)
                 ?? throw new NotFoundException<Status>("Status mövcud deyil");
+
+            if (existStatus.StatusEnum == StatusEnum.Pending)
+                throw new CannotChangePendingStatusVisibilityException(MessageHelper.GetMessage("CANNOT_CHANGE_PENDING_STATUS"));
 
             existStatus.IsVisible = !existStatus.IsVisible;
 
