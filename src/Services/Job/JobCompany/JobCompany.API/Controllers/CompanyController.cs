@@ -15,7 +15,7 @@ namespace JobCompany.API.Controllers
         [AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser)]
         public async Task<IActionResult> UpdateCompany([FromBody] UpdateCompanyRequest request)
         {
-            await service.UpdateCompanyAsync(request.Dto, request.numbersDto);
+            await service.UpdateCompanyAsync(request.CompanyDto, request.NumbersDto);
             return Ok();
         }
 

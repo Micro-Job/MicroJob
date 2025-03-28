@@ -11,6 +11,7 @@
         public string? WebLink { get; set; }
         public int? EmployeeCount { get; set; }
         public string? CompanyLogo { get; set; }
+        public string? Email { get; set; }
         public Guid? CategoryId { get; set; }
         public Category Category { get; set; }
 

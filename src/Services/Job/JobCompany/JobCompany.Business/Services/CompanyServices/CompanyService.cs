@@ -3,6 +3,9 @@ using JobCompany.Business.Dtos.Common;
 using JobCompany.Business.Dtos.CompanyDtos;
 using JobCompany.Business.Dtos.NumberDtos;
 using JobCompany.Business.Exceptions.Common;
+using JobCompany.Business.Exceptions.UserExceptions;
+using JobCompany.Business.Extensions;
+using JobCompany.Business.Statistics;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using MassTransit;
@@ -55,6 +58,12 @@ namespace JobCompany.Business.Services.CompanyServices
             company.CategoryId = dto.CategoryId;
             company.CountryId = dto.CountryId;
             company.CityId = dto.CityId;
+
+
+            if (dto.Email !=null && await _context.Companies.AnyAsync(x => x.Email == dto.Email && x.Id != company.Id))
+                throw new EmailAlreadyUsedException(MessageHelper.GetMessage("EMAIL_ALREADY_USED"));
+
+            company.Email = dto.Email;
 
             if (numbersDto is not null)
             {
@@ -140,15 +149,10 @@ namespace JobCompany.Business.Services.CompanyServices
                                                 Number = cn.Number,
                                             })
                                             .ToList(),
+                            Email = x.Email,
                         })
                         .FirstOrDefaultAsync()
                     ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>(MessageHelper.GetMessage("NOT_FOUND"));
-
-            var response = await _client.GetResponse<GetAllCompaniesDataResponse>(
-                new GetAllCompaniesDataRequest { UserId = company.UserId }
-            );
-            company.Email = response.Message.Email;
-            company.PhoneNumber = response.Message.PhoneNumber;
             return company;
         }
 
@@ -163,7 +167,7 @@ namespace JobCompany.Business.Services.CompanyServices
                 .Where(c => c.UserId == _currentUser.UserGuid)
                 .Select(x => new CompanyProfileDto
                 {
-                    Id = x.UserId,
+                    Id = x.Id,
                     Name = x.CompanyName,
                     Information = x.CompanyInformation,
                     Location = x.CompanyLocation,
@@ -171,18 +175,10 @@ namespace JobCompany.Business.Services.CompanyServices
                     CreatedDate = x.CreatedDate,
                     EmployeeCount = x.EmployeeCount.HasValue ? x.EmployeeCount.Value : null,
                     CompanyLogo = !string.IsNullOrEmpty(x.CompanyLogo) ? $"{_authServiceBaseUrl}/{x.CompanyLogo}" : null,
-                    Category = x.Category.Translations
-                        .Where(t => t.Language == currentLanguage)
-                        .Select(t => t.Name)
-                        .FirstOrDefault(),
-                    City = x.City.Translations
-                        .Where(t => t.Language == currentLanguage)
-                        .Select(t => t.Name)
-                        .FirstOrDefault(),
-                    Country = x.Country.Translations
-                        .Where(t => t.Language == currentLanguage)
-                        .Select(t => t.Name)
-                        .FirstOrDefault(),
+                    Category = x.Category.GetTranslation(currentLanguage, GetTranslationPropertyName.Name),
+                    City = x.City != null ? x.City.GetTranslation(currentLanguage, GetTranslationPropertyName.Name) : null,
+                    Country = x.Country != null ? x.Country.GetTranslation(currentLanguage, GetTranslationPropertyName.Name) : null,
+                    Email = x.Email,
                     CompanyNumbers = x.CompanyNumbers != null
                         ? x.CompanyNumbers.Select(cn => new CompanyNumberDto
                         {
@@ -193,10 +189,6 @@ namespace JobCompany.Business.Services.CompanyServices
                 })
                 .FirstOrDefaultAsync()
                     ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>(MessageHelper.GetMessage("NOT_FOUND"));
-
-            var response = await _client.GetResponse<GetAllCompaniesDataResponse>(new GetAllCompaniesDataRequest { UserId = companyProfile.Id });
-            
-            companyProfile.Email = response.Message.Email;
 
             return companyProfile;
         }
