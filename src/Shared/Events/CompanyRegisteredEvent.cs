@@ -6,5 +6,6 @@
         public Guid UserId { get; set; }
         public string CompanyName { get; set; }
         public string? CompanyLogo { get; set; }
+        public bool IsCompany { get; set; }
     }
 }

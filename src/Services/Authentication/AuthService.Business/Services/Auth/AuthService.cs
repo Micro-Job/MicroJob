@@ -47,11 +47,6 @@ namespace AuthService.Business.Services.Auth
             if (dto.Password != dto.ConfirmPassword)
                 throw new WrongPasswordException();
 
-            FileDto fileResult =
-                dto.Image != null
-                    ? await _fileService.UploadAsync(FilePaths.image, dto.Image)
-                    : new FileDto();
-
             var user = new User
             {
                 Id = Guid.NewGuid(),
@@ -62,11 +57,7 @@ namespace AuthService.Business.Services.Auth
                 RegistrationDate = DateTime.Now,
                 JobStatus = JobStatus.ActivelySeekingJob,
                 Password = _tokenHandler.GeneratePasswordHash(dto.Password),
-                Image = dto.Image != null ? $"{fileResult.FilePath}/{fileResult.FileName}" : null,
-                UserRole =
-                    dto.UserStatus == 1 ? UserRole.SimpleUser
-                    : dto.UserStatus == 2 ? UserRole.EmployeeUser
-                    : throw new InvalidUserStatusException(),
+                UserRole = UserRole.SimpleUser
             };
 
             await _context.Users.AddAsync(user);
@@ -99,10 +90,7 @@ namespace AuthService.Business.Services.Auth
             if (dto.Password != dto.ConfirmPassword)
                 throw new WrongPasswordException();
 
-            FileDto fileResult =
-                dto.Image != null
-                    ? await _fileService.UploadAsync(FilePaths.image, dto.Image)
-                    : new FileDto { FilePath = "Files/Images", FileName = "defaultlogo.jpg" };
+            FileDto fileResult = new FileDto { FilePath = "Files/Images", FileName = "defaultlogo.jpg" };
 
             var user = new User
             {
@@ -114,7 +102,10 @@ namespace AuthService.Business.Services.Auth
                 RegistrationDate = DateTime.Now,
                 Password = _tokenHandler.GeneratePasswordHash(dto.Password),
                 Image = fileResult.FilePath + "/" + fileResult.FileName,
-                UserRole = UserRole.CompanyUser,
+                UserRole =
+                    dto.UserStatus == 3 ? UserRole.CompanyUser
+                    : dto.UserStatus == 2 ? UserRole.EmployeeUser
+                    : throw new InvalidUserStatusException(),
             };
 
             await _context.Users.AddAsync(user);
@@ -127,6 +118,7 @@ namespace AuthService.Business.Services.Auth
                     UserId = user.Id,
                     CompanyName = dto.CompanyName.Trim(),
                     CompanyLogo = user.Image,
+                    IsCompany = dto.IsCompany,
                 }
             );
 
