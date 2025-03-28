@@ -10,7 +10,18 @@ public class PositionController(IPositionService _positionService) : ControllerB
     [HttpGet("[action]")]
     public async Task<IActionResult> GetAllPositions()
     {
-        var positions = await _positionService.GetAllPositionsAsync();
-        return Ok(positions);
+        return Ok(await _positionService.GetAllPositionsAsync());
+    }
+
+    [HttpGet("[action]")]
+    public async Task<IActionResult> GetMainPositions()
+    {
+        return Ok(await _positionService.GetMainPositionsAsync());
+    }
+
+    [HttpGet("[action]")]
+    public async Task<IActionResult> GetSubPositions(string mainPositionId)
+    {
+        return Ok(await _positionService.GetSubPositionsAsync(mainPositionId));
     }
 }

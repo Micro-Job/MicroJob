@@ -1,4 +1,5 @@
-﻿using Job.Business.Dtos.PositionDtos;
+﻿using Job.Business.Dtos.Position;
+using Job.Business.Dtos.PositionDtos;
 using Job.Business.Exceptions.Common;
 using Job.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
@@ -31,6 +32,34 @@ public class PositionService(JobDbContext _context) : IPositionService
             })
             .AsNoTracking()
             .ToListAsync();
+
+        return positions;
+    }
+
+    public async Task<List<PositionListDto>> GetMainPositionsAsync()
+    {
+        var positions = await _context.Positions.Where(x => x.IsActive && x.ParentPositionId != null)
+        .Select(x => new PositionListDto
+        {
+            Id = x.Id,
+            Name = x.Name
+        })
+        .AsNoTracking()
+        .ToListAsync();
+
+        return positions;
+    }
+
+    public async Task<List<PositionListDto>> GetSubPositionsAsync(string parentId)
+    {
+        var positions = await _context.Positions.Where(x => x.IsActive && x.ParentPositionId != Guid.Parse(parentId))
+        .Select(x => new PositionListDto
+        {
+            Id = x.Id,
+            Name = x.Name
+        })
+        .AsNoTracking()
+        .ToListAsync();
 
         return positions;
     }
