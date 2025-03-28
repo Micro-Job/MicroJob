@@ -366,12 +366,12 @@ namespace Job.Business.Services.Resume
         {
             return await _context.Resumes.AnyAsync(x => x.UserId == _currentUser.UserGuid);
         }
-
+            
         #region Private Methods
         private async Task<Core.Entities.Resume> BuildResumeAsync(ResumeCreateDto dto, Guid positionId)
         {
             FileDto fileResult = dto.UserPhoto != null
-                ? await _fileService.UploadAsync(FilePaths.document, dto.UserPhoto)
+                ? await _fileService.UploadAsync(FilePaths.image, dto.UserPhoto)
                 : new FileDto();
 
             string? email = dto.IsMainEmail
