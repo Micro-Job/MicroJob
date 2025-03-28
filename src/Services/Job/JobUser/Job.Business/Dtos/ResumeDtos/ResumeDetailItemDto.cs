@@ -12,11 +12,11 @@ namespace Job.Business.Dtos.ResumeDtos
 {
     public record ResumeDetailItemDto
     {
-        public Guid? UserId { get; set; }
+        public Guid UserId { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string FatherName { get; set; }
-        public string Position { get; set; }
+        public string? Position { get; set; }
         public string? UserPhoto { get; set; }
         public Driver IsDriver { get; set; }
         public FamilySituation IsMarried { get; set; }
@@ -26,7 +26,6 @@ namespace Job.Business.Dtos.ResumeDtos
         public string? Adress { get; set; }
         public DateTime BirthDay { get; set; }
 
-        //public UserInformationDto User { get; set; }
         public string? ResumeEmail { get; set; }
         public ICollection<SkillGetByIdDto>? Skills { get; set; }
         public ICollection<NumberGetByIdDto>? PhoneNumbers { get; set; }

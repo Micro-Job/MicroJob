@@ -17,9 +17,6 @@ namespace Job.Business.Dtos.ResumeDtos
         public string? Position { get; set; }
         public JobStatus JobStatus { get; set; }
         public LastWorkDto? LastWork { get; set; }
-        // ne ucundu anlamadim ?
-        //public DateTime? StartDate { get; set; }
-        //public DateTime? EndDate { get; set; }
         public ICollection<string>? SkillsName { get; set; }
     }
 }

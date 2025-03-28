@@ -178,7 +178,6 @@ namespace JobCompany.Business.Services.VacancyServices
         {
             var query = _context
                 .Vacancies.Where(x => x.Company.UserId == _currentUser.UserGuid)
-                .Include(x => x.Company)
                 .AsNoTracking();
 
             query = ApplyVacancyFilters(
@@ -209,6 +208,7 @@ namespace JobCompany.Business.Services.VacancyServices
                     WorkStyle = x.WorkStyle,
                     MainSalary = x.MainSalary,
                     MaxSalary = x.MaxSalary,
+                    VacancyStatus = x.VacancyStatus
                 })
                 .Skip(Math.Max(0, (skip - 1) * take))
                 .Take(take)
@@ -399,7 +399,7 @@ namespace JobCompany.Business.Services.VacancyServices
                 .AsNoTracking()
                 .AsQueryable();
 
-            query = ApplyVacancyFilters(query, titleName, categoryId, countryId, cityId, VacancyStatus.Active, minSalary, maxSalary, companyId, workStyle, workType);
+            query = ApplyVacancyFilters(query, titleName, categoryId, countryId, cityId, null, minSalary, maxSalary, companyId, workStyle, workType);
 
             var vacancies = await query
                 .Select(v => new VacancyGetAllDto

@@ -135,6 +135,9 @@
   <data name="CANNOT_BE_EMPTY" xml:space="preserve">
     <value>Boş ola bilməz</value>
   </data>
+  <data name="CANNOT_CHANGE_PENDING_STATUS" xml:space="preserve">
+    <value>Gözləmədə statusunu gizlədə bilməzsiniz</value>
+  </data>
   <data name="END_DATE_MUST_BE" xml:space="preserve">
     <value>Təhsil cari deyilsə, bitmə tarixi göstərilməlidir</value>
   </data>

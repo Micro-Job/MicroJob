@@ -26,6 +26,7 @@ namespace Job.Business.Services.Resume
             int skip,
             int take);
         Task<DataListDto<ResumeListDto>> GetSavedResumesAsync(string? fullName , int skip , int take);
+        Task<ResumeDetailItemDto> GetByIdResumeAysnc(string id);
         Task ToggleSaveResumeAsync(string resumeId);
         Task<bool> IsExistResumeAsync();
     }
