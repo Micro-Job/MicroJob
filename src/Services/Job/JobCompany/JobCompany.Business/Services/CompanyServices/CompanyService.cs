@@ -31,7 +31,7 @@ namespace JobCompany.Business.Services.CompanyServices
             JobCompanyDbContext context,
             IRequestClient<GetAllCompaniesDataRequest> client,
             IHttpContextAccessor contextAccessor,
-            IConfiguration configuration,ICurrentUser currentUser
+            IConfiguration configuration, ICurrentUser currentUser
         )
         {
             _context = context;
@@ -41,7 +41,7 @@ namespace JobCompany.Business.Services.CompanyServices
             _currentUser = currentUser;
         }
 
-        public async Task UpdateCompanyAsync(CompanyUpdateDto dto,ICollection<UpdateNumberDto>? numbersDto)
+        public async Task UpdateCompanyAsync(CompanyUpdateDto dto, ICollection<UpdateNumberDto>? numbersDto)
         {
             var company = await _context.Companies.Include(c => c.CompanyNumbers).FirstOrDefaultAsync(x => x.UserId == _currentUser.UserGuid)
                 ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>(MessageHelper.GetMessage("NOT_FOUND"));
@@ -90,7 +90,7 @@ namespace JobCompany.Business.Services.CompanyServices
             await _context.SaveChangesAsync();
         }
 
-        public async Task<DataListDto<CompanyDto>> GetAllCompaniesAsync(string? searchTerm,int skip = 1,int take = 12)
+        public async Task<DataListDto<CompanyDto>> GetAllCompaniesAsync(string? searchTerm, int skip = 1, int take = 12)
         {
             var query = _context.Companies.AsQueryable();
 
@@ -152,13 +152,62 @@ namespace JobCompany.Business.Services.CompanyServices
             return company;
         }
 
+        /// <summary>
+        /// Şirkət profili 
+        /// </summary>
+        public async Task<CompanyProfileDto> GetOwnCompanyInformationAsync()
+        {
+            var currentLanguage = _currentUser.LanguageCode;
+
+            var companyProfile = await _context.Companies
+                .Where(c => c.UserId == _currentUser.UserGuid)
+                .Select(x => new CompanyProfileDto
+                {
+                    Id = x.UserId,
+                    Name = x.CompanyName,
+                    Information = x.CompanyInformation,
+                    Location = x.CompanyLocation,
+                    WebLink = x.WebLink,
+                    CreatedDate = x.CreatedDate,
+                    EmployeeCount = x.EmployeeCount.HasValue ? x.EmployeeCount.Value : null,
+                    CompanyLogo = !string.IsNullOrEmpty(x.CompanyLogo) ? $"{_authServiceBaseUrl}/{x.CompanyLogo}" : null,
+                    Category = x.Category.Translations
+                        .Where(t => t.Language == currentLanguage)
+                        .Select(t => t.Name)
+                        .FirstOrDefault(),
+                    City = x.City.Translations
+                        .Where(t => t.Language == currentLanguage)
+                        .Select(t => t.Name)
+                        .FirstOrDefault(),
+                    Country = x.Country.Translations
+                        .Where(t => t.Language == currentLanguage)
+                        .Select(t => t.Name)
+                        .FirstOrDefault(),
+                    CompanyNumbers = x.CompanyNumbers != null
+                        ? x.CompanyNumbers.Select(cn => new CompanyNumberDto
+                        {
+                            Id = cn.Id,
+                            Number = cn.Number,
+                        }).ToList()
+                        : new List<CompanyNumberDto>()
+                })
+                .FirstOrDefaultAsync()
+                    ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>(MessageHelper.GetMessage("NOT_FOUND"));
+
+            var response = await _client.GetResponse<GetAllCompaniesDataResponse>(new GetAllCompaniesDataRequest { UserId = companyProfile.Id });
+            
+            companyProfile.Email = response.Message.Email;
+
+            return companyProfile;
+        }
+
         public async Task<string?> GetCompanyNameAsync(string companyId)
         {
             var companyGuid = Guid.Parse(companyId);
 
             return await _context.Companies.Where(x => x.Id == companyGuid)
                 .Select(x => x.CompanyName)
-                .FirstOrDefaultAsync() 
+                .FirstOrDefaultAsync()
                 ?? throw new NotFoundException<Company>("Şirkət mövcud deyil");
         }
     }

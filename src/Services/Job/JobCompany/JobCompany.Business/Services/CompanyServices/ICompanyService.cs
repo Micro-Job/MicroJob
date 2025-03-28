@@ -11,7 +11,7 @@ namespace JobCompany.Business.Services.CompanyServices
         Task<DataListDto<CompanyDto>> GetAllCompaniesAsync(string? searchTerm, int skip = 1,int take = 12);
         //Task<GetAllCompaniesDataResponse> GetAllCompaniesDataResponseAsync(Guid UserId);
         Task<CompanyDetailItemDto> GetCompanyDetailAsync(string id);
-
+        Task<CompanyProfileDto> GetOwnCompanyInformationAsync();
         Task<string> GetCompanyNameAsync(string id);
     }
 }

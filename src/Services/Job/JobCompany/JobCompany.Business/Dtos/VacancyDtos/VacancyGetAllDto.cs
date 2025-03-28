@@ -16,5 +16,6 @@ namespace JobCompany.Business.Dtos.VacancyDtos
         public decimal? MainSalary { get; set; }
         public decimal? MaxSalary { get; set; }
         public bool IsSaved { get; set; }
+        public VacancyStatus VacancyStatus { get; set; }
     }
 }
