@@ -223,7 +223,7 @@ namespace Job.Business.Services.Resume
                     .FirstOrDefault(),
                 SkillsName = x.ResumeSkills
                 .Select(s => s.Skill.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name))
-                .ToList()
+                .ToList(),
                 Position = x.Position != null ? x.Position.Name : null,
 
             })
@@ -322,7 +322,7 @@ namespace Job.Business.Services.Resume
                     .FirstOrDefault(),
                 SkillsName = x.Resume.ResumeSkills
                 .Select(s => s.Skill.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name))
-                .ToList()
+                .ToList(),
                 Position = x.Resume.Position != null ? x.Resume.Position.Name : null,
 
             })
@@ -599,7 +599,7 @@ namespace Job.Business.Services.Resume
 
             if (isPublic)
             {
-                var userData = await _userInformationService.GetUserDataAsync(resume.UserId);
+                var userData = await _userInformationService.GetUserDataAsync((Guid)resume.UserId);
                 resume.FirstName = userData.FirstName;
                 resume.LastName = userData.LastName;
             }
