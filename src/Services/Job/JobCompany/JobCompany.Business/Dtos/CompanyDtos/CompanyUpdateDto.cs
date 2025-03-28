@@ -14,6 +14,7 @@ namespace JobCompany.Business.Dtos.CompanyDtos
         public Guid? CategoryId { get; set; }
         public Guid? CountryId { get; set; }
         public Guid? CityId { get; set; }
+        public string? Email { get; set; }
     }
     public class CompanyUpdateDtoValidator : AbstractValidator<CompanyUpdateDto>
     {
@@ -45,6 +46,11 @@ namespace JobCompany.Business.Dtos.CompanyDtos
             RuleFor(x => x.EmployeeCount)
                 .GreaterThanOrEqualTo(0).WithMessage(MessageHelper.GetMessage("GREATER_THAN_OR_EQUAL_TO_ZERO"))
                 .When(x => x.EmployeeCount.HasValue);
+
+            RuleFor(x => x.Email)
+                .EmailAddress()
+                .WithMessage(MessageHelper.GetMessage("INVALID_FORMAT"))
+                .When(x => x.Email != null);
         }
     }
 }
