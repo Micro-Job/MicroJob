@@ -38,7 +38,7 @@ public class PositionService(JobDbContext _context) : IPositionService
 
     public async Task<List<PositionListDto>> GetMainPositionsAsync()
     {
-        var positions = await _context.Positions.Where(x => x.IsActive && x.ParentPositionId != null)
+        var positions = await _context.Positions.Where(x => x.IsActive && x.ParentPositionId == null)
         .Select(x => new PositionListDto
         {
             Id = x.Id,
