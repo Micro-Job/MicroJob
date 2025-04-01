@@ -377,21 +377,20 @@ namespace JobCompany.Business.Services.ApplicationServices
 
 
         /// <summary>
-        /// Consumer yenisi lazim
+        /// Sadece 1 consumer responsundan istifade etdim , userDataResponsdaki datalar onsuzda resumeDataResponse'da var idi o birine ehtiyac qalmadi
         /// </summary>
         /// <param name="skip"></param>
         /// <param name="take"></param>
         /// <returns></returns>
-        /// <exception cref="NotImplementedException"></exception>
+        /// <exception cref="NotImplementedException"></exception> 
         public async Task<DataListDto<ApplicationWithStatusInfoListDto>> GetAllApplicationWithStatusAsync(int skip = 1, int take = 9)
         {
             var applications = await GetPaginatedApplicationsAsync(skip, take);
 
             var userIds = applications.Item1.Select(a => a.UserId).ToList();
 
-            var userDataResponse = await GetUserDataResponseAsync(userIds);
             var resumeDataResponse = await GetResumeDataResponseAsync(userIds);
-            var data = MapApplicationsWithStatusToDto(applications.Item1, userDataResponse, resumeDataResponse); 
+            var data = MapApplicationsWithStatusToDto(applications.Item1, resumeDataResponse); 
 
             return new DataListDto<ApplicationWithStatusInfoListDto>
             {
@@ -402,21 +401,22 @@ namespace JobCompany.Business.Services.ApplicationServices
 
         private List<ApplicationWithStatusInfoListDto> MapApplicationsWithStatusToDto(
             List<Application> applications,
-            GetUsersDataResponse usersDataResponse,
             GetResumesDataResponse resumesDataResponse)
         {
             var response = applications
                 .Select(a =>
                 {
-                    var user = usersDataResponse.Users.FirstOrDefault(u => u.UserId == a.UserId);
                     var resume = resumesDataResponse.Users.FirstOrDefault(r => r.UserId == a.UserId);
 
                     return new ApplicationWithStatusInfoListDto()
                     {
                         ApplicationId = a.Id,
-                        ProfileImage =  user.ProfileImage != null ? $"{_currentUser.BaseUrl}/{user?.ProfileImage}" : null,
-                        FirstName = user?.FirstName,
-                        LastName = user?.LastName,
+                        ProfileImage = resume != null && resume.ProfileImage != null
+                        ? $"{_currentUser.BaseUrl}/{resume.ProfileImage}"
+                        : null,
+
+                        FirstName = resume?.FirstName,
+                        LastName = resume?.LastName,
                         StatusId = a.StatusId,
                         StatusName = a.Status.StatusEnum.ToString(),
                         Position = resume?.Position
