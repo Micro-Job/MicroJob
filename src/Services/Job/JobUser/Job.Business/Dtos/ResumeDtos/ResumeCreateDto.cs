@@ -36,9 +36,9 @@ namespace Job.Business.Dtos.ResumeDtos
 
         public ICollection<CertificateCreateDto>? Certificates { get; set; }
         public ICollection<NumberCreateDto> PhoneNumbers { get; set; }
-        public ICollection<ExperienceCreateDto> Experiences { get; set; }
-        public ICollection<EducationCreateDto> Educations { get; set; }
-        public ICollection<LanguageCreateDto> Languages { get; set; }
+        public ICollection<ExperienceCreateDto>? Experiences { get; set; }
+        public ICollection<EducationCreateDto>? Educations { get; set; }
+        public ICollection<LanguageCreateDto>? Languages { get; set; }
     }
 
     public class ResumeCreateDtoValidator : AbstractValidator<ResumeCreateDto>
@@ -57,9 +57,9 @@ namespace Job.Business.Dtos.ResumeDtos
             RuleFor(x => x.Adress)
                 .MaximumLength(200).WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_200"));
 
-            RuleFor(x => x.BirthDay)
-                .NotEmpty().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
-                .LessThan(DateTime.Now).WithMessage(MessageHelper.GetMessage("BIRTHDAY_MUST_BE_IN_THE_PAST"));
+            //RuleFor(x => x.BirthDay)
+            //    .NotEmpty().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
+            //    .LessThan(DateTime.Now).WithMessage(MessageHelper.GetMessage("BIRTHDAY_MUST_BE_IN_THE_PAST"));
 
             RuleFor(x => x.Gender)
                 .IsInEnum().WithMessage(MessageHelper.GetMessage("INVALID_FORMAT"));

@@ -26,19 +26,16 @@ namespace JobCompany.Business.Services.CompanyServices
     {
         private JobCompanyDbContext _context;
         readonly IConfiguration _configuration;
-        readonly IRequestClient<GetAllCompaniesDataRequest> _client;
         private readonly string? _authServiceBaseUrl;
         private readonly ICurrentUser _currentUser;
 
         public CompanyService(
             JobCompanyDbContext context,
-            IRequestClient<GetAllCompaniesDataRequest> client,
             IHttpContextAccessor contextAccessor,
             IConfiguration configuration, ICurrentUser currentUser
         )
         {
             _context = context;
-            _client = client;
             _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
             _configuration = configuration;
             _currentUser = currentUser;
@@ -178,6 +175,9 @@ namespace JobCompany.Business.Services.CompanyServices
                     Category = x.Category.GetTranslation(currentLanguage, GetTranslationPropertyName.Name),
                     City = x.City != null ? x.City.GetTranslation(currentLanguage, GetTranslationPropertyName.Name) : null,
                     Country = x.Country != null ? x.Country.GetTranslation(currentLanguage, GetTranslationPropertyName.Name) : null,
+                    CategoryId = x.CategoryId,
+                    CityId = x.CityId,
+                    CountryId = x.CountryId,
                     Email = x.Email,
                     CompanyNumbers = x.CompanyNumbers != null
                         ? x.CompanyNumbers.Select(cn => new CompanyNumberDto
