@@ -16,9 +16,12 @@ using Microsoft.Extensions.Configuration;
 using Shared.Exceptions;
 using Shared.Requests;
 using Shared.Responses;
+using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.Enums;
+using SharedLibrary.ExternalServices.FileService;
 using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;
+using SharedLibrary.Statics;
 
 namespace JobCompany.Business.Services.CompanyServices
 {
@@ -28,17 +31,20 @@ namespace JobCompany.Business.Services.CompanyServices
         readonly IConfiguration _configuration;
         private readonly string? _authServiceBaseUrl;
         private readonly ICurrentUser _currentUser;
+        private readonly IFileService _fileService;
 
         public CompanyService(
             JobCompanyDbContext context,
             IHttpContextAccessor contextAccessor,
             IConfiguration configuration, ICurrentUser currentUser
+            , IFileService fileService
         )
         {
             _context = context;
             _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
             _configuration = configuration;
             _currentUser = currentUser;
+            _fileService = fileService;
         }
 
         public async Task UpdateCompanyAsync(CompanyUpdateDto dto, ICollection<UpdateNumberDto>? numbersDto)
@@ -60,6 +66,18 @@ namespace JobCompany.Business.Services.CompanyServices
                 throw new EmailAlreadyUsedException(MessageHelper.GetMessage("EMAIL_ALREADY_USED"));
 
             company.Email = dto.Email;
+
+            if (!string.IsNullOrEmpty(company.CompanyLogo))
+            {
+                _fileService.DeleteFile(company.CompanyLogo);
+            }
+
+            if (dto.CompanyLogo != null)
+            {
+                FileDto fileResult = await _fileService.UploadAsync(FilePaths.image, dto.CompanyLogo);
+
+                company.CompanyLogo = $"{fileResult.FilePath}/{fileResult.FileName}";
+            }
 
             if (numbersDto is not null)
             {
