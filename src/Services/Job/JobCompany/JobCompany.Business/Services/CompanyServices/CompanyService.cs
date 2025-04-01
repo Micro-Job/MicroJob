@@ -168,6 +168,9 @@ namespace JobCompany.Business.Services.CompanyServices
 
             var companyProfile = await _context.Companies
                 .Where(c => c.UserId == _currentUser.UserGuid)
+                .Include(x => x.Category.Translations)
+                .Include(x => x.City.Translations)
+                .Include(x => x.Country.Translations)
                 .Select(x => new CompanyProfileDto
                 {
                     Id = x.Id,
