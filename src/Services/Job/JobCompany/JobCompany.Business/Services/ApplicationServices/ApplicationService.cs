@@ -414,6 +414,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                     return new ApplicationWithStatusInfoListDto()
                     {
                         ApplicationId = a.Id,
+                        ProfileImage =  user.ProfileImage != null ? $"{_currentUser.BaseUrl}/{user?.ProfileImage}" : null,
                         FirstName = user?.FirstName,
                         LastName = user?.LastName,
                         StatusId = a.StatusId,
