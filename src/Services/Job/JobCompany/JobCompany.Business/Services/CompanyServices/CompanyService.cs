@@ -46,9 +46,9 @@ namespace JobCompany.Business.Services.CompanyServices
             var company = await _context.Companies.Include(c => c.CompanyNumbers).FirstOrDefaultAsync(x => x.UserId == _currentUser.UserGuid)
                 ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>(MessageHelper.GetMessage("NOT_FOUND"));
 
-            company.CompanyName = dto.CompanyName.Trim();
-            company.CompanyInformation = dto.CompanyInformation.Trim();
-            company.CompanyLocation = dto.CompanyLocation.Trim();
+            company.CompanyName = dto.CompanyName?.Trim();
+            company.CompanyInformation = dto.CompanyInformation?.Trim();
+            company.CompanyLocation = dto.CompanyLocation?.Trim();
             company.WebLink = dto.WebLink;
             company.EmployeeCount = dto.EmployeeCount ?? company.EmployeeCount;
             company.CreatedDate = dto.CreatedDate;
@@ -56,43 +56,49 @@ namespace JobCompany.Business.Services.CompanyServices
             company.CountryId = dto.CountryId;
             company.CityId = dto.CityId;
 
-
-            if (dto.Email !=null && await _context.Companies.AnyAsync(x => x.Email == dto.Email && x.Id != company.Id))
+            if (dto.Email != null && await _context.Companies.AnyAsync(x => x.Email == dto.Email && x.Id != company.Id))
                 throw new EmailAlreadyUsedException(MessageHelper.GetMessage("EMAIL_ALREADY_USED"));
 
             company.Email = dto.Email;
 
             if (numbersDto is not null)
             {
-                var numbersDtoDict = numbersDto.ToDictionary(n => n.Id, n => n.PhoneNumber);
+                var numbersDtoDict = numbersDto
+                    .Where(n => n.Id != null)
+                    .ToDictionary(n => n.Id!.ToString(), n => n.PhoneNumber);
 
-                var existingNumbers = company.CompanyNumbers.ToDictionary(
+                // Id-si olmayan nömrələr yeni nömrələrdir. Onları əlavə edir
+                var numbersToAdd = numbersDto
+                    .Where(n => n.Id == null)
+                    .Select(n => new CompanyNumber { Number = n.PhoneNumber, CompanyId = company.Id })
+                    .ToList();
+
+                // Mövcud nömrələri alırıq
+                var existingNumbers = company.CompanyNumbers?.ToDictionary(
                     n => n.Id.ToString(),
                     n => n
-                );
+                ) ?? [];
+
+                var numbersToRemove = new List<CompanyNumber>();
 
                 foreach (var kvp in existingNumbers)
                 {
-                    if (!numbersDtoDict.ContainsKey(kvp.Key))
+                    // Yeni nömrələr arasında mövcud nömrə yoxdursa mövcud nömrəni silir
+                    if (!numbersDtoDict.TryGetValue(kvp.Key, out string? value))
                     {
-                        company.CompanyNumbers.Remove(kvp.Value);
+                        numbersToRemove.Add(kvp.Value);
                     }
                     else
                     {
-                        kvp.Value.Number = numbersDtoDict[kvp.Key];
+                        // Yeni nömrə mövcud nömrədən fərqli olduqda mövcud olan nömrəni yeniləyir
+                        kvp.Value.Number = value;
                         numbersDtoDict.Remove(kvp.Key);
                     }
                 }
-
-                foreach (var newNumber in numbersDtoDict)
-                {
-                    company.CompanyNumbers.Add(
-                        new CompanyNumber { Number = newNumber.Value, CompanyId = company.Id }
-                    );
-                }
+                await _context.CompanyNumbers.AddRangeAsync(numbersToAdd);
+                _context.CompanyNumbers.RemoveRange(numbersToRemove);
             }
 
-            _context.Companies.Update(company);
             await _context.SaveChangesAsync();
         }
 
