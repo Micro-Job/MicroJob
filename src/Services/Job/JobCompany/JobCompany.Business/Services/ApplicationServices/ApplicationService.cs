@@ -238,6 +238,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                         Status = a.Status.StatusEnum,
                         VacancyId = a.VacancyId,
                         VacancyName = a.Vacancy.Title,
+                        ProfileImage = user.ProfileImage
                     };
                 })
                 .ToList();

@@ -13,4 +13,5 @@ public record AllApplicationListDto
     public Guid VacancyId { get; set; }
     public Guid? StatusId { get; set; }
     public StatusEnum Status { get; set; }
+    public string? ProfileImage { get; set; }
 }
