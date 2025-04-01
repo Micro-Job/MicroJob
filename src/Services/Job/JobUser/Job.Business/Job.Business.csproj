@@ -9,10 +9,13 @@
   <ItemGroup>
     <Compile Remove="Dtos\ApplicationDtos\**" />
     <Compile Remove="HelperServices\**" />
+    <Compile Remove="NewFolder\**" />
     <EmbeddedResource Remove="Dtos\ApplicationDtos\**" />
     <EmbeddedResource Remove="HelperServices\**" />
+    <EmbeddedResource Remove="NewFolder\**" />
     <None Remove="Dtos\ApplicationDtos\**" />
     <None Remove="HelperServices\**" />
+    <None Remove="NewFolder\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -31,10 +34,6 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="NewFolder\" />
   </ItemGroup>
 
 </Project>

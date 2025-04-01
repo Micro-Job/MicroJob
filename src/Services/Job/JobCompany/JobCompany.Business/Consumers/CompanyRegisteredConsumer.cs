@@ -13,12 +13,12 @@ namespace JobCompany.Business.Consumers
             Guid companyId = context.Message.CompanyId;
 
             var newCompany = new Company
-
             {
                 Id = companyId,
                 UserId = context.Message.UserId,
                 CompanyName = context.Message.CompanyName,
                 CompanyLogo = context.Message.CompanyLogo,
+                IsCompany = context.Message.IsCompany
             };
 
             await _context.Companies.AddAsync(newCompany);
