@@ -62,5 +62,11 @@ namespace JobCompany.API.Controllers
         {
             return Ok(await service.GetUserApplicationByIdAsync(applicationId));
         }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetAllApplicationWithStatus()
+        {
+            return Ok(await service.GetAllApplicationWithStatusAsync());
+        }
     }
 }

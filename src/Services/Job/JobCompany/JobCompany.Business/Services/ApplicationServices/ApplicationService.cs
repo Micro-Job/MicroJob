@@ -374,5 +374,57 @@ namespace JobCompany.Business.Services.ApplicationServices
                 
             return application;
         }
+
+
+        /// <summary>
+        /// Consumer yenisi lazim
+        /// </summary>
+        /// <param name="skip"></param>
+        /// <param name="take"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public async Task<DataListDto<ApplicationWithStatusInfoListDto>> GetAllApplicationWithStatusAsync(int skip = 1, int take = 9)
+        {
+            var applications = await GetPaginatedApplicationsAsync(skip, take);
+
+            var userIds = applications.Item1.Select(a => a.UserId).ToList();
+
+            var userDataResponse = await GetUserDataResponseAsync(userIds);
+            var resumeDataResponse = await GetResumeDataResponseAsync(userIds);
+            var data = MapApplicationsWithStatusToDto(applications.Item1, userDataResponse, resumeDataResponse); 
+
+            return new DataListDto<ApplicationWithStatusInfoListDto>
+            {
+                Datas = data,
+                TotalCount = applications.Item2
+            };
+        }
+
+        private List<ApplicationWithStatusInfoListDto> MapApplicationsWithStatusToDto(
+            List<Application> applications,
+            GetUsersDataResponse usersDataResponse,
+            GetResumesDataResponse resumesDataResponse)
+        {
+            var response = applications
+                .Select(a =>
+                {
+                    var user = usersDataResponse.Users.FirstOrDefault(u => u.UserId == a.UserId);
+                    var resume = resumesDataResponse.Users.FirstOrDefault(r => r.UserId == a.UserId);
+
+                    return new ApplicationWithStatusInfoListDto()
+                    {
+                        ApplicationId = a.Id,
+                        FirstName = user?.FirstName,
+                        LastName = user?.LastName,
+                        StatusId = a.StatusId,
+                        StatusName = a.Status.StatusEnum.ToString(),
+                        Position = resume?.Position
+                    };
+                })
+                .ToList();
+
+            return response;
+        }
+
     }
 }
