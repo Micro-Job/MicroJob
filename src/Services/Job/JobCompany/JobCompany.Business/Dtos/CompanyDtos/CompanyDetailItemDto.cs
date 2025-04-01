@@ -10,7 +10,6 @@ namespace JobCompany.Business.Dtos.CompanyDtos
         public string? CompanyLogo { get; set; }
         public ICollection<CompanyNumberDto>? CompanyNumbers { get; set; }
         public string? CompanyLocation { get; set; }
-        public string PhoneNumber { get; set; }
         public string Email { get; set; }
         public string? WebLink { get; set; }
     }

@@ -62,9 +62,15 @@ namespace Job.Business.Services.Resume
             await _context.SaveChangesAsync();
 
             var phoneNumbers = await GetPhoneNumbersAsync(resumeCreateDto, resume.Id, resumeCreateDto);
-            var educations = await _educationService.CreateBulkEducationAsync(resumeCreateDto.Educations, resume.Id);
-            var experiences = await _experienceService.CreateBulkExperienceAsync(resumeCreateDto.Experiences, resume.Id);
-            var languages = await _languageService.CreateBulkLanguageAsync(resumeCreateDto.Languages, resume.Id);
+            var educations = resumeCreateDto.Educations != null
+                ? await _educationService.CreateBulkEducationAsync(resumeCreateDto.Educations, resume.Id)
+                : [];
+            var experiences = resumeCreateDto.Experiences != null
+                ? await _experienceService.CreateBulkExperienceAsync(resumeCreateDto.Experiences, resume.Id)
+                : [];
+            var languages = resumeCreateDto.Languages != null
+                ? await _languageService.CreateBulkLanguageAsync(resumeCreateDto.Languages, resume.Id)
+                : [];
             var certificates = await GetCertificatesAsync(resumeCreateDto);
             var resumeSkills = GetResumeSkills(resumeCreateDto.SkillIds, resume.Id);
 
@@ -366,12 +372,12 @@ namespace Job.Business.Services.Resume
         {
             return await _context.Resumes.AnyAsync(x => x.UserId == _currentUser.UserGuid);
         }
-
+            
         #region Private Methods
         private async Task<Core.Entities.Resume> BuildResumeAsync(ResumeCreateDto dto, Guid positionId)
         {
             FileDto fileResult = dto.UserPhoto != null
-                ? await _fileService.UploadAsync(FilePaths.document, dto.UserPhoto)
+                ? await _fileService.UploadAsync(FilePaths.image, dto.UserPhoto)
                 : new FileDto();
 
             string? email = dto.IsMainEmail
