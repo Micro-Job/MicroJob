@@ -13,6 +13,8 @@ namespace Job.Business.Dtos.ResumeDtos
     public record ResumeDetailItemDto
     {
         public Guid UserId { get; set; }
+        public Guid ResumeId { get; set; }
+        public bool IsSaved { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string FatherName { get; set; }
