@@ -192,6 +192,9 @@
   <data name="NO_PERMISSION" xml:space="preserve">
     <value>You have no permission</value>
   </data>
+  <data name="OLD_PASSWORD_WRONG" xml:space="preserve">
+    <value>The old password is incorrect</value>
+  </data>
   <data name="PASSWORDS_DO_NOT_MATCH" xml:space="preserve">
     <value>Passwords do not match</value>
   </data>
