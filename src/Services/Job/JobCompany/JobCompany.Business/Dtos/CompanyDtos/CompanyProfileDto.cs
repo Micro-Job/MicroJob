@@ -11,10 +11,13 @@ public class CompanyProfileDto
     public DateTime? CreatedDate { get; set; }
     public int? EmployeeCount { get; set; }
     public string? Category { get; set; }
+    public Guid? CategoryId { get; set; }
     public ICollection<CompanyNumberDto>? CompanyNumbers { get; set; }
     public string? Email { get; set; }
     public string? Country { get; set; }
+    public Guid? CountryId { get; set; }
     public string? City { get; set; }
+    public Guid? CityId { get; set; }
     public string? Location { get; set; }
     public string? WebLink { get; set; }
 }

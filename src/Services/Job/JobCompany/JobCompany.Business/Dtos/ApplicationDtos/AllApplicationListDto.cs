@@ -1,4 +1,6 @@
-﻿namespace JobCompany.Business.Dtos.ApplicationDtos;
+﻿using SharedLibrary.Enums;
+
+namespace JobCompany.Business.Dtos.ApplicationDtos;
 
 public record AllApplicationListDto
 {
@@ -10,5 +12,6 @@ public record AllApplicationListDto
     public string VacancyName { get; set; }
     public Guid VacancyId { get; set; }
     public Guid? StatusId { get; set; }
-    public string StatusName { get; set; }
+    public StatusEnum Status { get; set; }
+    public string? ProfileImage { get; set; }
 }

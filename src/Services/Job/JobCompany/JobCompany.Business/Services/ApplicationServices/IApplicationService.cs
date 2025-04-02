@@ -12,6 +12,7 @@ namespace JobCompany.Business.Services.ApplicationServices
         Task ChangeApplicationStatusAsync(string applicationId, string statusId);
         Task<ApplicationGetByIdDto> GetApplicationByIdAsync(string applicationId);
         Task<ICollection<ApplicationInfoListDto>> GetAllApplicationAsync(int skip = 1,int take = 9);
+        Task<DataListDto<ApplicationWithStatusInfoListDto>> GetAllApplicationWithStatusAsync(int skip = 1,int take = 9);
         Task<DataListDto<AllApplicationListDto>> GetAllApplicationsListAsync(int skip = 1,int take = 10);
 
         Task CreateUserApplicationAsync(string vacancyId);

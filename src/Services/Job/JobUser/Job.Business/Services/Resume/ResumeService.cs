@@ -526,14 +526,18 @@ namespace Job.Business.Services.Resume
 
         public async Task<ResumeDetailItemDto> GetByIdResumeAysnc(string id)
         {
+            var userId = _currentUser.UserGuid;
             var resumeGuid = Guid.Parse(id);
             var resume = await _context.Resumes.Where(r => r.Id == resumeGuid)
             .Include(x => x.ResumeSkills)
                 .ThenInclude(x => x.Skill)
                     .ThenInclude(x => x.Translations)
+            .Include(x => x.SavedResumes)
             .Select(r => new ResumeDetailItemDto
             {
                 UserId = r.UserId,
+                ResumeId = r.Id,
+                IsSaved = r.SavedResumes.Any(sr => sr.CompanyUserId == userId),
                 FirstName = r.IsPublic ? r.FirstName : null,
                 LastName = r.IsPublic ? r.LastName : null,
                 FatherName = r.FatherName,

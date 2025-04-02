@@ -29,7 +29,7 @@ namespace JobCompany.API.Controllers
             return Ok(await service.GetAllApplicationsListAsync(skip, take));
         }
 
-        [HttpPatch("[action]")]
+        [HttpPost("[action]")]
         public async Task<IActionResult> ChangeApplicationStatus(string applicationId,string statusId)
         {
             await service.ChangeApplicationStatusAsync(applicationId, statusId);
@@ -61,6 +61,12 @@ namespace JobCompany.API.Controllers
         public async Task<IActionResult> GetUserApplicationById(string applicationId)
         {
             return Ok(await service.GetUserApplicationByIdAsync(applicationId));
+        }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetAllApplicationWithStatus()
+        {
+            return Ok(await service.GetAllApplicationWithStatusAsync());
         }
     }
 }

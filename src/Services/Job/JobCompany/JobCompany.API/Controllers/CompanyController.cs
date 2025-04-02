@@ -13,7 +13,7 @@ namespace JobCompany.API.Controllers
     {
         [HttpPut("[action]")]
         [AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser)]
-        public async Task<IActionResult> UpdateCompany([FromBody] UpdateCompanyRequest request)
+        public async Task<IActionResult> UpdateCompany([FromForm] UpdateCompanyRequest request)
         {
             await service.UpdateCompanyAsync(request.CompanyDto, request.NumbersDto);
             return Ok();

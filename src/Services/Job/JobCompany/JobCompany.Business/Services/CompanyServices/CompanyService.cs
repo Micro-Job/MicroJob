@@ -16,9 +16,12 @@ using Microsoft.Extensions.Configuration;
 using Shared.Exceptions;
 using Shared.Requests;
 using Shared.Responses;
+using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.Enums;
+using SharedLibrary.ExternalServices.FileService;
 using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;
+using SharedLibrary.Statics;
 
 namespace JobCompany.Business.Services.CompanyServices
 {
@@ -26,22 +29,22 @@ namespace JobCompany.Business.Services.CompanyServices
     {
         private JobCompanyDbContext _context;
         readonly IConfiguration _configuration;
-        readonly IRequestClient<GetAllCompaniesDataRequest> _client;
         private readonly string? _authServiceBaseUrl;
         private readonly ICurrentUser _currentUser;
+        private readonly IFileService _fileService;
 
         public CompanyService(
             JobCompanyDbContext context,
-            IRequestClient<GetAllCompaniesDataRequest> client,
             IHttpContextAccessor contextAccessor,
             IConfiguration configuration, ICurrentUser currentUser
+            , IFileService fileService
         )
         {
             _context = context;
-            _client = client;
             _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
             _configuration = configuration;
             _currentUser = currentUser;
+            _fileService = fileService;
         }
 
         public async Task UpdateCompanyAsync(CompanyUpdateDto dto, ICollection<UpdateNumberDto>? numbersDto)
@@ -49,9 +52,9 @@ namespace JobCompany.Business.Services.CompanyServices
             var company = await _context.Companies.Include(c => c.CompanyNumbers).FirstOrDefaultAsync(x => x.UserId == _currentUser.UserGuid)
                 ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>(MessageHelper.GetMessage("NOT_FOUND"));
 
-            company.CompanyName = dto.CompanyName.Trim();
-            company.CompanyInformation = dto.CompanyInformation.Trim();
-            company.CompanyLocation = dto.CompanyLocation.Trim();
+            company.CompanyName = dto.CompanyName?.Trim();
+            company.CompanyInformation = dto.CompanyInformation?.Trim();
+            company.CompanyLocation = dto.CompanyLocation?.Trim();
             company.WebLink = dto.WebLink;
             company.EmployeeCount = dto.EmployeeCount ?? company.EmployeeCount;
             company.CreatedDate = dto.CreatedDate;
@@ -59,43 +62,61 @@ namespace JobCompany.Business.Services.CompanyServices
             company.CountryId = dto.CountryId;
             company.CityId = dto.CityId;
 
-
-            if (dto.Email !=null && await _context.Companies.AnyAsync(x => x.Email == dto.Email && x.Id != company.Id))
+            if (dto.Email != null && await _context.Companies.AnyAsync(x => x.Email == dto.Email && x.Id != company.Id))
                 throw new EmailAlreadyUsedException(MessageHelper.GetMessage("EMAIL_ALREADY_USED"));
 
             company.Email = dto.Email;
 
+            if (!string.IsNullOrEmpty(company.CompanyLogo))
+            {
+                _fileService.DeleteFile(company.CompanyLogo);
+            }
+
+            if (dto.CompanyLogo != null)
+            {
+                FileDto fileResult = await _fileService.UploadAsync(FilePaths.image, dto.CompanyLogo);
+
+                company.CompanyLogo = $"{fileResult.FilePath}/{fileResult.FileName}";
+            }
+
             if (numbersDto is not null)
             {
-                var numbersDtoDict = numbersDto.ToDictionary(n => n.Id, n => n.PhoneNumber);
+                var numbersDtoDict = numbersDto
+                    .Where(n => n.Id != null)
+                    .ToDictionary(n => n.Id!.ToString(), n => n.PhoneNumber);
 
-                var existingNumbers = company.CompanyNumbers.ToDictionary(
+                // Id-si olmayan nömrələr yeni nömrələrdir. Onları əlavə edir
+                var numbersToAdd = numbersDto
+                    .Where(n => n.Id == null)
+                    .Select(n => new CompanyNumber { Number = n.PhoneNumber, CompanyId = company.Id })
+                    .ToList();
+
+                // Mövcud nömrələri alırıq
+                var existingNumbers = company.CompanyNumbers?.ToDictionary(
                     n => n.Id.ToString(),
                     n => n
-                );
+                ) ?? [];
+
+                var numbersToRemove = new List<CompanyNumber>();
 
                 foreach (var kvp in existingNumbers)
                 {
-                    if (!numbersDtoDict.ContainsKey(kvp.Key))
+                    // Yeni nömrələr arasında mövcud nömrə yoxdursa mövcud nömrəni silir
+                    if (!numbersDtoDict.TryGetValue(kvp.Key, out string? value))
                     {
-                        company.CompanyNumbers.Remove(kvp.Value);
+                        numbersToRemove.Add(kvp.Value);
                     }
                     else
                     {
-                        kvp.Value.Number = numbersDtoDict[kvp.Key];
+                        // Yeni nömrə mövcud nömrədən fərqli olduqda mövcud olan nömrəni yeniləyir
+                        kvp.Value.Number = value;
                         numbersDtoDict.Remove(kvp.Key);
                     }
                 }
-
-                foreach (var newNumber in numbersDtoDict)
-                {
-                    company.CompanyNumbers.Add(
-                        new CompanyNumber { Number = newNumber.Value, CompanyId = company.Id }
-                    );
-                }
+                await _context.CompanyNumbers.AddRangeAsync(numbersToAdd);
+                _context.CompanyNumbers.RemoveRange(numbersToRemove);
             }
 
-            _context.Companies.Update(company);
             await _context.SaveChangesAsync();
         }
 
@@ -164,7 +185,13 @@ namespace JobCompany.Business.Services.CompanyServices
             var currentLanguage = _currentUser.LanguageCode;
 
             var companyProfile = await _context.Companies
+                .Include(c => c.Category.Translations)
+                .Include(c => c.City.Translations)
+                .Include(c => c.Country.Translations)
                 .Where(c => c.UserId == _currentUser.UserGuid)
+                .Include(x => x.Category.Translations)
+                .Include(x => x.City.Translations)
+                .Include(x => x.Country.Translations)
                 .Select(x => new CompanyProfileDto
                 {
                     Id = x.Id,
@@ -178,6 +205,9 @@ namespace JobCompany.Business.Services.CompanyServices
                     Category = x.Category.GetTranslation(currentLanguage, GetTranslationPropertyName.Name),
                     City = x.City != null ? x.City.GetTranslation(currentLanguage, GetTranslationPropertyName.Name) : null,
                     Country = x.Country != null ? x.Country.GetTranslation(currentLanguage, GetTranslationPropertyName.Name) : null,
+                    CategoryId = x.CategoryId,
+                    CityId = x.CityId,
+                    CountryId = x.CountryId,
                     Email = x.Email,
                     CompanyNumbers = x.CompanyNumbers != null
                         ? x.CompanyNumbers.Select(cn => new CompanyNumberDto
