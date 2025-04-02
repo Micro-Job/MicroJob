@@ -502,7 +502,7 @@ namespace JobCompany.Business.Services.VacancyServices
 
         public async Task<List<VacancyGetAllDto>> SimilarVacanciesAsync(string vacancyId, int take = 8)
         {
-            var mainVacancy = await _context.Vacancies.Where(x => x.Id == Guid.Parse(vacancyId) && x.VacancyStatus == VacancyStatus.Active && x.EndDate > DateTime.Now)
+            var mainVacancy = await _context.Vacancies.Where(x => x.Id == Guid.Parse(vacancyId) && x.EndDate > DateTime.Now)
             .Select(x => new
             {
                 x.Id,
