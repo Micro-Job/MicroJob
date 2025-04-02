@@ -1,4 +1,5 @@
 using FluentValidation;
+using Microsoft.AspNetCore.Http;
 using SharedLibrary.Helpers;
 
 namespace JobCompany.Business.Dtos.CompanyDtos
@@ -15,6 +16,7 @@ namespace JobCompany.Business.Dtos.CompanyDtos
         public Guid? CountryId { get; set; }
         public Guid? CityId { get; set; }
         public string? Email { get; set; }
+        public IFormFile? CompanyLogo { get; set; }
     }
     public class CompanyUpdateDtoValidator : AbstractValidator<CompanyUpdateDto>
     {
