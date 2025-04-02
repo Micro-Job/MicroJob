@@ -238,7 +238,8 @@ namespace JobCompany.Business.Services.ApplicationServices
                         Status = a.Status.StatusEnum,
                         VacancyId = a.VacancyId,
                         VacancyName = a.Vacancy.Title,
-                        ProfileImage = user.ProfileImage
+                        ProfileImage = user.ProfileImage,
+                        DateTime = a.CreatedDate
                     };
                 })
                 .ToList();
@@ -420,7 +421,8 @@ namespace JobCompany.Business.Services.ApplicationServices
                         LastName = resume?.LastName,
                         StatusId = a.StatusId,
                         StatusName = a.Status.StatusEnum.ToString(),
-                        Position = resume?.Position
+                        Position = resume?.Position,
+                        DateTime = a.CreatedDate,
                     };
                 })
                 .ToList();

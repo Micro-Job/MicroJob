@@ -14,4 +14,5 @@ public record AllApplicationListDto
     public Guid? StatusId { get; set; }
     public StatusEnum Status { get; set; }
     public string? ProfileImage { get; set; }
+    public DateTime DateTime { get; set; }
 }

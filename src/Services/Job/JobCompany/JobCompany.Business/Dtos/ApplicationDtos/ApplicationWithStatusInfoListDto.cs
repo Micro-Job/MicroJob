@@ -11,4 +11,5 @@ public class ApplicationWithStatusInfoListDto
     public string Position { get; set; }
     public Guid? StatusId { get; set; }
     public string? StatusName { get; set; }
+    public DateTime DateTime { get; set; }
 }
