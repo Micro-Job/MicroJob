@@ -11,4 +11,5 @@ public record AllApplicationListDto
     public Guid VacancyId { get; set; }
     public Guid? StatusId { get; set; }
     public string StatusName { get; set; }
+    public DateTime DateTime { get; set; }
 }

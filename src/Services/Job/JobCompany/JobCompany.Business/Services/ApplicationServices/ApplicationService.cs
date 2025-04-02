@@ -238,6 +238,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                         StatusName = a.Status.GetTranslation(_currentUser.LanguageCode,GetTranslationPropertyName.Name),
                         VacancyId = a.VacancyId,
                         VacancyName = a.Vacancy.Title,
+                        DateTime = a.CreatedDate
                     };
                 })
                 .ToList();
@@ -419,7 +420,8 @@ namespace JobCompany.Business.Services.ApplicationServices
                         LastName = resume?.LastName,
                         StatusId = a.StatusId,
                         StatusName = a.Status.StatusEnum.ToString(),
-                        Position = resume?.Position
+                        Position = resume?.Position,
+                        DateTime = a.CreatedDate,
                     };
                 })
                 .ToList();
