@@ -235,9 +235,10 @@ namespace JobCompany.Business.Services.ApplicationServices
                         Email = user.Email,
                         PhoneNumber = user.PhoneNumber,
                         StatusId = a.StatusId,
-                        StatusName = a.Status.GetTranslation(_currentUser.LanguageCode,GetTranslationPropertyName.Name),
+                        Status = a.Status.StatusEnum,
                         VacancyId = a.VacancyId,
                         VacancyName = a.Vacancy.Title,
+                        ProfileImage = user.ProfileImage
                     };
                 })
                 .ToList();
