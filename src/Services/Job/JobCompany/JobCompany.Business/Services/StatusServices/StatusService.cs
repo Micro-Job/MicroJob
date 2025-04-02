@@ -54,16 +54,22 @@ namespace JobCompany.Business.Services.StatusServices
 
         public async Task ToggleChangeStatusVisibilityAsync(string statusId)
         {
-            var existStatus = await _context.Statuses.FirstOrDefaultAsync(x => x.Id == Guid.Parse(statusId) && x.Company.UserId == _currentUser.UserGuid)
-                ?? throw new NotFoundException<Status>("Status mövcud deyil");
+            var existStatus = await _context.Statuses
+                .Include(s => s.Applications)  
+                .FirstOrDefaultAsync(x => x.Id == Guid.Parse(statusId) && x.Company.UserId == _currentUser.UserGuid)
+                ?? throw new NotFoundException<Status>(MessageHelper.GetMessage("NOT_FOUND"));
 
             if (existStatus.StatusEnum == StatusEnum.Pending)
                 throw new CannotChangePendingStatusVisibilityException(MessageHelper.GetMessage("CANNOT_CHANGE_PENDING_STATUS"));
+
+            if (existStatus.Applications.Any())
+                throw new CannotChangeStatusVisibilityException(MessageHelper.GetMessage("CANNOT_CHANGE_STATUS"));
 
             existStatus.IsVisible = !existStatus.IsVisible;
 
             await _context.SaveChangesAsync();
         }
+
 
 
         //public async Task CreateStatusAsync(CreateStatusDto dto)

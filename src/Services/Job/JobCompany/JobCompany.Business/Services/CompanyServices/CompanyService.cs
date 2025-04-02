@@ -185,6 +185,9 @@ namespace JobCompany.Business.Services.CompanyServices
             var currentLanguage = _currentUser.LanguageCode;
 
             var companyProfile = await _context.Companies
+                .Include(c => c.Category.Translations)
+                .Include(c => c.City.Translations)
+                .Include(c => c.Country.Translations)
                 .Where(c => c.UserId == _currentUser.UserGuid)
                 .Include(x => x.Category.Translations)
                 .Include(x => x.City.Translations)

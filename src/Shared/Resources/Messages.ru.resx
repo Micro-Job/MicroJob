@@ -138,6 +138,9 @@
   <data name="CANNOT_CHANGE_PENDING_STATUS" xml:space="preserve">
     <value>Невозможно скрыть ожидаемый статус.</value>
   </data>
+  <data name="CANNOT_CHANGE_STATUS" xml:space="preserve">
+    <value>Статус не может быть изменен</value>
+  </data>
   <data name="EMAIL_ALREADY_USED" xml:space="preserve">
     <value>Этот адрес электронной почты используется другой компанией.</value>
   </data>
