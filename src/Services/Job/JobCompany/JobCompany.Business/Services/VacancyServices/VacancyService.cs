@@ -270,6 +270,8 @@ namespace JobCompany.Business.Services.VacancyServices
         {
             var vacancyGuid = Guid.Parse(id);
 
+            Guid userGuid = (Guid)_currentUser.UserGuid;
+
             var vacancyDto = await _context
                     .Vacancies.Where(x => x.Id == vacancyGuid)
                     .Select(x => new VacancyGetByIdDto
@@ -294,7 +296,7 @@ namespace JobCompany.Business.Services.VacancyServices
                         Driver = x.Driver,
                         Citizenship = x.Citizenship,
                         ExamId = x.ExamId,
-                        IsSaved = _currentUser.UserId != null ? x.SavedVacancies.Any(y=> y.UserId == _currentUser.UserGuid && y.VacancyId == vacancyGuid) : false,
+                        IsSaved = userGuid != null ? x.SavedVacancies.Any(y=> y.UserId == userGuid && y.VacancyId == vacancyGuid) : false,
                         VacancyNumbers = x
                             .VacancyNumbers.Select(vn => new VacancyNumberDto
                             {
@@ -307,13 +309,17 @@ namespace JobCompany.Business.Services.VacancyServices
                             .ToList(),
                         CompanyName = x.CompanyName,
                         CategoryName = x.Category.GetTranslation(_currentUser.LanguageCode,GetTranslationPropertyName.Name),
+                        CompanyUserId = x.Company.UserId
                     })
                     .FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
 
             var existVacancy = await _context.Vacancies.FirstOrDefaultAsync(x => x.Id == vacancyGuid);
 
-            existVacancy.ViewCount++;
-            await _context.SaveChangesAsync();
+            if (vacancyDto.CompanyUserId != userGuid)
+            {
+                existVacancy.ViewCount++;
+                await _context.SaveChangesAsync();
+            }
 
             return vacancyDto;
         }
