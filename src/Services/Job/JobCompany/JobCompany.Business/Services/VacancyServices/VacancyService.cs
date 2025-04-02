@@ -87,6 +87,7 @@ namespace JobCompany.Business.Services.VacancyServices
                 CompanyLogo = companyLogoPath,
                 StartDate = vacancyDto.StartDate,
                 EndDate = vacancyDto.EndDate,
+                CreatedDate = DateTime.Now,
                 Location = vacancyDto.Location,
                 CountryId = vacancyDto.CountryId,
                 CityId = vacancyDto.CityId,
