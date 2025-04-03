@@ -163,12 +163,15 @@ namespace JobCompany.Business.Services.ExamServices
             };
         }
 
-        public async Task<GetExamIntroDto> GetExamIntroAsync(string examId)
+        public async Task<GetExamIntroDto> GetExamIntroAsync(string examId, string vacancyId)
         {
             var examGuid = Guid.Parse(examId);
+            var vacancyGuid = Guid.Parse(vacancyId);
 
-            if (await _context.UserExams.AnyAsync(x => x.ExamId == examGuid && x.UserId == _currentUser.UserGuid && x.Exam.Vacancies.Any(y=> y.ExamId == examGuid)))
-                throw new BadRequestException("Siz bu imtahan");
+            var hasTakenExam = await _context.UserExams.AnyAsync(x => x.ExamId == examGuid && x.UserId == _currentUser.UserGuid && x.VacancyId == vacancyGuid);
+            
+            if (hasTakenExam)
+                throw new BadRequestException("Siz bu imtahandan artıq keçmisiniz");
 
             var data = await _context.Exams.Where(x=> x.Id == examGuid)
                 .Select(x=> new GetExamIntroDto
@@ -293,6 +296,7 @@ namespace JobCompany.Business.Services.ExamServices
             {
                 UserId = userGuid, 
                 ExamId = dto.ExamId,
+                VacancyId = dto.VacancyId,
                 TrueAnswerCount = (byte)trueCount,
                 FalseAnswerCount = (byte)falseCount, 
             };

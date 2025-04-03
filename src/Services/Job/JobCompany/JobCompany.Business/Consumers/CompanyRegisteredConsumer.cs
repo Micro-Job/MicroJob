@@ -27,7 +27,7 @@ namespace JobCompany.Business.Consumers
             {
                 new Status
                 {
-                    StatusColor = "#28a745", // Yeşil
+                    StatusColor = "#3183C8", // Yeşil
                     IsVisible = true,
                     Order = 1,
                     StatusEnum = StatusEnum.Pending,
@@ -35,7 +35,7 @@ namespace JobCompany.Business.Consumers
                 },
                 new Status
                 {
-                    StatusColor = "#ffc107", // Sarı
+                    StatusColor = "#DEB85B", // Sarı
                     IsVisible = true,
                     Order = 2,
                     StatusEnum = StatusEnum.Interview,
@@ -43,7 +43,7 @@ namespace JobCompany.Business.Consumers
                 },
                 new Status
                 {
-                    StatusColor = "#17a2b8", // Mavi
+                    StatusColor = "#38C172", // Mavi
                     IsVisible = true,
                     Order = 3,
                     StatusEnum = StatusEnum.Accepted,
@@ -51,7 +51,7 @@ namespace JobCompany.Business.Consumers
                 },
                 new Status
                 {
-                    StatusColor = "#dc3545", // Kırmızı
+                    StatusColor = "#F44336", // Kırmızı
                     IsVisible = true,
                     Order = 4,
                     StatusEnum = StatusEnum.Rejected,

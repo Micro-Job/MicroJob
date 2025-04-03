@@ -46,9 +46,9 @@ namespace JobCompany.API.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetExamIntro(string examId)
+        public async Task<IActionResult> GetExamIntro(string examId, string vacancyId)
         {
-            return Ok(await examService.GetExamIntroAsync(examId));
+            return Ok(await examService.GetExamIntroAsync(examId, vacancyId));
         }
 
         [HttpGet("[action]")]

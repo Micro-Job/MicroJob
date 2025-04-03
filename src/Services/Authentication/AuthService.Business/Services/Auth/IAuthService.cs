@@ -15,5 +15,6 @@ namespace AuthService.Business.Services.Auth
 
         Task ConfirmPasswordResetAsync(PasswordResetDto dto);
 
+        Task UpdatePasswordAsync(string oldPassword, string newPassword);
     }
 }
