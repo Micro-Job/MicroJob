@@ -232,7 +232,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                 {
                     var user = usersDataResponse.Users.FirstOrDefault(u => u.UserId == a.UserId);
 
-                    var resumeId = resumeIdsByUserIds.ResumeIds.FirstOrDefault(r => r == a.UserId);
+                    var resumeId = resumeIdsByUserIds.ResumeIds.TryGetValue(a.UserId, out var id) ? id : Guid.Empty;
 
                     return new AllApplicationListDto()
                     {

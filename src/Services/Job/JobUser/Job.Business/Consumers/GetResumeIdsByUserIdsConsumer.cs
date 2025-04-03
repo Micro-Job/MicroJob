@@ -1,5 +1,6 @@
 ﻿using Job.DAL.Contexts;
 using MassTransit;
+using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Requests;
 using SharedLibrary.Responses;
 
@@ -7,16 +8,15 @@ namespace Job.Business.Consumers;
 
 public class GetResumeIdsByUserIdsConsumer(JobDbContext _dbContext) : IConsumer<GetResumeIdsByUserIdsRequest>
 {
+    /// <summary> Verilmiş olan userId-lərə uyğun resumeId-ləri tapır. </summary>
     public async Task Consume(ConsumeContext<GetResumeIdsByUserIdsRequest> context)
     {
-        var resumeIds = _dbContext.Resumes
-            .Where(x => context.Message.UserIds.Contains(x.UserId))
-            .Select(x => x.Id)
-            .ToList();
+        var resumeIds = await _dbContext.Resumes
+            .Where(r => context.Message.UserIds.Contains(r.UserId))
+            .ToDictionaryAsync(r => r.UserId, r => r.Id);
 
-        await context.RespondAsync(new GetResumeIdsByUserIdsResponse
-        {
-            ResumeIds = resumeIds
-        });
+        var response = new GetResumeIdsByUserIdsResponse { ResumeIds = resumeIds };
+
+        await context.RespondAsync(response);
     }
 }
