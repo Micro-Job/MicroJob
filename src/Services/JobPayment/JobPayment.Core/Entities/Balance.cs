@@ -10,7 +10,13 @@ namespace JobPayment.Core.Entities
     public class Balance : BaseEntity
     {
         public Guid UserId { get; set; }
+
         public double Coin { get; set; }
-        public double BonusCoin { get; set; }
+        /// <summary>
+        /// Hele ki deqiqlesmeyib
+        /// </summary>
+        public double? BonusCoin { get; set; }
+
+        public ICollection<Transaction>? Tranzactions { get; set; }
     }
 }

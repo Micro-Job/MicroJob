@@ -1,0 +1,46 @@
+﻿using JobPayment.Business.Consumers;
+using JobPayment.Business.Services.Balance;
+using JobPayment.Business.Services.Packet;
+using MassTransit;
+using Microsoft.Extensions.DependencyInjection;
+using SharedLibrary.HelperServices.Current;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace JobPayment.Business
+{
+    public static class ServiceRegistration
+    {
+        public static void AddPaymentServices(this IServiceCollection services)
+        {
+            services.AddHttpContextAccessor();
+            services.AddScoped<ICurrentUser, CurrentUser>();
+            services.AddScoped<IBalanceService , BalanceService>();
+            services.AddScoped<IPacketService , PacketService>();
+        }
+
+        public static void AddMassTransit(this IServiceCollection services, string username, string password, string hostname, string port)
+        {
+            password = Uri.EscapeDataString(password);
+            string cString = $"amqp://{username}:{password}@{hostname}:{port}/";
+
+            services.AddMassTransit(x =>
+            {
+                x.AddConsumer<CreateBalanceConsumer>();
+
+                x.SetKebabCaseEndpointNameFormatter();
+
+                x.UsingRabbitMq((context, cfg) =>
+                {
+                    cfg.Host(cString);
+
+                    cfg.ConfigureEndpoints(context);
+                });
+            });
+
+        }
+    }
+}

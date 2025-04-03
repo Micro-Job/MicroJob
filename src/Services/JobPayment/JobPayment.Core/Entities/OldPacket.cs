@@ -9,9 +9,10 @@ namespace JobPayment.Core.Entities
 {
     public class OldPacket : BaseEntity
     {
-        public Packet Packet { get; set; }
-        public Guid PacketId { get; set; }
+        public decimal OldValue { get; set; }
+        public double Coin { get; set; }
 
-        public int MyProperty { get; set; }
+        public Guid PacketId { get; set; }
+        public Packet Packet { get; set; }
     }
 }

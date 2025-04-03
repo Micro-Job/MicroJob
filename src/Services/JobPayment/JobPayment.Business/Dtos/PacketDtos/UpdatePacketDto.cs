@@ -1,20 +1,18 @@
-﻿using JobPayment.Core.Entities.Base;
-using JobPayment.Core.Enums;
+﻿using JobPayment.Core.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace JobPayment.Core.Entities
+namespace JobPayment.Business.Dtos.PacketDtos
 {
-    public class Packet : BaseEntity
+    public class UpdatePacketDto
     {
-        public string? Title { get; set; }
+        public Guid PacketId { get; set; }
+        public string Title { get; set; }
         public PacketType PacketType { get; set; }
         public decimal Value { get; set; }
         public double Coin { get; set; }
-
-        public ICollection<OldPacket>? OldPackets { get; set; }
     }
 }
