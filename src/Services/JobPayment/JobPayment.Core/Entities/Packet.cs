@@ -14,6 +14,7 @@ namespace JobPayment.Core.Entities
         public PacketType PacketType { get; set; }
         public decimal Value { get; set; }
         public double Coin { get; set; }
+        public bool IsDeleted { get; set; }
 
         public ICollection<OldPacket>? OldPackets { get; set; }
     }

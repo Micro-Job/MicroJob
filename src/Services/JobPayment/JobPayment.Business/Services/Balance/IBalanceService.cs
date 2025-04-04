@@ -8,5 +8,6 @@ namespace JobPayment.Business.Services.Balance
 {
     public interface IBalanceService
     {
+        public Task IncreaseBalanceAsync(string packetId);
     }
 }

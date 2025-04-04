@@ -1,6 +1,7 @@
 ﻿using JobPayment.Business.Consumers;
 using JobPayment.Business.Services.Balance;
-using JobPayment.Business.Services.Packet;
+using JobPayment.Business.Services.PacketSer;
+using JobPayment.Business.Services.Transaction;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using SharedLibrary.HelperServices.Current;
@@ -20,6 +21,7 @@ namespace JobPayment.Business
             services.AddScoped<ICurrentUser, CurrentUser>();
             services.AddScoped<IBalanceService , BalanceService>();
             services.AddScoped<IPacketService , PacketService>();
+            services.AddScoped<ITransactionService , TransactionService>();
         }
 
         public static void AddMassTransit(this IServiceCollection services, string username, string password, string hostname, string port)
