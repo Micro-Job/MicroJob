@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Job.Core.Entities;
 using Job.DAL.Contexts;
 using MassTransit;
@@ -18,7 +14,7 @@ namespace Job.Business.Consumers
                 {
                     ReceiverId = userId,
                     SenderId = context.Message.SenderId,
-                    //Content = context.Message.Content,
+                    NotificationType = SharedLibrary.Enums.NotificationType.VacancyUpdate,
                     InformationId = context.Message.InformationId,
                     IsSeen = false,
                 })
