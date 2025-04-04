@@ -48,6 +48,7 @@ namespace Job.Business
                 x.AddConsumer<VacancyCreatedConsumer>();
                 x.AddConsumer<VacancyUpdatedConsumer>();
                 x.AddConsumer<GetResumeIdsByUserIdsConsumer>();
+                x.AddConsumer<GetFilteredUserIdsConsumer>();
 
                 x.SetKebabCaseEndpointNameFormatter();
 

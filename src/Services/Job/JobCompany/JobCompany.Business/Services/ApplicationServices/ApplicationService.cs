@@ -36,6 +36,8 @@ namespace JobCompany.Business.Services.ApplicationServices
         private readonly string? _authServiceBaseUrl;
         private readonly IRequestClient<GetUserDataRequest> _requestUser;
         private readonly IRequestClient<GetResumeIdsByUserIdsRequest> _resumeIdsRequest;
+        private readonly IRequestClient<GetFilteredUserIdsRequest> _filteredUserIdsRequest;
+
 
         public ApplicationService(
             JobCompanyDbContext context,
@@ -45,7 +47,8 @@ namespace JobCompany.Business.Services.ApplicationServices
             IConfiguration configuration,
             ICurrentUser currentUser,
             IRequestClient<GetUserDataRequest> requestUser,
-            IRequestClient<GetResumeIdsByUserIdsRequest> resumeIdsRequest)
+            IRequestClient<GetResumeIdsByUserIdsRequest> resumeIdsRequest,
+            IRequestClient<GetFilteredUserIdsRequest> filteredUserIdsRequest)
         {
             _currentUser = currentUser;
             _context = context;
@@ -56,6 +59,7 @@ namespace JobCompany.Business.Services.ApplicationServices
             _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
             _requestUser = requestUser;
             _resumeIdsRequest = resumeIdsRequest;
+            _filteredUserIdsRequest = filteredUserIdsRequest;
         }
 
         /// <summary> Yaradılan müraciətin geri alınması </summary>
@@ -206,22 +210,31 @@ namespace JobCompany.Business.Services.ApplicationServices
         }
 
         /// <summary> Şirkətə daxil olan bütün müraciətlərin filterlə birlikdə detallı şəkildə gətirilməsi </summary>
-        public async Task<DataListDto<AllApplicationListDto>> GetAllApplicationsListAsync(int skip = 1, int take = 10)
+        public async Task<DataListDto<AllApplicationListDto>> GetAllApplicationsListAsync(Guid? vacancyId, Gender? gender, StatusEnum? status, List<Guid>? skillIds, int skip = 1, int take = 10)
         {
-            var applications = await GetPaginatedApplicationsAsync(skip, take);
+            var applications = await GetPaginatedApplicationsAsync(skip, take, vacancyId, gender, status, skillIds);
 
             var userIds = applications.Item1.Select(a => a.UserId).ToList();
 
-            var userDataResponse = await GetUserDataResponseAsync(userIds);
+            var filteredApplications = applications.Item1;
 
-            var resumeIdsResponse = await GetResumeIdsByUserIds(userIds);
+            if (gender != null || (skillIds != null && skillIds.Count != 0)) //Filterdə gender və ya skillids varsa sorğu atılır
+            {
+                var response = await _filteredUserIdsRequest.GetResponse<GetFilteredUserIdsResponse>(
+                    new GetFilteredUserIdsRequest { UserIds = userIds, Gender = gender, SkillIds = skillIds }); //Parametrlərə uyğun user id-ləri filtrlənir
 
-            var data = MapApplicationsToDto(applications.Item1, userDataResponse, resumeIdsResponse);
+                filteredApplications = applications.Item1.Where(a => response.Message.UserIds.Contains(a.UserId)).ToList();
+            }
+
+            var userDataResponse = await GetUserDataResponseAsync(filteredApplications.Select(a => a.UserId).ToList());
+            var resumeIdsResponse = await GetResumeIdsByUserIds(filteredApplications.Select(a => a.UserId).ToList());
+
+            var data = MapApplicationsToDto(filteredApplications, userDataResponse, resumeIdsResponse);
 
             return new DataListDto<AllApplicationListDto>
             {
                 Datas = data,
-                TotalCount = applications.Item2
+                TotalCount = filteredApplications.Count
             };
         }
 
@@ -255,13 +268,20 @@ namespace JobCompany.Business.Services.ApplicationServices
             return response;
         }
 
-        private async Task<(List<Application>, int)> GetPaginatedApplicationsAsync(int skip, int take)
+        private async Task<(List<Application>, int)> GetPaginatedApplicationsAsync(int skip, int take, Guid? vacancyId, Gender? gender, StatusEnum? status, List<Guid>? skillIds)
         {
             var query = _context.Applications
-                .Include(a => a.Vacancy)
-                .Include(a => a.Status)
-                .Where(a => a.Vacancy.Company.UserId == _currentUser.UserGuid)
-                .OrderByDescending(a => a.CreatedDate);
+                .Where(a => a.Vacancy.Company.UserId == _currentUser.UserGuid);
+
+            if (vacancyId != null)  // Vakansiyaya görə filterlənmə
+                query = query.Where(a => a.VacancyId == vacancyId);
+
+            if (status != null) // Statusa görə filterlənmə
+                query = query.Where(a => a.Status.StatusEnum == status);
+
+            query = query.Include(a => a.Vacancy)
+                         .Include(a => a.Status)
+                         .OrderByDescending(a => a.CreatedDate);
 
             var applications = await query
                 .Skip(Math.Max(0, (skip - 1) * take))
@@ -394,7 +414,7 @@ namespace JobCompany.Business.Services.ApplicationServices
         /// <exception cref="NotImplementedException"></exception> 
         public async Task<DataListDto<ApplicationWithStatusInfoListDto>> GetAllApplicationWithStatusAsync(int skip = 1, int take = 9)
         {
-            var applications = await GetPaginatedApplicationsAsync(skip, take);
+            var applications = await GetPaginatedApplicationsAsync(skip, take, null, null, null, null);
 
             var userIds = applications.Item1.Select(a => a.UserId).ToList();
 
@@ -436,7 +456,7 @@ namespace JobCompany.Business.Services.ApplicationServices
 
             return response;
         }
-        
+
         /// <summary> User id-lərinə görə resume id-lərinin gətirilməsi </summary>
         private async Task<GetResumeIdsByUserIdsResponse> GetResumeIdsByUserIds(List<Guid> userIds)
         {
