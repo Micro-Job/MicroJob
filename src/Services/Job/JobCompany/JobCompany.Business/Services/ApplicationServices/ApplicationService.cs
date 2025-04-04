@@ -238,7 +238,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                         Status = a.Status.StatusEnum,
                         VacancyId = a.VacancyId,
                         VacancyName = a.Vacancy.Title,
-                        ProfileImage = user.ProfileImage,
+                        ProfileImage = $"{_authServiceBaseUrl}/{user.ProfileImage}",
                         DateTime = a.CreatedDate
                     };
                 })
@@ -414,13 +414,13 @@ namespace JobCompany.Business.Services.ApplicationServices
                     {
                         ApplicationId = a.Id,
                         ProfileImage = resume != null && resume.ProfileImage != null
-                        ? $"{_currentUser.BaseUrl}/{resume.ProfileImage}"
+                        ? $"{_authServiceBaseUrl}/{resume.ProfileImage}"
                         : null,
 
                         FirstName = resume?.FirstName,
                         LastName = resume?.LastName,
                         StatusId = a.StatusId,
-                        StatusName = a.Status.StatusEnum.ToString(),
+                        StatusName = a.Status.StatusEnum,
                         Position = resume?.Position,
                         DateTime = a.CreatedDate,
                     };

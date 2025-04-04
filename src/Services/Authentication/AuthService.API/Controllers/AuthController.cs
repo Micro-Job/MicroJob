@@ -49,6 +49,13 @@ namespace AuthService.API.Controllers
             return Ok();
         }
 
+        [HttpPost("[action]")]
+        public async Task<IActionResult> UpdatePassword(string oldPassword, string newPassword)
+        {
+            await _authService.UpdatePasswordAsync(oldPassword, newPassword);
+            return Ok();
+        }
+
         [HttpGet("[action]")]
         public async Task<IActionResult> TryLanguage()
         {

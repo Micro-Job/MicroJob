@@ -6,10 +6,10 @@ namespace Job.Business.Dtos.CertificateDtos
 {
     public record CertificateUpdateDto
     {
-        public string Id { get; set; }
-        public string CertificateName { get; set; }
-        public string GivenOrganization { get; set; }
-        public IFormFile CertificateFile { get; set; }
+        public string? Id { get; set; }
+        public string? CertificateName { get; set; }
+        public string? GivenOrganization { get; set; }
+        public IFormFile? CertificateFile { get; set; }
     }
 
     public class CertificateUpdateDtoValidator : AbstractValidator<CertificateUpdateDto>

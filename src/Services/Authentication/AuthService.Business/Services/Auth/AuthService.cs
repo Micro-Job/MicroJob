@@ -22,7 +22,7 @@ using SharedLibrary.Statics;
 
 namespace AuthService.Business.Services.Auth
 {
-    public class AuthService(AppDbContext _context,ITokenHandler _tokenHandler,IPublishEndpoint _publishEndpoint,IConfiguration _configuration,IEmailService _emailService) : IAuthService
+    public class AuthService(AppDbContext _context, ITokenHandler _tokenHandler, IPublishEndpoint _publishEndpoint, IConfiguration _configuration, IEmailService _emailService, ICurrentUser _currentUser) : IAuthService
     {
         private readonly string? _authServiceBaseUrl = _configuration["AuthService:BaseUrl"];
 
@@ -53,7 +53,7 @@ namespace AuthService.Business.Services.Auth
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
 
-            await _publishEndpoint.Publish(new UserRegisteredEvent { UserId = user.Id , JobStatus = user.JobStatus });
+            await _publishEndpoint.Publish(new UserRegisteredEvent { UserId = user.Id, JobStatus = user.JobStatus });
 
             //await _publisher.SendEmail(
             //    new EmailMessage
@@ -196,9 +196,9 @@ namespace AuthService.Business.Services.Auth
         /// <exception cref="UserNotFoundException"></exception>
         public async Task ResetPasswordAsync(string email)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(x => x.Email == email) 
+            var user = await _context.Users.FirstOrDefaultAsync(x => x.Email == email)
                 ?? throw new NotFoundException<User>(MessageHelper.GetMessage("NOTFOUNDEXCEPTION_USER"));
-            
+
             var token = _tokenHandler.CreatePasswordResetToken(user);
 
             var passwordToken = new PasswordToken
@@ -239,6 +239,24 @@ namespace AuthService.Business.Services.Auth
             user.Password = _tokenHandler.GeneratePasswordHash(dto.NewPassword);
 
             _context.PasswordTokens.Remove(passwordToken);
+            await _context.SaveChangesAsync();
+        }
+
+        /// <summary>
+        /// User-in şifrəsini yeniləyir
+        /// </summary>
+        public async Task UpdatePasswordAsync(string oldPassword, string newPassword)
+        {
+            var hashOldPassword = _tokenHandler.GeneratePasswordHash(oldPassword);
+
+            var user = await _context.Users.Where(ap => ap.Id == _currentUser.UserGuid).FirstOrDefaultAsync()
+                ?? throw new NotFoundException<User>();
+
+            if (user.Password != hashOldPassword)
+                throw new OldPasswordWrongException();
+
+            user.Password = _tokenHandler.GeneratePasswordHash(newPassword);
+
             await _context.SaveChangesAsync();
         }
     }

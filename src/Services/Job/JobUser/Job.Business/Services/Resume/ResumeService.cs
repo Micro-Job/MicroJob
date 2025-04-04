@@ -508,7 +508,7 @@ namespace Job.Business.Services.Resume
             }
         }
 
-        private async Task<ICollection<Core.Entities.Certificate>> UpdateCertificatesAsync(ICollection<CertificateUpdateDto> certificatesDto)
+        private async Task<ICollection<Core.Entities.Certificate>> UpdateCertificatesAsync(ICollection<CertificateUpdateDto>? certificatesDto)
         {
             return certificatesDto != null
                 ? await _certificateService.UpdateBulkCertificateAsync(certificatesDto)
