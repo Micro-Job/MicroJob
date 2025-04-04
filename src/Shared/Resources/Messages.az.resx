@@ -243,6 +243,12 @@
   <data name="USER_PHONE_OR_EMAIL_EXISTS" xml:space="preserve">
     <value>İstifadəçi nömrəsi və ya email mövcuddur</value>
   </data>
+  <data name="VACANCY_PAUSED" xml:space="preserve">
+    <value>Vakansiya statusu 'Pause' vəziyyətində olduğu üçün yeni müraciətlər qəbul edilə bilməz.</value>
+  </data>
+  <data name="VACANCY_STATUS_NOT_TOGGABLE" xml:space="preserve">
+    <value>Bu vakansiyanın statusu dəyişdirilə bilməz. Bu xüsusiyyət yalnız "Aktiv" və ya "Pauza" statusunda olan vakansiyalar üçün keçərlidir.</value>
+  </data>
   <data name="VACANCY_UPDATE" xml:space="preserve">
     <value>Vakansiya block olunduğu üçün update edilə bilməz</value>
   </data>

@@ -7,5 +7,6 @@ public enum VacancyStatus
     Deactive = 3,
     Reject = 4,
     Block = 5,
-    Update = 6
+    Update = 6,
+    Pause = 7,
 }

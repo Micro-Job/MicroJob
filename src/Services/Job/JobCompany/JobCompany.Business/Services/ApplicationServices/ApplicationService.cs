@@ -2,6 +2,7 @@
 using JobCompany.Business.Dtos.Common;
 using JobCompany.Business.Dtos.StatusDtos;
 using JobCompany.Business.Exceptions.ApplicationExceptions;
+using JobCompany.Business.Exceptions.VacancyExceptions;
 using JobCompany.Business.Extensions;
 using JobCompany.Business.Statistics;
 using JobCompany.Core.Entites;
@@ -297,6 +298,14 @@ namespace JobCompany.Business.Services.ApplicationServices
 
             var vacancyGuid = Guid.Parse(vacancyId);
 
+            var vacancy = await _context.Vacancies.FirstOrDefaultAsync(x => x.Id == vacancyGuid)
+                ?? throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
+
+            if (vacancy.VacancyStatus == VacancyStatus.Pause)
+            {
+                throw new VacancyStatusNotToggableException("Vakansiya statusu 'Pause' vəziyyətində olduğu üçün yeni müraciətlər qəbul edilə bilməz.");
+            }
+
             if (await _context.Applications.AnyAsync(x => x.VacancyId == vacancyGuid && x.UserId == userGuid))
                 throw new ApplicationIsAlreadyExistException(MessageHelper.GetMessage("APPLICATION_ALREADY_EXIST"));
 
@@ -304,8 +313,10 @@ namespace JobCompany.Business.Services.ApplicationServices
                 .Include(v => v.Company)
                 .ThenInclude(c => c.Statuses)
                 .Where(v => v.Id == vacancyGuid)
-                .Select(v => new { v.Company, v.Title })
+                .Select(v => new { v.Company, v.Title, v.VacancyStatus })
                 .FirstOrDefaultAsync() ?? throw new NotFoundException<Company>("NOT_FOUND");
+
+            if (vacancyInfo.VacancyStatus == VacancyStatus.Pause) throw new VacancyPausedException();
 
             var companyStatus = vacancyInfo.Company.Statuses
                 .FirstOrDefault(s => s.StatusEnum == StatusEnum.Pending) ??
