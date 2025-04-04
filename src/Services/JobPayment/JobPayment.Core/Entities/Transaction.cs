@@ -26,10 +26,17 @@ namespace JobPayment.Core.Entities
         /// Tranzaksiya zamani ne qeder coin emeliyyati bas verib
         /// </summary>
         public double? Coin { get; set; }
+        public double? BeforeBalanceCoin { get; set; }
+        public DateTime? CreatedDate { get; set; }
 
         public Guid UserId { get; set; }
 
         public Guid BalanceId { get; set; }
         public Balance Balance { get; set; }
+
+
+
+        //Mərkəz olaraq deposit görülüb deyə Transaction-ı depositdə saxlayırıq.Bu istifadəyə görə dəyişə bilər(one-to-one)
+        public Deposit Deposit { get; set; }
     }
 }

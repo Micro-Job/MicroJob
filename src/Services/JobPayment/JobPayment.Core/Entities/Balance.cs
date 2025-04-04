@@ -18,5 +18,6 @@ namespace JobPayment.Core.Entities
         public double? BonusCoin { get; set; }
 
         public ICollection<Transaction>? Tranzactions { get; set; }
+        public ICollection<Deposit>? Deposits { get; set; }
     }
 }

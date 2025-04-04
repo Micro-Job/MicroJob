@@ -20,7 +20,8 @@ namespace JobPayment.DAL.Configurations
 
             builder.HasMany(x => x.OldPackets)
                 .WithOne(x => x.Packet)
-                .HasForeignKey(x => x.PacketId);
+                .HasForeignKey(x => x.PacketId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

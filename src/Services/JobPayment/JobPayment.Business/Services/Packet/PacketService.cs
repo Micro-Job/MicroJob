@@ -29,7 +29,7 @@ namespace JobPayment.Business.Services.Packet
 
         public Task UpdatePacketAsync(UpdatePacketDto dto)
         {
-            
+            throw new Exception();
         }
     }
 }

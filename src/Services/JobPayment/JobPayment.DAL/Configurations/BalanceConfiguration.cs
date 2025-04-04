@@ -13,11 +13,12 @@ namespace JobPayment.DAL.Configurations
     {
         public void Configure(EntityTypeBuilder<Balance> builder)
         {
-            builder.HasKey(x => x.UserId);
+            builder.HasIndex(x => x.UserId);
 
             builder.HasMany(x => x.Tranzactions)
                 .WithOne(x => x.Balance)
-                .HasForeignKey(x => x.Balance);
+                .HasForeignKey(x => x.BalanceId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

@@ -9,13 +9,14 @@ using System.Threading.Tasks;
 
 namespace JobPayment.DAL.Configurations
 {
-    public class TranzactionConfiguration : IEntityTypeConfiguration<Transaction>
+    public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
     {
         public void Configure(EntityTypeBuilder<Transaction> builder)
         {
-            builder.HasKey(x=> x.UserId);
+            builder.HasIndex(x=> x.UserId);
 
-
+            builder.Property(x => x.CreatedDate)
+                .HasDefaultValueSql("GETUTCDATE()");
         }
     }
 }
