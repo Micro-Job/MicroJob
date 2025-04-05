@@ -32,6 +32,7 @@ namespace JobCompany.Business.Services.CompanyServices
         private readonly string? _authServiceBaseUrl;
         private readonly ICurrentUser _currentUser;
         private readonly IFileService _fileService;
+        private readonly IHttpContextAccessor _contextAccessor;
 
         public CompanyService(
             JobCompanyDbContext context,
@@ -45,6 +46,7 @@ namespace JobCompany.Business.Services.CompanyServices
             _configuration = configuration;
             _currentUser = currentUser;
             _fileService = fileService;
+            _contextAccessor = contextAccessor;
         }
 
         public async Task UpdateCompanyAsync(CompanyUpdateDto dto, ICollection<UpdateNumberDto>? numbersDto)
@@ -184,10 +186,10 @@ namespace JobCompany.Business.Services.CompanyServices
         {
             var currentLanguage = _currentUser.LanguageCode;
 
+            //Bu application-ın run olduğu serverin url-ini alırıq (Məs: http://localhost:5082)
+            var serviceUrl = $"{_contextAccessor.HttpContext?.Request.Scheme}://{_contextAccessor.HttpContext?.Request.Host}";
+            Console.WriteLine(serviceUrl);
             var companyProfile = await _context.Companies
-                .Include(c => c.Category.Translations)
-                .Include(c => c.City.Translations)
-                .Include(c => c.Country.Translations)
                 .Where(c => c.UserId == _currentUser.UserGuid)
                 .Include(x => x.Category.Translations)
                 .Include(x => x.City.Translations)
@@ -201,7 +203,7 @@ namespace JobCompany.Business.Services.CompanyServices
                     WebLink = x.WebLink,
                     CreatedDate = x.CreatedDate,
                     EmployeeCount = x.EmployeeCount.HasValue ? x.EmployeeCount.Value : null,
-                    CompanyLogo = !string.IsNullOrEmpty(x.CompanyLogo) ? $"{_authServiceBaseUrl}/{x.CompanyLogo}" : null,
+                    CompanyLogo = !string.IsNullOrEmpty(x.CompanyLogo) ? $"{serviceUrl}/{x.CompanyLogo}" : null,
                     Category = x.Category.GetTranslation(currentLanguage, GetTranslationPropertyName.Name),
                     City = x.City != null ? x.City.GetTranslation(currentLanguage, GetTranslationPropertyName.Name) : null,
                     Country = x.Country != null ? x.Country.GetTranslation(currentLanguage, GetTranslationPropertyName.Name) : null,
