@@ -53,7 +53,8 @@ namespace AuthService.Business.Services.Auth
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
 
-            await _publishEndpoint.Publish(new UserRegisteredEvent { UserId = user.Id, JobStatus = user.JobStatus });
+            await _publishEndpoint.Publish(new UserRegisteredEvent { UserId = user.Id , JobStatus = user.JobStatus });
+            await _createBalance(user.Id);
 
             //await _publisher.SendEmail(
             //    new EmailMessage
@@ -106,7 +107,7 @@ namespace AuthService.Business.Services.Auth
             );
 
             await _publishEndpoint.Publish(new UserRegisteredEvent { UserId = user.Id });
-
+            await _createBalance(user.Id);
             //await _publisher.SendEmail(
             //    new EmailMessage
             //    {
@@ -238,6 +239,14 @@ namespace AuthService.Business.Services.Auth
             await _context.SaveChangesAsync();
         }
 
+
+        private async Task _createBalance(Guid userId)
+        {
+            await _publishEndpoint.Publish(new CreateBalanceEvent
+            {
+                UserId = userId,
+            });
+        }
         /// <summary>
         /// User-in şifrəsini yeniləyir
         /// </summary>

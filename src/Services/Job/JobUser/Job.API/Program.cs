@@ -129,7 +129,7 @@ namespace Job.API
             app.UseStaticFiles();
             app.UseMiddleware<LanguageMiddleware>();
 
-            // app.UseCustomExceptionHandler();
+            app.UseCustomExceptionHandler();
 
             app.UseAuthentication();
             app.UseAuthorization();
