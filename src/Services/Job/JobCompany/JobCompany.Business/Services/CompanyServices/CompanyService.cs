@@ -72,6 +72,7 @@ namespace JobCompany.Business.Services.CompanyServices
             if (!string.IsNullOrEmpty(company.CompanyLogo))
             {
                 _fileService.DeleteFile(company.CompanyLogo);
+                company.CompanyLogo = "Files/Images/defaultlogo.jpg";
             }
 
             if (dto.CompanyLogo != null)
@@ -134,7 +135,7 @@ namespace JobCompany.Business.Services.CompanyServices
                 {
                     CompanyId = c.Id,
                     CompanyName = c.CompanyName,
-                    CompanyImage = c.CompanyLogo != null ? $"{_authServiceBaseUrl}/{c.CompanyLogo}" : null,
+                    CompanyImage = c.CompanyLogo != null ? $"{_currentUser.BaseUrl}/{c.CompanyLogo}" : null,
                     CompanyVacancyCount = c.Vacancies != null ? c.Vacancies.Count(v => v.VacancyStatus == VacancyStatus.Active && v.EndDate > DateTime.Now) : 0,
                 })
                 .Skip(Math.Max(0, (skip - 1) * take))
@@ -162,7 +163,7 @@ namespace JobCompany.Business.Services.CompanyServices
                             CompanyInformation = x.CompanyInformation,
                             CompanyLocation = x.CompanyLocation,
                             CompanyName = x.CompanyName,
-                            CompanyLogo = $"{_authServiceBaseUrl}/{x.CompanyLogo}",
+                            CompanyLogo = $"{_currentUser.BaseUrl}/{x.CompanyLogo}",
                             WebLink = x.WebLink,
                             UserId = x.UserId,
                             CompanyNumbers = x.CompanyNumbers
@@ -200,7 +201,7 @@ namespace JobCompany.Business.Services.CompanyServices
                     WebLink = x.WebLink,
                     CreatedDate = x.CreatedDate,
                     EmployeeCount = x.EmployeeCount.HasValue ? x.EmployeeCount.Value : null,
-                    CompanyLogo = !string.IsNullOrEmpty(x.CompanyLogo) ? $"{_currentUser.BaseUrl}/{x.CompanyLogo}" : null,
+                    CompanyLogo = $"{_currentUser.BaseUrl}/{x.CompanyLogo}",
                     Category = x.Category.GetTranslation(currentLanguage, GetTranslationPropertyName.Name),
                     City = x.City != null ? x.City.GetTranslation(currentLanguage, GetTranslationPropertyName.Name) : null,
                     Country = x.Country != null ? x.Country.GetTranslation(currentLanguage, GetTranslationPropertyName.Name) : null,

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Configuration;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,13 +7,11 @@ using System.Threading.Tasks;
 
 namespace AuthService.Business.Templates
 {
-    public class EmailTemplate
+    public class EmailTemplate(IConfiguration _configuration)
     {
-        public static string ResetPassword(string token, string username)
+        public string ResetPassword(string token, string username)
         {
-            //TODO : buradaki url-ler appsettingsden goturulmelidir
-            string ip = "http://localhost:3001";//local
-            //string ip = "https://job.siesco.studio";//real
+            string ip = _configuration["ResetPasswordUrl"];
 
             return $@"
 <!DOCTYPE html>

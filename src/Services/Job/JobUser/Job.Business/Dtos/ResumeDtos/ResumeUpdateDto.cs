@@ -33,9 +33,9 @@ namespace Job.Business.Dtos.ResumeDtos
 
         public ICollection<CertificateUpdateDto>? Certificates { get; set; }
         public ICollection<NumberUpdateDto> PhoneNumbers { get; set; }
-        public ICollection<ExperienceUpdateDto> Experiences { get; set; }
-        public ICollection<EducationUpdateDto> Educations { get; set; }
-        public ICollection<LanguageUpdateDto> Languages { get; set; }
+        public ICollection<ExperienceUpdateDto>? Experiences { get; set; }
+        public ICollection<EducationUpdateDto>? Educations { get; set; }
+        public ICollection<LanguageUpdateDto>? Languages { get; set; }
     }
 
     public class ResumeUpdateDtoValidator : AbstractValidator<ResumeUpdateDto>

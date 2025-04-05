@@ -3,6 +3,7 @@ using JobCompany.DAL.Contexts;
 using MassTransit;
 using SharedLibrary.Enums;
 using SharedLibrary.Events;
+using SharedLibrary.Statics;
 
 namespace JobCompany.Business.Consumers
 {
@@ -17,7 +18,7 @@ namespace JobCompany.Business.Consumers
                 Id = companyId,
                 UserId = context.Message.UserId,
                 CompanyName = context.Message.CompanyName,
-                CompanyLogo = context.Message.CompanyLogo,
+                CompanyLogo = Path.Combine(FilePaths.image, "defaultlogo.jpg"),
                 IsCompany = context.Message.IsCompany
             };
 

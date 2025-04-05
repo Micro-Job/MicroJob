@@ -8,7 +8,7 @@ namespace Job.Business.Services.Education
 {
     public class EducationService(JobDbContext context) : IEducationService
     {
-        public async Task<ICollection<Core.Entities.Education>> CreateBulkEducationAsync(ICollection<EducationCreateDto> dtos,Guid resumeId)
+        public async Task<ICollection<Core.Entities.Education>> CreateBulkEducationAsync(ICollection<EducationCreateDto> dtos, Guid resumeId)
         {
             var educationsToAdd = dtos.Select(dto =>
                     MapEducationDtoToEntityForCreate(dto, resumeId)
@@ -27,7 +27,6 @@ namespace Job.Business.Services.Education
             await context.Educations.AddAsync(education);
         }
 
-        //TODO : Burada kod optimizasiyasına ehtiyyac var 
         public async Task<ICollection<Core.Entities.Education>> UpdateBulkEducationAsync(ICollection<EducationUpdateDto> dtos, Guid resumeId)
         {
             var institutionNames = dtos.Select(d => d.InstitutionName).ToList();
@@ -36,25 +35,40 @@ namespace Job.Business.Services.Education
                 .Where(e => e.ResumeId == resumeId && institutionNames.Contains(e.InstitutionName))
                 .ToListAsync();
 
-            if (!educations.Any())
-                throw new NotFoundException<Core.Entities.Education>(MessageHelper.GetMessage("NOT_FOUND"));
-
-            educations = educations
-                .Select(education =>
+            if (educations.Count == 0) // Əgər heç bir təhsil məlumatı tapılmadısa, yeni təhsil məlumatları əlavə edirik
+            {
+                var createDtos = dtos.Select(dto => new EducationCreateDto
                 {
-                    var dto = dtos.FirstOrDefault(d => d.InstitutionName == education.InstitutionName);
-                    if (dto != null)
+                    InstitutionName = dto.InstitutionName,
+                    Profession = dto.Profession,
+                    StartDate = dto.StartDate,
+                    EndDate = dto.IsCurrentEducation ? null : dto.EndDate,
+                    IsCurrentEducation = dto.IsCurrentEducation,
+                    ProfessionDegree = dto.ProfessionDegree
+                }).ToList();
+
+                var createdEducations = await CreateBulkEducationAsync(createDtos, resumeId);
+
+                return createdEducations;
+            }
+            else
+            {
+                // Mövcud olan təhsil məlumatlarını güncəlləyirik
+                educations = educations.Select(education =>
                     {
-                        MapEducationDtoToEntityForUpdate(education, dto);
-                    }
-                    return education;
-                })
-                .ToList();
+                        var dto = dtos.FirstOrDefault(d => d.InstitutionName == education.InstitutionName);
 
-            await context.SaveChangesAsync();
+                        if (dto != null) MapEducationDtoToEntityForUpdate(education, dto);
 
-            return educations;
+                        return education;
+                    }).ToList();
+
+                await context.SaveChangesAsync();
+
+                return educations;
+            }
         }
+
 
 
         public async Task UpdateEducationAsync(EducationUpdateDto dto)
@@ -66,7 +80,7 @@ namespace Job.Business.Services.Education
             MapEducationDtoToEntityForUpdate(education, dto);
         }
 
-        private Core.Entities.Education MapEducationDtoToEntityForCreate(EducationCreateDto dto,Guid resumeId)
+        private Core.Entities.Education MapEducationDtoToEntityForCreate(EducationCreateDto dto, Guid resumeId)
         {
             return new Core.Entities.Education
             {
@@ -80,7 +94,7 @@ namespace Job.Business.Services.Education
             };
         }
 
-        private void MapEducationDtoToEntityForUpdate(Core.Entities.Education education,EducationUpdateDto dto)
+        private void MapEducationDtoToEntityForUpdate(Core.Entities.Education education, EducationUpdateDto dto)
         {
             education.InstitutionName = dto.InstitutionName;
             education.Profession = dto.Profession;
