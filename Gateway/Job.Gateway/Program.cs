@@ -22,7 +22,7 @@ namespace Job.Gateway
             {
                 options.AddPolicy("_myAllowSpecificOrigins", policy =>
                 {
-                    policy.WithOrigins("http://localhost:3000", "http://localhost:3001", "http://localhost:3002")
+                    policy.WithOrigins("http://localhost:3000", "http://localhost:3001", "http://localhost:3002", "https://job.siesco.studio")
                           .AllowAnyMethod()
                           .AllowAnyHeader()
                           .AllowCredentials();
@@ -36,7 +36,7 @@ namespace Job.Gateway
             app.UseAuthorization();
             app.UseCustomExceptionHandler();
             app.UseCors("_myAllowSpecificOrigins");
-            app.UseCustomExceptionHandler();
+            //app.UseCustomExceptionHandler();
             app.MapControllers();
             await app.UseOcelot();
             app.Run();
