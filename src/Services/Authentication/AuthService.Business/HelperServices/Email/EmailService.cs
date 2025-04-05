@@ -58,18 +58,18 @@ namespace AuthService.Business.HelperServices.Email
                 .Where(pt => pt.Token == token && pt.ExpireTime > DateTime.Now)
                 .Select(pt => new
                 {
-                    Email = pt.User.Email
+                    Email = pt.User.Email,
+                    UserName = pt.User.FirstName + pt.User.LastName
                 })
                 .SingleOrDefaultAsync();
 
             if (user == null || user.Email != toEmail) throw new NotFoundException<User>(MessageHelper.GetMessage("NOTFOUNDEXCEPTION_USER"));
 
-            string email = user.Email;
 
             await SendEmailAsync(toEmail, new EmailMessage
             {
                 Subject = "Şifrənizi yeniləyin...",
-                Content = EmailTemplate.ResetPassword(token, email)
+                Content = EmailTemplate.ResetPassword(token, user.UserName)
             });
 
         }

@@ -10,8 +10,10 @@ namespace AuthService.Business.Templates
     {
         public static string ResetPassword(string token, string username)
         {
-            string ip = "https://ais.azerterminal.az";
-            //string ip = "http://localhost:3000";
+            //TODO : buradaki url-ler appsettingsden goturulmelidir
+            string ip = "http://localhost:3001";//local
+            //string ip = "https://job.siesco.studio";//real
+
             return $@"
 <!DOCTYPE html>
 <html lang='en-US'>
@@ -58,13 +60,13 @@ namespace AuthService.Business.Templates
                                 <tr>
                                     <td style='padding:0 35px;'>
                                         <h1 style='color:#1e1e2d; font-weight:500; margin:0;font-size:32px; font-family: Montserrat;'>
-                                            ""AZƏRTERMİNAL KOMPLEKS"" birliyi vahid idarə etmə sistemi
+                                            ""HIRI"" birliyi vahid idarə etmə sistemi
                                         </h1>
                                         <h4 style='font-family: Montserrat;'>İstifadəçi adı : <span style='color: #6fccff;'>{username}</span></h4>
                                         <p style='color:#455056; font-size:15px;line-height:24px; margin:0; font-family: Montserrat;'>
                                             Şifrəni yenilə düyməsinə sıxmaqla özünüzə yeni şifrə təyin edin və unutmayın.
                                         </p>
-                                        <a href='{ip}/#/changepassword/{token}'
+                                        <a href='{ip}/reset-password/{token}'
                                             style='background:#6fccff;text-decoration:none !important; font-weight:500; margin-top:35px; color:#fff;text-transform:uppercase; font-family: Montserrat; font-size:14px;padding:10px 24px;display:inline-block;border-radius:50px;'>ŞİFRƏNİ YENİLƏ</a>
                                     </td>
                                 </tr>
