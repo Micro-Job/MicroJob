@@ -5,6 +5,7 @@ namespace JobCompany.Business.Dtos.ApplicationDtos;
 public record AllApplicationListDto
 {
     public Guid ApplicationId { get; set; }
+    public Guid ResumeId { get; set; }
     public string FirstName { get; set; }
     public string LastName { get; set; }
     public string Email { get; set; }

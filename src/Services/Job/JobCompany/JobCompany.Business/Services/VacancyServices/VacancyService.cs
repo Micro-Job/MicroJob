@@ -38,6 +38,7 @@ namespace JobCompany.Business.Services.VacancyServices
         readonly IConfiguration _configuration;
         private readonly string? _authServiceBaseUrl;
         private readonly ICurrentUser _currentUser;
+        private readonly IHttpContextAccessor _contextAccessor;
 
         public VacancyService(
             JobCompanyDbContext _context,
@@ -45,7 +46,8 @@ namespace JobCompany.Business.Services.VacancyServices
             IExamService examService,
             IPublishEndpoint publishEndpoint,
             IConfiguration configuration,
-            ICurrentUser currentUser
+            ICurrentUser currentUser,
+            IHttpContextAccessor contextAccessor
         )
         {
             this._context = _context;
@@ -54,6 +56,7 @@ namespace JobCompany.Business.Services.VacancyServices
             _configuration = configuration;
             _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
             _currentUser = currentUser;
+            _contextAccessor = contextAccessor;
         }
 
         /// <summary> vacancy yaradılması </summary>
@@ -61,7 +64,7 @@ namespace JobCompany.Business.Services.VacancyServices
         public async Task CreateVacancyAsync(CreateVacancyDto vacancyDto, ICollection<CreateNumberDto>? numberDto)
         {
             string? companyLogoPath = null;
-                var company = await _context.Companies.Where(x => x.UserId == _currentUser.UserGuid).Select(x => new
+            var company = await _context.Companies.Where(x => x.UserId == _currentUser.UserGuid).Select(x => new
             {
                 x.Id,
                 x.CompanyName,
@@ -74,7 +77,7 @@ namespace JobCompany.Business.Services.VacancyServices
             }
             else if (vacancyDto.CompanyLogo != null)
             {
-                FileDto fileResult = await _fileService.UploadAsync(FilePaths.image,vacancyDto.CompanyLogo);
+                FileDto fileResult = await _fileService.UploadAsync(FilePaths.image, vacancyDto.CompanyLogo);
                 companyLogoPath = $"{fileResult.FilePath}/{fileResult.FileName}";
             }
 
@@ -137,6 +140,7 @@ namespace JobCompany.Business.Services.VacancyServices
             vacancy.VacancySkills = vacancySkills;
 
             await _context.Vacancies.AddAsync(vacancy);
+            await _context.SaveChangesAsync();
 
             if (vacancyDto.SkillIds != null)
             {
@@ -150,8 +154,6 @@ namespace JobCompany.Business.Services.VacancyServices
                     }
                 );
             }
-
-            await _context.SaveChangesAsync();
         }
 
         public async Task DeleteAsync(List<string> ids)
@@ -280,7 +282,7 @@ namespace JobCompany.Business.Services.VacancyServices
                         Id = x.Id,
                         Title = x.Title,
                         CompanyId = x.CompanyId,
-                        CompanyLogo = $"{_authServiceBaseUrl}/{x.Company.CompanyLogo}",
+                        CompanyLogo = $"{_currentUser.BaseUrl}/{x.Company.CompanyLogo}",
                         StartDate = x.StartDate,
                         EndDate = x.EndDate,
                         Location = x.Location,
@@ -297,7 +299,7 @@ namespace JobCompany.Business.Services.VacancyServices
                         Driver = x.Driver,
                         Citizenship = x.Citizenship,
                         ExamId = x.ExamId,
-                        IsSaved = userGuid != null ? x.SavedVacancies.Any(y=> y.UserId == userGuid && y.VacancyId == vacancyGuid) : false,
+                        IsSaved = userGuid != null ? x.SavedVacancies.Any(y => y.UserId == userGuid && y.VacancyId == vacancyGuid) : false,
                         VacancyNumbers = x
                             .VacancyNumbers.Select(vn => new VacancyNumberDto
                             {
@@ -306,10 +308,10 @@ namespace JobCompany.Business.Services.VacancyServices
                             .ToList(),
                         Skills = x
                             .VacancySkills.Where(vc => vc.Skill != null)
-                            .Select(vc => new SkillDto { Name = vc.Skill.Translations.GetTranslation(_currentUser.LanguageCode,GetTranslationPropertyName.Name) })
+                            .Select(vc => new SkillDto { Name = vc.Skill.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name) })
                             .ToList(),
                         CompanyName = x.CompanyName,
-                        CategoryName = x.Category.GetTranslation(_currentUser.LanguageCode,GetTranslationPropertyName.Name),
+                        CategoryName = x.Category.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name),
                         CompanyUserId = x.Company.UserId
                     })
                     .FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
@@ -334,7 +336,7 @@ namespace JobCompany.Business.Services.VacancyServices
                     .Vacancies.Where(v => v.Id == vacancyGuid && v.Company.UserId == _currentUser.UserGuid)
                     .FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
 
-            if (existingVacancy.VacancyStatus == VacancyStatus.Block)
+            if (existingVacancy.VacancyStatus == VacancyStatus.Block && existingVacancy.VacancyStatus == VacancyStatus.Reject)
                 throw new VacancyUpdateException(MessageHelper.GetMessage("VACANCY_UPDATE"));
 
             existingVacancy.CompanyId = Guid.Parse(vacancyDto.CompanyId);
@@ -378,7 +380,7 @@ namespace JobCompany.Business.Services.VacancyServices
                     }
                 }
             }
-            
+
 
             await _context.SaveChangesAsync();
 
@@ -402,7 +404,7 @@ namespace JobCompany.Business.Services.VacancyServices
 
         public async Task<DataListDto<VacancyGetAllDto>> GetAllVacanciesAsync(string? titleName, string? categoryId, string? countryId, string? cityId, decimal? minSalary, decimal? maxSalary, string? companyId, byte? workStyle, byte? workType, int skip = 1, int take = 9)
         {
-            var query = _context.Vacancies.Where(x=> x.VacancyStatus == VacancyStatus.Active && x.EndDate > DateTime.Now)
+            var query = _context.Vacancies.Where(x => x.VacancyStatus == VacancyStatus.Active && x.EndDate > DateTime.Now)
                 .AsNoTracking()
                 .AsQueryable();
 
@@ -422,7 +424,7 @@ namespace JobCompany.Business.Services.VacancyServices
                     WorkStyle = v.WorkStyle,
                     MainSalary = v.MainSalary,
                     MaxSalary = v.MaxSalary,
-                    IsSaved =  _currentUser.UserId != null ? v.SavedVacancies.Any(x=> x.VacancyId == v.Id && x.UserId == _currentUser.UserGuid) : false
+                    IsSaved = _currentUser.UserId != null ? v.SavedVacancies.Any(x => x.VacancyId == v.Id && x.UserId == _currentUser.UserGuid) : false
                 })
                 .Skip(Math.Max(0, (skip - 1) * take))
                 .Take(take)
@@ -497,6 +499,25 @@ namespace JobCompany.Business.Services.VacancyServices
                     new SavedVacancy { UserId = _currentUser.UserGuid, VacancyId = vacancyGuid }
                 );
             }
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task TogglePauseVacancyAsync(Guid vacancyId)
+        {
+            var vacancy = await _context.Vacancies.FirstOrDefaultAsync(x => x.Id == vacancyId)
+                ?? throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
+
+            if (vacancy.VacancyStatus == VacancyStatus.Active)
+            {
+                vacancy.VacancyStatus = VacancyStatus.Pause;
+            }
+            else if (vacancy.VacancyStatus == VacancyStatus.Pause)
+            {
+                vacancy.VacancyStatus = VacancyStatus.Active;
+            }
+            else
+                throw new VacancyStatusNotToggableException(MessageHelper.GetMessage("VACANCY_STATUS_NOT_TOGGABLE"));
+
             await _context.SaveChangesAsync();
         }
 

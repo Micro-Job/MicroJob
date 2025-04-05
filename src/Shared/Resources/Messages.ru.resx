@@ -243,6 +243,12 @@
   <data name="USER_PHONE_OR_EMAIL_EXISTS" xml:space="preserve">
     <value>Номер пользователя или email уже существует</value>
   </data>
+  <data name="VACANCY_PAUSED" xml:space="preserve">
+    <value>Статус вакансии — «Пауза», и она не может быть использована для приема новых заявок.</value>
+  </data>
+  <data name="VACANCY_STATUS_NOT_TOGGABLE" xml:space="preserve">
+    <value>Статус этой вакансии не может быть изменен. Данная функция доступна только для вакансий со статусом «Активно» или «Пауза».</value>
+  </data>
   <data name="VACANCY_UPDATE" xml:space="preserve">
     <value>Вакансия не может быть обновлена, так как она заблокирована</value>
   </data>

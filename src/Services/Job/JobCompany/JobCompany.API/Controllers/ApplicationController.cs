@@ -24,9 +24,9 @@ namespace JobCompany.API.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetAllApplicationsList(int skip = 1, int take = 10)
+        public async Task<IActionResult> GetAllApplicationsList(Guid? vacancyId, Gender? gender, StatusEnum? status,[FromQuery] List<Guid>? skillIds, int skip = 1, int take = 10)
         {
-            return Ok(await service.GetAllApplicationsListAsync(skip, take));
+            return Ok(await service.GetAllApplicationsListAsync(vacancyId, gender, status, skillIds, skip, take));
         }
 
         [HttpPost("[action]")]
