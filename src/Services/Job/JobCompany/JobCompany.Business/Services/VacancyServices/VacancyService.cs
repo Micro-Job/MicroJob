@@ -137,6 +137,7 @@ namespace JobCompany.Business.Services.VacancyServices
             vacancy.VacancySkills = vacancySkills;
 
             await _context.Vacancies.AddAsync(vacancy);
+            await _context.SaveChangesAsync();
 
             if (vacancyDto.SkillIds != null)
             {
@@ -150,8 +151,6 @@ namespace JobCompany.Business.Services.VacancyServices
                     }
                 );
             }
-
-            await _context.SaveChangesAsync();
         }
 
         public async Task DeleteAsync(List<string> ids)
@@ -334,7 +333,7 @@ namespace JobCompany.Business.Services.VacancyServices
                     .Vacancies.Where(v => v.Id == vacancyGuid && v.Company.UserId == _currentUser.UserGuid)
                     .FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
 
-            if (existingVacancy.VacancyStatus == VacancyStatus.Block)
+            if (existingVacancy.VacancyStatus == VacancyStatus.Block && existingVacancy.VacancyStatus == VacancyStatus.Reject)
                 throw new VacancyUpdateException(MessageHelper.GetMessage("VACANCY_UPDATE"));
 
             existingVacancy.CompanyId = Guid.Parse(vacancyDto.CompanyId);
