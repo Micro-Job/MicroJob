@@ -22,7 +22,7 @@ using SharedLibrary.Statics;
 
 namespace AuthService.Business.Services.Auth
 {
-    public class AuthService(AppDbContext _context,ITokenHandler _tokenHandler,IPublishEndpoint _publishEndpoint,IConfiguration _configuration,IEmailService _emailService) : IAuthService
+    public class AuthService(AppDbContext _context, ITokenHandler _tokenHandler, IPublishEndpoint _publishEndpoint, IConfiguration _configuration, IEmailService _emailService, ICurrentUser _currentUser) : IAuthService
     {
         private readonly string? _authServiceBaseUrl = _configuration["AuthService:BaseUrl"];
 
@@ -55,6 +55,7 @@ namespace AuthService.Business.Services.Auth
 
             await _publishEndpoint.Publish(new UserRegisteredEvent { UserId = user.Id , JobStatus = user.JobStatus });
             await _createBalance(user.Id);
+
             //await _publisher.SendEmail(
             //    new EmailMessage
             //    {
@@ -80,8 +81,6 @@ namespace AuthService.Business.Services.Auth
             if (dto.Password != dto.ConfirmPassword)
                 throw new WrongPasswordException();
 
-            FileDto fileResult = new FileDto { FilePath = "Files/Images", FileName = "defaultlogo.jpg" };
-
             var user = new User
             {
                 Id = Guid.NewGuid(),
@@ -91,7 +90,6 @@ namespace AuthService.Business.Services.Auth
                 MainPhoneNumber = dto.MainPhoneNumber,
                 RegistrationDate = DateTime.Now,
                 Password = _tokenHandler.GeneratePasswordHash(dto.Password),
-                Image = fileResult.FilePath + "/" + fileResult.FileName,
                 UserRole = dto.IsCompany ? UserRole.CompanyUser : UserRole.EmployeeUser
             };
 
@@ -104,7 +102,6 @@ namespace AuthService.Business.Services.Auth
                     CompanyId = Guid.NewGuid(),
                     UserId = user.Id,
                     CompanyName = dto.IsCompany ? dto.CompanyName.Trim() : null,
-                    CompanyLogo = user.Image,
                     IsCompany = dto.IsCompany,
                 }
             );
@@ -196,9 +193,9 @@ namespace AuthService.Business.Services.Auth
         /// <exception cref="UserNotFoundException"></exception>
         public async Task ResetPasswordAsync(string email)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(x => x.Email == email) 
+            var user = await _context.Users.FirstOrDefaultAsync(x => x.Email == email)
                 ?? throw new NotFoundException<User>(MessageHelper.GetMessage("NOTFOUNDEXCEPTION_USER"));
-            
+
             var token = _tokenHandler.CreatePasswordResetToken(user);
 
             var passwordToken = new PasswordToken
@@ -249,6 +246,23 @@ namespace AuthService.Business.Services.Auth
             {
                 UserId = userId,
             });
+        }
+        /// <summary>
+        /// User-in şifrəsini yeniləyir
+        /// </summary>
+        public async Task UpdatePasswordAsync(string oldPassword, string newPassword)
+        {
+            var hashOldPassword = _tokenHandler.GeneratePasswordHash(oldPassword);
+
+            var user = await _context.Users.Where(ap => ap.Id == _currentUser.UserGuid).FirstOrDefaultAsync()
+                ?? throw new NotFoundException<User>();
+
+            if (user.Password != hashOldPassword)
+                throw new OldPasswordWrongException();
+
+            user.Password = _tokenHandler.GeneratePasswordHash(newPassword);
+
+            await _context.SaveChangesAsync();
         }
     }
 }

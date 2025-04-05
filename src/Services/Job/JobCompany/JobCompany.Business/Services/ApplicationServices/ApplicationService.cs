@@ -1,7 +1,8 @@
-﻿    using JobCompany.Business.Dtos.ApplicationDtos;
+﻿using JobCompany.Business.Dtos.ApplicationDtos;
 using JobCompany.Business.Dtos.Common;
 using JobCompany.Business.Dtos.StatusDtos;
 using JobCompany.Business.Exceptions.ApplicationExceptions;
+using JobCompany.Business.Exceptions.VacancyExceptions;
 using JobCompany.Business.Extensions;
 using JobCompany.Business.Statistics;
 using JobCompany.Core.Entites;
@@ -35,6 +36,9 @@ namespace JobCompany.Business.Services.ApplicationServices
         private readonly ICurrentUser _currentUser;
         private readonly string? _authServiceBaseUrl;
         private readonly IRequestClient<GetUserDataRequest> _requestUser;
+        private readonly IRequestClient<GetResumeIdsByUserIdsRequest> _resumeIdsRequest;
+        private readonly IRequestClient<GetFilteredUserIdsRequest> _filteredUserIdsRequest;
+
 
         public ApplicationService(
             JobCompanyDbContext context,
@@ -43,7 +47,9 @@ namespace JobCompany.Business.Services.ApplicationServices
             IPublishEndpoint publishEndpoint,
             IConfiguration configuration,
             ICurrentUser currentUser,
-            IRequestClient<GetUserDataRequest> requestUser)
+            IRequestClient<GetUserDataRequest> requestUser,
+            IRequestClient<GetResumeIdsByUserIdsRequest> resumeIdsRequest,
+            IRequestClient<GetFilteredUserIdsRequest> filteredUserIdsRequest)
         {
             _currentUser = currentUser;
             _context = context;
@@ -53,6 +59,8 @@ namespace JobCompany.Business.Services.ApplicationServices
             _configuration = configuration;
             _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
             _requestUser = requestUser;
+            _resumeIdsRequest = resumeIdsRequest;
+            _filteredUserIdsRequest = filteredUserIdsRequest;
         }
 
         /// <summary> Yaradılan müraciətin geri alınması </summary>
@@ -79,7 +87,7 @@ namespace JobCompany.Business.Services.ApplicationServices
             var applicationGuid = Guid.Parse(applicationId);
 
             var existAppVacancy = await _context.Applications
-                .Where(x =>x.Id == applicationGuid && x.Vacancy.Company.UserId == _currentUser.UserGuid)
+                .Where(x => x.Id == applicationGuid && x.Vacancy.Company.UserId == _currentUser.UserGuid)
                 .Select(x => new
                 {
                     Application = x,
@@ -125,7 +133,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                         StatusColor = a.Status.StatusColor,
                         Steps = _context
                             .Statuses.OrderBy(s => s.Order)
-                            .Select(s => s.GetTranslation(_currentUser.LanguageCode,GetTranslationPropertyName.Name))
+                            .Select(s => s.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name))
                             .ToList(),
                     })
                     .FirstOrDefaultAsync() ?? throw new NotFoundException<Application>(MessageHelper.GetMessage("NOT_FOUND"));
@@ -158,7 +166,7 @@ namespace JobCompany.Business.Services.ApplicationServices
         }
 
         /// <summary> Daxil olmus muracietler -> Şirkət üçün bütün müraciətlərin gətirilməsi </summary>
-        public async Task<ICollection<ApplicationInfoListDto>> GetAllApplicationAsync(int skip = 1,int take = 9)
+        public async Task<ICollection<ApplicationInfoListDto>> GetAllApplicationAsync(int skip = 1, int take = 9)
         {
             var company =
                 await _context.Companies.FirstOrDefaultAsync(c => c.UserId == _currentUser.UserGuid)
@@ -203,29 +211,42 @@ namespace JobCompany.Business.Services.ApplicationServices
         }
 
         /// <summary> Şirkətə daxil olan bütün müraciətlərin filterlə birlikdə detallı şəkildə gətirilməsi </summary>
-        public async Task<DataListDto<AllApplicationListDto>> GetAllApplicationsListAsync(int skip = 1,int take = 10)
+        public async Task<DataListDto<AllApplicationListDto>> GetAllApplicationsListAsync(Guid? vacancyId, Gender? gender, StatusEnum? status, List<Guid>? skillIds, int skip = 1, int take = 10)
         {
-            var applications = await GetPaginatedApplicationsAsync(skip, take);
+            var applications = await GetPaginatedApplicationsAsync(skip, take, vacancyId, gender, status, skillIds);
 
             var userIds = applications.Item1.Select(a => a.UserId).ToList();
 
-            var userDataResponse = await GetUserDataResponseAsync(userIds);
+            var filteredApplications = applications.Item1;
 
-            var data = MapApplicationsToDto(applications.Item1, userDataResponse);
+            if (gender != null || (skillIds != null && skillIds.Count != 0)) //Filterdə gender və ya skillids varsa sorğu atılır
+            {
+                var response = await _filteredUserIdsRequest.GetResponse<GetFilteredUserIdsResponse>(
+                    new GetFilteredUserIdsRequest { UserIds = userIds, Gender = gender, SkillIds = skillIds }); //Parametrlərə uyğun user id-ləri filtrlənir
 
-            return new DataListDto<AllApplicationListDto> 
-            { 
+                filteredApplications = applications.Item1.Where(a => response.Message.UserIds.Contains(a.UserId)).ToList();
+            }
+
+            var userDataResponse = await GetUserDataResponseAsync(filteredApplications.Select(a => a.UserId).ToList());
+            var resumeIdsResponse = await GetResumeIdsByUserIds(filteredApplications.Select(a => a.UserId).ToList());
+
+            var data = MapApplicationsToDto(filteredApplications, userDataResponse, resumeIdsResponse);
+
+            return new DataListDto<AllApplicationListDto>
+            {
                 Datas = data,
-                TotalCount = applications.Item2
+                TotalCount = filteredApplications.Count
             };
         }
 
-        private List<AllApplicationListDto> MapApplicationsToDto(List<Application> applications,GetUsersDataResponse usersDataResponse)
+        private List<AllApplicationListDto> MapApplicationsToDto(List<Application> applications, GetUsersDataResponse usersDataResponse, GetResumeIdsByUserIdsResponse resumeIdsByUserIds)
         {
             var response = applications
                 .Select(a =>
                 {
                     var user = usersDataResponse.Users.FirstOrDefault(u => u.UserId == a.UserId);
+
+                    var resumeId = resumeIdsByUserIds.ResumeIds.TryGetValue(a.UserId, out var id) ? id : Guid.Empty;
 
                     return new AllApplicationListDto()
                     {
@@ -238,7 +259,9 @@ namespace JobCompany.Business.Services.ApplicationServices
                         Status = a.Status.StatusEnum,
                         VacancyId = a.VacancyId,
                         VacancyName = a.Vacancy.Title,
-                        ProfileImage = user.ProfileImage
+                        ProfileImage = $"{_authServiceBaseUrl}/{user.ProfileImage}",
+                        DateTime = a.CreatedDate,
+                        ResumeId = resumeId,
                     };
                 })
                 .ToList();
@@ -246,20 +269,27 @@ namespace JobCompany.Business.Services.ApplicationServices
             return response;
         }
 
-        private async Task<(List<Application> , int)> GetPaginatedApplicationsAsync(int skip, int take)
+        private async Task<(List<Application>, int)> GetPaginatedApplicationsAsync(int skip, int take, Guid? vacancyId, Gender? gender, StatusEnum? status, List<Guid>? skillIds)
         {
             var query = _context.Applications
-                .Include(a => a.Vacancy)
-                .Include(a => a.Status)
-                .Where(a => a.Vacancy.Company.UserId == _currentUser.UserGuid)
-                .OrderByDescending(a => a.CreatedDate);
+                .Where(a => a.Vacancy.Company.UserId == _currentUser.UserGuid);
+
+            if (vacancyId != null)  // Vakansiyaya görə filterlənmə
+                query = query.Where(a => a.VacancyId == vacancyId);
+
+            if (status != null) // Statusa görə filterlənmə
+                query = query.Where(a => a.Status.StatusEnum == status);
+
+            query = query.Include(a => a.Vacancy)
+                         .Include(a => a.Status)
+                         .OrderByDescending(a => a.CreatedDate);
 
             var applications = await query
                 .Skip(Math.Max(0, (skip - 1) * take))
                 .Take(take)
                 .ToListAsync();
 
-            return (applications , await query.CountAsync());
+            return (applications, await query.CountAsync());
         }
 
         public async Task CreateUserApplicationAsync(string vacancyId)
@@ -268,15 +298,17 @@ namespace JobCompany.Business.Services.ApplicationServices
 
             var vacancyGuid = Guid.Parse(vacancyId);
 
-            if (await _context.Applications.AnyAsync(x => x.VacancyId == vacancyGuid && x.UserId == userGuid))
+            if (await _context.Applications.AnyAsync(x => x.VacancyId == vacancyGuid && x.IsDeleted == false && x.UserId == userGuid))
                 throw new ApplicationIsAlreadyExistException(MessageHelper.GetMessage("APPLICATION_ALREADY_EXIST"));
 
             var vacancyInfo = await _context.Vacancies
                 .Include(v => v.Company)
                 .ThenInclude(c => c.Statuses)
                 .Where(v => v.Id == vacancyGuid)
-                .Select(v => new { v.Company, v.Title })
+                .Select(v => new { v.Company, v.Title, v.VacancyStatus })
                 .FirstOrDefaultAsync() ?? throw new NotFoundException<Company>("NOT_FOUND");
+
+            if (vacancyInfo.VacancyStatus == VacancyStatus.Pause) throw new VacancyPausedException();
 
             var companyStatus = vacancyInfo.Company.Statuses
                 .FirstOrDefault(s => s.StatusEnum == StatusEnum.Pending) ??
@@ -300,7 +332,6 @@ namespace JobCompany.Business.Services.ApplicationServices
                 SenderId = userGuid,
                 VacancyId = vacancyGuid,
                 InformationId = userGuid,
-                Content = $"İstifadəçi {_currentUser.UserFullName} {vacancyInfo.Title} vakansiyasına müraciət etdi.",
             });
         }
 
@@ -312,7 +343,7 @@ namespace JobCompany.Business.Services.ApplicationServices
             int totalCount = await query.CountAsync();
 
             var applications = await query
-                .Include(x=> x.Status)
+                .Include(x => x.Status)
                 .OrderByDescending(a => a.CreatedDate)
                 .Select(a => new ApplicationDto
                 {
@@ -320,9 +351,9 @@ namespace JobCompany.Business.Services.ApplicationServices
                     VacancyId = a.VacancyId,
                     Title = a.Vacancy.Title,
                     CompanyId = a.Vacancy.CompanyId,
-                    CompanyLogo = a.Vacancy.Company.CompanyLogo != null ? $"{_authServiceBaseUrl}/{a.Vacancy.Company.CompanyLogo}": null,
+                    CompanyLogo = a.Vacancy.Company.CompanyLogo != null ? $"{_currentUser.BaseUrl}/{a.Vacancy.Company.CompanyLogo}" : null,
                     CompanyName = a.Vacancy.Company.CompanyName,
-                    WorkType = a.Vacancy.WorkType != null ? a.Vacancy.WorkType.GetDisplayName() : null, 
+                    WorkType = a.Vacancy.WorkType != null ? a.Vacancy.WorkType.GetDisplayName() : null,
                     VacancyStatus = a.Vacancy.VacancyStatus,
                     Status = a.Status.StatusEnum,
                     StatusColor = a.Status.StatusColor,
@@ -333,7 +364,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                 })
                 .Skip(Math.Max(0, (skip - 1) * take))
                 .Take(take)
-                .ToListAsync(); 
+                .ToListAsync();
 
             return new PaginatedApplicationDto
             {
@@ -345,9 +376,9 @@ namespace JobCompany.Business.Services.ApplicationServices
         public async Task<ApplicationDetailDto> GetUserApplicationByIdAsync(string applicationId)
         {
             var applicationGuid = Guid.Parse(applicationId);
-    
+
             var application = await _context.Applications
-                .Include(x=> x.Status)
+                .Include(x => x.Status)
                 .Where(a => a.UserId == _currentUser.UserGuid && a.Id == applicationGuid)
                 .Select(application => new ApplicationDetailDto
                 {
@@ -355,27 +386,26 @@ namespace JobCompany.Business.Services.ApplicationServices
                     VacancyName = application.Vacancy.Title,
                     CompanyId = application.Vacancy.CompanyId,
                     CompanyName = application.Vacancy.Company.CompanyName,
-                    CompanyLogo =  $"{_authServiceBaseUrl}/{application.Vacancy.Company.CompanyLogo}",
+                    CompanyLogo = $"{_currentUser.BaseUrl}/{application.Vacancy.Company.CompanyLogo}",
                     Location = application.Vacancy.Company.CompanyLocation,
                     WorkType = application.Vacancy.WorkType,
                     WorkStyle = application.Vacancy.WorkStyle,
                     CreatedDate = application.CreatedDate,
                     ApplicationStatusId = application.StatusId,
-                    CompanyStatuses = application.Vacancy.Company.Statuses.Where(x=> x.IsVisible).Select(x=> new ApplicationStatusesListDto
+                    CompanyStatuses = application.Vacancy.Company.Statuses.Where(x => x.IsVisible).Select(x => new ApplicationStatusesListDto
                     {
                         CompanyStatusId = x.Id,
                         CompanyStatus = x.StatusEnum,
                         Order = x.Order
                     })
-                    .OrderBy(x=> x.Order)
+                    .OrderBy(x => x.Order)
                     .ToList()
                 })
                 .FirstOrDefaultAsync()
                 ?? throw new NotFoundException<Application>(MessageHelper.GetMessage("NOT_FOUND"));
-                
+
             return application;
         }
-
 
         /// <summary>
         /// Sadece 1 consumer responsundan istifade etdim , userDataResponsdaki datalar onsuzda resumeDataResponse'da var idi o birine ehtiyac qalmadi
@@ -386,12 +416,12 @@ namespace JobCompany.Business.Services.ApplicationServices
         /// <exception cref="NotImplementedException"></exception> 
         public async Task<DataListDto<ApplicationWithStatusInfoListDto>> GetAllApplicationWithStatusAsync(int skip = 1, int take = 9)
         {
-            var applications = await GetPaginatedApplicationsAsync(skip, take);
+            var applications = await GetPaginatedApplicationsAsync(skip, take, null, null, null, null);
 
             var userIds = applications.Item1.Select(a => a.UserId).ToList();
 
             var resumeDataResponse = await GetResumeDataResponseAsync(userIds);
-            var data = MapApplicationsWithStatusToDto(applications.Item1, resumeDataResponse); 
+            var data = MapApplicationsWithStatusToDto(applications.Item1, resumeDataResponse);
 
             return new DataListDto<ApplicationWithStatusInfoListDto>
             {
@@ -413,14 +443,15 @@ namespace JobCompany.Business.Services.ApplicationServices
                     {
                         ApplicationId = a.Id,
                         ProfileImage = resume != null && resume.ProfileImage != null
-                        ? $"{_currentUser.BaseUrl}/{resume.ProfileImage}"
+                        ? $"{_authServiceBaseUrl}/{resume.ProfileImage}"
                         : null,
 
                         FirstName = resume?.FirstName,
                         LastName = resume?.LastName,
                         StatusId = a.StatusId,
-                        StatusName = a.Status.StatusEnum.ToString(),
-                        Position = resume?.Position
+                        StatusName = a.Status.StatusEnum,
+                        Position = resume?.Position,
+                        DateTime = a.CreatedDate,
                     };
                 })
                 .ToList();
@@ -428,5 +459,12 @@ namespace JobCompany.Business.Services.ApplicationServices
             return response;
         }
 
+        /// <summary> User id-lərinə görə resume id-lərinin gətirilməsi </summary>
+        private async Task<GetResumeIdsByUserIdsResponse> GetResumeIdsByUserIds(List<Guid> userIds)
+        {
+            var request = new GetResumeIdsByUserIdsRequest { UserIds = userIds };
+            var response = await _resumeIdsRequest.GetResponse<GetResumeIdsByUserIdsResponse>(request);
+            return response.Message;
+        }
     }
 }

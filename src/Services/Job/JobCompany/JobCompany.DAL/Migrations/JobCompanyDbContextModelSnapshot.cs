@@ -58,6 +58,9 @@ namespace JobCompany.DAL.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<Guid?>("StatusId")
                         .HasColumnType("uniqueidentifier");
 
@@ -488,6 +491,9 @@ namespace JobCompany.DAL.Migrations
                         .HasColumnType("tinyint");
 
                     b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("VacancyId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");

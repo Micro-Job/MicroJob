@@ -44,6 +44,7 @@ namespace Job.Business.Consumers
                     {
                         ReceiverId = resume.UserId,
                         SenderId = eventMessage.SenderId,
+                        NotificationType = SharedLibrary.Enums.NotificationType.Vacancy,
                         InformationId = eventMessage.InformationId,
                         IsSeen = false,
                     };

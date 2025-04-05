@@ -1,6 +1,6 @@
 using FluentValidation.AspNetCore;
 using Job.Business;
-using Job.Business.BackgroundServices;
+//using Job.Business.BackgroundServices;
 using Job.Business.Consumers;
 using Job.Business.Services.Resume;
 using Job.DAL.Contexts;
@@ -70,6 +70,9 @@ namespace Job.API
             {
                 opt.UseSqlServer(configuration.GetConnectionString("MSSQL"));
             });
+
+            //builder.Services.AddHostedService<RabbitMqBackgroundService>();
+
 
             builder.Services.AddFluentValidation(opt =>
             {

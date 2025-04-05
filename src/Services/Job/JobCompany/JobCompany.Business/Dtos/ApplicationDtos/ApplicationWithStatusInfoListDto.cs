@@ -10,5 +10,6 @@ public class ApplicationWithStatusInfoListDto
     public string LastName { get; set; }
     public string Position { get; set; }
     public Guid? StatusId { get; set; }
-    public string? StatusName { get; set; }
+    public StatusEnum StatusName { get; set; }
+    public DateTime DateTime { get; set; }
 }
