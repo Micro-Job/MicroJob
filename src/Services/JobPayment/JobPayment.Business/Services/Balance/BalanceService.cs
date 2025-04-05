@@ -30,7 +30,8 @@ namespace JobPayment.Business.Services.BalanceSer
                 TranzactionType = TranzactionType.InCome,
                 InformationType = InformationType.PacketPayment,
                 InformationId = existPacket.Id,
-                UserId = (Guid)_currentUser.UserGuid
+                UserId = (Guid)_currentUser.UserGuid,
+                Amount = existPacket.Value
             });
 
             myBalance.Coin += existPacket.Coin;
@@ -40,7 +41,9 @@ namespace JobPayment.Business.Services.BalanceSer
 
         public async Task<Balance> GetOwnBalanceAsync()
         {
-            var myBalance = await _context.Balances.FirstOrDefaultAsync(x=> x.Id == _currentUser.UserGuid) 
+            var userId = _currentUser.UserGuid;
+
+            var myBalance = await _context.Balances.FirstOrDefaultAsync(x=> x.UserId == _currentUser.UserGuid) 
                             ?? throw new NotFoundException<Balance>();
 
             return myBalance;

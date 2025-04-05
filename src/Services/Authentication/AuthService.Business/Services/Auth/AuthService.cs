@@ -54,7 +54,7 @@ namespace AuthService.Business.Services.Auth
             await _context.SaveChangesAsync();
 
             await _publishEndpoint.Publish(new UserRegisteredEvent { UserId = user.Id , JobStatus = user.JobStatus });
-            await _createBalance(user.Id, false);
+            await _createBalance(user.Id);
             //await _publisher.SendEmail(
             //    new EmailMessage
             //    {
@@ -110,7 +110,7 @@ namespace AuthService.Business.Services.Auth
             );
 
             await _publishEndpoint.Publish(new UserRegisteredEvent { UserId = user.Id });
-            await _createBalance(user.Id , true);
+            await _createBalance(user.Id);
             //await _publisher.SendEmail(
             //    new EmailMessage
             //    {
@@ -243,12 +243,11 @@ namespace AuthService.Business.Services.Auth
         }
 
 
-        private async Task _createBalance(Guid userId , bool IsCompany)
+        private async Task _createBalance(Guid userId)
         {
             await _publishEndpoint.Publish(new CreateBalanceEvent
             {
                 UserId = userId,
-                IsCompany = IsCompany
             });
         }
     }

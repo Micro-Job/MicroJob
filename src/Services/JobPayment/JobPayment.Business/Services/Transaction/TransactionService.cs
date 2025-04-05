@@ -37,7 +37,6 @@ namespace JobPayment.Business.Services.TransactionSer
                 {
                     Amount = dto.Amount,
                     BalanceId = dto.BalanceId,
-                    UserId = dto.UserId,
                     TransactionId = newTransaction.Id
                 }); 
             }

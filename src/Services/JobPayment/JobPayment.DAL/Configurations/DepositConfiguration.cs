@@ -13,6 +13,8 @@ namespace JobPayment.DAL.Configurations
     {
         public void Configure(EntityTypeBuilder<Deposit> builder)
         {
+            builder.ToTable("Deposits");
+
             builder.HasOne(x => x.Balance)
                .WithMany(x => x.Deposits)
                .HasForeignKey(x => x.BalanceId)

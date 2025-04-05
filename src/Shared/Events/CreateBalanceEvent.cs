@@ -9,6 +9,5 @@ namespace SharedLibrary.Events
     public class CreateBalanceEvent
     {
         public Guid UserId { get; set; }
-        public bool IsCompany { get; set; }
     }
 }

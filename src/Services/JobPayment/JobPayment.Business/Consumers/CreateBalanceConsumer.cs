@@ -19,7 +19,6 @@ namespace JobPayment.Business.Consumers
                 UserId = context.Message.UserId,
                 Coin = 0,
                 BonusCoin = 0,
-                IsCompany = context.Message.IsCompany
             });
             await _context.SaveChangesAsync();
         }
