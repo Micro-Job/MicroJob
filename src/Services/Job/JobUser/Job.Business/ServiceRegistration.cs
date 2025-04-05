@@ -47,6 +47,7 @@ namespace Job.Business
                 x.AddConsumer<UpdateUserApplicationStatusConsumer>();
                 x.AddConsumer<VacancyCreatedConsumer>();
                 x.AddConsumer<VacancyUpdatedConsumer>();
+                x.AddConsumer<VacancyDeletedConsumer>();
                 x.AddConsumer<GetResumeIdsByUserIdsConsumer>();
                 x.AddConsumer<GetFilteredUserIdsConsumer>();
 

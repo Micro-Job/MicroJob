@@ -298,15 +298,7 @@ namespace JobCompany.Business.Services.ApplicationServices
 
             var vacancyGuid = Guid.Parse(vacancyId);
 
-            var vacancy = await _context.Vacancies.FirstOrDefaultAsync(x => x.Id == vacancyGuid)
-                ?? throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
-
-            if (vacancy.VacancyStatus == VacancyStatus.Pause)
-            {
-                throw new VacancyStatusNotToggableException("Vakansiya statusu 'Pause' vəziyyətində olduğu üçün yeni müraciətlər qəbul edilə bilməz.");
-            }
-
-            if (await _context.Applications.AnyAsync(x => x.VacancyId == vacancyGuid && x.UserId == userGuid))
+            if (await _context.Applications.AnyAsync(x => x.VacancyId == vacancyGuid && x.IsDeleted == false && x.UserId == userGuid))
                 throw new ApplicationIsAlreadyExistException(MessageHelper.GetMessage("APPLICATION_ALREADY_EXIST"));
 
             var vacancyInfo = await _context.Vacancies
@@ -340,7 +332,6 @@ namespace JobCompany.Business.Services.ApplicationServices
                 SenderId = userGuid,
                 VacancyId = vacancyGuid,
                 InformationId = userGuid,
-                Content = $"İstifadəçi {_currentUser.UserFullName} {vacancyInfo.Title} vakansiyasına müraciət etdi.",
             });
         }
 

@@ -14,7 +14,7 @@ namespace JobCompany.Business.Consumers
             {
                 ReceiverId = context.Message.UserId,
                 SenderId = context.Message.SenderId,
-                //Content = context.Message.Content,
+                NotificationType = SharedLibrary.Enums.NotificationType.Application,
                 InformationId = context.Message.InformationId,
                 IsSeen = false,
             };
