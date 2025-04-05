@@ -12,7 +12,7 @@ using System.Net;
 namespace AuthService.Business.HelperServices.Email
 {
     public class EmailService(IOptions<SmtpSettings> smtpSettings,
-                              AppDbContext _context) : IEmailService
+                              AppDbContext _context, EmailTemplate _emailTemplate) : IEmailService
 
     {
         private readonly SmtpSettings _smtpSettings = smtpSettings.Value;
@@ -22,7 +22,7 @@ namespace AuthService.Business.HelperServices.Email
             await SendEmailAsync(toEmail, new EmailMessage
             {
                 Subject = "Şifrənizi müəyyən edin...",
-                Content = EmailTemplate.ResetPassword(toEmail, token)
+                Content = _emailTemplate.ResetPassword(toEmail, token)
             });
         }
 
@@ -69,7 +69,7 @@ namespace AuthService.Business.HelperServices.Email
             await SendEmailAsync(toEmail, new EmailMessage
             {
                 Subject = "Şifrənizi yeniləyin...",
-                Content = EmailTemplate.ResetPassword(token, user.UserName)
+                Content = _emailTemplate.ResetPassword(token, user.UserName)
             });
 
         }

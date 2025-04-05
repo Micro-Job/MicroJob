@@ -273,7 +273,7 @@ namespace JobCompany.Business.Services.VacancyServices
         {
             var vacancyGuid = Guid.Parse(id);
 
-            Guid userGuid = (Guid)_currentUser.UserGuid;
+            Guid? userGuid = _currentUser.UserGuid;
 
             var vacancyDto = await _context
                     .Vacancies.Where(x => x.Id == vacancyGuid)

@@ -72,6 +72,7 @@ namespace JobCompany.Business.Services.CompanyServices
             if (!string.IsNullOrEmpty(company.CompanyLogo))
             {
                 _fileService.DeleteFile(company.CompanyLogo);
+                company.CompanyLogo = "Files/Images/defaultlogo.jpg";
             }
 
             if (dto.CompanyLogo != null)
@@ -200,7 +201,7 @@ namespace JobCompany.Business.Services.CompanyServices
                     WebLink = x.WebLink,
                     CreatedDate = x.CreatedDate,
                     EmployeeCount = x.EmployeeCount.HasValue ? x.EmployeeCount.Value : null,
-                    CompanyLogo = !string.IsNullOrEmpty(x.CompanyLogo) ? $"{_currentUser.BaseUrl}/{x.CompanyLogo}" : null,
+                    CompanyLogo = $"{_currentUser.BaseUrl}/{x.CompanyLogo}",
                     Category = x.Category.GetTranslation(currentLanguage, GetTranslationPropertyName.Name),
                     City = x.City != null ? x.City.GetTranslation(currentLanguage, GetTranslationPropertyName.Name) : null,
                     Country = x.Country != null ? x.Country.GetTranslation(currentLanguage, GetTranslationPropertyName.Name) : null,

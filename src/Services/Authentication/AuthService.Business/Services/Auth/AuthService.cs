@@ -80,8 +80,6 @@ namespace AuthService.Business.Services.Auth
             if (dto.Password != dto.ConfirmPassword)
                 throw new WrongPasswordException();
 
-            FileDto fileResult = new FileDto { FilePath = "Files/Images", FileName = "defaultlogo.jpg" };
-
             var user = new User
             {
                 Id = Guid.NewGuid(),
@@ -91,7 +89,6 @@ namespace AuthService.Business.Services.Auth
                 MainPhoneNumber = dto.MainPhoneNumber,
                 RegistrationDate = DateTime.Now,
                 Password = _tokenHandler.GeneratePasswordHash(dto.Password),
-                Image = fileResult.FilePath + "/" + fileResult.FileName,
                 UserRole = dto.IsCompany ? UserRole.CompanyUser : UserRole.EmployeeUser
             };
 
@@ -104,7 +101,6 @@ namespace AuthService.Business.Services.Auth
                     CompanyId = Guid.NewGuid(),
                     UserId = user.Id,
                     CompanyName = dto.IsCompany ? dto.CompanyName.Trim() : null,
-                    CompanyLogo = user.Image,
                     IsCompany = dto.IsCompany,
                 }
             );

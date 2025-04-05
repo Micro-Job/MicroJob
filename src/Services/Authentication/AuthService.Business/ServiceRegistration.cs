@@ -4,6 +4,7 @@ using AuthService.Business.HelperServices.TokenHandler;
 using AuthService.Business.Publishers;
 using AuthService.Business.Services.Auth;
 using AuthService.Business.Services.UserServices;
+using AuthService.Business.Templates;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,6 +28,7 @@ namespace AuthService.Business
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IFileService, FileService>();
             services.AddScoped<ICurrentUser, CurrentUser>();
+            services.AddSingleton<EmailTemplate>();
         }
 
         public static IServiceCollection AddMassTransit(this IServiceCollection services, string username, string password, string hostname, string port)

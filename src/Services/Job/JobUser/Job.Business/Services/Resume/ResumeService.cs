@@ -176,9 +176,18 @@ namespace Job.Business.Services.Resume
 
             await UpdatePhoneNumbersAsync(resume, updateDto.PhoneNumbers, updateDto.IsMainNumber);
 
-            resume.Educations = await _educationService.UpdateBulkEducationAsync(updateDto.Educations, resume.Id);
-            resume.Experiences = await _experienceService.UpdateBulkExperienceAsync(updateDto.Experiences, resume.Id);
-            resume.Languages = await _languageService.UpdateBulkLanguageAsync(updateDto.Languages, resume.Id);
+            resume.Educations = updateDto.Educations != null
+                ? await _educationService.UpdateBulkEducationAsync(updateDto.Educations, resume.Id)
+                : [];
+
+            resume.Experiences = updateDto.Experiences != null
+                ? await _experienceService.UpdateBulkExperienceAsync(updateDto.Experiences, resume.Id)
+                : [];
+
+            resume.Languages = updateDto.Languages != null
+                ? await _languageService.UpdateBulkLanguageAsync(updateDto.Languages, resume.Id)
+                : [];
+
             resume.Certificates = await UpdateCertificatesAsync(updateDto.Certificates ?? []);
 
             UpdateResumeSkills(resume, updateDto.SkillIds);
@@ -372,7 +381,7 @@ namespace Job.Business.Services.Resume
         {
             return await _context.Resumes.AnyAsync(x => x.UserId == _currentUser.UserGuid);
         }
-            
+
         #region Private Methods
         private async Task<Core.Entities.Resume> BuildResumeAsync(ResumeCreateDto dto, Guid positionId)
         {
@@ -452,6 +461,7 @@ namespace Job.Business.Services.Resume
                 .Include(r => r.Certificates)
                 .Include(r => r.Experiences)
                 .Include(r => r.Languages)
+                .Include(r => r.ResumeSkills)
                 .FirstOrDefaultAsync(r => r.UserId == userGuid)
                 ?? throw new NotFoundException<Core.Entities.Resume>(MessageHelper.GetMessage("NOT_FOUND"));
         }
@@ -517,7 +527,9 @@ namespace Job.Business.Services.Resume
 
         private static void UpdateResumeSkills(Core.Entities.Resume resume, IEnumerable<Guid>? skillIds)
         {
-            resume.ResumeSkills = skillIds?.Select(skillId => new ResumeSkill
+            resume.ResumeSkills.Clear();
+
+            resume.ResumeSkills = skillIds?.Distinct().Select(skillId => new ResumeSkill
             {
                 SkillId = skillId,
                 ResumeId = resume.Id
@@ -556,7 +568,7 @@ namespace Job.Business.Services.Resume
                     Id = s.SkillId,
                     Name = s.Skill.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name)
                 }).ToList(),
-                PhoneNumbers = r.IsPublic ? 
+                PhoneNumbers = r.IsPublic ?
                 r.PhoneNumbers.Select(p => new NumberGetByIdDto
                 {
                     PhoneNumber = p.PhoneNumber
