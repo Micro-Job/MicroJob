@@ -25,4 +25,11 @@
     <Folder Include="wwwroot\Files\Documents\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="wwwroot\Files\Images\defaultlogo.jpg">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>

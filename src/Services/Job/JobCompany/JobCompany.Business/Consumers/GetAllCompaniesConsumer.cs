@@ -3,17 +3,14 @@ using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using SharedLibrary.Dtos.CompanyDtos;
+using SharedLibrary.HelperServices.Current;
 using SharedLibrary.Requests;
 using SharedLibrary.Responses;
 
 namespace JobCompany.Business.Consumers
 {
-    public class GetAllCompaniesConsumer(IConfiguration configuration, JobCompanyDbContext context) : IConsumer<GetAllCompaniesRequest>
+    public class GetAllCompaniesConsumer(ICurrentUser _currentUser, JobCompanyDbContext _context) : IConsumer<GetAllCompaniesRequest>
     {
-        private readonly JobCompanyDbContext _context = context;
-        readonly IConfiguration _configuration = configuration;
-        private readonly string? _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
-
         public async Task Consume(ConsumeContext<GetAllCompaniesRequest> context)
         {
             var searchTerm = context.Message.SearchTerm?.ToLower() ?? string.Empty;
@@ -36,7 +33,7 @@ namespace JobCompany.Business.Consumers
                     CompanyId = x.Id,
                     CompanyUserId = x.UserId,
                     CompanyName = x.CompanyName,
-                    CompanyImage = $"{_authServiceBaseUrl}/{x.CompanyLogo}",
+                    CompanyImage = $"{_currentUser.BaseUrl}/{x.CompanyLogo}",
                     CompanyVacancyCount = x.Vacancies.Count,
                 })
                 .ToListAsync();
