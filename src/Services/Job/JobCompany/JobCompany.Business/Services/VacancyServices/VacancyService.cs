@@ -204,7 +204,7 @@ namespace JobCompany.Business.Services.VacancyServices
                     Title = x.Title,
                     StartDate = x.StartDate,
                     Location = x.Location,
-                    CompanyLogo = $"{_authServiceBaseUrl}/{x.Company.CompanyLogo}",
+                    CompanyLogo = $"{_currentUser.BaseUrl}/{x.Company.CompanyLogo}",
                     CompanyName = x.CompanyName,
                     ViewCount = x.ViewCount,
                     WorkType = x.WorkType,
@@ -249,7 +249,7 @@ namespace JobCompany.Business.Services.VacancyServices
                     CompanyName = x.CompanyName,
                     Title = x.Title,
                     Location = x.Location,
-                    CompanyLogo = $"{_authServiceBaseUrl}/{x.Company.CompanyLogo}",
+                    CompanyLogo = $"{_currentUser.BaseUrl}/{x.Company.CompanyLogo}",
                     WorkStyle = x.WorkStyle,
                     WorkType = x.WorkType,
                     StartDate = x.StartDate,
@@ -273,7 +273,7 @@ namespace JobCompany.Business.Services.VacancyServices
         {
             var vacancyGuid = Guid.Parse(id);
 
-            Guid userGuid = (Guid)_currentUser.UserGuid;
+            Guid? userGuid = _currentUser.UserGuid;
 
             var vacancyDto = await _context
                     .Vacancies.Where(x => x.Id == vacancyGuid)

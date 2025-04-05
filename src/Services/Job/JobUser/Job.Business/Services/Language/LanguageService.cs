@@ -1,4 +1,4 @@
-using Job.Business.Dtos.LanguageDtos;
+﻿using Job.Business.Dtos.LanguageDtos;
 using Job.Business.Exceptions.Common;
 using Job.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
@@ -29,23 +29,49 @@ namespace Job.Business.Services.Language
 
         public async Task<ICollection<Core.Entities.Language>> UpdateBulkLanguageAsync(ICollection<LanguageUpdateDto> dtos, Guid resumeId)
         {
+            var updatedLanguages = new List<Core.Entities.Language>();     // Nəticə olaraq qaytarılacaq dil siyahısı
+            var newLanguageDtos = new List<LanguageCreateDto>();        // Yeni əlavə olunacaq dillər üçün yaradılacaq DTO siyahısı
+
             foreach (var dto in dtos)
             {
-                await UpdateLanguageAsync(dto, resumeId, false);
+                if (Guid.TryParse(dto.Id, out var parsedId) && parsedId != Guid.Empty) // Əgər id düzgün parse olunursa
+                {
+                    var language = await context.Languages
+                        .FirstOrDefaultAsync(x => x.Id == parsedId && x.ResumeId == resumeId)
+                        ?? throw new NotFoundException<Core.Entities.Language>(MessageHelper.GetMessage("NOT_FOUND"));
+
+                    MapLanguageDtoToEntityForUpdate(language, dto); // dil datasını güncəlləyirik
+
+                    updatedLanguages.Add(new Core.Entities.Language  // güncələnmiş dil geri qaytarılan siyahıya əlavə olunur
+                    {
+                        Id = parsedId,
+                        ResumeId = resumeId,
+                        LanguageName = dto.LanguageName,
+                        LanguageLevel = dto.LanguageLevel
+                    });
+                }
+                else // Əgər id düzgün parse olunmur və ya boşdursa, yeni dil əlavə edirik
+                {
+                    newLanguageDtos.Add(new LanguageCreateDto
+                    {
+                        LanguageName = dto.LanguageName,
+                        LanguageLevel = dto.LanguageLevel
+                    });
+                }
+            }
+
+            if (newLanguageDtos.Count > 0) // Əgər yeni dillər varsa, onları əlavə edirik
+            {
+                var newlyCreated = await CreateBulkLanguageAsync(newLanguageDtos, resumeId);
+                updatedLanguages.AddRange(newlyCreated);
             }
 
             await context.SaveChangesAsync();
 
-            var updatedLanguages = dtos.Select(dto => new Core.Entities.Language
-            {
-                Id = Guid.Parse(dto.Id),
-                ResumeId = resumeId,
-                LanguageName = dto.LanguageName,
-                LanguageLevel = dto.LanguageLevel
-            }).ToList();
-
             return updatedLanguages;
         }
+
+
 
         //TODO : saveChanges nedir?
         public async Task UpdateLanguageAsync(LanguageUpdateDto dto, Guid resumeId, bool saveChanges = true)
@@ -61,7 +87,7 @@ namespace Job.Business.Services.Language
             if (saveChanges) await context.SaveChangesAsync();
         }
 
-        
+
         private static Core.Entities.Language MapLanguageDtoToEntityForCreate(LanguageCreateDto dto, Guid resumeId)
         {
             return new Core.Entities.Language
