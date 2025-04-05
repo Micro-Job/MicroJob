@@ -49,6 +49,8 @@ namespace Job.Business
                 x.AddConsumer<VacancyUpdatedConsumer>();
                 x.AddConsumer<VacancyDeletedConsumer>();
                 x.AddConsumer<GetResumeIdsByUserIdsConsumer>();
+                x.AddConsumer<GetFilteredUserIdsConsumer>();
+
                 x.SetKebabCaseEndpointNameFormatter();
 
                 x.UsingRabbitMq((context, cfg) =>

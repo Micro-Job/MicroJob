@@ -185,10 +185,7 @@ namespace JobCompany.Business.Services.CompanyServices
         public async Task<CompanyProfileDto> GetOwnCompanyInformationAsync()
         {
             var currentLanguage = _currentUser.LanguageCode;
-
-            //Bu application-ın run olduğu serverin url-ini alırıq (Məs: http://localhost:5082)
-            var serviceUrl = $"{_contextAccessor.HttpContext?.Request.Scheme}://{_contextAccessor.HttpContext?.Request.Host}";
-            Console.WriteLine(serviceUrl);
+            
             var companyProfile = await _context.Companies
                 .Where(c => c.UserId == _currentUser.UserGuid)
                 .Include(x => x.Category.Translations)
@@ -203,7 +200,7 @@ namespace JobCompany.Business.Services.CompanyServices
                     WebLink = x.WebLink,
                     CreatedDate = x.CreatedDate,
                     EmployeeCount = x.EmployeeCount.HasValue ? x.EmployeeCount.Value : null,
-                    CompanyLogo = !string.IsNullOrEmpty(x.CompanyLogo) ? $"{serviceUrl}/{x.CompanyLogo}" : null,
+                    CompanyLogo = !string.IsNullOrEmpty(x.CompanyLogo) ? $"{_currentUser.BaseUrl}/{x.CompanyLogo}" : null,
                     Category = x.Category.GetTranslation(currentLanguage, GetTranslationPropertyName.Name),
                     City = x.City != null ? x.City.GetTranslation(currentLanguage, GetTranslationPropertyName.Name) : null,
                     Country = x.Country != null ? x.Country.GetTranslation(currentLanguage, GetTranslationPropertyName.Name) : null,
