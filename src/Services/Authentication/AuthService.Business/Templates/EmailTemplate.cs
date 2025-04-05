@@ -10,7 +10,10 @@ namespace AuthService.Business.Templates
     {
         public static string ResetPassword(string token, string username)
         {
-            string ip = "http://localhost:3001";
+            //TODO : buradaki url-ler appsettingsden goturulmelidir
+            string ip = "http://localhost:3001";//local
+            //string ip = "https://job.siesco.studio";//real
+
             return $@"
 <!DOCTYPE html>
 <html lang='en-US'>
