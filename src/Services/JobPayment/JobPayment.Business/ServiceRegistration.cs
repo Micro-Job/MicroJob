@@ -1,7 +1,8 @@
 ﻿using JobPayment.Business.Consumers;
-using JobPayment.Business.Services.Balance;
+using JobPayment.Business.Services.BalanceSer;
+using JobPayment.Business.Services.DepositSer;
 using JobPayment.Business.Services.PacketSer;
-using JobPayment.Business.Services.Transaction;
+using JobPayment.Business.Services.TransactionSer;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using SharedLibrary.HelperServices.Current;
@@ -20,6 +21,7 @@ namespace JobPayment.Business
             services.AddHttpContextAccessor();
             services.AddScoped<ICurrentUser, CurrentUser>();
             services.AddScoped<IBalanceService , BalanceService>();
+            services.AddScoped<IDepositService , DepositService>();
             services.AddScoped<IPacketService , PacketService>();
             services.AddScoped<ITransactionService , TransactionService>();
         }

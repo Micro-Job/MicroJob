@@ -17,5 +17,6 @@ namespace JobPayment.DAL.Contexts
         public DbSet<OldPacket> OldPackets { get; set; }
         public DbSet<Packet> Packets { get; set; }
         public DbSet<Transaction> Tranzactions { get; set; }
+        public DbSet<Deposit> Deposits { get; set; }
     }
 }

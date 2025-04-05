@@ -248,6 +248,7 @@ namespace AuthService.Business.Services.Auth
             await _publishEndpoint.Publish(new CreateBalanceEvent
             {
                 UserId = userId,
+                IsCompany = IsCompany
             });
         }
     }

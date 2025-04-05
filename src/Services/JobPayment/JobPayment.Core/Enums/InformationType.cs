@@ -16,5 +16,6 @@ namespace JobPayment.Core.Enums
         /// Anonim resumelere baxmaq ucun odenis edilerse
         /// </summary>
         AnonymResume = 2,
+        PacketPayment = 3
     }
 }
