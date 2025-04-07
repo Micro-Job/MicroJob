@@ -8,7 +8,7 @@ using System.Security.Cryptography.Xml;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace JobPayment.Business.Services.DepositSer
+namespace JobPayment.Business.Services.DepositServices
 {
     public class DepositService(PaymentDbContext _context) : IDepositService
     {

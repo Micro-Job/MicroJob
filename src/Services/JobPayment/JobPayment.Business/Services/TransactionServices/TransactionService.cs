@@ -1,6 +1,6 @@
 ﻿using JobPayment.Business.Dtos.DepositDtos;
 using JobPayment.Business.Dtos.TransactionDtos;
-using JobPayment.Business.Services.DepositSer;
+using JobPayment.Business.Services.DepositServices;
 using JobPayment.Core.Entities;
 using JobPayment.Core.Enums;
 using JobPayment.DAL.Contexts;
@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace JobPayment.Business.Services.TransactionSer
+namespace JobPayment.Business.Services.TransactionServices
 {
     public class TransactionService(PaymentDbContext _context , IDepositService _depositService) : ITransactionService
     {
@@ -31,7 +31,7 @@ namespace JobPayment.Business.Services.TransactionSer
 
             await _context.Tranzactions.AddAsync(newTransaction);
 
-            if(dto.TranzactionType == TranzactionType.InCome)
+            if(dto.TranzactionType == TranzactionType.InCome && dto.Amount != null)
             {
                 await _depositService.CreateDepositAsync(new CreateDepositDto
                 {

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace JobPayment.Business.Services.DepositSer
+namespace JobPayment.Business.Services.DepositServices
 {
     public interface IDepositService
     {

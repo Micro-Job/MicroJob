@@ -1,22 +1,19 @@
 ﻿using JobPayment.Business.Dtos.TransactionDtos;
-using JobPayment.Business.Services.PacketSer;
-using JobPayment.Business.Services.TransactionSer;
+using JobPayment.Business.Services.PacketServices;
+using JobPayment.Business.Services.TransactionServices;
 using JobPayment.Core.Entities;
 using JobPayment.Core.Enums;
 using JobPayment.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
+using SharedLibrary.Enums;
 using SharedLibrary.Exceptions;
 using SharedLibrary.HelperServices.Current;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-namespace JobPayment.Business.Services.BalanceSer
+namespace JobPayment.Business.Services.BalanceServices
 {
     public class BalanceService(PaymentDbContext _context , ITransactionService _transactionService,  IPacketService _packetService , ICurrentUser _currentUser) : IBalanceService
     {
-        public async Task IncreaseBalanceAsync(string packetId , int number)
+        public async Task IncreaseBalanceAsync(string packetId)
         {
             var existPacket = await _packetService.GetPacketByIdAsync(packetId);
 

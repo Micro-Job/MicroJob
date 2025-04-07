@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace JobPayment.Core.Enums
+namespace SharedLibrary.Enums
 {
     public enum InformationType : byte
     {

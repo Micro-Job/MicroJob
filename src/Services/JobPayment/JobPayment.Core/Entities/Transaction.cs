@@ -1,6 +1,7 @@
 ﻿
 using JobPayment.Core.Entities.Base;
 using JobPayment.Core.Enums;
+using SharedLibrary.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;

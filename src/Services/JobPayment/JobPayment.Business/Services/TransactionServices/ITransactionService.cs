@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace JobPayment.Business.Services.TransactionSer
+namespace JobPayment.Business.Services.TransactionServices
 {
     public interface ITransactionService
     {
