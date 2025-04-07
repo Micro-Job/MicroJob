@@ -6,7 +6,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "job-auth-service",
-          "Port": 8080
+          "Port": 5001
         }
       ],
       "UpstreamPathTemplate": "/auth/{everything}",
@@ -18,7 +18,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "jobuser-service",
-          "Port": 8080
+          "Port": 5002
         }
       ],
       "UpstreamPathTemplate": "/job/{everything}",
@@ -30,7 +30,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "jobcompany-service",
-          "Port": 8080
+          "Port": 5082
         }
       ],
       "UpstreamPathTemplate": "/jobcompany/{everything}",
@@ -42,7 +42,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "jobpayment-service",
-          "Port": 8080
+          "Port": 5003
         }
       ],
       "UpstreamPathTemplate": "/jobpayment/{everything}",
@@ -50,6 +50,6 @@
     }
   ],
   "GlobalConfiguration": {
-    "BaseUrl": "http://job-gateway:8080"
+    "BaseUrl": "http://job-gateway:5000"
   }
 }
