@@ -1,4 +1,5 @@
-﻿using System;
+﻿using JobPayment.Core.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,7 @@ namespace JobPayment.Business.Services.BalanceSer
 {
     public interface IBalanceService
     {
-        public Task IncreaseBalanceAsync(string packetId);
+        public Task IncreaseBalanceAsync(string packetId , int number);
+        public Task<Balance> GetOwnBalanceAsync();
     }
 }

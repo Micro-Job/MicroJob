@@ -16,7 +16,7 @@ namespace JobPayment.Business.Services.BalanceSer
 {
     public class BalanceService(PaymentDbContext _context , ITransactionService _transactionService,  IPacketService _packetService , ICurrentUser _currentUser) : IBalanceService
     {
-        public async Task IncreaseBalanceAsync(string packetId)
+        public async Task IncreaseBalanceAsync(string packetId , int number)
         {
             var existPacket = await _packetService.GetPacketByIdAsync(packetId);
 
@@ -35,14 +35,12 @@ namespace JobPayment.Business.Services.BalanceSer
             });
 
             myBalance.Coin += existPacket.Coin;
-
+                
             await _context.SaveChangesAsync();
         }
 
         public async Task<Balance> GetOwnBalanceAsync()
         {
-            var userId = _currentUser.UserGuid;
-
             var myBalance = await _context.Balances.FirstOrDefaultAsync(x=> x.UserId == _currentUser.UserGuid) 
                             ?? throw new NotFoundException<Balance>();
 
