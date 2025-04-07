@@ -12,6 +12,7 @@ namespace Job.Business.Dtos.ResumeDtos
     {
         public Guid Id { get; set; }
         public bool IsSaved { get; set; }
+        public bool IsPrivate { get; set; }
         public string? ProfileImage { get; set; }
         public string? FullName { get; set; }
         public string? Position { get; set; }
