@@ -225,7 +225,7 @@ namespace Job.Business.Services.Resume
                 ? $"{_currentUser.BaseUrl}/{x.UserPhoto}"
                 : null,
                 IsSaved = x.SavedResumes.Any(sr => sr.ResumeId == x.Id && sr.CompanyUserId == _currentUser.UserGuid),
-                IsPrivate = !x.IsPublic,
+                IsPublic = x.IsPublic,
                 JobStatus = x.User.JobStatus,
                 LastWork = x.Experiences
                     .OrderByDescending(e => e.StartDate)
