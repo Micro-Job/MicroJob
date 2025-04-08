@@ -1,7 +1,8 @@
-﻿using JobPayment.Business.Services.BalanceSer;
+﻿using JobPayment.Business.Services.BalanceServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Reflection.Metadata.Ecma335;
 
 namespace JobPayment.API.Controllers
 {
@@ -15,6 +16,12 @@ namespace JobPayment.API.Controllers
         {
             await _balanceService.IncreaseBalanceAsync(packetId);
             return Ok();
+        }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetOwnBalance()
+        {
+            return Ok(await _balanceService.GetOwnBalanceAsync());
         }
     }
 }

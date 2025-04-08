@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace JobPayment.Business.Services.PacketSer
+namespace JobPayment.Business.Services.PacketServices
 {
     public class PacketService(PaymentDbContext _context) : IPacketService
     {

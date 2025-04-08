@@ -1,8 +1,10 @@
 ﻿using JobPayment.Business.Consumers;
-using JobPayment.Business.Services.BalanceSer;
-using JobPayment.Business.Services.DepositSer;
-using JobPayment.Business.Services.PacketSer;
-using JobPayment.Business.Services.TransactionSer;
+using JobPayment.Business.Services.BalanceServices;
+using JobPayment.Business.Services.DepositServices;
+using JobPayment.Business.Services.PacketServices;
+using JobPayment.Business.Services.Payment;
+using JobPayment.Business.Services.PriceServices;
+using JobPayment.Business.Services.TransactionServices;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using SharedLibrary.HelperServices.Current;
@@ -23,6 +25,8 @@ namespace JobPayment.Business
             services.AddScoped<IBalanceService , BalanceService>();
             services.AddScoped<IDepositService , DepositService>();
             services.AddScoped<IPacketService , PacketService>();
+            services.AddScoped<IPriceService , PriceService>();
+            services.AddScoped<IPaymentService , PaymentService>();
             services.AddScoped<ITransactionService , TransactionService>();
         }
 
@@ -34,6 +38,7 @@ namespace JobPayment.Business
             services.AddMassTransit(x =>
             {
                 x.AddConsumer<CreateBalanceConsumer>();
+                x.AddConsumer<PayConsumer>();
 
                 x.SetKebabCaseEndpointNameFormatter();
 
