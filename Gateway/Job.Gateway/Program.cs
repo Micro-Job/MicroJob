@@ -11,9 +11,12 @@ namespace Job.Gateway
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            var environment = builder.Environment.EnvironmentName;
+            builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange: true)
+                                  .AddJsonFile($"ocelot.{environment}.json", optional: true, reloadOnChange: true);
             builder.Services.AddOcelot();
 
-            builder.Configuration.AddJsonFile("ocelot.json");
+            //builder.Configuration.AddJsonFile("ocelot.json");
 
             builder.Services.AddControllers();
 
