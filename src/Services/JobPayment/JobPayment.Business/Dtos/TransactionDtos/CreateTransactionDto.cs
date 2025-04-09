@@ -13,7 +13,7 @@ namespace JobPayment.Business.Dtos.TransactionDtos
     {
         public Guid InformationId { get; set; }
         public InformationType InformationType { get; set; }
-        public TranzactionType TranzactionType { get; set; }
+        public TransactionType TranzactionType { get; set; }
         public decimal? Amount { get; set; }
         public double? Coin { get; set; }
         public double? BeforeBalanceCoin { get; set; }
