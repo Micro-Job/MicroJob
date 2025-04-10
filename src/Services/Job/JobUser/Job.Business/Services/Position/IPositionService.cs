@@ -5,7 +5,7 @@ namespace Job.Business.Services.Position;
 
 public interface IPositionService
 {
-    Task<Guid> GetOrCreatePositionAsync(string? positionName, Guid? selectedPositionId, Guid? parentPositionId = null);
+    Task<Guid> GetOrCreatePositionAsync(string? positionName, Guid? selectedPositionId, Guid? parentPositionId);
     Task<List<PositionDto>> GetAllPositionsAsync();
 
     Task<List<PositionListDto>> GetMainPositionsAsync();

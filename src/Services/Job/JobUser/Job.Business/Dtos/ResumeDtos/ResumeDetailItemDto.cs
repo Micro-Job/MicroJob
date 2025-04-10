@@ -27,6 +27,8 @@ namespace Job.Business.Dtos.ResumeDtos
         public Military MilitarySituation { get; set; }
         public string? Adress { get; set; }
         public DateTime BirthDay { get; set; }
+        public Guid? PositionId { get; set; }
+        public Guid? ParentPositionId { get; set; }
 
         public string? ResumeEmail { get; set; }
         public ICollection<SkillGetByIdDto>? Skills { get; set; }
