@@ -19,6 +19,6 @@ namespace JobCompany.Business.Services.VacancyServices
         Task ToggleSaveVacancyAsync(string vacancyId);
         Task<List<VacancyGetAllDto>> SimilarVacanciesAsync(string vacancyId, int take = 6);
 
-        Task<DataListDto<VacancyGetAllDto>> GetAllSavedVacancyAsync(int skip, int take);
+        Task<DataListDto<VacancyGetAllDto>> GetAllSavedVacancyAsync(int skip, int take, string? vacancyName);
     }
 }

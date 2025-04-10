@@ -87,9 +87,9 @@ namespace JobCompany.API.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetAllSavedVacancy(int skip, int take)
+        public async Task<IActionResult> GetAllSavedVacancy(int skip, int take, string? vacancyName)
         {
-            return Ok(await _vacancyService.GetAllSavedVacancyAsync(skip, take));
+            return Ok(await _vacancyService.GetAllSavedVacancyAsync(skip, take, vacancyName));
         }
     }
 }

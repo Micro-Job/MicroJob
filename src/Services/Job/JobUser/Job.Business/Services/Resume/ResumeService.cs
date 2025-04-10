@@ -303,10 +303,12 @@ namespace Job.Business.Services.Resume
 
             if (languages != null && languages.Any())
             {
-                query = query.Where(x => languages.All(lang =>
-                    x.Languages.Any(rl =>
+                foreach (var lang in languages)
+                {
+                    query = query.Where(x => x.Languages.Any(rl =>
                         rl.LanguageName == lang.Language &&
-                        rl.LanguageLevel == lang.LanguageLevel)));
+                        rl.LanguageLevel == lang.LanguageLevel));
+                }
             }
 
             return query;
@@ -319,12 +321,13 @@ namespace Job.Business.Services.Resume
 
             var resumes = await query.Select(x => new ResumeListDto
             {
-                Id = x.Id,
+                Id = x.ResumeId,
                 FullName = x.Resume.IsPublic ? $"{x.Resume.FirstName} {x.Resume.LastName}" : null,
                 ProfileImage = x.Resume.IsPublic && x.Resume.UserPhoto != null
                 ? $"{_currentUser.BaseUrl}/{x.Resume.UserPhoto}"
                 : null,
-                IsSaved = true,
+                IsSaved = x.Resume.SavedResumes.Any(sr => sr.ResumeId == x.ResumeId && sr.CompanyUserId == _currentUser.UserGuid),
+                IsPublic = x.Resume.IsPublic,
                 JobStatus = x.Resume.User.JobStatus,
                 LastWork = x.Resume.Experiences
                     .OrderByDescending(e => e.StartDate)
