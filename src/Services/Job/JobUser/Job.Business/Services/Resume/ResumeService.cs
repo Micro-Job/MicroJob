@@ -321,12 +321,13 @@ namespace Job.Business.Services.Resume
 
             var resumes = await query.Select(x => new ResumeListDto
             {
-                Id = x.Id,
+                Id = x.ResumeId,
                 FullName = x.Resume.IsPublic ? $"{x.Resume.FirstName} {x.Resume.LastName}" : null,
                 ProfileImage = x.Resume.IsPublic && x.Resume.UserPhoto != null
                 ? $"{_currentUser.BaseUrl}/{x.Resume.UserPhoto}"
                 : null,
                 IsSaved = x.Resume.SavedResumes.Any(sr => sr.ResumeId == x.Id && sr.CompanyUserId == _currentUser.UserGuid),
+                IsPublic = x.Resume.IsPublic,
                 JobStatus = x.Resume.User.JobStatus,
                 LastWork = x.Resume.Experiences
                     .OrderByDescending(e => e.StartDate)
