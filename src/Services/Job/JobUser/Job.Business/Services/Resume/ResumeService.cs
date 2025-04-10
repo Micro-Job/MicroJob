@@ -326,7 +326,7 @@ namespace Job.Business.Services.Resume
                 ProfileImage = x.Resume.IsPublic && x.Resume.UserPhoto != null
                 ? $"{_currentUser.BaseUrl}/{x.Resume.UserPhoto}"
                 : null,
-                IsSaved = x.Resume.SavedResumes.Any(sr => sr.ResumeId == x.Id && sr.CompanyUserId == _currentUser.UserGuid),
+                IsSaved = x.Resume.SavedResumes.Any(sr => sr.ResumeId == x.ResumeId && sr.CompanyUserId == _currentUser.UserGuid),
                 IsPublic = x.Resume.IsPublic,
                 JobStatus = x.Resume.User.JobStatus,
                 LastWork = x.Resume.Experiences

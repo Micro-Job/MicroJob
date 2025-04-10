@@ -554,11 +554,17 @@ namespace JobCompany.Business.Services.VacancyServices
             return vacancies;
         }
 
-        public async Task<DataListDto<VacancyGetAllDto>> GetAllSavedVacancyAsync(int skip, int take)
+        public async Task<DataListDto<VacancyGetAllDto>> GetAllSavedVacancyAsync(int skip, int take, string? vacancyName)
         {
             var query = _context.SavedVacancies.Where(x => x.UserId == _currentUser.UserGuid)
                                                .AsQueryable()
                                                .AsNoTracking();
+
+            if (!string.IsNullOrEmpty(vacancyName))
+            {
+                vacancyName = vacancyName.Trim();
+                query = query.Where(x => x.Vacancy.Title.ToLower().Contains(vacancyName.ToLower()));
+            }
 
             var vacancies = await query
             .Select(x => new VacancyGetAllDto

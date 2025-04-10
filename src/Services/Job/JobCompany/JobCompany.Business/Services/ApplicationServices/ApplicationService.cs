@@ -142,9 +142,9 @@ namespace JobCompany.Business.Services.ApplicationServices
         }
 
         /// <summary> Consumer metodu - user idlərinə görə user datalarının gətirilməsi </summary>
-        private async Task<GetUsersDataResponse> GetUserDataResponseAsync(List<Guid> userIds)
+        private async Task<GetUsersDataResponse> GetUserDataResponseAsync(List<Guid> userIds, string? fullName)
         {
-            var request = new GetUsersDataRequest { UserIds = userIds };
+            var request = new GetUsersDataRequest { UserIds = userIds, FullName = fullName };
 
             var response = await _getUserDataClient.GetResponse<GetUsersDataResponse>(request);
 
@@ -211,9 +211,9 @@ namespace JobCompany.Business.Services.ApplicationServices
         }
 
         /// <summary> Şirkətə daxil olan bütün müraciətlərin filterlə birlikdə detallı şəkildə gətirilməsi </summary>
-        public async Task<DataListDto<AllApplicationListDto>> GetAllApplicationsListAsync(Guid? vacancyId, Gender? gender, StatusEnum? status, List<Guid>? skillIds, int skip = 1, int take = 10)
+        public async Task<DataListDto<AllApplicationListDto>> GetAllApplicationsListAsync(Guid? vacancyId, Gender? gender, StatusEnum? status, List<Guid>? skillIds, string? fullName, int skip = 1, int take = 10)
         {
-            var applications = await GetPaginatedApplicationsAsync(skip, take, vacancyId, gender, status, skillIds);
+            var applications = await GetPaginatedApplicationsAsync(skip, take, vacancyId, status);
 
             var userIds = applications.Item1.Select(a => a.UserId).ToList();
 
@@ -227,7 +227,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                 filteredApplications = applications.Item1.Where(a => response.Message.UserIds.Contains(a.UserId)).ToList();
             }
 
-            var userDataResponse = await GetUserDataResponseAsync(filteredApplications.Select(a => a.UserId).ToList());
+            var userDataResponse = await GetUserDataResponseAsync(filteredApplications.Select(a => a.UserId).ToList(), fullName); //Fullname userləri fullname-ə görə filterləmək üçündür
             var resumeIdsResponse = await GetResumeIdsByUserIds(filteredApplications.Select(a => a.UserId).ToList());
 
             var data = MapApplicationsToDto(filteredApplications, userDataResponse, resumeIdsResponse);
@@ -269,7 +269,7 @@ namespace JobCompany.Business.Services.ApplicationServices
             return response;
         }
 
-        private async Task<(List<Application>, int)> GetPaginatedApplicationsAsync(int skip, int take, Guid? vacancyId, Gender? gender, StatusEnum? status, List<Guid>? skillIds)
+        private async Task<(List<Application>, int)> GetPaginatedApplicationsAsync(int skip, int take, Guid? vacancyId, StatusEnum? status)
         {
             var query = _context.Applications
                 .Where(a => a.Vacancy.Company.UserId == _currentUser.UserGuid);
@@ -335,10 +335,16 @@ namespace JobCompany.Business.Services.ApplicationServices
             });
         }
 
-        public async Task<PaginatedApplicationDto> GetUserApplicationsAsync(int skip, int take)
+        public async Task<PaginatedApplicationDto> GetUserApplicationsAsync(string? vacancyName, int skip, int take)
         {
             var query = _context.Applications
                 .Where(a => a.UserId == _currentUser.UserGuid && a.IsActive);
+
+            if(!string.IsNullOrEmpty(vacancyName)) // Vakansiya adına görə filterlənmə
+            {
+                vacancyName = vacancyName.Trim();
+                query = query.Where(a => a.Vacancy.Title.ToLower().Contains(vacancyName.ToLower()));
+            }
 
             int totalCount = await query.CountAsync();
 
@@ -416,7 +422,7 @@ namespace JobCompany.Business.Services.ApplicationServices
         /// <exception cref="NotImplementedException"></exception> 
         public async Task<DataListDto<ApplicationWithStatusInfoListDto>> GetAllApplicationWithStatusAsync(int skip = 1, int take = 9)
         {
-            var applications = await GetPaginatedApplicationsAsync(skip, take, null, null, null, null);
+            var applications = await GetPaginatedApplicationsAsync(skip, take, null, null);
 
             var userIds = applications.Item1.Select(a => a.UserId).ToList();
 
