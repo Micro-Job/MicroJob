@@ -303,10 +303,12 @@ namespace Job.Business.Services.Resume
 
             if (languages != null && languages.Any())
             {
-                query = query.Where(x => languages.All(lang =>
-                    x.Languages.Any(rl =>
+                foreach (var lang in languages)
+                {
+                    query = query.Where(x => x.Languages.Any(rl =>
                         rl.LanguageName == lang.Language &&
-                        rl.LanguageLevel == lang.LanguageLevel)));
+                        rl.LanguageLevel == lang.LanguageLevel));
+                }
             }
 
             return query;
