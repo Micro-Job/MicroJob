@@ -15,5 +15,11 @@ namespace JobPayment.API.Controllers
         {
             return Ok(await _transactionService.GetOwnTransactionsAsync(startDate,endDate,transactionStatus,informationType,transactionType,skip,take));
         }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetTransactionDetail(string transactionId)
+        {
+            return Ok(await _transactionService.GetTransactionDetailAsync(transactionId));
+        }
     }
 }

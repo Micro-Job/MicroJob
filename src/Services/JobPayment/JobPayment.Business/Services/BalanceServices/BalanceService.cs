@@ -26,6 +26,7 @@ namespace JobPayment.Business.Services.BalanceServices
                 BeforeBalanceCoin = myBalance.Coin,
                 TranzactionType = TransactionType.InCome,
                 InformationType = InformationType.PacketPayment,
+                TransactionStatus = TransactionStatus.Success,
                 InformationId = existPacket.Id,
                 UserId = (Guid)_currentUser.UserGuid,
                 Amount = existPacket.Value

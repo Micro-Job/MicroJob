@@ -14,5 +14,7 @@ namespace JobPayment.Business.Services.TransactionServices
         public Task CreateTransactionAsync(CreateTransactionDto transaction);
 
         public Task<DataListDto<TransactionListDto>> GetOwnTransactionsAsync(string? startDate , string? endDate , byte? transactionStatus , byte? informationType , byte? transactionType , int skip = 1 , int take = 7);
+
+        public Task<TransactionDetailDto> GetTransactionDetailAsync(string transactionId);
     }
 }

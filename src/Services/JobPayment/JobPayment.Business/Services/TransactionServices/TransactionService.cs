@@ -8,6 +8,7 @@ using JobPayment.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using SharedLibrary.Enums;
+using SharedLibrary.Exceptions;
 using SharedLibrary.Extensions;
 using SharedLibrary.HelperServices.Current;
 using System;
@@ -30,6 +31,7 @@ namespace JobPayment.Business.Services.TransactionServices
                 BalanceId = dto.BalanceId,
                 CreatedDate = DateTime.Now,
                 BeforeBalanceCoin = dto.BeforeBalanceCoin,
+                TransactionStatus = dto.TransactionStatus,
                 InformationId = dto.InformationId,
                 InformationType = dto.InformationType,
                 TranzactionType = dto.TranzactionType,
@@ -52,6 +54,7 @@ namespace JobPayment.Business.Services.TransactionServices
         {
             var query = _context.Transactions
                 .Where(x => x.UserId == _currentUser.UserGuid)
+                .OrderByDescending(x=> x.CreatedDate)
                 .AsNoTracking()
                 .AsQueryable();
 
@@ -105,6 +108,23 @@ namespace JobPayment.Business.Services.TransactionServices
                 TotalCount = count,
                 TotalPage = (int)Math.Ceiling((double)count / take)
             };
+        }
+
+        public async Task<TransactionDetailDto> GetTransactionDetailAsync(string transactionId)
+        {
+            var transaction = await _context.Transactions.Where(x=> x.Id == Guid.Parse(transactionId) && x.UserId == _currentUser.UserGuid)
+            .Select(x=> new TransactionDetailDto
+            {
+                CompanyName = null,
+                Amount = x.Deposit.Amount,
+                Coin = x.Coin,
+                InformationType = x.InformationType,
+                TransactionType = x.TranzactionType,
+                TransactionStatus = x.TransactionStatus,
+                TransactionDate = x.CreatedDate
+            }).FirstOrDefaultAsync() ?? throw new NotFoundException<Transaction>("Əməliyyat mövcud deyil");
+
+            return transaction;
         }
     }
 }
