@@ -76,5 +76,12 @@ namespace Job.API.Controllers
             return Ok(await _resumeService.IsExistResumeAsync());
         }
 
+        [HttpPost("[action]")]
+        public async Task<IActionResult> TakeResumeAccess(string resumeId)
+        {
+            await _resumeService.TakeResumeAccessAsync(resumeId);
+            return Ok();
+        }
+
     }
 }

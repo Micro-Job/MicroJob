@@ -29,5 +29,7 @@ namespace Job.Business.Services.Resume
         Task<ResumeDetailItemDto> GetByIdResumeAysnc(string id);
         Task ToggleSaveResumeAsync(string resumeId);
         Task<bool> IsExistResumeAsync();
+
+        Task TakeResumeAccessAsync(string resumeId);
     }
 }
