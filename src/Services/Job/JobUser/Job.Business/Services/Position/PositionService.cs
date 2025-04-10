@@ -67,7 +67,7 @@ public class PositionService(JobDbContext _context) : IPositionService
     /// <summary>
     /// Position varsa onun id-sini qaytarır, yoxdursa yaradır və yenisinin id-sini geriyə qaytarır.
     /// </summary>
-    public async Task<Guid> GetOrCreatePositionAsync(string? positionName, Guid? selectedPositionId, Guid? parentPositionId = null)
+    public async Task<Guid> GetOrCreatePositionAsync(string? positionName, Guid? selectedPositionId, Guid? parentPositionId)
     {
         if (selectedPositionId != null)
         {

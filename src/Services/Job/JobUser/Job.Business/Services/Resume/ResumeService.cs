@@ -104,6 +104,8 @@ namespace Job.Business.Services.Resume
                                             Adress = resume.Adress,
                                             BirthDay = resume.BirthDay,
                                             ResumeEmail = resume.ResumeEmail,
+                                            PositionId = resume.PositionId,
+                                            ParentPositionId = resume.Position != null ? resume.Position.ParentPositionId : null,
                                             UserPhoto = resume.UserPhoto != null ? $"{_currentUser.BaseUrl}/{resume.UserPhoto}" : null,
                                             Skills = resume.ResumeSkills.Select(s => new SkillGetByIdDto
                                             {
@@ -165,7 +167,7 @@ namespace Job.Business.Services.Resume
 
             UpdateResumePersonalInfo(resume, updateDto);
 
-            var positionId = await _positionService.GetOrCreatePositionAsync(updateDto.Position, updateDto.PositionId);
+            var positionId = await _positionService.GetOrCreatePositionAsync(updateDto.Position, updateDto.PositionId, updateDto.ParentPositionId);
 
             if (positionId != Guid.Empty)
                 resume.PositionId = positionId;
