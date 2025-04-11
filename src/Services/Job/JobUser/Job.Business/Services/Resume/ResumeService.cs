@@ -7,6 +7,7 @@ using Job.Business.Dtos.NumberDtos;
 using Job.Business.Dtos.ResumeDtos;
 using Job.Business.Dtos.SkillDtos;
 using Job.Business.Exceptions.Common;
+using Job.Business.Exceptions.ResumeExceptions;
 using Job.Business.Extensions;
 using Job.Business.Services.Certificate;
 using Job.Business.Services.Education;
@@ -222,6 +223,7 @@ namespace Job.Business.Services.Resume
                 .Include(r => r.ResumeSkills)
                 .ThenInclude(rs => rs.Skill.Translations)
                 .Include(r => r.Languages)
+                .Include(r => r.CompanyResumeAccesses)
                 .AsQueryable()
                 .AsNoTracking();
 
@@ -231,7 +233,7 @@ namespace Job.Business.Services.Resume
             {
                 Id = x.Id,
                 FullName = x.IsPublic ? $"{x.FirstName} {x.LastName}" : null,
-                ProfileImage = x.IsPublic && x.UserPhoto != null
+                ProfileImage = (x.IsPublic || x.CompanyResumeAccesses.Any(cra => cra.CompanyUserId == _currentUser.UserGuid)) && x.UserPhoto != null
                 ? $"{_currentUser.BaseUrl}/{x.UserPhoto}"
                 : null,
                 IsSaved = x.SavedResumes.Any(sr => sr.ResumeId == x.Id && sr.CompanyUserId == _currentUser.UserGuid),
@@ -251,7 +253,7 @@ namespace Job.Business.Services.Resume
                 .Select(s => s.Skill.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name))
                 .ToList(),
                 Position = x.Position != null ? x.Position.Name : null,
-
+                HasAccess = x.IsPublic || x.CompanyResumeAccesses != null && x.CompanyResumeAccesses.Any(cra => cra.CompanyUserId == _currentUser.UserGuid)
             })
             .Skip(Math.Max(0, (skip - 1) * take))
             .Take(take)
@@ -333,7 +335,7 @@ namespace Job.Business.Services.Resume
             {
                 Id = x.ResumeId,
                 FullName = x.Resume.IsPublic ? $"{x.Resume.FirstName} {x.Resume.LastName}" : null,
-                ProfileImage = x.Resume.IsPublic && x.Resume.UserPhoto != null
+                ProfileImage = (x.Resume.IsPublic || (x.Resume.CompanyResumeAccesses != null && x.Resume.CompanyResumeAccesses.Any(cra => cra.CompanyUserId == _currentUser.UserGuid))) && x.Resume.UserPhoto != null
                 ? $"{_currentUser.BaseUrl}/{x.Resume.UserPhoto}"
                 : null,
                 IsSaved = x.Resume.SavedResumes.Any(sr => sr.ResumeId == x.ResumeId && sr.CompanyUserId == _currentUser.UserGuid),
@@ -353,7 +355,7 @@ namespace Job.Business.Services.Resume
                 .Select(s => s.Skill.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name))
                 .ToList(),
                 Position = x.Resume.Position != null ? x.Resume.Position.Name : null,
-
+                HasAccess = x.Resume.IsPublic || (x.Resume.CompanyResumeAccesses != null && x.Resume.CompanyResumeAccesses.Any(cra => cra.CompanyUserId == _currentUser.UserGuid))
             })
             .Skip(Math.Max(0, (skip - 1) * take))
             .Take(take)
@@ -468,7 +470,7 @@ namespace Job.Business.Services.Resume
                     CertificateFile = $"{_currentUser.BaseUrl}/{c.CertificateFile}"
                 }).ToList()
             })
-            .FirstOrDefaultAsync() ?? throw new NotFoundException<Core.Entities.Resume>("Resume mövcud deyil");
+            .FirstOrDefaultAsync() ?? throw new NotFoundException<Core.Entities.Resume>(MessageHelper.GetMessage("NOT_FOUND"));
 
             return resume;
         }
@@ -478,18 +480,18 @@ namespace Job.Business.Services.Resume
             var resumeGuid = Guid.Parse(resumeId);
 
             var resume = await _context.Resumes.Where(x => x.Id == resumeGuid)
-                .Select(x=> new 
+                .Select(x => new
                 {
                     x.IsPublic
                 }).FirstOrDefaultAsync();
 
             if (resume == null)
-                throw new NotFoundException<Core.Entities.Resume>("Resume mövcud deyil!");
+                throw new NotFoundException<Core.Entities.Resume>(MessageHelper.GetMessage("NOT_FOUND"));
 
-            if (resume.IsPublic) throw new NotFoundException<Core.Entities.Resume>("Bu resume anonim deyil!");
+            if (resume.IsPublic) throw new ResumeIsPublicException(MessageHelper.GetMessage("RESUME_IS_PUBLIC"));
 
             if (await _context.CompanyResumeAccesses.AnyAsync(x => x.ResumeId == resumeGuid && x.CompanyUserId == _currentUser.UserGuid))
-                throw new IsAlreadyExistException<CompanyResumeAccess>();
+                throw new IsAlreadyExistException<CompanyResumeAccess>(MessageHelper.GetMessage("RESUME_ACCESS_ALREADY_EXIST"));
 
             await _context.CompanyResumeAccesses.AddAsync(new CompanyResumeAccess
             {
@@ -662,7 +664,7 @@ namespace Job.Business.Services.Resume
                 ResumeId = resume.Id
             }).ToList() ?? [];
         }
-        
+
         #endregion
     }
 }
