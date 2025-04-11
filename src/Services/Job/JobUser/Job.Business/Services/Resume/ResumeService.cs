@@ -87,11 +87,17 @@ namespace Job.Business.Services.Resume
 
         public async Task<ResumeDetailItemDto> GetOwnResumeAsync()
         {
+            var userData = await _userInformationService.GetUserDataAsync((Guid)_currentUser.UserGuid);
+
+            var userMainEmail = userData.Email;
+            var userMainPhoneNumber = userData.MainPhoneNumber;
+
             var resume = await _context.Resumes
                                         .Include(x => x.ResumeSkills).ThenInclude(x => x.Skill).ThenInclude(x => x.Translations)
                                         .Where(x => x.UserId == _currentUser.UserGuid)
                                         .Select(resume => new ResumeDetailItemDto
                                         {
+                                            ResumeId = resume.Id,
                                             UserId = resume.UserId,
                                             FirstName = resume.FirstName,
                                             LastName = resume.LastName,
@@ -105,6 +111,8 @@ namespace Job.Business.Services.Resume
                                             Adress = resume.Adress,
                                             BirthDay = resume.BirthDay,
                                             ResumeEmail = resume.ResumeEmail,
+                                            IsMainEmail = resume.ResumeEmail == userMainEmail,
+                                            IsMainNumber = resume.PhoneNumbers.Any(p => p.PhoneNumber == userMainPhoneNumber),
                                             PositionId = resume.PositionId,
                                             ParentPositionId = resume.Position != null ? resume.Position.ParentPositionId : null,
                                             UserPhoto = resume.UserPhoto != null ? $"{_currentUser.BaseUrl}/{resume.UserPhoto}" : null,
@@ -155,7 +163,6 @@ namespace Job.Business.Services.Resume
 
             if (resume is null) return new ResumeDetailItemDto();
 
-            var userData = await _userInformationService.GetUserDataAsync((Guid)_currentUser.UserGuid);
             resume.FirstName = userData.FirstName;
             resume.LastName = userData.LastName;
 

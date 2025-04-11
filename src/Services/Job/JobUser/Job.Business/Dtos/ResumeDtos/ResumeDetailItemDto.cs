@@ -29,6 +29,8 @@ namespace Job.Business.Dtos.ResumeDtos
         public DateTime BirthDay { get; set; }
         public Guid? PositionId { get; set; }
         public Guid? ParentPositionId { get; set; }
+        public bool IsMainEmail { get; set; }
+        public bool IsMainNumber { get; set; }
 
         public string? ResumeEmail { get; set; }
         public ICollection<SkillGetByIdDto>? Skills { get; set; }
