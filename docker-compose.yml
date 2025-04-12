@@ -11,6 +11,7 @@ services:
       - auth
       - jobuser
       - jobcompany
+      - jobpayment
     environment:
       - VIRTUAL_HOST=job-api.siesco.studio
       - VIRTUAL_PORT=8080
@@ -44,6 +45,16 @@ services:
       dockerfile: src/Services/Job/JobCompany/JobCompany.API/Dockerfile
     ports:
       - "5004:8080"
+    networks:
+      - public-network
+      
+  jobpayment:
+    container_name: jobpayment-service
+    build:
+      context: .
+      dockerfile: src/Services/Job/JobPayment/JobPayment.API/Dockerfile
+    ports:
+      - "5016:8080"
     networks:
       - public-network
 networks:
