@@ -118,6 +118,7 @@ namespace JobPayment.Business.Services.TransactionServices
                 CompanyName = null,
                 Amount = x.Deposit.Amount,
                 Coin = x.Coin,
+                InformationId = x.InformationId,
                 InformationType = x.InformationType,
                 TransactionType = x.TranzactionType,
                 TransactionStatus = x.TransactionStatus,
