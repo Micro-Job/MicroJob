@@ -52,7 +52,7 @@ services:
     container_name: jobpayment-service
     build:
       context: .
-      dockerfile: src/Services/Job/JobPayment/JobPayment.API/Dockerfile
+      dockerfile: src/Services/JobPayment/JobPayment.API/Dockerfile
     ports:
       - "5016:8080"
     networks:
