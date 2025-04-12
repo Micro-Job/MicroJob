@@ -177,7 +177,7 @@ namespace JobCompany.Business.Services.VacancyServices
         }
 
         /// <summary> Şirkətin profilində bütün vakansiyalarını gətirmək(Filterlerle birlikde) </summary>
-        public async Task<List<VacancyGetAllDto>> GetAllOwnVacanciesAsync(string? titleName, string? categoryId, string? countryId, string? cityId, VacancyStatus? IsActive, decimal? minSalary, decimal? maxSalary, int skip = 1, int take = 6)
+        public async Task<List<VacancyGetAllDto>> GetAllOwnVacanciesAsync(string? titleName, string? categoryId, string? countryId, string? cityId, VacancyStatus? IsActive, decimal? minSalary, decimal? maxSalary, byte? workStyle, byte? workType, int skip = 1, int take = 6)
         {
             var query = _context
                 .Vacancies.Where(x => x.Company.UserId == _currentUser.UserGuid)
@@ -193,8 +193,8 @@ namespace JobCompany.Business.Services.VacancyServices
                 minSalary,
                 maxSalary,
                 null,
-                null,
-                null
+                workStyle,
+                workType
             );
 
             var vacancies = await query
@@ -554,11 +554,17 @@ namespace JobCompany.Business.Services.VacancyServices
             return vacancies;
         }
 
-        public async Task<DataListDto<VacancyGetAllDto>> GetAllSavedVacancyAsync(int skip, int take)
+        public async Task<DataListDto<VacancyGetAllDto>> GetAllSavedVacancyAsync(int skip, int take, string? vacancyName)
         {
             var query = _context.SavedVacancies.Where(x => x.UserId == _currentUser.UserGuid)
                                                .AsQueryable()
                                                .AsNoTracking();
+
+            if (!string.IsNullOrEmpty(vacancyName))
+            {
+                vacancyName = vacancyName.Trim();
+                query = query.Where(x => x.Vacancy.Title.ToLower().Contains(vacancyName.ToLower()));
+            }
 
             var vacancies = await query
             .Select(x => new VacancyGetAllDto

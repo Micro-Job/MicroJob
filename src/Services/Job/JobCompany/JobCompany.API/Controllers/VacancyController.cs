@@ -15,7 +15,7 @@ namespace JobCompany.API.Controllers
     public class VacancyController(IVacancyService _vacancyService) : ControllerBase
     {
         [HttpPost("[action]")]
-        public async Task<IActionResult> CreateVacancy([FromForm] CreateVacancyDto vacancyDto, [FromForm]ICollection<CreateNumberDto>? numberDtos)
+        public async Task<IActionResult> CreateVacancy([FromForm] CreateVacancyDto vacancyDto, [FromForm] ICollection<CreateNumberDto>? numberDtos)
         {
             await _vacancyService.CreateVacancyAsync(vacancyDto, numberDtos);
             return Ok();
@@ -36,9 +36,9 @@ namespace JobCompany.API.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetAllOwnVacancies(string? titleName, string? categoryId, string? countryId, string? cityId, VacancyStatus? IsActive, decimal? minSalary, decimal? maxSalary, int skip = 1, int take = 6)
+        public async Task<IActionResult> GetAllOwnVacancies(string? titleName, string? categoryId, string? countryId, string? cityId, VacancyStatus? IsActive, decimal? minSalary, decimal? maxSalary, byte? workStyle, byte? workType, int skip = 1, int take = 6)
         {
-            var data = await _vacancyService.GetAllOwnVacanciesAsync(titleName, categoryId, countryId, cityId, IsActive, minSalary, maxSalary, skip, take);
+            var data = await _vacancyService.GetAllOwnVacanciesAsync(titleName, categoryId, countryId, cityId, IsActive, minSalary, maxSalary, workStyle, workType, skip, take);
             return Ok(data);
         }
 
@@ -66,9 +66,9 @@ namespace JobCompany.API.Controllers
 
         [AllowAnonymous]
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetVacanciesByCompanyId(string companyId , int skip = 1, int take = 9)
+        public async Task<IActionResult> GetVacanciesByCompanyId(string companyId, int skip = 1, int take = 9)
         {
-            return Ok(await _vacancyService.GetVacanciesByCompanyIdAsync(companyId,skip,take));
+            return Ok(await _vacancyService.GetVacanciesByCompanyIdAsync(companyId, skip, take));
         }
 
         [AllowAnonymous]
@@ -87,9 +87,9 @@ namespace JobCompany.API.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetAllSavedVacancy(int skip , int take)
+        public async Task<IActionResult> GetAllSavedVacancy(int skip, int take, string? vacancyName)
         {
-            return Ok(await _vacancyService.GetAllSavedVacancyAsync(skip , take));
+            return Ok(await _vacancyService.GetAllSavedVacancyAsync(skip, take, vacancyName));
         }
     }
 }

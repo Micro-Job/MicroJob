@@ -33,5 +33,7 @@ namespace Job.Core.Entities
         public ICollection<Certificate>? Certificates { get; set; }
         public ICollection<ResumeSkill> ResumeSkills { get; set; }
         public ICollection<SavedResume> SavedResumes { get; set; }
+        public ICollection<CompanyResumeAccess>? CompanyResumeAccesses { get; set; }
+
     }
 }

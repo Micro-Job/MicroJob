@@ -24,13 +24,13 @@ namespace JobCompany.API.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetAllApplicationsList(Guid? vacancyId, Gender? gender, StatusEnum? status,[FromQuery] List<Guid>? skillIds, int skip = 1, int take = 10)
+        public async Task<IActionResult> GetAllApplicationsList(Guid? vacancyId, Gender? gender, StatusEnum? status, [FromQuery] List<Guid>? skillIds, string? fullName, int skip = 1, int take = 10)
         {
-            return Ok(await service.GetAllApplicationsListAsync(vacancyId, gender, status, skillIds, skip, take));
+            return Ok(await service.GetAllApplicationsListAsync(vacancyId, gender, status, skillIds, fullName, skip, take));
         }
 
         [HttpPost("[action]")]
-        public async Task<IActionResult> ChangeApplicationStatus(string applicationId,string statusId)
+        public async Task<IActionResult> ChangeApplicationStatus(string applicationId, string statusId)
         {
             await service.ChangeApplicationStatusAsync(applicationId, statusId);
             return Ok();
@@ -52,9 +52,9 @@ namespace JobCompany.API.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetUserApplications(int skip = 1, int take = 9)
+        public async Task<IActionResult> GetUserApplications(string? vacancyName, int skip = 1, int take = 9)
         {
-            return Ok(await service.GetUserApplicationsAsync(skip, take));
+            return Ok(await service.GetUserApplicationsAsync(vacancyName, skip, take));
         }
 
         [HttpGet("[action]")]

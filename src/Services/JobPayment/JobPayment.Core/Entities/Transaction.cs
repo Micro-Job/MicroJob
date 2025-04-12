@@ -21,7 +21,8 @@ namespace JobPayment.Core.Entities
         /// <summary>
         /// Tranzaksiyanin novu(Medaxil,mexaric,legv ve s.)
         /// </summary>
-        public TranzactionType TranzactionType { get; set; }
+        public TransactionType TranzactionType { get; set; }
+        public TransactionStatus TransactionStatus { get; set; }
 
         /// <summary>
         /// Tranzaksiya zamani ne qeder coin emeliyyati bas verib

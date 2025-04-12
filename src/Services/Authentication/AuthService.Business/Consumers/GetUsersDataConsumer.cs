@@ -4,38 +4,38 @@ using Microsoft.EntityFrameworkCore;
 using Shared.Requests;
 using Shared.Responses;
 
-namespace AuthService.Business.Consumers
+namespace AuthService.Business.Consumers;
+
+public class GetUsersDataConsumer(AppDbContext _appDbContext) : IConsumer<GetUsersDataRequest>
 {
-    public class GetUsersDataConsumer : IConsumer<GetUsersDataRequest>
+    public async Task Consume(ConsumeContext<GetUsersDataRequest> context)
     {
-        private readonly AppDbContext _context;
+        var userIds = context.Message.UserIds;
 
-        public GetUsersDataConsumer(AppDbContext context)
+        var query = _appDbContext.Users.AsQueryable();
+
+        if (!string.IsNullOrEmpty(context.Message.FullName))
         {
-            _context = context;
+            var fullName = context.Message.FullName.Trim().ToLower();
+            query = query.Where(x => $"{x.FirstName} {x.LastName}".ToLower().Contains(fullName));
         }
 
-        public async Task Consume(ConsumeContext<GetUsersDataRequest> context)
-        {
-            var userIds = context.Message.UserIds;
-
-            var users = await _context.Users
-                .Where(x => userIds.Contains(x.Id))
-                .Select(x => new UserResponse
-                {
-                    UserId = x.Id,
-                    FirstName = x.FirstName,
-                    LastName = x.LastName,
-                    ProfileImage = x.Image,
-                    Email = x.Email,
-                    PhoneNumber = x.MainPhoneNumber
-                })
-                .ToListAsync();
-
-            await context.RespondAsync(new GetUsersDataResponse
+        var users = await query
+            .Where(x => userIds.Contains(x.Id))
+            .Select(x => new UserResponse
             {
-                Users = users
-            });
-        }
+                UserId = x.Id,
+                FirstName = x.FirstName,
+                LastName = x.LastName,
+                ProfileImage = x.Image,
+                Email = x.Email,
+                PhoneNumber = x.MainPhoneNumber
+            })
+            .ToListAsync();
+
+        await context.RespondAsync(new GetUsersDataResponse
+        {
+            Users = users
+        });
     }
 }

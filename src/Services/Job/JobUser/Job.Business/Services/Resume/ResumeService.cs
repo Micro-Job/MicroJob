@@ -7,6 +7,7 @@ using Job.Business.Dtos.NumberDtos;
 using Job.Business.Dtos.ResumeDtos;
 using Job.Business.Dtos.SkillDtos;
 using Job.Business.Exceptions.Common;
+using Job.Business.Exceptions.ResumeExceptions;
 using Job.Business.Extensions;
 using Job.Business.Services.Certificate;
 using Job.Business.Services.Education;
@@ -19,14 +20,14 @@ using Job.Business.Statistics;
 using Job.Core.Entities;
 using Job.Core.Enums;
 using Job.DAL.Contexts;
+using MassTransit;
 using MassTransit.Initializers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Microsoft.Extensions.Configuration;
 using Shared.Enums;
 using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.Enums;
+using SharedLibrary.Events;
 using SharedLibrary.ExternalServices.FileService;
 using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;
@@ -43,7 +44,8 @@ namespace Job.Business.Services.Resume
             ICertificateService _certificateService,
             IUserInformationService _userInformationService,
             ICurrentUser _currentUser,
-            IPositionService _positionService) : IResumeService
+            IPositionService _positionService,
+            IPublishEndpoint _publishEndpoint) : IResumeService
     {
         public async Task CreateResumeAsync(ResumeCreateDto resumeCreateDto)
         {
@@ -86,11 +88,17 @@ namespace Job.Business.Services.Resume
 
         public async Task<ResumeDetailItemDto> GetOwnResumeAsync()
         {
+            var userData = await _userInformationService.GetUserDataAsync((Guid)_currentUser.UserGuid);
+
+            var userMainEmail = userData.Email;
+            var userMainPhoneNumber = userData.MainPhoneNumber;
+
             var resume = await _context.Resumes
                                         .Include(x => x.ResumeSkills).ThenInclude(x => x.Skill).ThenInclude(x => x.Translations)
                                         .Where(x => x.UserId == _currentUser.UserGuid)
                                         .Select(resume => new ResumeDetailItemDto
                                         {
+                                            ResumeId = resume.Id,
                                             UserId = resume.UserId,
                                             FirstName = resume.FirstName,
                                             LastName = resume.LastName,
@@ -104,6 +112,10 @@ namespace Job.Business.Services.Resume
                                             Adress = resume.Adress,
                                             BirthDay = resume.BirthDay,
                                             ResumeEmail = resume.ResumeEmail,
+                                            IsMainEmail = resume.ResumeEmail == userMainEmail,
+                                            IsMainNumber = resume.PhoneNumbers.Any(p => p.PhoneNumber == userMainPhoneNumber),
+                                            PositionId = resume.PositionId,
+                                            ParentPositionId = resume.Position != null ? resume.Position.ParentPositionId : null,
                                             UserPhoto = resume.UserPhoto != null ? $"{_currentUser.BaseUrl}/{resume.UserPhoto}" : null,
                                             Skills = resume.ResumeSkills.Select(s => new SkillGetByIdDto
                                             {
@@ -152,7 +164,6 @@ namespace Job.Business.Services.Resume
 
             if (resume is null) return new ResumeDetailItemDto();
 
-            var userData = await _userInformationService.GetUserDataAsync((Guid)_currentUser.UserGuid);
             resume.FirstName = userData.FirstName;
             resume.LastName = userData.LastName;
 
@@ -165,7 +176,7 @@ namespace Job.Business.Services.Resume
 
             UpdateResumePersonalInfo(resume, updateDto);
 
-            var positionId = await _positionService.GetOrCreatePositionAsync(updateDto.Position, updateDto.PositionId);
+            var positionId = await _positionService.GetOrCreatePositionAsync(updateDto.Position, updateDto.PositionId, updateDto.ParentPositionId);
 
             if (positionId != Guid.Empty)
                 resume.PositionId = positionId;
@@ -212,6 +223,7 @@ namespace Job.Business.Services.Resume
                 .Include(r => r.ResumeSkills)
                 .ThenInclude(rs => rs.Skill.Translations)
                 .Include(r => r.Languages)
+                .Include(r => r.CompanyResumeAccesses)
                 .AsQueryable()
                 .AsNoTracking();
 
@@ -221,7 +233,7 @@ namespace Job.Business.Services.Resume
             {
                 Id = x.Id,
                 FullName = x.IsPublic ? $"{x.FirstName} {x.LastName}" : null,
-                ProfileImage = x.IsPublic && x.UserPhoto != null
+                ProfileImage = (x.IsPublic || x.CompanyResumeAccesses.Any(cra => cra.CompanyUserId == _currentUser.UserGuid)) && x.UserPhoto != null
                 ? $"{_currentUser.BaseUrl}/{x.UserPhoto}"
                 : null,
                 IsSaved = x.SavedResumes.Any(sr => sr.ResumeId == x.Id && sr.CompanyUserId == _currentUser.UserGuid),
@@ -241,7 +253,7 @@ namespace Job.Business.Services.Resume
                 .Select(s => s.Skill.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name))
                 .ToList(),
                 Position = x.Position != null ? x.Position.Name : null,
-
+                HasAccess = x.IsPublic || x.CompanyResumeAccesses != null && x.CompanyResumeAccesses.Any(cra => cra.CompanyUserId == _currentUser.UserGuid)
             })
             .Skip(Math.Max(0, (skip - 1) * take))
             .Take(take)
@@ -303,10 +315,12 @@ namespace Job.Business.Services.Resume
 
             if (languages != null && languages.Any())
             {
-                query = query.Where(x => languages.All(lang =>
-                    x.Languages.Any(rl =>
+                foreach (var lang in languages)
+                {
+                    query = query.Where(x => x.Languages.Any(rl =>
                         rl.LanguageName == lang.Language &&
-                        rl.LanguageLevel == lang.LanguageLevel)));
+                        rl.LanguageLevel == lang.LanguageLevel));
+                }
             }
 
             return query;
@@ -319,12 +333,13 @@ namespace Job.Business.Services.Resume
 
             var resumes = await query.Select(x => new ResumeListDto
             {
-                Id = x.Id,
+                Id = x.ResumeId,
                 FullName = x.Resume.IsPublic ? $"{x.Resume.FirstName} {x.Resume.LastName}" : null,
-                ProfileImage = x.Resume.IsPublic && x.Resume.UserPhoto != null
+                ProfileImage = (x.Resume.IsPublic || (x.Resume.CompanyResumeAccesses != null && x.Resume.CompanyResumeAccesses.Any(cra => cra.CompanyUserId == _currentUser.UserGuid))) && x.Resume.UserPhoto != null
                 ? $"{_currentUser.BaseUrl}/{x.Resume.UserPhoto}"
                 : null,
-                IsSaved = x.Resume.SavedResumes.Any(sr => sr.ResumeId == x.Id && sr.CompanyUserId == _currentUser.UserGuid),
+                IsSaved = x.Resume.SavedResumes.Any(sr => sr.ResumeId == x.ResumeId && sr.CompanyUserId == _currentUser.UserGuid),
+                IsPublic = x.Resume.IsPublic,
                 JobStatus = x.Resume.User.JobStatus,
                 LastWork = x.Resume.Experiences
                     .OrderByDescending(e => e.StartDate)
@@ -340,7 +355,7 @@ namespace Job.Business.Services.Resume
                 .Select(s => s.Skill.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name))
                 .ToList(),
                 Position = x.Resume.Position != null ? x.Resume.Position.Name : null,
-
+                HasAccess = x.Resume.IsPublic || (x.Resume.CompanyResumeAccesses != null && x.Resume.CompanyResumeAccesses.Any(cra => cra.CompanyUserId == _currentUser.UserGuid))
             })
             .Skip(Math.Max(0, (skip - 1) * take))
             .Take(take)
@@ -381,6 +396,119 @@ namespace Job.Business.Services.Resume
         public async Task<bool> IsExistResumeAsync()
         {
             return await _context.Resumes.AnyAsync(x => x.UserId == _currentUser.UserGuid);
+        }
+
+        public async Task<ResumeDetailItemDto> GetByIdResumeAysnc(string id)
+        {
+            var userId = _currentUser.UserGuid;
+            var resumeGuid = Guid.Parse(id);
+            var resume = await _context.Resumes.Where(r => r.Id == resumeGuid)
+            .Include(x => x.ResumeSkills)
+                .ThenInclude(x => x.Skill)
+                    .ThenInclude(x => x.Translations)
+            .Include(x => x.SavedResumes)
+            .Select(r => new ResumeDetailItemDto
+            {
+                UserId = r.UserId,
+                ResumeId = r.Id,
+                IsSaved = r.SavedResumes.Any(sr => sr.CompanyUserId == userId),
+                FirstName = r.IsPublic ? r.FirstName : null,
+                LastName = r.IsPublic ? r.LastName : null,
+                FatherName = r.FatherName,
+                IsDriver = r.IsDriver,
+                IsMarried = r.IsMarried,
+                IsCitizen = r.IsCitizen,
+                MilitarySituation = r.MilitarySituation,
+                Gender = r.Gender,
+                Adress = r.Adress,
+                Position = r.Position != null ? r.Position.Name : null,
+                BirthDay = r.BirthDay,
+                ResumeEmail = r.IsPublic ? r.ResumeEmail : null,
+                UserPhoto = r.IsPublic && r.UserPhoto != null ? $"{_currentUser.BaseUrl}/{r.UserPhoto}" : null,
+                Skills = r.ResumeSkills.Select(s => new SkillGetByIdDto
+                {
+                    Id = s.SkillId,
+                    Name = s.Skill.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name)
+                }).ToList(),
+                PhoneNumbers = r.IsPublic ?
+                r.PhoneNumbers.Select(p => new NumberGetByIdDto
+                {
+                    PhoneNumber = p.PhoneNumber
+                }).ToList()
+                : null,
+                Educations = r.Educations.Select(e => new EducationGetByIdDto
+                {
+                    EducationId = e.Id,
+                    InstitutionName = e.InstitutionName,
+                    Profession = e.Profession,
+                    StartDate = e.StartDate,
+                    EndDate = e.EndDate,
+                    IsCurrentEducation = e.IsCurrentEducation,
+                    ProfessionDegree = e.ProfessionDegree
+                }).ToList(),
+                Experiences = r.Experiences.Select(ex => new ExperienceGetByIdDto
+                {
+                    ExperienceId = ex.Id,
+                    OrganizationName = ex.OrganizationName,
+                    PositionName = ex.PositionName,
+                    PositionDescription = ex.PositionDescription,
+                    StartDate = ex.StartDate,
+                    EndDate = ex.EndDate,
+                    IsCurrentOrganization = ex.IsCurrentOrganization
+                }).ToList(),
+                Languages = r.Languages.Select(l => new LanguageGetByIdDto
+                {
+                    LanguageId = l.Id,
+                    LanguageName = l.LanguageName,
+                    LanguageLevel = l.LanguageLevel
+                }).ToList(),
+                Certificates = r.Certificates.Select(c => new CertificateGetByIdDto
+                {
+                    CertificateId = c.Id,
+                    CertificateName = c.CertificateName,
+                    GivenOrganization = c.GivenOrganization,
+                    CertificateFile = $"{_currentUser.BaseUrl}/{c.CertificateFile}"
+                }).ToList()
+            })
+            .FirstOrDefaultAsync() ?? throw new NotFoundException<Core.Entities.Resume>(MessageHelper.GetMessage("NOT_FOUND"));
+
+            return resume;
+        }
+
+        public async Task TakeResumeAccessAsync(string resumeId)
+        {
+            var resumeGuid = Guid.Parse(resumeId);
+
+            var resume = await _context.Resumes.Where(x => x.Id == resumeGuid)
+                .Select(x => new
+                {
+                    x.IsPublic
+                }).FirstOrDefaultAsync();
+
+            if (resume == null)
+                throw new NotFoundException<Core.Entities.Resume>(MessageHelper.GetMessage("NOT_FOUND"));
+
+            if (resume.IsPublic) throw new ResumeIsPublicException(MessageHelper.GetMessage("RESUME_IS_PUBLIC"));
+
+            if (await _context.CompanyResumeAccesses.AnyAsync(x => x.ResumeId == resumeGuid && x.CompanyUserId == _currentUser.UserGuid))
+                throw new IsAlreadyExistException<CompanyResumeAccess>(MessageHelper.GetMessage("RESUME_ACCESS_ALREADY_EXIST"));
+
+            await _context.CompanyResumeAccesses.AddAsync(new CompanyResumeAccess
+            {
+                AccessDate = DateTime.Now,
+                CompanyUserId = (Guid)_currentUser.UserGuid,
+                ResumeId = resumeGuid
+            });
+
+            await _context.SaveChangesAsync();
+
+            //Odenisin olmasi ucun
+            await _publishEndpoint.Publish(new PayEvent
+            {
+                InformationType = InformationType.AnonymResume,
+                InformationId = resumeGuid,
+                UserId = (Guid)_currentUser.UserGuid
+            });
         }
 
         #region Private Methods
@@ -536,84 +664,6 @@ namespace Job.Business.Services.Resume
                 ResumeId = resume.Id
             }).ToList() ?? [];
         }
-
-        public async Task<ResumeDetailItemDto> GetByIdResumeAysnc(string id)
-        {
-            var userId = _currentUser.UserGuid;
-            var resumeGuid = Guid.Parse(id);
-            var resume = await _context.Resumes.Where(r => r.Id == resumeGuid)
-            .Include(x => x.ResumeSkills)
-                .ThenInclude(x => x.Skill)
-                    .ThenInclude(x => x.Translations)
-            .Include(x => x.SavedResumes)
-            .Select(r => new ResumeDetailItemDto
-            {
-                UserId = r.UserId,
-                ResumeId = r.Id,
-                IsSaved = r.SavedResumes.Any(sr => sr.CompanyUserId == userId),
-                FirstName = r.IsPublic ? r.FirstName : null,
-                LastName = r.IsPublic ? r.LastName : null,
-                FatherName = r.FatherName,
-                IsDriver = r.IsDriver,
-                IsMarried = r.IsMarried,
-                IsCitizen = r.IsCitizen,
-                MilitarySituation = r.MilitarySituation,
-                Gender = r.Gender,
-                Adress = r.Adress,
-                Position = r.Position != null ? r.Position.Name : null,
-                BirthDay = r.BirthDay,
-                ResumeEmail = r.IsPublic ? r.ResumeEmail : null,
-                UserPhoto = r.IsPublic && r.UserPhoto != null ? $"{_currentUser.BaseUrl}/{r.UserPhoto}" : null,
-                Skills = r.ResumeSkills.Select(s => new SkillGetByIdDto
-                {
-                    Id = s.SkillId,
-                    Name = s.Skill.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name)
-                }).ToList(),
-                PhoneNumbers = r.IsPublic ?
-                r.PhoneNumbers.Select(p => new NumberGetByIdDto
-                {
-                    PhoneNumber = p.PhoneNumber
-                }).ToList()
-                : null,
-                Educations = r.Educations.Select(e => new EducationGetByIdDto
-                {
-                    EducationId = e.Id,
-                    InstitutionName = e.InstitutionName,
-                    Profession = e.Profession,
-                    StartDate = e.StartDate,
-                    EndDate = e.EndDate,
-                    IsCurrentEducation = e.IsCurrentEducation,
-                    ProfessionDegree = e.ProfessionDegree
-                }).ToList(),
-                Experiences = r.Experiences.Select(ex => new ExperienceGetByIdDto
-                {
-                    ExperienceId = ex.Id,
-                    OrganizationName = ex.OrganizationName,
-                    PositionName = ex.PositionName,
-                    PositionDescription = ex.PositionDescription,
-                    StartDate = ex.StartDate,
-                    EndDate = ex.EndDate,
-                    IsCurrentOrganization = ex.IsCurrentOrganization
-                }).ToList(),
-                Languages = r.Languages.Select(l => new LanguageGetByIdDto
-                {
-                    LanguageId = l.Id,
-                    LanguageName = l.LanguageName,
-                    LanguageLevel = l.LanguageLevel
-                }).ToList(),
-                Certificates = r.Certificates.Select(c => new CertificateGetByIdDto
-                {
-                    CertificateId = c.Id,
-                    CertificateName = c.CertificateName,
-                    GivenOrganization = c.GivenOrganization,
-                    CertificateFile = $"{_currentUser.BaseUrl}/{c.CertificateFile}"
-                }).ToList()
-            })
-            .FirstOrDefaultAsync() ?? throw new NotFoundException<Core.Entities.Resume>("Resume mövcud deyil");
-
-            return resume;
-        }
-
 
         #endregion
     }

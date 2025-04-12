@@ -27,7 +27,7 @@ namespace JobPayment.Business.Services.Payment
                 Coin = price.Coin,
                 InformationId = dto.InformationId,
                 InformationType = dto.InformationType,
-                TranzactionType = TranzactionType.OutCome,
+                TranzactionType = TransactionType.OutCome,
                 UserId = dto.UserId 
             });
 

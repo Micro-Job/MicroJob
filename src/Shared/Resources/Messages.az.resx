@@ -219,6 +219,12 @@
   <data name="REGISTER_COMPLETED" xml:space="preserve">
     <value>Qeydiyyat uğurla başa çatdı</value>
   </data>
+  <data name="RESUME_ACCESS_ALREADY_EXIST" xml:space="preserve">
+    <value>Bu CV-yə artıq baxma icazəniz mövcuddur.</value>
+  </data>
+  <data name="RESUME_IS_PUBLIC" xml:space="preserve">
+    <value>Bu CV anonim deyil</value>
+  </data>
   <data name="SESSION_EXPIRED" xml:space="preserve">
     <value>Sessiyanızın müddəti bitmişdir</value>
   </data>
@@ -233,6 +239,9 @@
   </data>
   <data name="TERMS_NOT_ACCEPTED" xml:space="preserve">
     <value>Şərtlərlə razı olmadan qeydiyyatdan keçə bilməzsiniz</value>
+  </data>
+  <data name="UNAUTHORIZED_ACCESS" xml:space="preserve">
+    <value>İcazəniz yoxdur</value>
   </data>
   <data name="USEREXISTEXCEPTION_EMAIL" xml:space="preserve">
     <value>Email mövcuddur</value>

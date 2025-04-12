@@ -6,11 +6,10 @@ using System.Threading.Tasks;
 
 namespace JobPayment.Core.Enums
 {
-    //TODO : burada rejected ve income ayrilmalidir cunki income olub da rejected olmus ola biler
-    public enum TranzactionType : byte
+    public enum TransactionStatus : byte
     {
-        InCome = 1,
-        OutCome = 2,
+        Success = 1,
+        Failed = 2,
         Rejected = 3
     }
 }

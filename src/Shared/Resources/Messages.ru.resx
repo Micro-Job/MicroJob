@@ -219,6 +219,12 @@
   <data name="REGISTER_COMPLETED" xml:space="preserve">
     <value>Регистрация успешно завершена</value>
   </data>
+  <data name="RESUME_ACCESS_ALREADY_EXIST" xml:space="preserve">
+    <value>У вас уже есть разрешение на просмотр этого резюме.</value>
+  </data>
+  <data name="RESUME_IS_PUBLIC" xml:space="preserve">
+    <value>Это резюме не анонимно.</value>
+  </data>
   <data name="SESSION_EXPIRED" xml:space="preserve">
     <value>Время вашей сессии истекло</value>
   </data>
@@ -233,6 +239,9 @@
   </data>
   <data name="TERMS_NOT_ACCEPTED" xml:space="preserve">
     <value>Вы не можете зарегистрироваться без согласия с условиями</value>
+  </data>
+  <data name="UNAUTHORIZED_ACCESS" xml:space="preserve">
+    <value>У вас нет разрешения.</value>
   </data>
   <data name="USEREXISTEXCEPTION_EMAIL" xml:space="preserve">
     <value>Электронная почта уже существует</value>
