@@ -104,7 +104,8 @@ namespace Job.API
                             .WithOrigins(
                                 "http://localhost:3000",
                                 "http://localhost:3001",
-                                "http://localhost:3002"
+                                "http://localhost:3002",
+                                "http://localhost:5000"
                             )
                             .AllowAnyMethod()
                             .AllowAnyHeader()
@@ -115,6 +116,9 @@ namespace Job.API
 
             var app = builder.Build();
             app.UseStaticFiles();
+
+            app.UseCors("AllowSwagger");
+
 
             if (app.Environment.IsDevelopment())
             {

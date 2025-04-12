@@ -39,7 +39,21 @@ namespace JobPayment.API
                 opt.UseSqlServer(configuration.GetConnectionString("MSSQL"));
             });
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("_myAllowSpecificOrigins", policy =>
+                {
+                    policy.WithOrigins("http://localhost:3000", "http://localhost:3001", "http://localhost:3002", "http://localhost:5000")
+                          .AllowAnyMethod()
+                          .AllowAnyHeader()
+                          .AllowCredentials();
+                });
+            });
+
             var app = builder.Build();
+
+            app.UseCors("AllowSwagger");
+
 
             if (app.Environment.IsDevelopment())
             {

@@ -71,7 +71,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("_myAllowSpecificOrigins", policy =>
     {
-        policy.WithOrigins("http://localhost:3000", "http://localhost:3001", "http://localhost:3002")
+        policy.WithOrigins("http://localhost:3000", "http://localhost:3001", "http://localhost:3002", "http://localhost:5000")
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials();
@@ -82,6 +82,8 @@ builder.Services.AddAuth(builder.Configuration["Jwt:Issuer"]!, builder.Configura
 var app = builder.Build();
 
 
+
+app.UseCors("AllowSwagger");
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>

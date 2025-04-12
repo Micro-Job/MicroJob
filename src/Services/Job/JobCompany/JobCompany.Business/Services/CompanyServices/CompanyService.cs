@@ -125,7 +125,7 @@ namespace JobCompany.Business.Services.CompanyServices
 
         public async Task<DataListDto<CompanyDto>> GetAllCompaniesAsync(string? searchTerm, int skip = 1, int take = 12)
         {
-            var query = _context.Companies.AsQueryable();
+            var query = _context.Companies.Where(x=> x.IsCompany).AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(searchTerm))
                 query = query.Where(x => x.CompanyName.Contains(searchTerm));
