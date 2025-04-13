@@ -66,6 +66,38 @@ namespace JobCompany.Business.Services.ExamServices
             }
         }
 
+        public async Task UpdateExamAsync(UpdateExamDto dto)
+        {
+            var exam = await _context.Exams
+                .Include(e => e.ExamQuestions)
+                .ThenInclude(eq => eq.Question)
+                .ThenInclude(q => q.Answers)
+                .FirstOrDefaultAsync(e => e.Id == dto.Id && e.Company.UserId == _currentUser.UserGuid)
+                ?? throw new NotFoundException<Exam>(MessageHelper.GetMessage("NOT_FOUND"));
+
+            using var transaction = await _context.Database.BeginTransactionAsync();
+
+            try
+            {
+                exam.Title = dto.Title;
+                exam.IntroDescription = dto.IntroDescription;
+                exam.LimitRate = dto.LimitRate;
+                exam.IsTemplate = dto.IsTemplate;
+                exam.Duration = dto.Duration;
+
+                var updatedQuestionIds = await _questionService.UpdateBulkQuestionsAsync(dto.Id, dto.Questions);
+
+                await _context.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+
         public async Task<GetExamByIdDto> GetExamByIdAsync(string examId)
         {
             var examGuid = Guid.Parse(examId);

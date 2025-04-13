@@ -1,4 +1,5 @@
 ﻿using JobCompany.Business.Dtos.AnswerDtos;
+using JobCompany.Business.Dtos.QuestionDtos;
 using JobCompany.Core.Entites;
 
 namespace JobCompany.Business.Services.AnswerServices
@@ -9,5 +10,7 @@ namespace JobCompany.Business.Services.AnswerServices
             ICollection<CreateAnswerDto> dtos,
             string questionId
         );
+
+        Task UpdateBulkAnswersAsync(List<Question> existingQuestions, ICollection<QuestionUpdateDto> dtos);
     }
 }
