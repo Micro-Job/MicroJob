@@ -4,7 +4,7 @@ namespace JobCompany.Business.Services.ManageService;
 
 public interface IManageService
 {
-    Task VacancyAcceptAsync(VacancyAcceptDto dto);
+    Task VacancyAcceptAsync(string vacancyId);
     Task VacancyRejectAsync(VacancyStatusUpdateDto dto);
     Task ToggleBlockVacancyStatusAsync(VacancyStatusUpdateDto dto);
 }

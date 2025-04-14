@@ -35,28 +35,14 @@ namespace JobCompany.Business.Services.VacancyServices
         private readonly JobCompanyDbContext _context;
         private readonly IFileService _fileService;
         private readonly IPublishEndpoint _publishEndpoint;
-        readonly IConfiguration _configuration;
-        private readonly string? _authServiceBaseUrl;
         private readonly ICurrentUser _currentUser;
-        private readonly IHttpContextAccessor _contextAccessor;
 
-        public VacancyService(
-            JobCompanyDbContext _context,
-            IFileService fileService,
-            IExamService examService,
-            IPublishEndpoint publishEndpoint,
-            IConfiguration configuration,
-            ICurrentUser currentUser,
-            IHttpContextAccessor contextAccessor
-        )
+        public VacancyService(JobCompanyDbContext context,IFileService fileService,IPublishEndpoint publishEndpoint,ICurrentUser currentUser)
         {
-            this._context = _context;
+            _context = context;
             _fileService = fileService;
             _publishEndpoint = publishEndpoint;
-            _configuration = configuration;
-            _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
             _currentUser = currentUser;
-            _contextAccessor = contextAccessor;
         }
 
         /// <summary> vacancy yaradılması </summary>
@@ -415,7 +401,7 @@ namespace JobCompany.Business.Services.VacancyServices
                 {
                     Id = v.Id,
                     Title = v.Title,
-                    CompanyLogo = v.CompanyLogo != null ? $"{_authServiceBaseUrl}/{v.CompanyLogo}" : null,
+                    CompanyLogo = v.CompanyLogo != null ? $"{_currentUser.BaseUrl}/{v.CompanyLogo}" : null,
                     CompanyName = v.CompanyName,
                     StartDate = v.StartDate,
                     Location = v.Location,
@@ -536,7 +522,7 @@ namespace JobCompany.Business.Services.VacancyServices
             {
                 Id = x.Id,
                 Title = x.Title,
-                CompanyLogo = x.CompanyLogo != null ? $"{_authServiceBaseUrl}/{x.CompanyLogo}" : null,
+                CompanyLogo = x.CompanyLogo != null ? $"{_currentUser.BaseUrl}/{x.CompanyLogo}" : null,
                 CompanyName = x.CompanyName,
                 StartDate = x.StartDate,
                 Location = x.Location,
@@ -571,7 +557,7 @@ namespace JobCompany.Business.Services.VacancyServices
             {
                 Id = x.Vacancy.Id,
                 Title = x.Vacancy.Title,
-                CompanyLogo = x.Vacancy.CompanyLogo != null ? $"{_authServiceBaseUrl}/{x.Vacancy.CompanyLogo}" : null,
+                CompanyLogo = x.Vacancy.CompanyLogo != null ? $"{_currentUser.BaseUrl}/{x.Vacancy.CompanyLogo}" : null,
                 CompanyName = x.Vacancy.CompanyName,
                 StartDate = x.Vacancy.StartDate,
                 Location = x.Vacancy.Location,

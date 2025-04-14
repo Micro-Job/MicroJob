@@ -12,6 +12,11 @@ namespace JobCompany.Core.Entites
         public DateTime StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public DateTime CreatedDate { get; set; }
+
+        /// <summary>
+        /// Odenilmeli olan vaxt - hele ki elave edilmeyib
+        /// </summary>
+        //public DateTime? PayDate { get; set; }
         public string? Location { get; set; }
         public int ViewCount { get; set; }
         public string? Email { get; set; }
