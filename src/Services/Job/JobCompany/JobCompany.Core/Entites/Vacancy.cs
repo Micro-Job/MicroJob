@@ -27,7 +27,7 @@ namespace JobCompany.Core.Entites
         public FamilySituation Family { get; set; }
         public Citizenship Citizenship { get; set; }
         public VacancyStatus VacancyStatus { get; set; }
-        public bool IsVip { get; set; }
+        //public bool IsVip { get; set; }
 
         public Guid? CompanyId { get; set; }
         public Company? Company { get; set; }

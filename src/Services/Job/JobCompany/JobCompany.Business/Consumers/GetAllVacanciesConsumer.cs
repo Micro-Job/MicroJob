@@ -11,7 +11,6 @@ namespace JobCompany.Business.Consumers;
 public class GetAllVacanciesConsumer(JobCompanyDbContext context, IConfiguration configuration) : IConsumer<GetAllVacanciesRequest>
 {
     private readonly JobCompanyDbContext _context = context;
-    readonly IConfiguration _configuration = configuration;
     private readonly string? _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
 
     public async Task Consume(ConsumeContext<GetAllVacanciesRequest> context)
@@ -74,6 +73,8 @@ public class GetAllVacanciesConsumer(JobCompanyDbContext context, IConfiguration
             query = query.Where(v => v.MainSalary <= request.MaxSalary);
         }
 
+        int count = await query.CountAsync();
+
         var vacancies = await query
             .Select(v => new AllVacanyDto
             {
@@ -87,12 +88,11 @@ public class GetAllVacanciesConsumer(JobCompanyDbContext context, IConfiguration
                 MainSalary = v.MainSalary,
                 WorkType = v.WorkType,
                 WorkStyle = v.WorkStyle,
-                IsVip = v.IsVip,
                 IsActive = v.VacancyStatus,
                 CategoryId = v.CategoryId,
             })
             .ToListAsync();
 
-        await context.RespondAsync(new GetAllVacanciesResponse { Vacancies = vacancies, TotalCount = vacancies.Count });
+        await context.RespondAsync(new GetAllVacanciesResponse { Vacancies = vacancies, TotalCount = count });
     }
 }
