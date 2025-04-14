@@ -16,6 +16,7 @@ public class VacancyDeletedConsumer(JobDbContext _context) : IConsumer<VacancyDe
                 SenderId = context.Message.SenderId,
                 NotificationType = SharedLibrary.Enums.NotificationType.VacancyDeleted,
                 InformationId = context.Message.InformationId,
+                InformationName = context.Message.InformationName,
                 IsSeen = false,
             }).ToList();
 

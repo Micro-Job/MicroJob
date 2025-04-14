@@ -91,7 +91,8 @@ namespace JobCompany.Business.Services.ApplicationServices
                 .Select(x => new
                 {
                     Application = x,
-                    VacancyId = x.VacancyId
+                    VacancyId = x.VacancyId,
+                    VacancyTitle = x.Vacancy.Title
                 })
                 .FirstOrDefaultAsync()
             ?? throw new NotFoundException<Application>(MessageHelper.GetMessage("NOT_FOUND"));
@@ -107,6 +108,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                     UserId = application.UserId,
                     SenderId = (Guid)_currentUser.UserGuid,
                     InformationId = existAppVacancy.VacancyId,
+                    InformationName = existAppVacancy.VacancyTitle
                     //Content =
                     //    $"{vacancy.CompanyName} şirkətinin müraciət statusu dəyişdirildi: {application.Status.Name}",
                 }
@@ -332,6 +334,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                 SenderId = userGuid,
                 VacancyId = vacancyGuid,
                 InformationId = userGuid,
+                InformationName = vacancyInfo.Title,
             });
         }
 

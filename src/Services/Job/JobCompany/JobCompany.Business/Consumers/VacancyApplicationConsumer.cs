@@ -16,6 +16,7 @@ namespace JobCompany.Business.Consumers
                 SenderId = context.Message.SenderId,
                 NotificationType = SharedLibrary.Enums.NotificationType.Application,
                 InformationId = context.Message.InformationId,
+                InformationName = context.Message.InformationName,
                 IsSeen = false,
             };
             await _context.Notifications.AddAsync(newNotification);
