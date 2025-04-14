@@ -35,28 +35,14 @@ namespace JobCompany.Business.Services.VacancyServices
         private readonly JobCompanyDbContext _context;
         private readonly IFileService _fileService;
         private readonly IPublishEndpoint _publishEndpoint;
-        readonly IConfiguration _configuration;
-        private readonly string? _authServiceBaseUrl;
         private readonly ICurrentUser _currentUser;
-        private readonly IHttpContextAccessor _contextAccessor;
 
-        public VacancyService(
-            JobCompanyDbContext _context,
-            IFileService fileService,
-            IExamService examService,
-            IPublishEndpoint publishEndpoint,
-            IConfiguration configuration,
-            ICurrentUser currentUser,
-            IHttpContextAccessor contextAccessor
-        )
+        public VacancyService(JobCompanyDbContext context,IFileService fileService,IPublishEndpoint publishEndpoint,ICurrentUser currentUser)
         {
-            this._context = _context;
+            _context = context;
             _fileService = fileService;
             _publishEndpoint = publishEndpoint;
-            _configuration = configuration;
-            _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
             _currentUser = currentUser;
-            _contextAccessor = contextAccessor;
         }
 
         /// <summary> vacancy yaradılması </summary>
@@ -327,6 +313,72 @@ namespace JobCompany.Business.Services.VacancyServices
             return vacancyDto;
         }
 
+        /// <summary> Vakansiyanın bütün detallarını gətirir </summary>
+        public async Task<VacancyDetailsDto> GetVacancyDetailsAsync(Guid id)
+        {
+            var vacancy = await _context.Vacancies
+                .Where(x => x.Id == id && x.Company.UserId == _currentUser.UserGuid)
+                .Include(x => x.Country).ThenInclude(c => c.Translations)
+                .Include(x => x.City).ThenInclude(c => c.Translations)
+                .Include(x => x.Category).ThenInclude(c => c.Translations)
+                .Include(v => v.VacancySkills)
+                            .ThenInclude(vs => vs.Skill)
+                                .ThenInclude(s => s.Translations)
+                .Select(v => new VacancyDetailsDto
+                {
+                    Id = v.Id,
+                    Title = v.Title,
+                    CompanyId = v.CompanyId,
+                    CompanyName = v.CompanyName,
+                    CompanyUserId = v.Company.UserId,
+                    CompanyLogo = $"{_currentUser.BaseUrl}/{v.Company.CompanyLogo}",
+                    StartDate = v.StartDate,
+                    EndDate = v.EndDate,
+                    Location = v.Location,
+                    ViewCount = v.ViewCount,
+                    WorkType = v.WorkType,
+                    WorkStyle = v.WorkStyle,
+                    MainSalary = v.MainSalary,
+                    MaxSalary = v.MaxSalary,
+                    Requirement = v.Requirement,
+                    Description = v.Description,
+                    Email = v.Email,
+                    Gender = v.Gender,
+                    Military = v.Military,
+                    Family = v.Family,
+                    Driver = v.Driver,
+                    Citizenship = v.Citizenship,
+                    ExamId = v.ExamId,
+                    CreatedDate = v.CreatedDate,
+                    IsVip = v.IsVip,
+                    VacancyStatus = v.VacancyStatus,
+                    CategoryId = v.CategoryId,
+                    CategoryName = v.Category != null ? v.Category.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name) : null,
+                    CityId = v.CityId,
+                    CityName = v.City != null ? v.City.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name) : null,
+                    CountryId = v.CountryId,
+                    CountryName = v.Country != null ? v.Country.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name) : null,
+
+                    VacancyNumbers = v.VacancyNumbers != null ? v
+                                .VacancyNumbers.Select(vn => new VacancyNumberDto
+                                {
+                                    Id = vn.Id,
+                                    VacancyNumber = vn.Number,
+                                }).ToList() : new List<VacancyNumberDto>(),
+
+                    Skills = v.VacancySkills
+                                .Where(vc => vc.Skill != null)
+                                .Select(vc => new SkillDto
+                                {
+                                    Id = vc.Skill.Id,
+                                    Name = vc.Skill.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name)
+                                }).ToList()
+                }).FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
+
+            return vacancy;
+        }
+
+
         /// <summary> vacancynin update olunması usere notification </summary>
         public async Task UpdateVacancyAsync(UpdateVacancyDto vacancyDto, ICollection<UpdateNumberDto>? numberDtos)
         {
@@ -415,7 +467,7 @@ namespace JobCompany.Business.Services.VacancyServices
                 {
                     Id = v.Id,
                     Title = v.Title,
-                    CompanyLogo = v.CompanyLogo != null ? $"{_authServiceBaseUrl}/{v.CompanyLogo}" : null,
+                    CompanyLogo = v.CompanyLogo != null ? $"{_currentUser.BaseUrl}/{v.CompanyLogo}" : null,
                     CompanyName = v.CompanyName,
                     StartDate = v.StartDate,
                     Location = v.Location,
@@ -536,7 +588,7 @@ namespace JobCompany.Business.Services.VacancyServices
             {
                 Id = x.Id,
                 Title = x.Title,
-                CompanyLogo = x.CompanyLogo != null ? $"{_authServiceBaseUrl}/{x.CompanyLogo}" : null,
+                CompanyLogo = x.CompanyLogo != null ? $"{_currentUser.BaseUrl}/{x.CompanyLogo}" : null,
                 CompanyName = x.CompanyName,
                 StartDate = x.StartDate,
                 Location = x.Location,
@@ -571,7 +623,7 @@ namespace JobCompany.Business.Services.VacancyServices
             {
                 Id = x.Vacancy.Id,
                 Title = x.Vacancy.Title,
-                CompanyLogo = x.Vacancy.CompanyLogo != null ? $"{_authServiceBaseUrl}/{x.Vacancy.CompanyLogo}" : null,
+                CompanyLogo = x.Vacancy.CompanyLogo != null ? $"{_currentUser.BaseUrl}/{x.Vacancy.CompanyLogo}" : null,
                 CompanyName = x.Vacancy.CompanyName,
                 StartDate = x.Vacancy.StartDate,
                 Location = x.Vacancy.Location,

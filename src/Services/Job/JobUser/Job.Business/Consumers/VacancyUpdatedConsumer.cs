@@ -16,6 +16,7 @@ namespace Job.Business.Consumers
                     SenderId = context.Message.SenderId,
                     NotificationType = SharedLibrary.Enums.NotificationType.VacancyUpdate,
                     InformationId = context.Message.InformationId,
+                    InformationName = context.Message.InformationName,
                     IsSeen = false,
                 })
                 .ToList();

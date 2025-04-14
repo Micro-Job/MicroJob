@@ -46,6 +46,7 @@ namespace Job.Business.Consumers
                         SenderId = eventMessage.SenderId,
                         NotificationType = SharedLibrary.Enums.NotificationType.Vacancy,
                         InformationId = eventMessage.InformationId,
+                        InformationName = eventMessage.InformatioName,
                         IsSeen = false,
                     };
 

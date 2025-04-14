@@ -13,6 +13,7 @@ namespace JobCompany.Business.Services.VacancyServices
         Task<List<VacancyGetAllDto>> GetAllOwnVacanciesAsync(string? titleName, string? categoryId, string? countryId, string? cityId, VacancyStatus? IsActive, decimal? minSalary, decimal? maxSalary, byte? workStyle, byte? workType, int skip = 1, int take = 6);
         Task<List<VacancyListDtoForAppDto>> GetAllVacanciesForAppAsync();
         Task<VacancyGetByIdDto> GetByIdVacancyAsync(string id);
+        Task<VacancyDetailsDto> GetVacancyDetailsAsync(Guid id);
         Task<DataListDto<VacancyGetAllDto>> GetAllVacanciesAsync(string? titleName, string? categoryId, string? countryId, string? cityId, decimal? minSalary, decimal? maxSalary, string? companyId, byte? workStyle, byte? workType, int skip = 1, int take = 9);
         Task<DataListDto<VacancyGetByCompanyIdDto>> GetVacanciesByCompanyIdAsync(string companyId, int skip = 1, int take = 9);
 

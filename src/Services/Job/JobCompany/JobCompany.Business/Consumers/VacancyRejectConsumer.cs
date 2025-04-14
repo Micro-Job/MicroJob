@@ -11,10 +11,11 @@ public class VacancyRejectConsumer(JobCompanyDbContext _context) : IConsumer<Vac
     {
         var newNotification = new Notification
         {
-            ReceiverId = context.Message.ReceiverId ?? throw new Exception(),
+            ReceiverId = context.Message.ReceiverId,
             SenderId = context.Message.SenderId,
             NotificationType = SharedLibrary.Enums.NotificationType.VacancyReject,
             InformationId = context.Message.InformationId,
+            InformationName = context.Message.InformationName,
             IsSeen = false,
         };
         await _context.Notifications.AddAsync(newNotification);
