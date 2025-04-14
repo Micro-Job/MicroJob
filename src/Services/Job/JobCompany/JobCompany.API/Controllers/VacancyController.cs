@@ -57,6 +57,13 @@ namespace JobCompany.API.Controllers
             return Ok(data);
         }
 
+        [HttpGet("[action]/{id}")]
+        public async Task<IActionResult> GetVacancyDetails(Guid id)
+        {
+            var data = await _vacancyService.GetVacancyDetailsAsync(id);
+            return Ok(data);
+        }
+
         [AllowAnonymous]
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllVacanciesForApp()

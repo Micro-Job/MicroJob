@@ -15,6 +15,7 @@ public class VacancyAcceptConsumer(JobCompanyDbContext _context) : IConsumer<Vac
             SenderId = context.Message.SenderId,
             NotificationType = SharedLibrary.Enums.NotificationType.VacancyAccept,
             InformationId = context.Message.InformationId,
+            InformationName = context.Message.InformationName,
             IsSeen = false,
         };
         await _context.Notifications.AddAsync(newNotification);
