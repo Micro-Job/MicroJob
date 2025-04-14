@@ -327,6 +327,78 @@ namespace JobCompany.Business.Services.VacancyServices
             return vacancyDto;
         }
 
+        /// <summary> Vakansiyanın bütün detallarının gətirilməsi </summary>
+        public async Task<VacancyDetailsDto> GetVacancyDetailsAsync(Guid id)
+        {
+            var vacancy = await _context.Vacancies
+                .Where(x => x.Id == id && x.Company.UserId==_currentUser.UserGuid)
+                .Include(x => x.Country).ThenInclude(c => c.Translations)
+                .Include(x => x.City).ThenInclude(c => c.Translations)
+                .Include(x => x.Category).ThenInclude(c => c.Translations)
+                .Include(x => x.Company)
+                .Include(v => v.VacancySkills)
+                    .ThenInclude(vs => vs.Skill)
+                        .ThenInclude(s => s.Translations)
+                .FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
+
+            var skillCount = vacancy.VacancySkills.Count;
+            var firstSkill = vacancy.VacancySkills.FirstOrDefault()?.Skill;
+            var firstSkillTranslation = firstSkill?.Translations?.FirstOrDefault();
+
+
+            var vacancyDetails = new VacancyDetailsDto
+            {
+                Id = vacancy.Id,
+                Title = vacancy.Title,
+                CompanyId = vacancy.CompanyId,
+                CompanyName = vacancy.CompanyName,
+                CompanyUserId = vacancy.Company.UserId,
+                CompanyLogo = $"{_currentUser.BaseUrl}/{vacancy.Company.CompanyLogo}",
+                StartDate = vacancy.StartDate,
+                EndDate = vacancy.EndDate,
+                Location = vacancy.Location,
+                ViewCount = vacancy.ViewCount,
+                WorkType = vacancy.WorkType,
+                WorkStyle = vacancy.WorkStyle,
+                MainSalary = vacancy.MainSalary,
+                MaxSalary = vacancy.MaxSalary,
+                Requirement = vacancy.Requirement,
+                Description = vacancy.Description,
+                Email = vacancy.Email,
+                Gender = vacancy.Gender,
+                Military = vacancy.Military,
+                Family = vacancy.Family,
+                Driver = vacancy.Driver,
+                Citizenship = vacancy.Citizenship,
+                ExamId = vacancy.ExamId,
+                CreatedDate = vacancy.CreatedDate,
+                IsVip = vacancy.IsVip,
+                VacancyStatus = vacancy.VacancyStatus,
+                CategoryId = vacancy.CategoryId,
+                CategoryName = vacancy.Category?.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name),
+                CityId = vacancy.CityId,
+                CityName = vacancy.City?.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name),
+                CountryId = vacancy.CountryId,
+                CountryName = vacancy.Country?.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name),
+
+                VacancyNumbers = vacancy.VacancyNumbers?.Select(vn => new VacancyNumberDto
+                {
+                    Id = vn.Id,
+                    VacancyNumber = vn.Number,
+                }).ToList() ?? [],
+
+                Skills = vacancy.VacancySkills?
+                    .Where(vc => vc.Skill != null)
+                    .Select(vc => new SkillDto
+                    {
+                        Id = vc.Skill.Id,
+                        Name = vc.Skill.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name)
+                    }).ToList() ?? [],
+            };
+
+            return vacancyDetails;
+        }
+
         /// <summary> vacancynin update olunması usere notification </summary>
         public async Task UpdateVacancyAsync(UpdateVacancyDto vacancyDto, ICollection<UpdateNumberDto>? numberDtos)
         {
