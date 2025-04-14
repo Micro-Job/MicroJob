@@ -49,7 +49,7 @@ namespace JobCompany.Business.Services.CompanyServices
             _contextAccessor = contextAccessor;
         }
 
-        public async Task UpdateCompanyAsync(CompanyUpdateDto dto, ICollection<UpdateNumberDto>? numbersDto)
+        public async Task<CompanyUpdateResponseDto> UpdateCompanyAsync(CompanyUpdateDto dto, ICollection<UpdateNumberDto>? numbersDto)
         {
             var company = await _context.Companies.Include(c => c.CompanyNumbers).FirstOrDefaultAsync(x => x.UserId == _currentUser.UserGuid)
                 ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>(MessageHelper.GetMessage("NOT_FOUND"));
@@ -69,14 +69,13 @@ namespace JobCompany.Business.Services.CompanyServices
 
             company.Email = dto.Email;
 
-            if (!string.IsNullOrEmpty(company.CompanyLogo))
-            {
-                _fileService.DeleteFile(company.CompanyLogo);
-                company.CompanyLogo = "Files/Images/defaultlogo.jpg";
-            }
-
             if (dto.CompanyLogo != null)
             {
+                if (!string.IsNullOrEmpty(company.CompanyLogo))
+                {
+                    _fileService.DeleteFile(company.CompanyLogo);
+                }
+
                 FileDto fileResult = await _fileService.UploadAsync(FilePaths.image, dto.CompanyLogo);
 
                 company.CompanyLogo = $"{fileResult.FilePath}/{fileResult.FileName}";
@@ -121,6 +120,11 @@ namespace JobCompany.Business.Services.CompanyServices
             }
 
             await _context.SaveChangesAsync();
+
+            return new CompanyUpdateResponseDto
+            {
+                CompanyLogo = $"{_currentUser.BaseUrl}/{company.CompanyLogo}"
+            };
         }
 
         public async Task<DataListDto<CompanyDto>> GetAllCompaniesAsync(string? searchTerm, int skip = 1, int take = 12)
@@ -186,7 +190,7 @@ namespace JobCompany.Business.Services.CompanyServices
         public async Task<CompanyProfileDto> GetOwnCompanyInformationAsync()
         {
             var currentLanguage = _currentUser.LanguageCode;
-            
+
             var companyProfile = await _context.Companies
                 .Where(c => c.UserId == _currentUser.UserGuid)
                 .Include(x => x.Category.Translations)
