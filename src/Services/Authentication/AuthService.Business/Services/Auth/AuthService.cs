@@ -18,11 +18,13 @@ using SharedLibrary.Exceptions;
 using SharedLibrary.ExternalServices.FileService;
 using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;
+using SharedLibrary.Requests;
+using SharedLibrary.Responses;
 using SharedLibrary.Statics;
 
 namespace AuthService.Business.Services.Auth
 {
-    public class AuthService(AppDbContext _context, ITokenHandler _tokenHandler, IPublishEndpoint _publishEndpoint, IConfiguration _configuration, IEmailService _emailService, ICurrentUser _currentUser) : IAuthService
+    public class AuthService(AppDbContext _context, ITokenHandler _tokenHandler, IPublishEndpoint _publishEndpoint, IConfiguration _configuration, IEmailService _emailService, ICurrentUser _currentUser, IRequestClient<GetCompaniesDataByUserIdsRequest> _companyDataClient) : IAuthService
     {
         private readonly string? _authServiceBaseUrl = _configuration["AuthService:BaseUrl"];
 
@@ -53,7 +55,7 @@ namespace AuthService.Business.Services.Auth
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
 
-            await _publishEndpoint.Publish(new UserRegisteredEvent { UserId = user.Id , JobStatus = user.JobStatus });
+            await _publishEndpoint.Publish(new UserRegisteredEvent { UserId = user.Id, JobStatus = user.JobStatus });
             await _createBalance(user.Id);
 
             //await _publisher.SendEmail(
@@ -138,7 +140,7 @@ namespace AuthService.Business.Services.Auth
             user.RefreshTokenExpireDate = refreshToken.Expires;
             await _context.SaveChangesAsync();
 
-            return new TokenResponseDto
+            var responseDto = new TokenResponseDto
             {
                 UserId = user.Id.ToString(),
                 FullName = user.FirstName + " " + user.LastName,
@@ -148,6 +150,22 @@ namespace AuthService.Business.Services.Auth
                 Expires = refreshToken.Expires,
                 UserImage = user.Image != null ? $"{_authServiceBaseUrl}/{user.Image}" : null
             };
+
+            if (user.UserRole == UserRole.CompanyUser || user.UserRole == UserRole.EmployeeUser)
+            {
+                var companyResponse = await _companyDataClient.GetResponse<GetCompaniesDataByUserIdsResponse>(
+                    new GetCompaniesDataByUserIdsRequest
+                    {
+                        UserIds = [user.Id]
+                    });
+
+                var companyData = companyResponse.Message.Companies[user.Id];
+
+                responseDto.FullName = companyData.CompanyName;
+                responseDto.UserImage = $"{_configuration["JobCompany:BaseUrl"]}/{companyData.CompanyLogo}" ?? null;
+            }
+
+            return responseDto;
         }
 
         public async Task<TokenResponseDto> LoginWithRefreshTokenAsync(string refreshToken)

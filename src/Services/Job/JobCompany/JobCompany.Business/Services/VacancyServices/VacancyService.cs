@@ -327,77 +327,71 @@ namespace JobCompany.Business.Services.VacancyServices
             return vacancyDto;
         }
 
-        /// <summary> Vakansiyanın bütün detallarının gətirilməsi </summary>
+        /// <summary> Vakansiyanın bütün detallarını gətirir </summary>
         public async Task<VacancyDetailsDto> GetVacancyDetailsAsync(Guid id)
         {
             var vacancy = await _context.Vacancies
-                .Where(x => x.Id == id && x.Company.UserId==_currentUser.UserGuid)
+                .Where(x => x.Id == id && x.Company.UserId == _currentUser.UserGuid)
                 .Include(x => x.Country).ThenInclude(c => c.Translations)
                 .Include(x => x.City).ThenInclude(c => c.Translations)
                 .Include(x => x.Category).ThenInclude(c => c.Translations)
-                .Include(x => x.Company)
                 .Include(v => v.VacancySkills)
-                    .ThenInclude(vs => vs.Skill)
-                        .ThenInclude(s => s.Translations)
-                .FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
-
-            var skillCount = vacancy.VacancySkills.Count;
-            var firstSkill = vacancy.VacancySkills.FirstOrDefault()?.Skill;
-            var firstSkillTranslation = firstSkill?.Translations?.FirstOrDefault();
-
-
-            var vacancyDetails = new VacancyDetailsDto
-            {
-                Id = vacancy.Id,
-                Title = vacancy.Title,
-                CompanyId = vacancy.CompanyId,
-                CompanyName = vacancy.CompanyName,
-                CompanyUserId = vacancy.Company.UserId,
-                CompanyLogo = $"{_currentUser.BaseUrl}/{vacancy.Company.CompanyLogo}",
-                StartDate = vacancy.StartDate,
-                EndDate = vacancy.EndDate,
-                Location = vacancy.Location,
-                ViewCount = vacancy.ViewCount,
-                WorkType = vacancy.WorkType,
-                WorkStyle = vacancy.WorkStyle,
-                MainSalary = vacancy.MainSalary,
-                MaxSalary = vacancy.MaxSalary,
-                Requirement = vacancy.Requirement,
-                Description = vacancy.Description,
-                Email = vacancy.Email,
-                Gender = vacancy.Gender,
-                Military = vacancy.Military,
-                Family = vacancy.Family,
-                Driver = vacancy.Driver,
-                Citizenship = vacancy.Citizenship,
-                ExamId = vacancy.ExamId,
-                CreatedDate = vacancy.CreatedDate,
-                IsVip = vacancy.IsVip,
-                VacancyStatus = vacancy.VacancyStatus,
-                CategoryId = vacancy.CategoryId,
-                CategoryName = vacancy.Category?.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name),
-                CityId = vacancy.CityId,
-                CityName = vacancy.City?.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name),
-                CountryId = vacancy.CountryId,
-                CountryName = vacancy.Country?.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name),
-
-                VacancyNumbers = vacancy.VacancyNumbers?.Select(vn => new VacancyNumberDto
+                            .ThenInclude(vs => vs.Skill)
+                                .ThenInclude(s => s.Translations)
+                .Select(v => new VacancyDetailsDto
                 {
-                    Id = vn.Id,
-                    VacancyNumber = vn.Number,
-                }).ToList() ?? [],
+                    Id = v.Id,
+                    Title = v.Title,
+                    CompanyId = v.CompanyId,
+                    CompanyName = v.CompanyName,
+                    CompanyUserId = v.Company.UserId,
+                    CompanyLogo = $"{_currentUser.BaseUrl}/{v.Company.CompanyLogo}",
+                    StartDate = v.StartDate,
+                    EndDate = v.EndDate,
+                    Location = v.Location,
+                    ViewCount = v.ViewCount,
+                    WorkType = v.WorkType,
+                    WorkStyle = v.WorkStyle,
+                    MainSalary = v.MainSalary,
+                    MaxSalary = v.MaxSalary,
+                    Requirement = v.Requirement,
+                    Description = v.Description,
+                    Email = v.Email,
+                    Gender = v.Gender,
+                    Military = v.Military,
+                    Family = v.Family,
+                    Driver = v.Driver,
+                    Citizenship = v.Citizenship,
+                    ExamId = v.ExamId,
+                    CreatedDate = v.CreatedDate,
+                    IsVip = v.IsVip,
+                    VacancyStatus = v.VacancyStatus,
+                    CategoryId = v.CategoryId,
+                    CategoryName = v.Category != null ? v.Category.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name) : null,
+                    CityId = v.CityId,
+                    CityName = v.City != null ? v.City.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name) : null,
+                    CountryId = v.CountryId,
+                    CountryName = v.Country != null ? v.Country.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name) : null,
 
-                Skills = vacancy.VacancySkills?
-                    .Where(vc => vc.Skill != null)
-                    .Select(vc => new SkillDto
-                    {
-                        Id = vc.Skill.Id,
-                        Name = vc.Skill.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name)
-                    }).ToList() ?? [],
-            };
+                    VacancyNumbers = v.VacancyNumbers != null ? v
+                                .VacancyNumbers.Select(vn => new VacancyNumberDto
+                                {
+                                    Id = vn.Id,
+                                    VacancyNumber = vn.Number,
+                                }).ToList() : new List<VacancyNumberDto>(),
 
-            return vacancyDetails;
+                    Skills = v.VacancySkills
+                                .Where(vc => vc.Skill != null)
+                                .Select(vc => new SkillDto
+                                {
+                                    Id = vc.Skill.Id,
+                                    Name = vc.Skill.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name)
+                                }).ToList()
+                }).FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
+
+            return vacancy;
         }
+
 
         /// <summary> vacancynin update olunması usere notification </summary>
         public async Task UpdateVacancyAsync(UpdateVacancyDto vacancyDto, ICollection<UpdateNumberDto>? numberDtos)
