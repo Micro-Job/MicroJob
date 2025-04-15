@@ -15,6 +15,10 @@ namespace JobPayment.Core.Entities
         public decimal Value { get; set; }
         public double Coin { get; set; }
         public bool IsDeleted { get; set; }
+        public DateTime CreatedDate { get; set; }
+        public DateTime ValidFrom { get; set; }
+        public DateTime? ValidTo { get; set; }
+
 
         public ICollection<OldPacket>? OldPackets { get; set; }
     }
