@@ -10,6 +10,7 @@ namespace JobPayment.Core.Entities
     public class OldService : BaseEntity
     {
         public double OldCoin { get; set; }
+        public DateTime CreatedDate { get; set; }
 
         public Guid PriceId { get; set; }
         public Service Price { get; set; }
