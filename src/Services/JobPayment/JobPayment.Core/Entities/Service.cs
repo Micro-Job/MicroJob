@@ -13,6 +13,7 @@ namespace JobPayment.Core.Entities
     {
         public InformationType InformationType { get; set; }
         public double Coin { get; set; }
+        public DateTime CreatedDate { get; set; }
 
         public ICollection<OldService>? OldPrices { get; set; }
     }
