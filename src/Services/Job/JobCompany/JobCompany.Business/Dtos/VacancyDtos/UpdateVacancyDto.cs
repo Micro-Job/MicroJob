@@ -71,8 +71,6 @@ namespace JobCompany.Business.Dtos.VacancyDtos
             RuleFor(x => x.StartDate)
                 .LessThan(x => x.EndDate)
                 .When(x => x.EndDate.HasValue)
-                .WithMessage(MessageHelper.GetMessage("STARTDATE_MUST_BE_EARLİER_ENDATE"))
-                .GreaterThanOrEqualTo(DateTime.Now)
                 .WithMessage(MessageHelper.GetMessage("STARTDATE_MUST_BE_EARLİER_ENDATE"));
 
             RuleFor(x => x.EndDate)

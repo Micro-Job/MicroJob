@@ -37,7 +37,7 @@ namespace JobCompany.Business.Services.VacancyServices
         private readonly IPublishEndpoint _publishEndpoint;
         private readonly ICurrentUser _currentUser;
 
-        public VacancyService(JobCompanyDbContext context,IFileService fileService,IPublishEndpoint publishEndpoint,ICurrentUser currentUser)
+        public VacancyService(JobCompanyDbContext context, IFileService fileService, IPublishEndpoint publishEndpoint, ICurrentUser currentUser)
         {
             _context = context;
             _fileService = fileService;
@@ -387,6 +387,7 @@ namespace JobCompany.Business.Services.VacancyServices
                 await _context
                     .Vacancies.Where(v => v.Id == vacancyGuid && v.Company.UserId == _currentUser.UserGuid)
                     .Include(v => v.VacancySkills)
+                    .Include(v => v.VacancyNumbers)
                     .FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
 
             if (existingVacancy.VacancyStatus == VacancyStatus.Block && existingVacancy.VacancyStatus == VacancyStatus.Reject)
@@ -422,26 +423,58 @@ namespace JobCompany.Business.Services.VacancyServices
 
             if (numberDtos is not null)
             {
-                foreach (var numberDto in numberDtos)
+                var existingNumbers = existingVacancy.VacancyNumbers ?? [];
+                var existingNumberDict = existingNumbers.ToDictionary(n => n.Id, n => n);
+
+                var incomingNumberDict = numberDtos
+                    .Where(n => !string.IsNullOrWhiteSpace(n.Id))
+                    .ToDictionary(n => Guid.Parse(n.Id!), n => n.PhoneNumber);
+
+                // Id-si olan nömrələri güncəlləyirik
+                foreach (var kvp in incomingNumberDict)
                 {
-                    var phoneNumberGuid = Guid.Parse(numberDto.Id);
-                    var phoneNumber = existingVacancy.VacancyNumbers?.FirstOrDefault(p =>
-                        p.Id == phoneNumberGuid
-                    );
-                    if (phoneNumber != null && phoneNumber.Number != numberDto.PhoneNumber)
+                    if (existingNumberDict.TryGetValue(kvp.Key, out var existingNumber))
                     {
-                        phoneNumber.Number = numberDto.PhoneNumber;
+                        if (existingNumber.Number != kvp.Value)
+                            existingNumber.Number = kvp.Value;
                     }
+                }
+
+                // Id-si olmayan yeni nömrələri əlavə et
+                var newNumbers = numberDtos
+                    .Where(n => string.IsNullOrWhiteSpace(n.Id))
+                    .Select(n => new VacancyNumber
+                    {
+                        Id = Guid.NewGuid(),
+                        Number = n.PhoneNumber,
+                        VacancyId = existingVacancy.Id
+                    }).ToList();
+
+                if (newNumbers.Count != 0)
+                {
+                    await _context.VacancyNumbers.AddRangeAsync(newNumbers);
+                }
+
+                // Müqayisə edib silinəcək nömrələri tapırıq
+                var toRemove = existingNumbers
+                    .Where(n => !incomingNumberDict.ContainsKey(n.Id))
+                    .ToList();
+
+                if (toRemove.Count != 0)
+                {
+                    _context.VacancyNumbers.RemoveRange(toRemove);
                 }
             }
 
-            if (vacancyDto.Skills is not null) 
+
+
+            if (vacancyDto.Skills is not null)
             {
                 var existingSkillIds = existingVacancy.VacancySkills.Select(vs => vs.SkillId).ToList(); // Mövcud olan skill id-ləri
                 var incomingSkillIds = vacancyDto.Skills.Select(s => s.Id).ToList(); // Request-də gələn skill id-ləri
 
                 var skillsToAdd = incomingSkillIds.Except(existingSkillIds).ToList(); // Müqayisə edib əlavə olunacaq skill id-ləri tapırıq
-                
+
                 var newVacancySkills = skillsToAdd.Select(skillId => new VacancySkill
                 {
                     VacancyId = existingVacancy.Id,
@@ -453,7 +486,7 @@ namespace JobCompany.Business.Services.VacancyServices
                     await _context.VacancySkills.AddRangeAsync(newVacancySkills);  // Yeni skilllər əlavə olunur
                 }
 
-                
+
                 var skillsToRemove = existingSkillIds.Except(incomingSkillIds).ToList(); // Müqayisə edib silinəcək skill id-ləri tapırıq
                 if (skillsToRemove.Count != 0)
                 {
