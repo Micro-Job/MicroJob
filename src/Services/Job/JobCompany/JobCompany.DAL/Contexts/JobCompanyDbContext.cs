@@ -36,6 +36,10 @@ namespace JobCompany.DAL.Contexts
         public DbSet<UserExam> UserExams { get; set; }
         public DbSet<VacancyComment> VacancyComments { get; set; }
         public DbSet<VacancyCommentTranslation> VacancyCommentTranslations { get; set; }
+        public DbSet<Message> Messages { get; set; }
+        public DbSet<VacancyMessage> VacancyMessages { get; set; }
+        public DbSet<MessageTranslation> MessageTranslations { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
