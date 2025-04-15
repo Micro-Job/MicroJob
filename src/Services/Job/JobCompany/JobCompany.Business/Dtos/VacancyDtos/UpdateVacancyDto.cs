@@ -1,5 +1,5 @@
 ﻿using FluentValidation;
-using JobCompany.Core.Enums;
+using JobCompany.Business.Dtos.SkillDtos;
 using Microsoft.AspNetCore.Http;
 using Shared.Enums;
 using SharedLibrary.Enums;
@@ -31,9 +31,9 @@ namespace JobCompany.Business.Dtos.VacancyDtos
         public Driver Driver { get; set; }
         public FamilySituation Family { get; set; }
         public Citizenship Citizenship { get; set; }
-
-        //public Guid? VacancyTestId { get; set; }
+        public Guid? ExamId { get; set; }
         public string? CategoryId { get; set; }
+        public ICollection<SkillUpdateDto> Skills { get; set; } = [];
     }
 
     public class UpdateVacancyDtoValidator : AbstractValidator<UpdateVacancyDto>
@@ -71,8 +71,6 @@ namespace JobCompany.Business.Dtos.VacancyDtos
             RuleFor(x => x.StartDate)
                 .LessThan(x => x.EndDate)
                 .When(x => x.EndDate.HasValue)
-                .WithMessage(MessageHelper.GetMessage("STARTDATE_MUST_BE_EARLİER_ENDATE"))
-                .GreaterThanOrEqualTo(DateTime.Now)
                 .WithMessage(MessageHelper.GetMessage("STARTDATE_MUST_BE_EARLİER_ENDATE"));
 
             RuleFor(x => x.EndDate)

@@ -1,4 +1,5 @@
-﻿using JobPayment.Core.Entities;
+﻿using JobPayment.Business.Dtos.BalanceDtos;
+using JobPayment.Core.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,5 +12,6 @@ namespace JobPayment.Business.Services.BalanceServices
     {
         public Task IncreaseBalanceAsync(string packetId);
         public Task<Balance> GetOwnBalanceAsync();
+        public Task<BalanceDto> GetUserBalanceByIdAsync(Guid userId);
     }
 }

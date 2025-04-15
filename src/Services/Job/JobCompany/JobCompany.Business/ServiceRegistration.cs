@@ -1,5 +1,4 @@
-﻿using Job.Business.Consumers;
-using JobCompany.Business.Consumers;
+﻿using JobCompany.Business.Consumers;
 using JobCompany.Business.Services.AnswerServices;
 using JobCompany.Business.Services.ApplicationServices;
 using JobCompany.Business.Services.CategoryServices;
@@ -57,20 +56,15 @@ namespace JobCompany.Business
             services.AddMassTransit(x =>
             {
                 x.AddConsumer<CompanyRegisteredConsumer>();
-                x.AddConsumer<VacancyDataConsumer>();
-                x.AddConsumer<GetAllCompaniesConsumer>();
                 x.AddConsumer<UserApplicationConsumer>();
                 x.AddConsumer<VacancyApplicationConsumer>();
                 x.AddConsumer<GetAllVacanciesConsumer>();
                 x.AddConsumer<GetCompanyDetailByIdConsumer>();
-                x.AddConsumer<GetVacancyInfoConsumer>();
                 x.AddConsumer<GetAllVacanciesByCompanyIdConsumer>();
-                x.AddConsumer<GetUserApplicationsConsumer>();
                 x.AddConsumer<CheckVacancyConsumer>();
-                x.AddConsumer<CheckCompanyConsumer>();
-                x.AddConsumer<GetOtherVacanciesByCompanyConsumer>();
                 x.AddConsumer<VacancyAcceptConsumer>();
                 x.AddConsumer<VacancyRejectConsumer>();
+                x.AddConsumer<GetCompaniesDataByUserIdsConsumer>();
 
                 x.SetKebabCaseEndpointNameFormatter();
 

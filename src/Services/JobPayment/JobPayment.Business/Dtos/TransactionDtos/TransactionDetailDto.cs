@@ -12,6 +12,7 @@ namespace JobPayment.Business.Dtos.TransactionDtos
     public class TransactionDetailDto
     {
         public string? CompanyName { get; set; }
+        public Guid InformationId { get; set; }
         public InformationType InformationType { get; set; }
         public TransactionStatus TransactionStatus { get; set; }
         public TransactionType TransactionType { get; set; }

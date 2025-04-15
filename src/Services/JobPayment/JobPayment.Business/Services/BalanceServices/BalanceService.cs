@@ -1,4 +1,5 @@
-﻿using JobPayment.Business.Dtos.TransactionDtos;
+﻿using JobPayment.Business.Dtos.BalanceDtos;
+using JobPayment.Business.Dtos.TransactionDtos;
 using JobPayment.Business.Services.PacketServices;
 using JobPayment.Business.Services.TransactionServices;
 using JobPayment.Core.Entities;
@@ -8,10 +9,11 @@ using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Enums;
 using SharedLibrary.Exceptions;
 using SharedLibrary.HelperServices.Current;
+using System.Xml.Linq;
 
 namespace JobPayment.Business.Services.BalanceServices
 {
-    public class BalanceService(PaymentDbContext _context , ITransactionService _transactionService,  IPacketService _packetService , ICurrentUser _currentUser) : IBalanceService
+    public class BalanceService(PaymentDbContext _context, ITransactionService _transactionService, IPacketService _packetService, ICurrentUser _currentUser) : IBalanceService
     {
         public async Task IncreaseBalanceAsync(string packetId)
         {
@@ -43,6 +45,18 @@ namespace JobPayment.Business.Services.BalanceServices
                             ?? throw new NotFoundException<Balance>();
 
             return myBalance;
+        }
+
+        public async Task<BalanceDto> GetUserBalanceByIdAsync(Guid userId)
+        {
+            var userBalance = await _context.Balances.Select(x => new BalanceDto
+            {
+                UserId = x.UserId,
+                Coin = x.Coin,
+                BonusCoin = x.BonusCoin
+            }).FirstOrDefaultAsync(x=> x.UserId == userId) ?? throw new NotFoundException<Balance>("Balance mövcud deyil");
+
+            return userBalance;
         }
     }
 }

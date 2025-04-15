@@ -328,6 +328,44 @@ namespace JobCompany.DAL.Migrations
                     b.ToTable("ExamQuestions");
                 });
 
+            modelBuilder.Entity("JobCompany.Core.Entites.Message", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Messages");
+                });
+
+            modelBuilder.Entity("JobCompany.Core.Entites.MessageTranslation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<byte>("Language")
+                        .HasColumnType("tinyint");
+
+                    b.Property<Guid>("MessageId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MessageId");
+
+                    b.ToTable("MessageTranslations");
+                });
+
             modelBuilder.Entity("JobCompany.Core.Entites.Notification", b =>
                 {
                     b.Property<Guid>("Id")
@@ -659,6 +697,27 @@ namespace JobCompany.DAL.Migrations
                     b.ToTable("VacancyCommentTranslations");
                 });
 
+            modelBuilder.Entity("JobCompany.Core.Entites.VacancyMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("MessageId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("VacancyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MessageId");
+
+                    b.HasIndex("VacancyId");
+
+                    b.ToTable("VacancyMessages");
+                });
+
             modelBuilder.Entity("JobCompany.Core.Entites.VacancyNumber", b =>
                 {
                     b.Property<Guid>("Id")
@@ -834,6 +893,17 @@ namespace JobCompany.DAL.Migrations
                     b.Navigation("Question");
                 });
 
+            modelBuilder.Entity("JobCompany.Core.Entites.MessageTranslation", b =>
+                {
+                    b.HasOne("JobCompany.Core.Entites.Message", "Message")
+                        .WithMany("Translations")
+                        .HasForeignKey("MessageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Message");
+                });
+
             modelBuilder.Entity("JobCompany.Core.Entites.Notification", b =>
                 {
                     b.HasOne("JobCompany.Core.Entites.Company", "Receiver")
@@ -944,6 +1014,25 @@ namespace JobCompany.DAL.Migrations
                     b.Navigation("VacancyComment");
                 });
 
+            modelBuilder.Entity("JobCompany.Core.Entites.VacancyMessage", b =>
+                {
+                    b.HasOne("JobCompany.Core.Entites.Message", "Message")
+                        .WithMany("VacancyMessages")
+                        .HasForeignKey("MessageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("JobCompany.Core.Entites.Vacancy", "Vacancy")
+                        .WithMany("VacancyMessages")
+                        .HasForeignKey("VacancyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Message");
+
+                    b.Navigation("Vacancy");
+                });
+
             modelBuilder.Entity("JobCompany.Core.Entites.VacancyNumber", b =>
                 {
                     b.HasOne("JobCompany.Core.Entites.Vacancy", "Vacancy")
@@ -1024,6 +1113,13 @@ namespace JobCompany.DAL.Migrations
                     b.Navigation("Vacancies");
                 });
 
+            modelBuilder.Entity("JobCompany.Core.Entites.Message", b =>
+                {
+                    b.Navigation("Translations");
+
+                    b.Navigation("VacancyMessages");
+                });
+
             modelBuilder.Entity("JobCompany.Core.Entites.Question", b =>
                 {
                     b.Navigation("Answers");
@@ -1048,6 +1144,8 @@ namespace JobCompany.DAL.Migrations
                     b.Navigation("Applications");
 
                     b.Navigation("SavedVacancies");
+
+                    b.Navigation("VacancyMessages");
 
                     b.Navigation("VacancyNumbers");
 

@@ -15,13 +15,12 @@ namespace JobCompany.API.Controllers
         [AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser)]
         public async Task<IActionResult> UpdateCompany([FromForm] UpdateCompanyRequest request)
         {
-            await service.UpdateCompanyAsync(request.CompanyDto, request.NumbersDto);
-            return Ok();
+            return Ok(await service.UpdateCompanyAsync(request.CompanyDto, request.NumbersDto));
         }
 
         [AllowAnonymous]
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetAllCompanies(string? searchTerm = null,int skip = 1,int take = 6)
+        public async Task<IActionResult> GetAllCompanies(string? searchTerm = null, int skip = 1, int take = 6)
         {
             return Ok(await service.GetAllCompaniesAsync(searchTerm, skip, take));
         }

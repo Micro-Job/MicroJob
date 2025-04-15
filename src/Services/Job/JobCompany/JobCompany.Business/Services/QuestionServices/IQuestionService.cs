@@ -8,5 +8,6 @@ namespace JobCompany.Business.Services.QuestionServices
     {
         Task CreateQuestionAsync(QuestionCreateDto dto, CreateListAnswersDto dtos);
         Task<ICollection<Question>> CreateBulkQuestionAsync(ICollection<QuestionCreateDto> dtos);
+        Task<ICollection<Guid>> UpdateBulkQuestionsAsync(Guid examId, ICollection<QuestionUpdateDto> dtos);
     }
 }

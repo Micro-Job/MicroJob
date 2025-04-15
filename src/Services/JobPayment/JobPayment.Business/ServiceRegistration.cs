@@ -38,6 +38,7 @@ namespace JobPayment.Business
             services.AddMassTransit(x =>
             {
                 x.AddConsumer<CreateBalanceConsumer>();
+                x.AddConsumer<CheckBalanceConsumer>();
                 x.AddConsumer<PayConsumer>();
 
                 x.SetKebabCaseEndpointNameFormatter();

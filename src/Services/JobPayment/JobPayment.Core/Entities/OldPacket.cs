@@ -11,6 +11,10 @@ namespace JobPayment.Core.Entities
     {
         public decimal OldValue { get; set; }
         public double Coin { get; set; }
+        /// <summary>
+        /// Packetden OldPackete dusme tarixi
+        /// </summary>
+        public DateTime CreatedDate { get; set; }
 
         public Guid PacketId { get; set; }
         public Packet Packet { get; set; }

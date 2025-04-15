@@ -1,12 +1,13 @@
 ﻿
+using JobCompany.Business.Dtos.MessageDtos;
 using JobCompany.Business.Dtos.VacancyDtos;
 using JobCompany.Business.Exceptions.Common;
-using JobCompany.Business.Exceptions.VacancyExceptions;
+using JobCompany.Business.Extensions;
+using JobCompany.Business.Statistics;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
-using Shared.Events;
 using SharedLibrary.Enums;
 using SharedLibrary.Events;
 using SharedLibrary.Helpers;
@@ -14,24 +15,12 @@ using SharedLibrary.HelperServices.Current;
 
 namespace JobCompany.Business.Services.ManageService;
 
-public class ManageService(JobCompanyDbContext _context,ICurrentUser _user, IPublishEndpoint _publishEndpoint) : IManageService
+public class ManageService(JobCompanyDbContext _context, ICurrentUser _user, IPublishEndpoint _publishEndpoint) : IManageService
 {
-    private bool HasRole(string roleName)
+    public async Task VacancyAcceptAsync(string vacancyId)
     {
-        if (Enum.TryParse<UserRole>(roleName, out var role))
-        {
-            return _user.UserRole == (byte)role;
-        }
-        return false; 
-    }
+        var vacancyGuid = Guid.Parse(vacancyId);
 
-    public async Task VacancyAcceptAsync(VacancyAcceptDto dto)
-    {
-        if (HasRole("SimpleUser") || HasRole("EmployeeUser") || HasRole("CompanyUser"))
-        {
-            throw new DontHavePermissionException(MessageHelper.GetMessage("NO_PERMISSION"));
-        }
-        var vacancyGuid = Guid.Parse(dto.VacancyId);
         var vacancy = await _context.Vacancies
             .Include(v => v.Applications)
             .Where(v => v.Id == vacancyGuid).FirstOrDefaultAsync()
@@ -42,9 +31,8 @@ public class ManageService(JobCompanyDbContext _context,ICurrentUser _user, IPub
              .Select(a => a.UserId)
              .ToList();
 
-        vacancy.VacancyStatus = SharedLibrary.Enums.VacancyStatus.Active;
+        vacancy.VacancyStatus = VacancyStatus.Active;
         await _context.SaveChangesAsync();
-
 
         ///summary
         /// Vakansiya accept olunanda sirkete bildiris getmesi
@@ -53,8 +41,8 @@ public class ManageService(JobCompanyDbContext _context,ICurrentUser _user, IPub
             new VacancyAcceptedEvent
             {
                 InformationId = vacancyGuid,
-                SenderId = (Guid)_user.UserGuid,
-                ReceiverId = (Guid)vacancy.CompanyId,
+                SenderId = null,
+                ReceiverId = vacancy.Company.UserId,
                 InformationName = vacancy.Title
             }
         );
@@ -62,23 +50,19 @@ public class ManageService(JobCompanyDbContext _context,ICurrentUser _user, IPub
         ///summary
         /// Vakansiya update olunanda bu vakansiyaya muraciet edenlere bildiris getmesi
         ///summary
-        await _publishEndpoint.Publish(
-            new VacancyUpdatedEvent
-            {
-                InformationId = vacancyGuid,
-                SenderId = (Guid)_user.UserGuid,
-                UserIds = appliedUserIds,
-                InformationName = vacancy.Title,
-            }
-        );
+        //await _publishEndpoint.Publish(
+        //    new VacancyUpdatedEvent
+        //    {
+        //        InformationId = vacancyGuid,
+        //        SenderId = (Guid)_user.UserGuid,
+        //        UserIds = appliedUserIds,
+        //        InformationName = vacancy.Title,
+        //    }
+        //);
     }
 
     public async Task VacancyRejectAsync(VacancyStatusUpdateDto dto)
     {
-        if (HasRole("SimpleUser") || HasRole("EmployeeUser") || HasRole("CompanyUser"))
-        {
-            throw new DontHavePermissionException(MessageHelper.GetMessage("NO_PERMISSION"));
-        }
         var vacancyGuid = Guid.Parse(dto.VacancyId);
         var vacancyCommenGuid = Guid.Parse(dto.VacancyCommentId);
         var vacancy = await _context.Vacancies
@@ -101,18 +85,18 @@ public class ManageService(JobCompanyDbContext _context,ICurrentUser _user, IPub
         );
 
         vacancy.VacancyCommentId = vacancyCommenGuid;
-        vacancy.VacancyStatus = SharedLibrary.Enums.VacancyStatus.Reject;
+        vacancy.VacancyStatus = VacancyStatus.Reject;
         await _context.SaveChangesAsync();
 
-       ///summary
-       /// Vakansiya reject olunanda sirket sahibine bildiris getmesi
-       ///summary
+        ///summary
+        /// Vakansiya reject olunanda sirket sahibine bildiris getmesi
+        ///summary
         await _publishEndpoint.Publish(
             new VacancyRejectedEvent
             {
                 InformationId = vacancyGuid,
                 SenderId = _user.UserGuid,
-                ReceiverId = vacancy.CompanyId,
+                ReceiverId = (Guid)vacancy.CompanyId,
                 InformationName = vacancy.Title
             }
         );
@@ -133,10 +117,6 @@ public class ManageService(JobCompanyDbContext _context,ICurrentUser _user, IPub
 
     public async Task ToggleBlockVacancyStatusAsync(VacancyStatusUpdateDto dto)
     {
-        if (HasRole("SimpleUser") || HasRole("EmployeeUser") || HasRole("CompanyUser"))
-        {
-            throw new DontHavePermissionException(MessageHelper.GetMessage("NO_PERMISSION"));
-        }
         var vacancyGuid = Guid.Parse(dto.VacancyId);
         var vacancy = await _context.Vacancies
             .Where(v => v.Id == vacancyGuid)
@@ -158,6 +138,100 @@ public class ManageService(JobCompanyDbContext _context,ICurrentUser _user, IPub
             }
         }
 
+        await _context.SaveChangesAsync();
+    }
+
+
+
+    public async Task<List<MessageWithTranslationsDto>> GetAllMessagesAsync()
+    {
+        var messages = await _context.Messages
+            .Include(m => m.Translations)
+            .ToListAsync();
+
+        var messageDtos = messages.Select(m => new MessageWithTranslationsDto
+        {
+            Id = m.Id,
+            CreatedDate = m.CreatedDate,
+            Translations = m.Translations.Select(t => new MessageTranslationDto
+            {
+                Language = t.Language,
+                Content = t.Content
+            }).ToList()
+        }).ToList();
+
+        return messageDtos;
+    }
+
+    public async Task<MessageDto> GetMessageByIdAsync(Guid id)
+    {
+        var message = await _context.Messages
+            .Include(m => m.Translations)
+            .FirstOrDefaultAsync(m => m.Id == id)
+            ?? throw new NotFoundException<Message>(MessageHelper.GetMessage("NOT_FOUND"));
+
+        return new MessageDto
+        {
+            Id = message.Id,
+            CreatedDate = message.CreatedDate,
+            Content = message.GetTranslation(_user.LanguageCode, GetTranslationPropertyName.Content)
+        };
+    }
+
+    public async Task CreateMessageAsync(CreateMessageDto dto)
+    {
+        var message = new Message
+        {
+            CreatedDate = DateTime.UtcNow,
+            Translations = dto.Translations.Select(t => new MessageTranslation
+            {
+                Content = t.Content,
+                Language = t.Language
+            }).ToList()
+        };
+
+        _context.Messages.Add(message);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task UpdateMessageAsync(Guid id, UpdateMessageDto dto)
+    {
+        var message = await _context.Messages
+            .Include(m => m.Translations)
+            .FirstOrDefaultAsync(m => m.Id == id)
+            ?? throw new NotFoundException<Message>(MessageHelper.GetMessage("NOT_FOUND"));
+
+        foreach (var dtoTranslation in dto.Translations)
+        {
+            var existingTranslation = message.Translations
+                .FirstOrDefault(t => t.Language == dtoTranslation.Language);
+
+            if (existingTranslation != null) // Mövcud olan tərcüməni yeniləyirik
+            {
+                existingTranslation.Content = dtoTranslation.Content;
+            }
+            else // Yeni tərcümə əlavə edirik
+            {
+                message.Translations.Add(new MessageTranslation
+                {
+                    MessageId = id,
+                    Language = dtoTranslation.Language,
+                    Content = dtoTranslation.Content
+                });
+            }
+        }
+
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task DeleteMessageAsync(Guid id)
+    {
+        var message = await _context.Messages
+            .Include(m => m.Translations)
+            .FirstOrDefaultAsync(m => m.Id == id)
+            ?? throw new NotFoundException<Message>(MessageHelper.GetMessage("NOT_FOUND"));
+
+        _context.Messages.Remove(message);
         await _context.SaveChangesAsync();
     }
 }

@@ -76,6 +76,9 @@ namespace JobPayment.DAL.Migrations
                     b.Property<double>("Coin")
                         .HasColumnType("float");
 
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<decimal>("OldValue")
                         .HasColumnType("decimal(18,2)");
 
@@ -94,6 +97,9 @@ namespace JobPayment.DAL.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<double>("OldCoin")
                         .HasColumnType("float");
@@ -117,6 +123,9 @@ namespace JobPayment.DAL.Migrations
                     b.Property<double>("Coin")
                         .HasColumnType("float");
 
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -125,6 +134,12 @@ namespace JobPayment.DAL.Migrations
 
                     b.Property<string>("Title")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ValidFrom")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ValidTo")
+                        .HasColumnType("datetime2");
 
                     b.Property<decimal>("Value")
                         .HasColumnType("decimal(18,2)");
@@ -142,6 +157,9 @@ namespace JobPayment.DAL.Migrations
 
                     b.Property<double>("Coin")
                         .HasColumnType("float");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<byte>("InformationType")
                         .HasColumnType("tinyint");

@@ -20,6 +20,13 @@ namespace JobCompany.API.Controllers
             return Ok(await examService.CreateExamAsync(dto));
         }
 
+        [HttpPost("[action]")]
+        public async Task<IActionResult> UpdateExam([FromForm] UpdateExamDto dto)
+        {
+            await examService.UpdateExamAsync(dto);
+            return Ok();
+        }
+
         [HttpGet("[action]")]
         public async Task<IActionResult> GetExamById(string examId)
         {

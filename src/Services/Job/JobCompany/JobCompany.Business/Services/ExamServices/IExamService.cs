@@ -8,6 +8,7 @@ namespace JobCompany.Business.Services.ExamServices
     public interface IExamService
     {
         Task<Guid> CreateExamAsync(CreateExamDto dto);
+        Task UpdateExamAsync(UpdateExamDto dto);
         Task<DataListDto<ExamListDto>> GetExamsAsync(string? examName, int skip, int take);
         Task<GetExamByIdDto> GetExamByIdAsync(string examId);
         Task<GetQuestionByStepDto> GetExamQuestionByStepAsync(string examId, int step);

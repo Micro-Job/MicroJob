@@ -22,7 +22,7 @@ namespace JobCompany.API.Controllers
         }
 
         [HttpPut("[action]")]
-        public async Task<IActionResult> UpdateVacancy(UpdateVacancyDto vacancyDto, ICollection<UpdateNumberDto>? numberDtos)
+        public async Task<IActionResult> UpdateVacancy([FromForm] UpdateVacancyDto vacancyDto, [FromForm] ICollection<UpdateNumberDto>? numberDtos)
         {
             await _vacancyService.UpdateVacancyAsync(vacancyDto, numberDtos);
             return Ok();
@@ -54,6 +54,13 @@ namespace JobCompany.API.Controllers
         public async Task<IActionResult> GetByIdVacancy(string id)
         {
             var data = await _vacancyService.GetByIdVacancyAsync(id);
+            return Ok(data);
+        }
+
+        [HttpGet("[action]/{id}")]
+        public async Task<IActionResult> GetVacancyDetails(Guid id)
+        {
+            var data = await _vacancyService.GetVacancyDetailsAsync(id);
             return Ok(data);
         }
 
