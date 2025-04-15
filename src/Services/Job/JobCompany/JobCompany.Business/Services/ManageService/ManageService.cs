@@ -1,29 +1,33 @@
 ﻿
 using JobCompany.Business.Dtos.MessageDtos;
+using JobCompany.Business.Dtos.NotificationDtos;
 using JobCompany.Business.Dtos.VacancyDtos;
 using JobCompany.Business.Exceptions.Common;
 using JobCompany.Business.Extensions;
+using JobCompany.Business.Services.NotificationServices;
 using JobCompany.Business.Statistics;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using SharedLibrary.Enums;
 using SharedLibrary.Events;
 using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;
+using SharedLibrary.Requests;
+using SharedLibrary.Responses;
 
 namespace JobCompany.Business.Services.ManageService;
 
-public class ManageService(JobCompanyDbContext _context, ICurrentUser _user, IPublishEndpoint _publishEndpoint) : IManageService
+public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUser,INotificationService _notificationService, IPublishEndpoint _publishEndpoint , IRequestClient<CheckBalanceRequest> _balanceRequest) : IManageService
 {
     public async Task VacancyAcceptAsync(string vacancyId)
     {
         var vacancyGuid = Guid.Parse(vacancyId);
 
         var vacancy = await _context.Vacancies
-            .Include(v => v.Applications)
-            .Where(v => v.Id == vacancyGuid).FirstOrDefaultAsync()
+            .Include(v => v.Applications).FirstOrDefaultAsync(v => v.Id == vacancyGuid)
             ?? throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
 
         var appliedUserIds = vacancy.Applications
@@ -31,21 +35,30 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _user, IPu
              .Select(a => a.UserId)
              .ToList();
 
-        vacancy.VacancyStatus = VacancyStatus.Active;
-        await _context.SaveChangesAsync();
-
         ///summary
         /// Vakansiya accept olunanda sirkete bildiris getmesi
         ///summary
-        await _publishEndpoint.Publish(
-            new VacancyAcceptedEvent
-            {
-                InformationId = vacancyGuid,
-                SenderId = null,
-                ReceiverId = vacancy.Company.UserId,
-                InformationName = vacancy.Title
-            }
-        );
+        await _notificationService.CreateNotificationAsync(new CreateNotificationDto
+        {
+            SenderId = null,
+            InformationId = vacancyGuid,
+            NotificationType = NotificationType.VacancyAccept,
+            InformationName = vacancy.Title,
+            ReceiverId = vacancy.Company.UserId
+        });
+
+        var balanceResponse = await _balanceRequest.GetResponse<CheckBalanceResponse>(new CheckBalanceRequest
+        {
+            InformationType = InformationType.Vacancy,
+            UserId = vacancy.Company.UserId
+        });
+
+        if (balanceResponse.Message.HasEnoughBalance)
+            vacancy.VacancyStatus = VacancyStatus.Active;
+        else
+            vacancy.VacancyStatus = VacancyStatus.PendingActive;
+
+        await _context.SaveChangesAsync();
 
         ///summary
         /// Vakansiya update olunanda bu vakansiyaya muraciet edenlere bildiris getmesi
@@ -95,7 +108,7 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _user, IPu
             new VacancyRejectedEvent
             {
                 InformationId = vacancyGuid,
-                SenderId = _user.UserGuid,
+                SenderId = _currentUser.UserGuid,
                 ReceiverId = (Guid)vacancy.CompanyId,
                 InformationName = vacancy.Title
             }
@@ -108,7 +121,7 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _user, IPu
             new VacancyDeletedEvent
             {
                 InformationId = vacancyGuid,
-                SenderId = (Guid)_user.UserGuid,
+                SenderId = (Guid)_currentUser.UserGuid,
                 UserIds = appliedUserIds,
                 InformationName = vacancy.Title,
             }
@@ -142,7 +155,6 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _user, IPu
     }
 
 
-
     public async Task<List<MessageWithTranslationsDto>> GetAllMessagesAsync()
     {
         var messages = await _context.Messages
@@ -174,7 +186,7 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _user, IPu
         {
             Id = message.Id,
             CreatedDate = message.CreatedDate,
-            Content = message.GetTranslation(_user.LanguageCode, GetTranslationPropertyName.Content)
+            Content = message.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Content)
         };
     }
 

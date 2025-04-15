@@ -86,5 +86,19 @@ namespace JobCompany.Business.Services.NotificationServices
                 .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsSeen, true));
         }
 
+        public async Task CreateNotificationAsync(CreateNotificationDto dto)
+        {
+            Notification notification = new Notification
+            {
+                InformationId = dto.InformationId,
+                CreatedDate = DateTime.Now,
+                InformationName = dto.InformationName,
+                IsSeen = false,
+                ReceiverId = dto.ReceiverId,
+                SenderId = dto.SenderId
+            };
+
+            await _context.Notifications.AddAsync(notification);
+        }
     }
 }

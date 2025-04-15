@@ -62,7 +62,6 @@ namespace JobCompany.Business
                 x.AddConsumer<GetCompanyDetailByIdConsumer>();
                 x.AddConsumer<GetAllVacanciesByCompanyIdConsumer>();
                 x.AddConsumer<CheckVacancyConsumer>();
-                x.AddConsumer<VacancyAcceptConsumer>();
                 x.AddConsumer<VacancyRejectConsumer>();
                 x.AddConsumer<GetCompaniesDataByUserIdsConsumer>();
 
