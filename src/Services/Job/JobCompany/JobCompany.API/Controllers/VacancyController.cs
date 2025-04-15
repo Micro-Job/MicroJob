@@ -22,7 +22,7 @@ namespace JobCompany.API.Controllers
         }
 
         [HttpPut("[action]")]
-        public async Task<IActionResult> UpdateVacancy(UpdateVacancyDto vacancyDto, ICollection<UpdateNumberDto>? numberDtos)
+        public async Task<IActionResult> UpdateVacancy([FromForm] UpdateVacancyDto vacancyDto, [FromForm] ICollection<UpdateNumberDto>? numberDtos)
         {
             await _vacancyService.UpdateVacancyAsync(vacancyDto, numberDtos);
             return Ok();
