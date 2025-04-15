@@ -350,7 +350,6 @@ namespace JobCompany.Business.Services.VacancyServices
                     Citizenship = v.Citizenship,
                     ExamId = v.ExamId,
                     CreatedDate = v.CreatedDate,
-                    IsVip = v.IsVip,
                     VacancyStatus = v.VacancyStatus,
                     CategoryId = v.CategoryId,
                     CategoryName = v.Category != null ? v.Category.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name) : null,
