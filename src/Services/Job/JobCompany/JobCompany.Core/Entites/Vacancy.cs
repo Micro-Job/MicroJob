@@ -32,7 +32,7 @@ namespace JobCompany.Core.Entites
         public FamilySituation Family { get; set; }
         public Citizenship Citizenship { get; set; }
         public VacancyStatus VacancyStatus { get; set; }
-        //public bool IsVip { get; set; }
+        public bool IsVip { get; set; }
 
         public Guid? CompanyId { get; set; }
         public Company? Company { get; set; }
@@ -52,6 +52,7 @@ namespace JobCompany.Core.Entites
         public ICollection<Application>? Applications { get; set; }
         public ICollection<VacancySkill> VacancySkills { get; set; }
         public ICollection<SavedVacancy>? SavedVacancies { get; set; }
+        public ICollection<VacancyMessage>? VacancyMessages { get; set; }
         public Guid? VacancyCommentId { get; set; }
         public VacancyComment? VacancyComment { get; set; }
     }
