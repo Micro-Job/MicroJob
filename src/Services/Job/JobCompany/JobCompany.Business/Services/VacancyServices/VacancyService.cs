@@ -440,21 +440,6 @@ namespace JobCompany.Business.Services.VacancyServices
                     }
                 }
 
-                // Id-si olmayan yeni nömrələri əlavə et
-                var newNumbers = numberDtos
-                    .Where(n => string.IsNullOrWhiteSpace(n.Id))
-                    .Select(n => new VacancyNumber
-                    {
-                        Id = Guid.NewGuid(),
-                        Number = n.PhoneNumber,
-                        VacancyId = existingVacancy.Id
-                    }).ToList();
-
-                if (newNumbers.Count != 0)
-                {
-                    await _context.VacancyNumbers.AddRangeAsync(newNumbers);
-                }
-
                 // Müqayisə edib silinəcək nömrələri tapırıq
                 var toRemove = existingNumbers
                     .Where(n => !incomingNumberDict.ContainsKey(n.Id))
@@ -463,6 +448,20 @@ namespace JobCompany.Business.Services.VacancyServices
                 if (toRemove.Count != 0)
                 {
                     _context.VacancyNumbers.RemoveRange(toRemove);
+                }
+
+                // Id-si olmayan yeni nömrələri əlavə et
+                var newNumbers = numberDtos
+                    .Where(n => string.IsNullOrWhiteSpace(n.Id))
+                    .Select(n => new VacancyNumber
+                    {
+                        Number = n.PhoneNumber,
+                        VacancyId = existingVacancy.Id
+                    }).ToList();
+
+                if (newNumbers.Count != 0)
+                {
+                    await _context.VacancyNumbers.AddRangeAsync(newNumbers);
                 }
             }
 
