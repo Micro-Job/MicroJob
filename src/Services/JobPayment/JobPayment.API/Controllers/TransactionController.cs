@@ -1,6 +1,5 @@
 ﻿using JobPayment.Business.Services.TransactionServices;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace JobPayment.API.Controllers
@@ -20,6 +19,12 @@ namespace JobPayment.API.Controllers
         public async Task<IActionResult> GetTransactionDetail(string transactionId)
         {
             return Ok(await _transactionService.GetTransactionDetailAsync(transactionId));
+        }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetAllTransactionsByUserId(string userId)
+        {
+            return Ok(await _transactionService.GetAllTransactionsByUserIdAsync(userId));
         }
     }
 }

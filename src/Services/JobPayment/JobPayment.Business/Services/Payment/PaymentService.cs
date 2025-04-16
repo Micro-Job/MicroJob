@@ -13,7 +13,7 @@ namespace JobPayment.Business.Services.Payment
     {
         public async Task Pay(PayDto dto)
         {
-            var myBalance = await _balanceService.GetOwnBalanceAsync();
+            var myBalance = await _balanceService.GetUserBalanceByIdAsync(dto.UserId);
             var price = await _priceService.GetPriceByInformationTypeAsync(dto.InformationType);
 
             if(price.Coin > myBalance.Coin)
@@ -28,10 +28,11 @@ namespace JobPayment.Business.Services.Payment
                 InformationId = dto.InformationId,
                 InformationType = dto.InformationType,
                 TranzactionType = TransactionType.OutCome,
-                UserId = dto.UserId 
+                TransactionStatus = TransactionStatus.Success,
+                UserId = dto.UserId
             });
 
-            myBalance.Coin -= price.Coin;
+            myBalance.Coin = myBalance.Coin - price.Coin;
 
             await _context.SaveChangesAsync();
         }

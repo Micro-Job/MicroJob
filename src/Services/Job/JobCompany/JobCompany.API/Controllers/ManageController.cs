@@ -33,10 +33,11 @@ namespace JobCompany.API.Controllers
             return Ok();
         }
 
+
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetAllMessages()
+        public async Task<IActionResult> GetAllMessages(int pageNumber, int pageSize)
         {
-            return Ok(await _service.GetAllMessagesAsync());
+            return Ok(await _service.GetAllMessagesAsync(pageNumber, pageSize));
         }
 
         [HttpGet("[action]/{id}")]

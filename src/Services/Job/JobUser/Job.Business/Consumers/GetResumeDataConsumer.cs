@@ -19,7 +19,13 @@ namespace Job.Business.Consumers
                     Position = r.Position != null ? r.Position.Name : null,
                     FirstName = r.FirstName,
                     LastName = r.LastName,
-                    ProfileImage = r.UserPhoto
+                    ProfileImage = r.UserPhoto,
+                    BirthDay = r.BirthDay,
+                    Email = r.ResumeEmail,
+                    IsDriver = r.IsDriver,
+                    IsMarried = r.IsMarried,
+                    MilitarySituation = r.MilitarySituation,
+                    PhoneNumber = r.PhoneNumbers.Select(p => p.PhoneNumber).ToList()
                 })
                 .ToListAsync();
 

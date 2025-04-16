@@ -47,14 +47,10 @@ namespace JobPayment.Business.Services.BalanceServices
             return myBalance;
         }
 
-        public async Task<BalanceDto> GetUserBalanceByIdAsync(Guid userId)
+        public async Task<Balance> GetUserBalanceByIdAsync(Guid userId)
         {
-            var userBalance = await _context.Balances.Select(x => new BalanceDto
-            {
-                UserId = x.UserId,
-                Coin = x.Coin,
-                BonusCoin = x.BonusCoin
-            }).FirstOrDefaultAsync(x=> x.UserId == userId) ?? throw new NotFoundException<Balance>("Balance mövcud deyil");
+            var userBalance = await _context.Balances.FirstOrDefaultAsync(x=> x.UserId == userId) 
+                                    ?? throw new NotFoundException<Balance>("Balance mövcud deyil");
 
             return userBalance;
         }
