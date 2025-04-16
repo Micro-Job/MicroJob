@@ -28,7 +28,8 @@ namespace JobPayment.Business.Services.Payment
                 InformationId = dto.InformationId,
                 InformationType = dto.InformationType,
                 TranzactionType = TransactionType.OutCome,
-                UserId = dto.UserId 
+                TransactionStatus = TransactionStatus.Success,
+                UserId = dto.UserId
             });
 
             myBalance.Coin = myBalance.Coin - price.Coin;
