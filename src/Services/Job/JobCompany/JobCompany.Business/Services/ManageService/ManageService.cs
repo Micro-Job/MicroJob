@@ -1,9 +1,7 @@
 ﻿using JobCompany.Business.Dtos.MessageDtos;
-using JobCompany.Business.Dtos.NotificationDtos;
 using JobCompany.Business.Dtos.VacancyDtos;
 using JobCompany.Business.Exceptions.Common;
 using JobCompany.Business.Extensions;
-using JobCompany.Business.Services.NotificationServices;
 using JobCompany.Business.Statistics;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
@@ -13,8 +11,6 @@ using SharedLibrary.Enums;
 using SharedLibrary.Events;
 using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;
-using SharedLibrary.Requests;
-using SharedLibrary.Responses;
 
 namespace JobCompany.Business.Services.ManageService;
 

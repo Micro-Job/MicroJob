@@ -33,6 +33,7 @@ namespace JobCompany.API.Controllers
             return Ok();
         }
 
+
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllMessages()
         {

@@ -14,5 +14,4 @@ public interface IManageService
     Task CreateMessageAsync(CreateMessageDto dto);
     Task UpdateMessageAsync(string id, UpdateMessageDto dto);
     Task DeleteMessageAsync(string id);
-
 }
