@@ -10,9 +10,9 @@ public interface IManageService
     Task ToggleBlockVacancyStatusAsync(VacancyStatusUpdateDto dto);
 
     Task<List<MessageWithTranslationsDto>> GetAllMessagesAsync();
-    Task<MessageDto> GetMessageByIdAsync(Guid id);
+    Task<MessageDto> GetMessageByIdAsync(string id);
     Task CreateMessageAsync(CreateMessageDto dto);
-    Task UpdateMessageAsync(Guid id, UpdateMessageDto dto);
-    Task DeleteMessageAsync(Guid id);
+    Task UpdateMessageAsync(string id, UpdateMessageDto dto);
+    Task DeleteMessageAsync(string id);
 
 }
