@@ -19,7 +19,7 @@ using System.Threading.Tasks;
 
 namespace JobPayment.Business.Services.TransactionServices
 {
-    public class TransactionService(PaymentDbContext _context , IDepositService _depositService , ICurrentUser _currentUser) : ITransactionService
+    public class TransactionService(PaymentDbContext _context, IDepositService _depositService, ICurrentUser _currentUser) : ITransactionService
     {
         public async Task CreateTransactionAsync(CreateTransactionDto dto)
         {
@@ -39,14 +39,14 @@ namespace JobPayment.Business.Services.TransactionServices
 
             await _context.Transactions.AddAsync(newTransaction);
 
-            if(dto.TranzactionType == TransactionType.InCome && dto.Amount != null)
+            if (dto.TranzactionType == TransactionType.InCome && dto.Amount != null)
             {
                 await _depositService.CreateDepositAsync(new CreateDepositDto
                 {
                     Amount = dto.Amount,
                     BalanceId = dto.BalanceId,
                     TransactionId = newTransaction.Id
-                }); 
+                });
             }
         }
 
@@ -54,14 +54,14 @@ namespace JobPayment.Business.Services.TransactionServices
         {
             var query = _context.Transactions
                 .Where(x => x.UserId == _currentUser.UserGuid)
-                .OrderByDescending(x=> x.CreatedDate)
+                .OrderByDescending(x => x.CreatedDate)
                 .AsNoTracking()
                 .AsQueryable();
 
-            if(startDate != null)
+            if (startDate != null)
             {
                 DateTime? Min = startDate.ToNullableDateTime();
-                if(Min != null)
+                if (Min != null)
                 {
                     query = query.Where(x => x.CreatedDate >= Min);
                 }
@@ -79,11 +79,11 @@ namespace JobPayment.Business.Services.TransactionServices
             if (transactionStatus != null)
                 query = query.Where(x => x.TransactionStatus == (TransactionStatus)transactionStatus);
 
-            if(transactionType != null)
+            if (transactionType != null)
                 query = query.Where(x => x.TranzactionType == (TransactionType)transactionType);
 
             if (informationType != null)
-                query = query.Where(x=> x.InformationType == (InformationType)informationType);
+                query = query.Where(x => x.InformationType == (InformationType)informationType);
 
             int count = await query.CountAsync();
 
@@ -96,7 +96,7 @@ namespace JobPayment.Business.Services.TransactionServices
                 InformationType = x.InformationType,
                 TransactionStatus = x.TransactionStatus,
                 TransactionType = x.TranzactionType
-                
+
             })
             .Skip(Math.Max(0, skip - 1) * take)
             .Take(take)
@@ -112,8 +112,8 @@ namespace JobPayment.Business.Services.TransactionServices
 
         public async Task<TransactionDetailDto> GetTransactionDetailAsync(string transactionId)
         {
-            var transaction = await _context.Transactions.Where(x=> x.Id == Guid.Parse(transactionId) && x.UserId == _currentUser.UserGuid)
-            .Select(x=> new TransactionDetailDto
+            var transaction = await _context.Transactions.Where(x => x.Id == Guid.Parse(transactionId) && x.UserId == _currentUser.UserGuid)
+            .Select(x => new TransactionDetailDto
             {
                 CompanyName = null,
                 Amount = x.Deposit.Amount,
@@ -126,6 +126,26 @@ namespace JobPayment.Business.Services.TransactionServices
             }).FirstOrDefaultAsync() ?? throw new NotFoundException<Transaction>("Əməliyyat mövcud deyil");
 
             return transaction;
+        }
+
+        public async Task<List<TransactionDetailDto>> GetAllTransactionsByUserIdAsync(string userId)
+        {
+            var userGuid = Guid.Parse(userId);
+
+            var transactions = await _context.Transactions.Where(x => x.UserId == userGuid)
+            .Select(x => new TransactionDetailDto
+            {
+                CompanyName = null,
+                Amount = x.Deposit.Amount,
+                Coin = x.Coin,
+                InformationId = x.InformationId,
+                InformationType = x.InformationType,
+                TransactionType = x.TranzactionType,
+                TransactionStatus = x.TransactionStatus,
+                TransactionDate = x.CreatedDate
+            }).ToListAsync();
+
+            return transactions;    
         }
     }
 }
