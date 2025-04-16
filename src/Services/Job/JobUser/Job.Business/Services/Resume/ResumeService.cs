@@ -280,9 +280,9 @@ namespace Job.Business.Services.Resume
         List<string>? skillIds,
         List<LanguageFilterDto>? languages)
         {
-            if (isPublic.HasValue)
+            if (isPublic != null)
             {
-                query = query.Where(x => x.IsPublic == isPublic.Value);
+                query = query.Where(x => x.IsPublic == isPublic);
             }
 
             if (!string.IsNullOrEmpty(fullname))

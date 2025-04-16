@@ -8,11 +8,6 @@ using JobPayment.Business.Services.TransactionServices;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using SharedLibrary.HelperServices.Current;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace JobPayment.Business
 {
@@ -40,6 +35,7 @@ namespace JobPayment.Business
                 x.AddConsumer<CreateBalanceConsumer>();
                 x.AddConsumer<CheckBalanceConsumer>();
                 x.AddConsumer<PayConsumer>();
+                x.AddConsumer<GetUserTransactionsConsumer>();
 
                 x.SetKebabCaseEndpointNameFormatter();
 
