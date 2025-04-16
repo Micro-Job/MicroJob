@@ -11,7 +11,7 @@ namespace AuthService.Business.Templates
     {
         public string ResetPassword(string token, string username)
         {
-            string ip = _configuration["ResetPasswordUrl"];
+            string ip = _configuration["ResetPasswordUrl"]!;
 
             return $@"
 <!DOCTYPE html>
@@ -59,9 +59,9 @@ namespace AuthService.Business.Templates
                                 <tr>
                                     <td style='padding:0 35px;'>
                                         <h1 style='color:#1e1e2d; font-weight:500; margin:0;font-size:32px; font-family: Montserrat;'>
-                                            ""HIRI"" birliyi vahid idarə etmə sistemi
+                                            ""HIRI""
                                         </h1>
-                                        <h4 style='font-family: Montserrat;'>İstifadəçi adı : <span style='color: #6fccff;'>{username}</span></h4>
+                                        <h4 style='font-family: Montserrat;'>İstifadəçinin tam adı : <span style='color: #6fccff;'>{username}</span></h4>
                                         <p style='color:#455056; font-size:15px;line-height:24px; margin:0; font-family: Montserrat;'>
                                             Şifrəni yenilə düyməsinə sıxmaqla özünüzə yeni şifrə təyin edin və unutmayın.
                                         </p>

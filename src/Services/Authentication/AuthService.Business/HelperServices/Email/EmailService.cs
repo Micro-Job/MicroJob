@@ -52,24 +52,26 @@ namespace AuthService.Business.HelperServices.Email
                 smtp.Send(message);
         }
 
-        public async Task SendResetPassword(string toEmail, string token)
+        public async Task SendResetPassword(User user, string token)
         {
-            var user = await _context.PasswordTokens
-                .Where(pt => pt.Token == token && pt.ExpireTime > DateTime.Now)
-                .Select(pt => new
-                {
-                    Email = pt.User.Email,
-                    UserName = pt.User.FirstName + pt.User.LastName
-                })
-                .SingleOrDefaultAsync();
+            //var user = await _context.PasswordTokens
+            //    .Where(pt => pt.Token == token && pt.ExpireTime > DateTime.Now)
+            //    .Select(pt => new
+            //    {
+            //        Email = pt.User.Email,
+            //        UserName = pt.User.FirstName + pt.User.LastName
+            //    })
+            //    .SingleOrDefaultAsync();
 
-            if (user == null || user.Email != toEmail) throw new NotFoundException<User>(MessageHelper.GetMessage("NOTFOUNDEXCEPTION_USER"));
+            //var user = await _context.Users.Firsr
+
+            //if (user == null || user.Email != u) throw new NotFoundException<User>(MessageHelper.GetMessage("NOTFOUNDEXCEPTION_USER"));
 
 
-            await SendEmailAsync(toEmail, new EmailMessage
+            await SendEmailAsync(user.Email, new EmailMessage
             {
                 Subject = "Şifrənizi yeniləyin...",
-                Content = _emailTemplate.ResetPassword(token, user.UserName)
+                Content = _emailTemplate.ResetPassword(token, $"{user.FirstName} {user.LastName}")
             });
 
         }
