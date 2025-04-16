@@ -93,12 +93,35 @@ namespace JobCompany.Business.Services.NotificationServices
                 InformationId = dto.InformationId,
                 CreatedDate = DateTime.Now,
                 InformationName = dto.InformationName,
+                NotificationType = dto.NotificationType,
                 IsSeen = false,
                 ReceiverId = dto.ReceiverId,
                 SenderId = dto.SenderId
             };
 
             await _context.Notifications.AddAsync(notification);
+        }
+
+        public async Task CreateBulkNotificationAsync(CreateBulkNotificationDto dto)
+        {
+            List<Notification> notifications = new List<Notification>();
+
+            foreach (var receiverId in dto.ReceiverIds)
+            {
+                notifications.Add(new Notification
+                {
+                    InformationId = dto.InformationId,
+                    CreatedDate = DateTime.Now,
+                    InformationName = dto.InformationName,
+                    NotificationType = dto.NotificationType,
+                    IsSeen = false,
+                    ReceiverId = receiverId,
+                    SenderId = dto.SenderId
+                });
+            }
+
+            await _context.Notifications.AddRangeAsync(notifications);
+            await _context.SaveChangesAsync();
         }
     }
 }

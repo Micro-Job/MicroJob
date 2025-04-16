@@ -20,58 +20,14 @@ using SharedLibrary.Responses;
 
 namespace JobCompany.Business.Services.ManageService;
 
-public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUser,INotificationService _notificationService, IPublishEndpoint _publishEndpoint , IRequestClient<CheckBalanceRequest> _balanceRequest) : IManageService
+public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUser, IPublishEndpoint _publishEndpoint) : IManageService
 {
     public async Task VacancyAcceptAsync(string vacancyId)
     {
-        var vacancyGuid = Guid.Parse(vacancyId);
-
-        var vacancy = await _context.Vacancies
-            .Include(v => v.Applications).FirstOrDefaultAsync(v => v.Id == vacancyGuid)
-            ?? throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
-
-        var appliedUserIds = vacancy.Applications
-             .Where(a => !a.IsDeleted)
-             .Select(a => a.UserId)
-             .ToList();
-
-        ///summary
-        /// Vakansiya accept olunanda sirkete bildiris getmesi
-        ///summary
-        await _notificationService.CreateNotificationAsync(new CreateNotificationDto
+        await _publishEndpoint.Publish(new VacancyAcceptEvent
         {
-            SenderId = null,
-            InformationId = vacancyGuid,
-            NotificationType = NotificationType.VacancyAccept,
-            InformationName = vacancy.Title,
-            ReceiverId = vacancy.Company.UserId
+            vacancyId = vacancyId
         });
-
-        var balanceResponse = await _balanceRequest.GetResponse<CheckBalanceResponse>(new CheckBalanceRequest
-        {
-            InformationType = InformationType.Vacancy,
-            UserId = vacancy.Company.UserId
-        });
-
-        if (balanceResponse.Message.HasEnoughBalance)
-            vacancy.VacancyStatus = VacancyStatus.Active;
-        else
-            vacancy.VacancyStatus = VacancyStatus.PendingActive;
-
-        await _context.SaveChangesAsync();
-
-        ///summary
-        /// Vakansiya update olunanda bu vakansiyaya muraciet edenlere bildiris getmesi
-        ///summary
-        //await _publishEndpoint.Publish(
-        //    new VacancyUpdatedEvent
-        //    {
-        //        InformationId = vacancyGuid,
-        //        SenderId = (Guid)_user.UserGuid,
-        //        UserIds = appliedUserIds,
-        //        InformationName = vacancy.Title,
-        //    }
-        //);
     }
 
     public async Task VacancyRejectAsync(VacancyStatusUpdateDto dto)

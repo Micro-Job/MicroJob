@@ -10,5 +10,6 @@ namespace JobCompany.Business.Services.NotificationServices
         Task MarkAllNotificationAsReadAsync();
 
         Task CreateNotificationAsync(CreateNotificationDto dto);
+        Task CreateBulkNotificationAsync(CreateBulkNotificationDto dto);
     }
 }

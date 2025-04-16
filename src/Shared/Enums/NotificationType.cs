@@ -34,5 +34,9 @@ public enum NotificationType : byte
     /// Vakansiyanin legv edilme bildirisi
     /// </summary>
     VacancyReject = 8,
+    /// <summary>
+    /// Vakansiya qebul edilib amma sirket balansinda yeterli coin yoxdur
+    /// </summary>
+    VacancyPendingActive = 9
 }
 
