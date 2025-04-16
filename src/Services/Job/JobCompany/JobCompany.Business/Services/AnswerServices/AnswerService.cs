@@ -41,6 +41,8 @@ namespace JobCompany.Business.Services.AnswerServices
 
                 var existingAnswersDict = existingAnswers.ToDictionary(a => a.Id);
 
+                questionDto.Answers ??= []; 
+
                 var dtoAnswerIds = questionDto.Answers
                     .Where(a => a.Id.HasValue)
                     .Select(a => a.Id.Value)
