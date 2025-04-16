@@ -8,5 +8,8 @@ namespace JobCompany.Business.Services.NotificationServices
         Task<DataListDto<NotificationDto>> GetUserNotificationsAsync(bool? IsSeen , int skip,int take);
         Task MarkNotificationAsReadAsync(string id);
         Task MarkAllNotificationAsReadAsync();
+
+        Task CreateNotificationAsync(CreateNotificationDto dto);
+        Task CreateBulkNotificationAsync(CreateBulkNotificationDto dto);
     }
 }

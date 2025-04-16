@@ -1,8 +1,9 @@
-﻿
-using JobCompany.Business.Dtos.MessageDtos;
+﻿using JobCompany.Business.Dtos.MessageDtos;
+using JobCompany.Business.Dtos.NotificationDtos;
 using JobCompany.Business.Dtos.VacancyDtos;
 using JobCompany.Business.Exceptions.Common;
 using JobCompany.Business.Extensions;
+using JobCompany.Business.Services.NotificationServices;
 using JobCompany.Business.Statistics;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
@@ -12,53 +13,19 @@ using SharedLibrary.Enums;
 using SharedLibrary.Events;
 using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;
+using SharedLibrary.Requests;
+using SharedLibrary.Responses;
 
 namespace JobCompany.Business.Services.ManageService;
 
-public class ManageService(JobCompanyDbContext _context, ICurrentUser _user, IPublishEndpoint _publishEndpoint) : IManageService
+public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUser, IPublishEndpoint _publishEndpoint) : IManageService
 {
     public async Task VacancyAcceptAsync(string vacancyId)
     {
-        var vacancyGuid = Guid.Parse(vacancyId);
-
-        var vacancy = await _context.Vacancies
-            .Include(v => v.Applications)
-            .Where(v => v.Id == vacancyGuid).FirstOrDefaultAsync()
-            ?? throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
-
-        var appliedUserIds = vacancy.Applications
-             .Where(a => !a.IsDeleted)
-             .Select(a => a.UserId)
-             .ToList();
-
-        vacancy.VacancyStatus = VacancyStatus.Active;
-        await _context.SaveChangesAsync();
-
-        ///summary
-        /// Vakansiya accept olunanda sirkete bildiris getmesi
-        ///summary
-        await _publishEndpoint.Publish(
-            new VacancyAcceptedEvent
-            {
-                InformationId = vacancyGuid,
-                SenderId = null,
-                ReceiverId = vacancy.Company.UserId,
-                InformationName = vacancy.Title
-            }
-        );
-
-        ///summary
-        /// Vakansiya update olunanda bu vakansiyaya muraciet edenlere bildiris getmesi
-        ///summary
-        //await _publishEndpoint.Publish(
-        //    new VacancyUpdatedEvent
-        //    {
-        //        InformationId = vacancyGuid,
-        //        SenderId = (Guid)_user.UserGuid,
-        //        UserIds = appliedUserIds,
-        //        InformationName = vacancy.Title,
-        //    }
-        //);
+        await _publishEndpoint.Publish(new VacancyAcceptEvent
+        {
+            vacancyId = vacancyId
+        });
     }
 
     public async Task VacancyRejectAsync(VacancyStatusUpdateDto dto)
@@ -95,7 +62,7 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _user, IPu
             new VacancyRejectedEvent
             {
                 InformationId = vacancyGuid,
-                SenderId = _user.UserGuid,
+                SenderId = _currentUser.UserGuid,
                 ReceiverId = (Guid)vacancy.CompanyId,
                 InformationName = vacancy.Title
             }
@@ -108,7 +75,7 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _user, IPu
             new VacancyDeletedEvent
             {
                 InformationId = vacancyGuid,
-                SenderId = (Guid)_user.UserGuid,
+                SenderId = (Guid)_currentUser.UserGuid,
                 UserIds = appliedUserIds,
                 InformationName = vacancy.Title,
             }
@@ -142,7 +109,6 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _user, IPu
     }
 
 
-
     public async Task<List<MessageWithTranslationsDto>> GetAllMessagesAsync()
     {
         var messages = await _context.Messages
@@ -163,18 +129,19 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _user, IPu
         return messageDtos;
     }
 
-    public async Task<MessageDto> GetMessageByIdAsync(Guid id)
+    public async Task<MessageDto> GetMessageByIdAsync(string id)
     {
+        var messageGuid = Guid.Parse(id);
         var message = await _context.Messages
             .Include(m => m.Translations)
-            .FirstOrDefaultAsync(m => m.Id == id)
+            .FirstOrDefaultAsync(m => m.Id == messageGuid)
             ?? throw new NotFoundException<Message>(MessageHelper.GetMessage("NOT_FOUND"));
 
         return new MessageDto
         {
             Id = message.Id,
             CreatedDate = message.CreatedDate,
-            Content = message.GetTranslation(_user.LanguageCode, GetTranslationPropertyName.Content)
+            Content = message.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Content)
         };
     }
 
@@ -190,15 +157,16 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _user, IPu
             }).ToList()
         };
 
-        _context.Messages.Add(message);
+        await _context.Messages.AddAsync(message);
         await _context.SaveChangesAsync();
     }
 
-    public async Task UpdateMessageAsync(Guid id, UpdateMessageDto dto)
+    public async Task UpdateMessageAsync(string id, UpdateMessageDto dto)
     {
+        var messageGuid = Guid.Parse(id);
         var message = await _context.Messages
             .Include(m => m.Translations)
-            .FirstOrDefaultAsync(m => m.Id == id)
+            .FirstOrDefaultAsync(m => m.Id == messageGuid)
             ?? throw new NotFoundException<Message>(MessageHelper.GetMessage("NOT_FOUND"));
 
         foreach (var dtoTranslation in dto.Translations)
@@ -214,7 +182,7 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _user, IPu
             {
                 message.Translations.Add(new MessageTranslation
                 {
-                    MessageId = id,
+                    MessageId = messageGuid,
                     Language = dtoTranslation.Language,
                     Content = dtoTranslation.Content
                 });
@@ -224,11 +192,12 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _user, IPu
         await _context.SaveChangesAsync();
     }
 
-    public async Task DeleteMessageAsync(Guid id)
+    public async Task DeleteMessageAsync(string id)
     {
+        var messageGuid = Guid.Parse(id);
         var message = await _context.Messages
             .Include(m => m.Translations)
-            .FirstOrDefaultAsync(m => m.Id == id)
+            .FirstOrDefaultAsync(m => m.Id == messageGuid)
             ?? throw new NotFoundException<Message>(MessageHelper.GetMessage("NOT_FOUND"));
 
         _context.Messages.Remove(message);
