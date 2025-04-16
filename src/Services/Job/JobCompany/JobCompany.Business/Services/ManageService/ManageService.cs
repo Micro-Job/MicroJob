@@ -1,4 +1,5 @@
-﻿using JobCompany.Business.Dtos.MessageDtos;
+﻿using JobCompany.Business.Dtos.Common;
+using JobCompany.Business.Dtos.MessageDtos;
 using JobCompany.Business.Dtos.VacancyDtos;
 using JobCompany.Business.Exceptions.Common;
 using JobCompany.Business.Extensions;
@@ -105,24 +106,32 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
     }
 
 
-    public async Task<List<MessageWithTranslationsDto>> GetAllMessagesAsync()
+    public async Task<DataListDto<MessageWithTranslationsDto>> GetAllMessagesAsync(int pageNumber = 1, int pageSize = 10)
     {
-        var messages = await _context.Messages
-            .Include(m => m.Translations)
+        var query = _context.Messages.AsQueryable();
+
+        var totalCount = await query.CountAsync();
+
+        var messageDtos = await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .Select(m => new MessageWithTranslationsDto
+            {
+                Id = m.Id,
+                CreatedDate = m.CreatedDate,
+                Translations = m.Translations.Select(t => new MessageTranslationDto
+                {
+                    Language = t.Language,
+                    Content = t.Content
+                }).ToList()
+            })
             .ToListAsync();
 
-        var messageDtos = messages.Select(m => new MessageWithTranslationsDto
+        return new DataListDto<MessageWithTranslationsDto>
         {
-            Id = m.Id,
-            CreatedDate = m.CreatedDate,
-            Translations = m.Translations.Select(t => new MessageTranslationDto
-            {
-                Language = t.Language,
-                Content = t.Content
-            }).ToList()
-        }).ToList();
-
-        return messageDtos;
+            Datas = messageDtos,
+            TotalCount = totalCount
+        };
     }
 
     public async Task<MessageDto> GetMessageByIdAsync(string id)

@@ -1,4 +1,5 @@
-﻿using JobCompany.Business.Dtos.MessageDtos;
+﻿using JobCompany.Business.Dtos.Common;
+using JobCompany.Business.Dtos.MessageDtos;
 using JobCompany.Business.Dtos.VacancyDtos;
 
 namespace JobCompany.Business.Services.ManageService;
@@ -9,7 +10,7 @@ public interface IManageService
     Task VacancyRejectAsync(VacancyStatusUpdateDto dto);
     Task ToggleBlockVacancyStatusAsync(VacancyStatusUpdateDto dto);
 
-    Task<List<MessageWithTranslationsDto>> GetAllMessagesAsync();
+    Task<DataListDto<MessageWithTranslationsDto>> GetAllMessagesAsync(int pageNumber = 1, int pageSize = 10);
     Task<MessageDto> GetMessageByIdAsync(string id);
     Task CreateMessageAsync(CreateMessageDto dto);
     Task UpdateMessageAsync(string id, UpdateMessageDto dto);
