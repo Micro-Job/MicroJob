@@ -33,6 +33,7 @@ namespace JobCompany.API.Controllers
             return Ok();
         }
 
+
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllMessages()
         {
@@ -64,6 +65,21 @@ namespace JobCompany.API.Controllers
         {
             await _service.DeleteMessageAsync(id);
             return Ok();
+        }
+
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetAllUsers(UserRole userRole, string? searchTerm, int pageIndex = 1, int pageSize = 10)
+        {
+            var result = await _service.GetAllUsersAsync(userRole, searchTerm, pageIndex, pageSize);
+            return Ok(result);
+        }
+
+        [HttpGet("[action]/{tab}/{userId}")]
+        public async Task<IActionResult> GetUserDetails(int tab, string userId)
+        {
+            var result = await _service.GetUserDetailsAsync(tab, userId);
+            return Ok(result);
         }
     }
 }

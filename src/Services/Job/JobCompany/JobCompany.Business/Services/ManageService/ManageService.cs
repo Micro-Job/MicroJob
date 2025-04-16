@@ -1,5 +1,7 @@
-﻿using JobCompany.Business.Dtos.MessageDtos;
+﻿using JobCompany.Business.Dtos.Common;
+using JobCompany.Business.Dtos.MessageDtos;
 using JobCompany.Business.Dtos.NotificationDtos;
+using JobCompany.Business.Dtos.UserDtos;
 using JobCompany.Business.Dtos.VacancyDtos;
 using JobCompany.Business.Exceptions.Common;
 using JobCompany.Business.Extensions;
@@ -9,6 +11,8 @@ using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using Shared.Requests;
+using Shared.Responses;
 using SharedLibrary.Enums;
 using SharedLibrary.Events;
 using SharedLibrary.Helpers;
@@ -18,7 +22,9 @@ using SharedLibrary.Responses;
 
 namespace JobCompany.Business.Services.ManageService;
 
-public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUser,INotificationService _notificationService, IPublishEndpoint _publishEndpoint , IRequestClient<CheckBalanceRequest> _balanceRequest) : IManageService
+public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUser, INotificationService _notificationService, IPublishEndpoint _publishEndpoint,
+    IRequestClient<CheckBalanceRequest> _balanceRequest, IRequestClient<GetUsersDataForAdminRequest> _allUsersDataRequest, IRequestClient<GetResumeDataRequest> _resumeDataRequest,
+    IRequestClient<GetResumeDetailRequest> _resumeDetail, IRequestClient<GetUserTransactionsRequest> _userTransactionsRequest) : IManageService
 {
     public async Task VacancyAcceptAsync(string vacancyId)
     {
@@ -247,4 +253,77 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
         _context.Messages.Remove(message);
         await _context.SaveChangesAsync();
     }
+
+
+    public async Task<DataListDto<GetUsersDataForAdminResponse>> GetAllUsersAsync(UserRole userRole, string? searchTerm, int pageIndex = 1, int pageSize = 10)
+    {
+        var response = await _allUsersDataRequest.GetResponse<DataListDto<GetUsersDataForAdminResponse>>(new GetUsersDataForAdminRequest
+        {
+            UserRole = userRole,
+            SearchTerm = searchTerm,
+            PageIndex = pageIndex,
+            PageSize = pageSize
+        });
+
+        return response.Message;
+    }
+
+    /// <summary>
+    /// User detallarını tab-a görə gətirir
+    /// Tab 1: Şəxsi məlumatlar
+    /// Tab 2: CV forması
+    /// Tab 3: Tranzaksiya
+    /// </summary>
+    public async Task<UserDetailsDto?> GetUserDetailsAsync(int tab, string userId)
+    {
+        var userGuid = Guid.Parse(userId);
+
+        return tab switch
+        {
+            1 => await GetPersonalInfoAsync(userGuid),
+            2 => await GetResumeDetailsAsync(userGuid),
+            3 => await GetUserTransactionsAsync(userGuid),
+            _ => default
+        };
+    }
+
+    private async Task<UserDetailsDto> GetPersonalInfoAsync(Guid userGuid)
+    {
+        var userData = await _resumeDataRequest.GetResponse<GetResumesDataResponse>(new GetResumeDataRequest
+        {
+            UserIds = [userGuid]
+        });
+
+        return new UserDetailsDto
+        {
+            PersonalInformation = userData.Message.Users.FirstOrDefault()
+        };
+    }
+
+    private async Task<UserDetailsDto> GetResumeDetailsAsync(Guid userGuid)
+    {
+        var resumeDetail = await _resumeDetail.GetResponse<GetResumeDetailResponse>(new GetResumeDetailRequest
+        {
+            UserId = userGuid
+        });
+
+        return new UserDetailsDto
+        {
+            ResumeDetails = resumeDetail.Message
+        };
+    }
+
+    private async Task<UserDetailsDto> GetUserTransactionsAsync(Guid userGuid)
+    {
+        var transactions = await _userTransactionsRequest.GetResponse<DataListDto<GetUserTransactionsResponse>>(new GetUserTransactionsRequest
+        {
+            UserId = userGuid
+        });
+
+        return new UserDetailsDto
+        {
+            UserTransactions = transactions.Message
+        };
+    }
+
 }
