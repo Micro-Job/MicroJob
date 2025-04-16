@@ -1,7 +1,6 @@
 ﻿using JobCompany.Business.Dtos.MessageDtos;
 using JobCompany.Business.Dtos.VacancyDtos;
 using JobCompany.Business.Services.ManageService;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SharedLibrary.Attributes;
 using SharedLibrary.Enums;
@@ -41,7 +40,7 @@ namespace JobCompany.API.Controllers
         }
 
         [HttpGet("[action]/{id}")]
-        public async Task<IActionResult> GetMessageById(Guid id)
+        public async Task<IActionResult> GetMessageById(string id)
         {
             return Ok(await _service.GetMessageByIdAsync(id));
         }
@@ -54,14 +53,14 @@ namespace JobCompany.API.Controllers
         }
 
         [HttpPut("[action]/{id}")]
-        public async Task<IActionResult> UpdateMessage(Guid id, UpdateMessageDto dto)
+        public async Task<IActionResult> UpdateMessage(string id, UpdateMessageDto dto)
         {
             await _service.UpdateMessageAsync(id, dto);
             return Ok();
         }
 
         [HttpDelete("[action]/{id}")]
-        public async Task<IActionResult> DeleteMessage(Guid id)
+        public async Task<IActionResult> DeleteMessage(string id)
         {
             await _service.DeleteMessageAsync(id);
             return Ok();
