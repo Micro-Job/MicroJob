@@ -493,6 +493,14 @@ namespace Job.Business.Services.Resume
             if (await _context.CompanyResumeAccesses.AnyAsync(x => x.ResumeId == resumeGuid && x.CompanyUserId == _currentUser.UserGuid))
                 throw new IsAlreadyExistException<CompanyResumeAccess>(MessageHelper.GetMessage("RESUME_ACCESS_ALREADY_EXIST"));
 
+            //Odenisin olmasi ucun
+            await _publishEndpoint.Publish(new PayEvent
+            {
+                InformationType = InformationType.AnonymResume,
+                InformationId = resumeGuid,
+                UserId = (Guid)_currentUser.UserGuid
+            });
+
             await _context.CompanyResumeAccesses.AddAsync(new CompanyResumeAccess
             {
                 AccessDate = DateTime.Now,
@@ -501,14 +509,6 @@ namespace Job.Business.Services.Resume
             });
 
             await _context.SaveChangesAsync();
-
-            //Odenisin olmasi ucun
-            await _publishEndpoint.Publish(new PayEvent
-            {
-                InformationType = InformationType.AnonymResume,
-                InformationId = resumeGuid,
-                UserId = (Guid)_currentUser.UserGuid
-            });
         }
 
         #region Private Methods
