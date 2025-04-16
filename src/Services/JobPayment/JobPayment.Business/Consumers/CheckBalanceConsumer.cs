@@ -12,7 +12,7 @@ namespace JobPayment.Business.Consumers
     {
         public async Task Consume(ConsumeContext<CheckBalanceRequest> context)
         {
-            BalanceDto userBalance = await _balanceService.GetUserBalanceByIdAsync(context.Message.UserId);
+            Balance userBalance = await _balanceService.GetUserBalanceByIdAsync(context.Message.UserId);
 
             Service service = await _priceService.GetPriceByInformationTypeAsync(context.Message.InformationType);
 
