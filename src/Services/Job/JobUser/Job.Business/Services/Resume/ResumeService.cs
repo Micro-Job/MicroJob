@@ -120,6 +120,8 @@ namespace Job.Business.Services.Resume
                                             PositionId = resume.PositionId,
                                             ParentPositionId = resume.Position != null ? resume.Position.ParentPositionId : null,
                                             UserPhoto = resume.UserPhoto != null ? $"{_currentUser.BaseUrl}/{resume.UserPhoto}" : null,
+                                            IsPublic = resume.IsPublic,
+                                            IsAnonym = resume.IsAnonym,
                                             Skills = resume.ResumeSkills.Select(s => new SkillGetByIdDto
                                             {
                                                 Id = s.SkillId,
@@ -167,8 +169,8 @@ namespace Job.Business.Services.Resume
 
             if (resume is null) return new ResumeDetailItemDto();
 
-            resume.FirstName = userData.FirstName;
-            resume.LastName = userData.LastName;
+            //resume.FirstName = userData.FirstName;
+            //resume.LastName = userData.LastName;
 
             return resume;
         }
@@ -534,7 +536,8 @@ namespace Job.Business.Services.Resume
                 Adress = dto.Adress,
                 BirthDay = dto.BirthDay,
                 UserPhoto = filePath,
-                ResumeEmail = email
+                ResumeEmail = email,
+                IsAnonym = dto.IsAnonym
             };
         }
 
@@ -597,6 +600,7 @@ namespace Job.Business.Services.Resume
             resume.Gender = updateDto.Gender;
             resume.Adress = updateDto.Adress;
             resume.BirthDay = updateDto.BirthDay;
+            resume.IsAnonym = updateDto.IsAnonym;
         }
 
         private async void UpdateUserPhotoAsync(Core.Entities.Resume resume, IFormFile userPhoto)
