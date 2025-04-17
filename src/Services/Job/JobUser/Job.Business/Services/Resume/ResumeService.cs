@@ -31,6 +31,8 @@ using SharedLibrary.Events;
 using SharedLibrary.ExternalServices.FileService;
 using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;
+using SharedLibrary.Requests;
+using SharedLibrary.Responses;
 using SharedLibrary.Statics;
 
 namespace Job.Business.Services.Resume
@@ -45,7 +47,8 @@ namespace Job.Business.Services.Resume
             IUserInformationService _userInformationService,
             ICurrentUser _currentUser,
             IPositionService _positionService,
-            IPublishEndpoint _publishEndpoint) : IResumeService
+            IPublishEndpoint _publishEndpoint,
+            IRequestClient<CheckBalanceRequest> _balanceRequest) : IResumeService
     {
         public async Task CreateResumeAsync(ResumeCreateDto resumeCreateDto)
         {
@@ -207,17 +210,7 @@ namespace Job.Business.Services.Resume
         }
 
         //Sirket hissəsində resumelerin metodlari
-        public async Task<DataListDto<ResumeListDto>> GetAllResumesAsync(
-            string? fullname,
-            bool? isPublic,
-            ProfessionDegree? professionDegree,
-            Citizenship? citizenship,
-            bool? isExperience,
-            JobStatus? jobStatus,
-            List<string>? skillIds,
-            List<LanguageFilterDto>? languages,
-            int skip,
-            int take)
+        public async Task<DataListDto<ResumeListDto>> GetAllResumesAsync(string? fullname,bool? isPublic,ProfessionDegree? professionDegree,Citizenship? citizenship,bool? isExperience,JobStatus? jobStatus,List<string>? skillIds,List<LanguageFilterDto>? languages,int skip,int take)
         {
             var query = _context.Resumes
                 .Include(r => r.ResumeSkills)
@@ -232,10 +225,8 @@ namespace Job.Business.Services.Resume
             var resumes = await query.Select(x => new ResumeListDto
             {
                 Id = x.Id,
-                FullName = x.IsPublic ? $"{x.FirstName} {x.LastName}" : null,
-                ProfileImage = (x.IsPublic || x.CompanyResumeAccesses.Any(cra => cra.CompanyUserId == _currentUser.UserGuid)) && x.UserPhoto != null
-                ? $"{_currentUser.BaseUrl}/{x.UserPhoto}"
-                : null,
+                FullName = x.IsPublic ? $"{x.FirstName} {x.LastName}" : x.CompanyResumeAccesses.Any(cra=> cra.CompanyUserId == _currentUser.UserGuid && cra.ResumeId == x.Id) ? $"{x.FirstName} {x.LastName}" : null,
+                ProfileImage = x.UserPhoto != null ? x.IsPublic ? $"{_currentUser.BaseUrl}/{x.UserPhoto}" : x.CompanyResumeAccesses.Any(cra => cra.CompanyUserId == _currentUser.UserGuid && cra.ResumeId == x.Id) ? $"{_currentUser.BaseUrl}/{x.UserPhoto}" : null : null,
                 IsSaved = x.SavedResumes.Any(sr => sr.ResumeId == x.Id && sr.CompanyUserId == _currentUser.UserGuid),
                 IsPublic = x.IsPublic,
                 JobStatus = x.User.JobStatus,
@@ -253,7 +244,7 @@ namespace Job.Business.Services.Resume
                 .Select(s => s.Skill.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name))
                 .ToList(),
                 Position = x.Position != null ? x.Position.Name : null,
-                HasAccess = x.IsPublic || x.CompanyResumeAccesses != null && x.CompanyResumeAccesses.Any(cra => cra.CompanyUserId == _currentUser.UserGuid)
+                HasAccess = x.IsPublic ? true : x.CompanyResumeAccesses.Any(cra => cra.CompanyUserId == _currentUser.UserGuid && cra.ResumeId == x.Id) 
             })
             .Skip(Math.Max(0, (skip - 1) * take))
             .Take(take)
@@ -268,17 +259,7 @@ namespace Job.Business.Services.Resume
             };
         }
 
-
-
-        private IQueryable<Core.Entities.Resume> ApplyFilters(
-        IQueryable<Core.Entities.Resume> query,
-        string? fullname,
-        bool? isPublic,
-        ProfessionDegree? professionDegree,
-        Citizenship? citizenship,
-        bool? isExperience,
-        List<string>? skillIds,
-        List<LanguageFilterDto>? languages)
+        private IQueryable<Core.Entities.Resume> ApplyFilters(IQueryable<Core.Entities.Resume> query,string? fullname,bool? isPublic,ProfessionDegree? professionDegree,Citizenship? citizenship,bool? isExperience,List<string>? skillIds,List<LanguageFilterDto>? languages)
         {
             if (isPublic != null)
             {
@@ -325,7 +306,6 @@ namespace Job.Business.Services.Resume
 
             return query;
         }
-
 
         public async Task<DataListDto<ResumeListDto>> GetSavedResumesAsync(string? fullName, int skip, int take)
         {
@@ -478,6 +458,9 @@ namespace Job.Business.Services.Resume
         public async Task TakeResumeAccessAsync(string resumeId)
         {
             var resumeGuid = Guid.Parse(resumeId);
+            
+            if (await _context.CompanyResumeAccesses.AnyAsync(x => x.ResumeId == resumeGuid && x.CompanyUserId == _currentUser.UserGuid))
+                throw new IsAlreadyExistException<CompanyResumeAccess>(MessageHelper.GetMessage("RESUME_ACCESS_ALREADY_EXIST"));
 
             var resume = await _context.Resumes.Where(x => x.Id == resumeGuid)
                 .Select(x => new
@@ -490,16 +473,24 @@ namespace Job.Business.Services.Resume
 
             if (resume.IsPublic) throw new ResumeIsPublicException(MessageHelper.GetMessage("RESUME_IS_PUBLIC"));
 
-            if (await _context.CompanyResumeAccesses.AnyAsync(x => x.ResumeId == resumeGuid && x.CompanyUserId == _currentUser.UserGuid))
-                throw new IsAlreadyExistException<CompanyResumeAccess>(MessageHelper.GetMessage("RESUME_ACCESS_ALREADY_EXIST"));
-
-            //Odenisin olmasi ucun
-            await _publishEndpoint.Publish(new PayEvent
+            //TODO : bu hisse olmaya da biler.Bir basa exception qaytararaq
+            var checkBalanceResponse = await _balanceRequest.GetResponse<CheckBalanceResponse>(new CheckBalanceRequest
             {
                 InformationType = InformationType.AnonymResume,
-                InformationId = resumeGuid,
                 UserId = (Guid)_currentUser.UserGuid
             });
+            if (checkBalanceResponse.Message.HasEnoughBalance)
+            {
+                //Odenisin olmasi ucun
+                await _publishEndpoint.Publish(new PayEvent
+                {
+                    InformationType = InformationType.AnonymResume,
+                    InformationId = resumeGuid,
+                    UserId = (Guid)_currentUser.UserGuid
+                });
+            }
+            //TODO : Burada exception qaytarmaq prinsip olaraq dogru deyil
+            else throw new NotFoundException<Core.Entities.Resume>("Yeterli balans yoxdur");
 
             await _context.CompanyResumeAccesses.AddAsync(new CompanyResumeAccess
             {

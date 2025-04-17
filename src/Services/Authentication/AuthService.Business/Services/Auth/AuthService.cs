@@ -223,11 +223,11 @@ namespace AuthService.Business.Services.Auth
                 UserId = user.Id,
                 ExpireTime = DateTime.Now.AddHours(1),
             };
+            await _emailService.SendResetPassword(user, token);
 
             await _context.PasswordTokens.AddAsync(passwordToken);
             await _context.SaveChangesAsync();
 
-            await _emailService.SendResetPassword(email, token);
         }
 
         /// <summary>
