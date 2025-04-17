@@ -75,8 +75,9 @@ namespace AuthService.Business.Services.Auth
                 throw new PolicyException();
 
             // email veya istifadeci adı tekrarlanmasını yoxla
-            if (await _context.Users.AnyAsync(x => x.Email == dto.Email || x.MainPhoneNumber == dto.MainPhoneNumber))
-                throw new UserExistException();
+            dto.MainPhoneNumber = dto.MainPhoneNumber.Trim();
+            dto.Email = dto.Email.Trim();
+            await CheckUserExistAsync(dto.Email, dto.MainPhoneNumber);
 
             if (dto.Password != dto.ConfirmPassword)
                 throw new WrongPasswordException();
