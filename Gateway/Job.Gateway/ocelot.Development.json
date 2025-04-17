@@ -10,7 +10,8 @@
         }
       ],
       "UpstreamPathTemplate": "/auth/{everything}",
-      "UpstreamHttpMethod": [ "POST", "GET", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": [ "POST", "GET", "PUT", "DELETE" ],
+      "SwaggerKey": "auth"
     },
     {
       "DownstreamPathTemplate": "/api/{everything}",
@@ -22,7 +23,8 @@
         }
       ],
       "UpstreamPathTemplate": "/job/{everything}",
-      "UpstreamHttpMethod": [ "POST", "GET", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": [ "POST", "GET", "PUT", "DELETE" ],
+      "SwaggerKey": "job"
     },
     {
       "DownstreamPathTemplate": "/api/{everything}",
@@ -34,7 +36,8 @@
         }
       ],
       "UpstreamPathTemplate": "/jobcompany/{everything}",
-      "UpstreamHttpMethod": [ "POST", "GET", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": [ "POST", "GET", "PUT", "DELETE" ],
+      "SwaggerKey": "jobcompany"
     },
     {
       "DownstreamPathTemplate": "/api/{everything}",
@@ -46,7 +49,30 @@
         }
       ],
       "UpstreamPathTemplate": "/jobpayment/{everything}",
-      "UpstreamHttpMethod": [ "POST", "GET", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": [ "POST", "GET", "PUT", "DELETE" ],
+      "SwaggerKey": "jobpayment"
+    }
+  ],
+  "SwaggerEndPoints": [
+    {
+      "Key": "auth",
+      "Version": "v1",
+      "Url": "http://localhost:5001/swagger/v1/swagger.json"
+    },
+    {
+      "Key": "job",
+      "Version": "v1",
+      "Url": "http://localhost:5002/swagger/v1/swagger.json"
+    },
+    {
+      "Key": "jobcompany",
+      "Version": "v1",
+      "Url": "http://localhost:5082/swagger/v1/swagger.json"
+    },
+    {
+      "Key": "jobpayment",
+      "Version": "v1",
+      "Url": "http://localhost:5003/swagger/v1/swagger.json"
     }
   ],
   "GlobalConfiguration": {

@@ -18,40 +18,8 @@ namespace JobCompany.API
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen(opt =>
-            {
-                opt.OperationFilter<AddLanguageHeaderParameter>();
-                opt.SwaggerDoc("v1", new OpenApiInfo { Title = "MyAPI", Version = "v1" });
-                opt.AddSecurityDefinition(
-                    "Bearer",
-                    new OpenApiSecurityScheme
-                    {
-                        In = ParameterLocation.Header,
-                        Description = "Please enter token",
-                        Name = "Authorization",
-                        Type = SecuritySchemeType.Http,
-                        BearerFormat = "JWT",
-                        Scheme = "bearer",
-                    }
-                );
+            builder.Services.AddSwagger("JobCompany API");
 
-                opt.AddSecurityRequirement(
-                    new OpenApiSecurityRequirement
-                    {
-                        {
-                            new OpenApiSecurityScheme
-                            {
-                                Reference = new OpenApiReference
-                                {
-                                    Type = ReferenceType.SecurityScheme,
-                                    Id = "Bearer",
-                                },
-                            },
-                            new string[] { }
-                        },
-                    }
-                );
-            });
             builder.Services.AddDbContext<JobCompanyDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("MSSQL"))
             );
@@ -105,6 +73,7 @@ namespace JobCompany.API
                 app.UseSwaggerUI(c =>
                 {
                     c.ConfigObject.AdditionalItems.Add("persistAuthorization", "true");
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Job Company API v1");
                 });
             }
 

@@ -25,40 +25,7 @@ namespace Job.API
 
             // Add Swagger
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen(c =>
-            {
-                c.OperationFilter<AddLanguageHeaderParameter>();
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "MyAPI", Version = "v1" });
-                c.AddSecurityDefinition(
-                    "Bearer",
-                    new OpenApiSecurityScheme
-                    {
-                        In = ParameterLocation.Header,
-                        Description = "Please enter token",
-                        Name = "Authorization",
-                        Type = SecuritySchemeType.Http,
-                        BearerFormat = "JWT",
-                        Scheme = "bearer",
-                    }
-                );
-
-                c.AddSecurityRequirement(
-                    new OpenApiSecurityRequirement
-                    {
-                        {
-                            new OpenApiSecurityScheme
-                            {
-                                Reference = new OpenApiReference
-                                {
-                                    Type = ReferenceType.SecurityScheme,
-                                    Id = "Bearer",
-                                },
-                            },
-                            new string[] { }
-                        },
-                    }
-                );
-            });
+            builder.Services.AddSwagger("JobUser API");
 
             builder.Services.AddAuth(
                 configuration["Jwt:Issuer"]!,
@@ -122,6 +89,7 @@ namespace Job.API
                 app.UseSwaggerUI(c =>
                 {
                     c.ConfigObject.AdditionalItems.Add("persistAuthorization", "true");
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Job API v1");
                 });
             }
 

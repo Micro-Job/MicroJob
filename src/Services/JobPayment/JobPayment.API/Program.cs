@@ -16,7 +16,7 @@ namespace JobPayment.API
 
             builder.Services.AddControllers();
 
-            builder.Services.AddSwagger();
+            builder.Services.AddSwagger("JobPayment API");
 
             builder.Services.AddAuth(
                configuration["Jwt:Issuer"]!,
@@ -47,6 +47,7 @@ namespace JobPayment.API
                 app.UseSwaggerUI(c =>
                 {
                     c.ConfigObject.AdditionalItems.Add("persistAuthorization", "true");
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Job Payment API v1");
                 });
             }
             app.UseHttpsRedirection();

@@ -11,12 +11,12 @@ namespace SharedLibrary.ServiceRegistration
 {
     public static class AddSwaggerService
     {
-        public static void AddSwagger(this IServiceCollection services)
+        public static void AddSwagger(this IServiceCollection services , string title)
         {
             services.AddSwaggerGen(opt =>
             {
                 opt.OperationFilter<AddLanguageHeaderParameter>();
-                opt.SwaggerDoc("v1", new OpenApiInfo { Title = "MyAPI", Version = "v1" });
+                opt.SwaggerDoc("v1", new OpenApiInfo { Title = title , Version = "v1" });
                 opt.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
                     In = ParameterLocation.Header,
