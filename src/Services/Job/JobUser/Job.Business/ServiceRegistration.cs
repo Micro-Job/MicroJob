@@ -9,6 +9,7 @@ using Job.Business.Services.Position;
 using Job.Business.Services.Resume;
 using Job.Business.Services.Skill;
 using Job.Business.Services.User;
+using Job.Business.Services.UserManagement;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using SharedLibrary.ExternalServices.FileService;
@@ -32,6 +33,7 @@ namespace Job.Business
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<ICurrentUser, CurrentUser>();
             services.AddScoped<IPositionService, PositionService>();
+            services.AddScoped<IUserManagementService, UserManagementService>();
         }
 
         public static IServiceCollection AddMassTransit(this IServiceCollection services, string username, string password, string hostname, string port)
