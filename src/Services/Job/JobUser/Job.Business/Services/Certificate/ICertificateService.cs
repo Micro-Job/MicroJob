@@ -10,7 +10,7 @@ namespace Job.Business.Services.Certificate
         );
         Task UpdateCertificateAsync(CertificateUpdateDto dto);
         Task<ICollection<Core.Entities.Certificate>> UpdateBulkCertificateAsync(
-            ICollection<CertificateUpdateDto> dtos
+            ICollection<CertificateUpdateDto> dtos, ICollection<Core.Entities.Certificate> existingCertificates
         );
     }
 }

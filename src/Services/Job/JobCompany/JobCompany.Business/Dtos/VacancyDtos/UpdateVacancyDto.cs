@@ -112,14 +112,14 @@ namespace JobCompany.Business.Dtos.VacancyDtos
             RuleFor(x => x.Requirement)
                 .NotEmpty()
                 .WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
-                .MaximumLength(1000)
-                .WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_1000"));
+                .MaximumLength(8192)
+                .WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_8192"));
 
             RuleFor(x => x.Description)
                 .NotEmpty()
                 .WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
-                .MaximumLength(2000)
-                .WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_1000"));
+                .MaximumLength(8192)
+                .WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_8192"));
 
             RuleFor(x => x.Gender).IsInEnum().WithMessage(MessageHelper.GetMessage("INVALID_FORMAT"));
 

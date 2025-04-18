@@ -42,12 +42,16 @@ namespace Job.Business.Services.Certificate
             return certificate;
         }
 
-        public async Task<ICollection<Core.Entities.Certificate>> UpdateBulkCertificateAsync(ICollection<CertificateUpdateDto> dtos)
+        public async Task<ICollection<Core.Entities.Certificate>> UpdateBulkCertificateAsync(ICollection<CertificateUpdateDto> updateCertificateDtos, ICollection<Core.Entities.Certificate> existingCertificates)
         {
-            var updatedCertificates = new List<Core.Entities.Certificate>(); // Nəticə olaraq qaytarılacaq sertifikat siyahısı
+            var allCertificates = new List<Core.Entities.Certificate>(); // Nəticə olaraq qaytarılacaq sertifikat siyahısı
             var newCertificateDtos = new List<CertificateCreateDto>(); // Yeni əlavə olunacaq sertifikatlar üçün yaradılacaq DTO siyahısı
 
-            foreach (var dto in dtos)
+            var incomingIds = updateCertificateDtos
+                .Where(dto => Guid.TryParse(dto.Id, out var id) && id != Guid.Empty)
+                .Select(dto => Guid.Parse(dto.Id)).ToHashSet();
+
+            foreach (var dto in updateCertificateDtos)
             {
                 if (Guid.TryParse(dto.Id, out var parsedId) && parsedId != Guid.Empty) // Sertifikat ID-si varsa və düzgün formatda parse edilirsə
                 {
@@ -63,7 +67,7 @@ namespace Job.Business.Services.Certificate
                     certificate.GivenOrganization = dto.GivenOrganization;
                     certificate.CertificateFile = $"{fileResult.FilePath}/{fileResult.FileName}";
 
-                    updatedCertificates.Add(certificate);  // Yenilənmiş sertifikatı siyahıya əlavə edirik
+                    allCertificates.Add(certificate);  // Yenilənmiş sertifikatı siyahıya əlavə edirik
                 }
                 else // Əgər sertifikat ID-si yoxdursa, yeni sertifikat yaradırıq
                 {
@@ -76,16 +80,27 @@ namespace Job.Business.Services.Certificate
                 }
             }
 
+            // Mövcud sertifikatlar ilə request-də gələn sertifikatların ID-lərini müqayisə edib silinməli olanları tapırıq
+            var certificatesToRemove = existingCertificates.Where(x => !incomingIds.Contains(x.Id)).ToList();
+
+            if (certificatesToRemove.Count != 0)
+            {
+                foreach (var certificate in certificatesToRemove)
+                {
+                    fileService.DeleteFile(certificate.CertificateFile);
+                }
+
+                context.Certificates.RemoveRange(certificatesToRemove);
+            }
+
             if (newCertificateDtos.Count > 0)  // Əgər yeni sertifikatlar varsa, onları əlavə edirik
             {
                 var newlyCreated = await CreateBulkCertificateAsync(newCertificateDtos);
-                updatedCertificates.AddRange(newlyCreated);
+                allCertificates.AddRange(newlyCreated);
             }
 
-            return updatedCertificates; // Yenilənmiş sertifikatları qaytarırıq
+            return allCertificates; // Sertifikatları qaytarırıq
         }
-
-
 
         public async Task UpdateCertificateAsync(CertificateUpdateDto dto)
         {

@@ -43,12 +43,12 @@ namespace JobCompany.DAL.Configurations
                    .HasMaxLength(128);
 
             builder.Property(v => v.Description)
-                   .HasMaxLength(1024)
+                   .HasMaxLength(8192)
                    .IsRequired();
 
             builder.Property(v => v.Requirement)
                    .IsRequired()
-                   .HasMaxLength(1024);
+                   .HasMaxLength(8192);
 
             builder.HasOne(v => v.Company)
                    .WithMany(c => c.Vacancies)
