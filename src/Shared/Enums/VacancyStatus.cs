@@ -7,9 +7,9 @@ public enum VacancyStatus
     /// </summary>
     Pending = 1,
     /// <summary>
-    /// Vakansiya operator terefinden qebul edilerse ve sirketin balansinda yeteri qeder coin varsa
+    /// aktiv olan ve yaxud legv edilen vakansiyani update ederse
     /// </summary>
-    Active = 2,
+    PendingUpdate = 2,
     Deactive = 3,
     /// <summary>
     /// Operator terefinden redd edilirse
@@ -24,5 +24,10 @@ public enum VacancyStatus
     /// <summary>
     /// Operator terefinden qebul edilib amma sirketin yeteri qeder coini yoxdursa
     /// </summary>
-    PendingActive = 8
+    PendingActive = 8,
+    /// <summary>
+    /// Vakansiya operator terefinden qebul edilerse ve sirketin balansinda yeteri qeder coin varsa
+    /// </summary>
+    Active = 9,
+    
 }

@@ -10,60 +10,67 @@ namespace JobCompany.API.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [AuthorizeRole(UserRole.Admin , UserRole.Operator)]
-    public class ManageController(IManageService _service) : ControllerBase
+    public class ManageController(IManageService _manageService) : ControllerBase
     {
         [HttpPost("[action]")]
         public async Task<IActionResult> VacancyAccept(string vacancyId)
         {
-            await _service.VacancyAcceptAsync(vacancyId);
+            await _manageService.VacancyAcceptAsync(vacancyId);
             return Ok();
         }
 
         [HttpPost("[action]")]
         public async Task<IActionResult> VacancyReject(VacancyStatusUpdateDto dto)
         {
-            await _service.VacancyRejectAsync(dto);
+            await _manageService.VacancyRejectAsync(dto);
             return Ok();
         }
 
         [HttpPost("[action]")]
         public async Task<IActionResult> ToggleBlockVacancyStatus(VacancyStatusUpdateDto dto)
         {
-            await _service.ToggleBlockVacancyStatusAsync(dto);
+            await _manageService.ToggleBlockVacancyStatusAsync(dto);
             return Ok();
         }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetAllVacancies(string? vacancyName, string? startMinDate, string? startMaxDate, string? endMinDate, string? endMaxDate, string? companyName, byte? vacancyStatus, int skip = 1, int take = 10)
+        {
+            return Ok(await _manageService.GetAllVacanciesAsync(vacancyName , startMinDate , startMaxDate , endMinDate , endMaxDate , companyName , vacancyStatus , skip , take));
+        }
+
 
 
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllMessages(int pageNumber, int pageSize)
         {
-            return Ok(await _service.GetAllMessagesAsync(pageNumber, pageSize));
+            return Ok(await _manageService.GetAllMessagesAsync(pageNumber, pageSize));
         }
 
         [HttpGet("[action]/{id}")]
         public async Task<IActionResult> GetMessageById(string id)
         {
-            return Ok(await _service.GetMessageByIdAsync(id));
+            return Ok(await _manageService.GetMessageByIdAsync(id));
         }
 
         [HttpPost("[action]")]
         public async Task<IActionResult> CreateMessage(CreateMessageDto dto)
         {
-            await _service.CreateMessageAsync(dto);
+            await _manageService.CreateMessageAsync(dto);
             return Ok();
         }
 
         [HttpPut("[action]/{id}")]
         public async Task<IActionResult> UpdateMessage(string id, UpdateMessageDto dto)
         {
-            await _service.UpdateMessageAsync(id, dto);
+            await _manageService.UpdateMessageAsync(id, dto);
             return Ok();
         }
 
         [HttpDelete("[action]/{id}")]
         public async Task<IActionResult> DeleteMessage(string id)
         {
-            await _service.DeleteMessageAsync(id);
+            await _manageService.DeleteMessageAsync(id);
             return Ok();
         }
     }

@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using SharedLibrary.Enums;
 using SharedLibrary.Exceptions;
 using SharedLibrary.Extensions;
+using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;
 using System;
 using System.Collections.Generic;
@@ -62,18 +63,14 @@ namespace JobPayment.Business.Services.TransactionServices
             {
                 DateTime? Min = startDate.ToNullableDateTime();
                 if (Min != null)
-                {
                     query = query.Where(x => x.CreatedDate >= Min);
-                }
             }
 
             if (endDate != null)
             {
                 DateTime? Max = endDate.ToNullableDateTime();
                 if (Max != null)
-                {
                     query = query.Where(x => x.CreatedDate <= Max);
-                }
             }
 
             if (transactionStatus != null)
@@ -84,8 +81,6 @@ namespace JobPayment.Business.Services.TransactionServices
 
             if (informationType != null)
                 query = query.Where(x => x.InformationType == (InformationType)informationType);
-
-            int count = await query.CountAsync();
 
             var transactions = await query.Select(x => new TransactionListDto
             {
@@ -98,15 +93,14 @@ namespace JobPayment.Business.Services.TransactionServices
                 TransactionType = x.TranzactionType
 
             })
-            .Skip(Math.Max(0, skip - 1) * take)
+            .Skip((skip - 1) * take)
             .Take(take)
             .ToListAsync();
 
             return new DataListDto<TransactionListDto>
             {
                 Datas = transactions,
-                TotalCount = count,
-                TotalPage = (int)Math.Ceiling((double)count / take)
+                TotalCount = await query.CountAsync(),
             };
         }
 
@@ -123,29 +117,62 @@ namespace JobPayment.Business.Services.TransactionServices
                 TransactionType = x.TranzactionType,
                 TransactionStatus = x.TransactionStatus,
                 TransactionDate = x.CreatedDate
-            }).FirstOrDefaultAsync() ?? throw new NotFoundException<Transaction>("Əməliyyat mövcud deyil");
+            }).FirstOrDefaultAsync() ?? throw new NotFoundException<Transaction>(MessageHelper.GetMessage("NOT_FOUND"));
 
             return transaction;
         }
 
-        public async Task<List<TransactionDetailDto>> GetAllTransactionsByUserIdAsync(string userId)
+        public async Task<DataListDto<TransactionListDto>> GetAllTransactionsByUserIdAsync(string userId , string? startDate, string? endDate, byte? transactionStatus, byte? informationType, byte? transactionType , int skip , int take)
         {
-            var userGuid = Guid.Parse(userId);
+            var query = _context.Transactions
+                .Where(x => x.UserId == Guid.Parse(userId))
+                .OrderByDescending(x => x.CreatedDate)
+                .AsNoTracking()
+                .AsQueryable();
 
-            var transactions = await _context.Transactions.Where(x => x.UserId == userGuid)
-            .Select(x => new TransactionDetailDto
+            if (startDate != null)
             {
-                CompanyName = null,
-                Amount = x.Deposit.Amount,
+                DateTime? Min = startDate.ToNullableDateTime();
+                if (Min != null)
+                    query = query.Where(x => x.CreatedDate >= Min);
+            }
+
+            if (endDate != null)
+            {
+                DateTime? Max = endDate.ToNullableDateTime();
+                if (Max != null)
+                    query = query.Where(x => x.CreatedDate <= Max);
+            }
+
+            if (transactionStatus != null)
+                query = query.Where(x => x.TransactionStatus == (TransactionStatus)transactionStatus);
+
+            if (transactionType != null)
+                query = query.Where(x => x.TranzactionType == (TransactionType)transactionType);
+
+            if (informationType != null)
+                query = query.Where(x => x.InformationType == (InformationType)informationType);
+
+            var transactions = await query.Select(x => new TransactionListDto
+            {
+                Id = x.Id,
                 Coin = x.Coin,
+                CreatedDate = x.CreatedDate,
                 InformationId = x.InformationId,
                 InformationType = x.InformationType,
-                TransactionType = x.TranzactionType,
                 TransactionStatus = x.TransactionStatus,
-                TransactionDate = x.CreatedDate
-            }).ToListAsync();
+                TransactionType = x.TranzactionType
 
-            return transactions;    
+            })
+            .Skip((skip - 1) * take)
+            .Take(take)
+            .ToListAsync();
+
+            return new DataListDto<TransactionListDto>
+            {
+                Datas = transactions,
+                TotalCount = await query.CountAsync(),
+            };
         }
     }
 }
