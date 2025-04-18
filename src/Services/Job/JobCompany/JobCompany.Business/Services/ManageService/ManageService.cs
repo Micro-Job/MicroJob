@@ -232,7 +232,7 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
     {
         var message = new Message
         {
-            CreatedDate = DateTime.UtcNow,
+            CreatedDate = DateTime.Now,
             Translations = dto.Translations.Select(t => new MessageTranslation
             {
                 Content = t.Content,
