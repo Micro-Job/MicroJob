@@ -35,7 +35,7 @@ namespace SharedLibrary.Extensions
         }
         public static DateTime? ToNullableDateTime(this string date, string format = "yyyy-MM-dd")
         {
-            if (DateTime.TryParseExact(date, format, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out DateTime parsedDate))
+            if (DateTime.TryParseExact(date, format, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsedDate))
             {
                 return parsedDate;
             }

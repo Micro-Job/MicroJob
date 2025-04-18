@@ -54,24 +54,23 @@ namespace JobCompany.Business.Services.CompanyServices
             var company = await _context.Companies.Include(c => c.CompanyNumbers).FirstOrDefaultAsync(x => x.UserId == _currentUser.UserGuid)
                 ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>(MessageHelper.GetMessage("NOT_FOUND"));
 
+            if (dto.Email != null && await _context.Companies.AnyAsync(x => x.Email == dto.Email && x.Id != company.Id))
+                throw new EmailAlreadyUsedException(MessageHelper.GetMessage("EMAIL_ALREADY_USED"));
+
             company.CompanyName = dto.CompanyName?.Trim();
             company.CompanyInformation = dto.CompanyInformation?.Trim();
             company.CompanyLocation = dto.CompanyLocation?.Trim();
             company.WebLink = dto.WebLink;
-            company.EmployeeCount = dto.EmployeeCount ?? company.EmployeeCount;
+            company.EmployeeCount = dto.EmployeeCount ?? null;
             company.CreatedDate = dto.CreatedDate;
             company.CategoryId = dto.CategoryId;
             company.CountryId = dto.CountryId;
             company.CityId = dto.CityId;
-
-            if (dto.Email != null && await _context.Companies.AnyAsync(x => x.Email == dto.Email && x.Id != company.Id))
-                throw new EmailAlreadyUsedException(MessageHelper.GetMessage("EMAIL_ALREADY_USED"));
-
             company.Email = dto.Email;
 
             if (dto.CompanyLogo != null)
             {
-                if (!string.IsNullOrEmpty(company.CompanyLogo))
+                if (!string.IsNullOrEmpty(company.CompanyLogo) && company.CompanyLogo != Path.Combine(FilePaths.image , "defaultlogo.jpg"))
                 {
                     _fileService.DeleteFile(company.CompanyLogo);
                 }
@@ -79,6 +78,10 @@ namespace JobCompany.Business.Services.CompanyServices
                 FileDto fileResult = await _fileService.UploadAsync(FilePaths.image, dto.CompanyLogo);
 
                 company.CompanyLogo = $"{fileResult.FilePath}/{fileResult.FileName}";
+            }
+            else
+            {
+                company.CompanyLogo = Path.Combine(FilePaths.image, "defaultlogo.jpg");
             }
 
             if (numbersDto is not null)

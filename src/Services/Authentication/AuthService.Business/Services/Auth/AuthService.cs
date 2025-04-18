@@ -30,12 +30,10 @@ namespace AuthService.Business.Services.Auth
 
         public async Task RegisterAsync(RegisterDto dto)
         {
-            var userCheck = await _context.Users.FirstOrDefaultAsync(x =>
-                x.Email == dto.Email || x.MainPhoneNumber == dto.MainPhoneNumber
-            );
+            dto.MainPhoneNumber = dto.MainPhoneNumber.Trim();
+            dto.Email = dto.Email.Trim();
+            await CheckUserExistAsync(dto.Email , dto.MainPhoneNumber);
 
-            if (userCheck != null)
-                throw new UserExistException();
             if (dto.Password != dto.ConfirmPassword)
                 throw new WrongPasswordException();
 
@@ -77,8 +75,9 @@ namespace AuthService.Business.Services.Auth
                 throw new PolicyException();
 
             // email veya istifadeci adı tekrarlanmasını yoxla
-            if (await _context.Users.AnyAsync(x => x.Email == dto.Email || x.MainPhoneNumber == dto.MainPhoneNumber))
-                throw new UserExistException();
+            dto.MainPhoneNumber = dto.MainPhoneNumber.Trim();
+            dto.Email = dto.Email.Trim();
+            await CheckUserExistAsync(dto.Email, dto.MainPhoneNumber);
 
             if (dto.Password != dto.ConfirmPassword)
                 throw new WrongPasswordException();
@@ -282,6 +281,25 @@ namespace AuthService.Business.Services.Auth
             user.Password = _tokenHandler.GeneratePasswordHash(newPassword);
 
             await _context.SaveChangesAsync();
+        }
+
+        public async Task CheckUserExistAsync(string email, string phoneNumber)
+        {
+            var user = await _context.Users.Where(x => x.Email == email || x.MainPhoneNumber == phoneNumber)
+                .Select(x => new
+                {
+                    x.Email,
+                    x.MainPhoneNumber
+                })
+                .FirstOrDefaultAsync();
+
+            if (user != null)
+            {
+                if (user.Email == email)
+                    throw new ExistEmailException();
+                else if (user.MainPhoneNumber == phoneNumber)
+                    throw new ExistPhoneNumberException();
+            }
         }
     }
 }

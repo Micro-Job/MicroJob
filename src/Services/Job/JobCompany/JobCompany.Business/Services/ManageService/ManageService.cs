@@ -10,6 +10,7 @@ using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Enums;
 using SharedLibrary.Events;
+using SharedLibrary.Extensions;
 using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;
 
@@ -17,6 +18,7 @@ namespace JobCompany.Business.Services.ManageService;
 
 public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUser, IPublishEndpoint _publishEndpoint) : IManageService
 {
+    #region Vacancy
     public async Task VacancyAcceptAsync(string vacancyId)
     {
         await _publishEndpoint.Publish(new VacancyAcceptEvent
@@ -28,10 +30,14 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
     public async Task VacancyRejectAsync(VacancyStatusUpdateDto dto)
     {
         var vacancyGuid = Guid.Parse(dto.VacancyId);
-        var vacancyCommenGuid = Guid.Parse(dto.VacancyCommentId);
+        var vacancyMessageGuid = Guid.Parse(dto.VacancyMessageId);
+
+        if (await _context.Messages.AnyAsync(x=> x.Id == vacancyMessageGuid))
+            throw new NotFoundException<Message>(MessageHelper.GetMessage("NOT_FOUND"));
+
         var vacancy = await _context.Vacancies
             .Include(v => v.Applications)
-            .Where(v => v.Id == vacancyGuid).FirstOrDefaultAsync()
+            .FirstOrDefaultAsync(v => v.Id == vacancyGuid)
             ?? throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
 
         var appliedUserIds = vacancy.Applications
@@ -48,22 +54,20 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
             .SetProperty(a => a.IsDeleted, true)
         );
 
-        vacancy.VacancyCommentId = vacancyCommenGuid;
+        vacancy.VacancyCommentId = vacancyMessageGuid;
         vacancy.VacancyStatus = VacancyStatus.Reject;
-        await _context.SaveChangesAsync();
 
-        ///summary
-        /// Vakansiya reject olunanda sirket sahibine bildiris getmesi
-        ///summary
-        await _publishEndpoint.Publish(
-            new VacancyRejectedEvent
-            {
-                InformationId = vacancyGuid,
-                SenderId = _currentUser.UserGuid,
-                ReceiverId = (Guid)vacancy.CompanyId,
-                InformationName = vacancy.Title
-            }
-        );
+        var newNotification = new Notification
+        {
+            ReceiverId = vacancy.Company.UserId,
+            SenderId = null,
+            NotificationType = NotificationType.VacancyReject,
+            InformationId = vacancyGuid,
+            InformationName = vacancy.Title,
+            IsSeen = false,
+        };
+        await _context.Notifications.AddAsync(newNotification);
+        await _context.SaveChangesAsync();
 
         ///summary
         /// Vakansiya reject olunanda bu vakansiyaya muraciet edenlere bildiris getmesi
@@ -81,20 +85,18 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
 
     public async Task ToggleBlockVacancyStatusAsync(VacancyStatusUpdateDto dto)
     {
-        var vacancyGuid = Guid.Parse(dto.VacancyId);
         var vacancy = await _context.Vacancies
-            .Where(v => v.Id == vacancyGuid)
-            .FirstOrDefaultAsync()
+            .FirstOrDefaultAsync(v => v.Id == Guid.Parse(dto.VacancyId))
             ?? throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
 
-        if (vacancy.VacancyStatus != SharedLibrary.Enums.VacancyStatus.Block)
+        if (vacancy.VacancyStatus != VacancyStatus.Block)
         {
-            vacancy.VacancyStatus = SharedLibrary.Enums.VacancyStatus.Block;
-            vacancy.VacancyCommentId = Guid.Parse(dto.VacancyCommentId);
+            vacancy.VacancyStatus = VacancyStatus.Block;
+            vacancy.VacancyCommentId = Guid.Parse(dto.VacancyMessageId);
         }
         else
         {
-            vacancy.VacancyStatus = SharedLibrary.Enums.VacancyStatus.Deactive;
+            vacancy.VacancyStatus = VacancyStatus.Deactive;
 
             if (vacancy.VacancyCommentId != null)
             {
@@ -105,7 +107,83 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
         await _context.SaveChangesAsync();
     }
 
+    public async Task<DataListDto<VacancyGetAllDto>> GetAllVacanciesAsync(string? vacancyName , string? startMinDate ,  string? startMaxDate , string? endMinDate , string? endMaxDate , string? companyName , byte? vacancyStatus , int skip = 1,int take = 10)
+    {
+        var query = _context.Vacancies
+            .Where(x => x.VacancyStatus == VacancyStatus.Pending || 
+                        x.VacancyStatus == VacancyStatus.Active ||
+                        x.VacancyStatus == VacancyStatus.Reject ||
+                        x.VacancyStatus == VacancyStatus.PendingUpdate) 
+            .OrderBy(x => x.VacancyStatus)
+            .AsQueryable()
+            .AsNoTracking();
 
+        if (vacancyStatus != null)
+            query = query.Where(x => x.VacancyStatus == (VacancyStatus)vacancyStatus);
+
+        if (startMinDate != null)
+        {
+            DateTime? Min = startMinDate.ToNullableDateTime();
+            if (Min != null)
+                query = query.Where(x => x.StartDate >= Min);
+        }
+
+        if (startMaxDate != null)
+        {
+            DateTime? Max = startMaxDate.ToNullableDateTime();
+            if (Max != null)
+                query = query.Where(x => x.StartDate <= Max);
+        }
+
+        if (endMinDate != null)
+        {
+            DateTime? Min = endMinDate.ToNullableDateTime();
+            if (Min != null)
+                query = query.Where(x => x.EndDate >= Min);
+        }
+
+        if (endMaxDate != null)
+        {
+            DateTime? Max = endMaxDate.ToNullableDateTime();
+            if (Max != null)
+                query = query.Where(x => x.EndDate <= Max);
+        }
+
+        if(companyName != null)
+            query = query.Where(x => x.CompanyName.Contains(companyName));
+
+        if (vacancyName != null)
+            query = query.Where(x => x.Title.Contains(vacancyName));
+
+        var data = await query.Select(x => new VacancyGetAllDto
+        {
+            Id = x.Id,
+            Title = x.Title,
+            VacancyStatus = x.VacancyStatus,
+            CompanyName = x.CompanyName,
+            Location = x.Location,
+            ViewCount = x.ViewCount,
+            MainSalary = x.MainSalary,
+            MaxSalary = x.MaxSalary,
+            WorkStyle = x.WorkStyle,
+            WorkType = x.WorkType,
+            //bu yaradilma tarixidir(normalda baslama tarixi olur)
+            StartDate = x.CreatedDate
+        })
+        .Skip((skip - 1) * take)
+        .Take(take)
+        .ToListAsync();
+
+        return new DataListDto<VacancyGetAllDto>
+        {
+            Datas = data,
+            TotalCount = await query.CountAsync()
+        };
+    }
+
+    #endregion
+
+    #region Message
     public async Task<DataListDto<MessageWithTranslationsDto>> GetAllMessagesAsync(int pageNumber = 1, int pageSize = 10)
     {
         var query = _context.Messages.AsQueryable();
@@ -154,7 +232,7 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
     {
         var message = new Message
         {
-            CreatedDate = DateTime.UtcNow,
+            CreatedDate = DateTime.Now,
             Translations = dto.Translations.Select(t => new MessageTranslation
             {
                 Content = t.Content,
@@ -208,4 +286,5 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
         _context.Messages.Remove(message);
         await _context.SaveChangesAsync();
     }
+    #endregion
 }

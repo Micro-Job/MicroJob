@@ -22,9 +22,9 @@ namespace JobPayment.API.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetAllTransactionsByUserId(string userId)
+        public async Task<IActionResult> GetAllTransactionsByUserId(string userId, string? startDate, string? endDate, byte? transactionStatus, byte? informationType, byte? transactionType, int skip, int take)
         {
-            return Ok(await _transactionService.GetAllTransactionsByUserIdAsync(userId));
+            return Ok(await _transactionService.GetAllTransactionsByUserIdAsync(userId , startDate , endDate , transactionStatus , informationType , transactionType , skip , take));
         }
     }
 }

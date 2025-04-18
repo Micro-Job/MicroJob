@@ -21,7 +21,14 @@ namespace Job.Core.Entities
         public Citizenship IsCitizen { get; set; }
         public Gender Gender { get; set; }
         public Military MilitarySituation { get; set; }
+        /// <summary>
+        /// sexsi melumatlarin gorunub gorunmemesi(ad,soyad,email,nomre,sekil)
+        /// </summary>
         public bool IsPublic { get; set; }
+        /// <summary>
+        /// Umumi olaraq paylasilan cv-ler hissesinde gorunub gorunmemesi
+        /// </summary>
+        public bool IsAnonym { get; set; }
         public string? Adress { get; set; }
         public DateTime BirthDay { get; set; }
         public string? ResumeEmail { get; set; }
