@@ -382,7 +382,7 @@ namespace Job.Business.Services.Resume
             return await _context.Resumes.AnyAsync(x => x.UserId == _currentUser.UserGuid);
         }
 
-        public async Task<ResumeDetailItemDto> GetByIdResumeAsync(string id)
+        public async Task<ResumeDetailItemDto> GetByIdResumeAysnc(string id)
         {
             var userId = _currentUser.UserGuid;
             var resumeGuid = Guid.Parse(id);
