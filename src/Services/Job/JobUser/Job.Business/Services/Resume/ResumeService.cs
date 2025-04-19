@@ -459,7 +459,7 @@ namespace Job.Business.Services.Resume
                 IsCitizen = resume.IsCitizen,
                 MilitarySituation = resume.MilitarySituation,
                 Adress = resume.Adress,
-                Position = resume.Position.Name,
+                Position = resume.Position?.Name,
 
                 Skills = resume.ResumeSkills.Select(s => new SkillGetByIdDto
                 {
