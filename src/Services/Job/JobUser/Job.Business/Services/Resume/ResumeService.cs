@@ -391,6 +391,7 @@ namespace Job.Business.Services.Resume
 
             var resumeData = await _context.Resumes
                 .Where(r => r.Id == resumeGuid)
+                .Include(r => r.SavedResumes)
                 .Include(r => r.Position)
                 .Include(r => r.PhoneNumbers)
                 .Include(r => r.Educations)
@@ -435,7 +436,7 @@ namespace Job.Business.Services.Resume
             {
                 ResumeId = resume.Id,
                 UserId = resume.UserId,
-
+                IsSaved = resume.SavedResumes.Any(sr => sr.ResumeId == resume.Id && sr.CompanyUserId == _currentUser.UserGuid),
                 FirstName = hasFullAccess ? resume.FirstName : null,
                 LastName = hasFullAccess ? resume.LastName : null,
                 FatherName = hasFullAccess ? resume.FatherName : null,
@@ -444,6 +445,7 @@ namespace Job.Business.Services.Resume
                 PhoneNumbers = hasFullAccess
                     ? resume.PhoneNumbers.Select(p => new NumberGetByIdDto
                     {
+                        PhoneNumberId = p.Id,
                         PhoneNumber = p.PhoneNumber
                     }).ToList()
                     : [],

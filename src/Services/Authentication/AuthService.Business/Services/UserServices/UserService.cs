@@ -125,7 +125,7 @@ namespace AuthService.Business.Services.UserServices
         /// <summary> Admin paneldə bütün istifadəçilər siyahısının göründüyü hissə </summary>  
         public async Task<DataListDto<BasicUserInfoDto>> GetAllUsersAsync(UserRole userRole, string? searchTerm, int pageIndex = 1, int pageSize = 10)
         {
-            var userQuery = _context.Users.Where(u => u.UserRole == userRole);
+            var userQuery = _context.Users.Where(u => u.UserRole == userRole).AsNoTracking();
 
             if (searchTerm != null)
                 searchTerm = searchTerm.Trim().ToLower();
