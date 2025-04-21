@@ -8,7 +8,7 @@ namespace Job.Business.Services.UserManagement;
 
 public interface IUserManagementService
 {
-    Task<DataListDto<GetUsersDataForAdminResponse>> GetAllUsersAsync(UserRole userRole, string? searchTerm, int pageIndex = 1, int pageSize = 10);
+    Task<PaginatedResponse<GetUsersDataForAdminResponse>> GetAllUsersAsync(UserRole userRole, string? searchTerm, int pageIndex = 1, int pageSize = 10);
     Task<UserPersonalInfoDto> GetPersonalInfoAsync(string userId);
     Task<ResumeDetailItemDto> GetResumeDetailAsync(string userId);
 }

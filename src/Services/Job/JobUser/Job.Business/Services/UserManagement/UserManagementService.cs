@@ -25,9 +25,9 @@ namespace Job.Business.Services.UserManagement;
 public class UserManagementService(JobDbContext _context, IRequestClient<GetUsersDataForAdminRequest> _allUsersDataRequest,
     IRequestClient<GetUserDataRequest> _userDataRequest, IConfiguration _configuration, ICurrentUser _currentUser) : IUserManagementService
 {
-    public async Task<DataListDto<GetUsersDataForAdminResponse>> GetAllUsersAsync(UserRole userRole, string? searchTerm, int pageIndex = 1, int pageSize = 10)
+    public async Task<PaginatedResponse<GetUsersDataForAdminResponse>> GetAllUsersAsync(UserRole userRole, string? searchTerm, int pageIndex = 1, int pageSize = 10)
     {
-        var response = await _allUsersDataRequest.GetResponse<DataListDto<GetUsersDataForAdminResponse>>(new GetUsersDataForAdminRequest
+        var response = await _allUsersDataRequest.GetResponse<PaginatedResponse<GetUsersDataForAdminResponse>>(new GetUsersDataForAdminRequest
         {
             UserRole = userRole,
             SearchTerm = searchTerm,

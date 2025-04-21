@@ -9,7 +9,7 @@ namespace JobCompany.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [AuthorizeRole(UserRole.Admin , UserRole.Operator)]
+    [AuthorizeRole(UserRole.Admin, UserRole.Operator)]
     public class ManageController(IManageService _manageService) : ControllerBase
     {
         [HttpPost("[action]")]
@@ -36,7 +36,7 @@ namespace JobCompany.API.Controllers
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllVacancies(string? vacancyName, string? startMinDate, string? startMaxDate, string? endMinDate, string? endMaxDate, string? companyName, byte? vacancyStatus, int skip = 1, int take = 10)
         {
-            return Ok(await _manageService.GetAllVacanciesAsync(vacancyName , startMinDate , startMaxDate , endMinDate , endMaxDate , companyName , vacancyStatus , skip , take));
+            return Ok(await _manageService.GetAllVacanciesAsync(vacancyName, startMinDate, startMaxDate, endMinDate, endMaxDate, companyName, vacancyStatus, skip, take));
         }
 
 
@@ -72,6 +72,18 @@ namespace JobCompany.API.Controllers
         {
             await _manageService.DeleteMessageAsync(id);
             return Ok();
+        }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetCompanyDetails(string companyUserId)
+        {
+            return Ok(await _manageService.GetCompanyDetailsAsync(companyUserId));
+        }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetVacanciesByCompanyUserId(string companyUserId, int skip = 1, int take = 9)
+        {
+            return Ok(await _manageService.GetVacanciesByCompanyUserIdAsync(companyUserId, skip, take));
         }
     }
 }

@@ -113,6 +113,7 @@ namespace JobCompany.API
             }
 
             app.UseHttpsRedirection();
+            app.UseCors("_myAllowSpecificOrigins");
             app.UseStaticFiles();
             app.UseMiddleware<LanguageMiddleware>();
 
@@ -121,7 +122,6 @@ namespace JobCompany.API
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.UseCors("_myAllowSpecificOrigins");
             app.MapControllers();
 
             app.Run();

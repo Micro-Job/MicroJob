@@ -16,7 +16,7 @@ namespace Job.Business.Services.Education
                 .ToList();
 
             await context.Educations.AddRangeAsync(educationsToAdd);
-
+            await context.SaveChangesAsync();
             return educationsToAdd;
         }
 
@@ -27,49 +27,55 @@ namespace Job.Business.Services.Education
             await context.Educations.AddAsync(education);
         }
 
-        public async Task<ICollection<Core.Entities.Education>> UpdateBulkEducationAsync(ICollection<EducationUpdateDto> dtos, Guid resumeId)
+        public async Task<ICollection<Core.Entities.Education>> UpdateBulkEducationAsync(ICollection<EducationUpdateDto> updateEducationDtos, ICollection<Core.Entities.Education> existEducations, Guid resumeId)
         {
-            var institutionNames = dtos.Select(d => d.InstitutionName).ToList();
+            var newEducations = new List<Core.Entities.Education>();  // Yeni əlavə olunan təhsilləri saxlayır
+            var allEducations = new List<Core.Entities.Education>();  // Geri qaytarılacaq bütün təhsilləri saxlayır
 
-            var educations = await context.Educations
-                .Where(e => e.ResumeId == resumeId && institutionNames.Contains(e.InstitutionName))
-                .ToListAsync();
+            var dtoIds = updateEducationDtos.Where(dto => dto.Id != null).Select(dto => Guid.Parse(dto.Id)).ToHashSet();
 
-            if (educations.Count == 0) // Əgər heç bir təhsil məlumatı tapılmadısa, yeni təhsil məlumatları əlavə edirik
+            foreach (var updatedEducation in updateEducationDtos)
             {
-                var createDtos = dtos.Select(dto => new EducationCreateDto
+                if (updatedEducation.Id is not null) // Id null deyilse, bu təhsil artıq mövcuddur və yenilənməlidir
                 {
-                    InstitutionName = dto.InstitutionName,
-                    Profession = dto.Profession,
-                    StartDate = dto.StartDate,
-                    EndDate = dto.IsCurrentEducation ? null : dto.EndDate,
-                    IsCurrentEducation = dto.IsCurrentEducation,
-                    ProfessionDegree = dto.ProfessionDegree
-                }).ToList();
+                    var existingEducation = existEducations.FirstOrDefault(e => e.Id == Guid.Parse(updatedEducation.Id));
 
-                var createdEducations = await CreateBulkEducationAsync(createDtos, resumeId);
+                    if (existingEducation is not null)
+                        MapEducationDtoToEntityForUpdate(existingEducation, updatedEducation);
+                    else
+                        throw new NotFoundException<Core.Entities.Education>(MessageHelper.GetMessage("NOT_FOUND"));
 
-                return createdEducations;
-            }
-            else
-            {
-                // Mövcud olan təhsil məlumatlarını güncəlləyirik
-                educations = educations.Select(education =>
+                    allEducations.Add(existingEducation);
+                }
+                else // Id null-dursa, bu yeni təhsildir və əlavə olunmalıdır
+                {
+                    var newEducation = MapEducationDtoToEntityForCreate(new EducationCreateDto
                     {
-                        var dto = dtos.FirstOrDefault(d => d.InstitutionName == education.InstitutionName);
+                        InstitutionName = updatedEducation.InstitutionName,
+                        Profession = updatedEducation.Profession,
+                        StartDate = updatedEducation.StartDate,
+                        EndDate = updatedEducation.IsCurrentEducation ? null : updatedEducation.EndDate,
+                        IsCurrentEducation = updatedEducation.IsCurrentEducation,
+                        ProfessionDegree = updatedEducation.ProfessionDegree
+                    }, resumeId);
 
-                        if (dto != null) MapEducationDtoToEntityForUpdate(education, dto);
-
-                        return education;
-                    }).ToList();
-
-                await context.SaveChangesAsync();
-
-                return educations;
+                    newEducations.Add(newEducation);
+                }
             }
+
+            // Request-də göndərilən təhsil ID-ləri ilə mövcud olan təhsil ID-lərini müqayisə edib silinməli olanları tapırıq
+            var educationsToRemove = existEducations.Where(e => !dtoIds.Contains(e.Id)).ToList();
+
+            if (educationsToRemove.Count != 0)
+                context.Educations.RemoveRange(educationsToRemove);
+
+            if (newEducations.Count != 0)
+                await context.Educations.AddRangeAsync(newEducations);
+
+            allEducations.AddRange(newEducations);
+
+            return allEducations;
         }
-
-
 
         public async Task UpdateEducationAsync(EducationUpdateDto dto)
         {
@@ -80,7 +86,8 @@ namespace Job.Business.Services.Education
             MapEducationDtoToEntityForUpdate(education, dto);
         }
 
-        private Core.Entities.Education MapEducationDtoToEntityForCreate(EducationCreateDto dto, Guid resumeId)
+
+        private static Core.Entities.Education MapEducationDtoToEntityForCreate(EducationCreateDto dto, Guid resumeId)
         {
             return new Core.Entities.Education
             {
@@ -94,7 +101,7 @@ namespace Job.Business.Services.Education
             };
         }
 
-        private void MapEducationDtoToEntityForUpdate(Core.Entities.Education education, EducationUpdateDto dto)
+        private static void MapEducationDtoToEntityForUpdate(Core.Entities.Education education, EducationUpdateDto dto)
         {
             education.InstitutionName = dto.InstitutionName;
             education.Profession = dto.Profession;

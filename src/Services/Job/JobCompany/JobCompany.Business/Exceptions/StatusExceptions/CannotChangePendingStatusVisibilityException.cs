@@ -9,11 +9,6 @@ public class CannotChangePendingStatusVisibilityException : Exception, IBaseExce
 
     public string ErrorMessage { get; }
 
-    public CannotChangePendingStatusVisibilityException()
-    {
-        ErrorMessage = "Gözləmədə(pending) statusunu görünməz etmək olmaz.";
-    }
-
     public CannotChangePendingStatusVisibilityException(string message) : base(message)
     {
         ErrorMessage = message;

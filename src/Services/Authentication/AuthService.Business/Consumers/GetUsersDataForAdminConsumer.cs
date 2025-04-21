@@ -1,7 +1,7 @@
-﻿using AuthService.Business.Dtos;
-using AuthService.DAL.Contexts;
+﻿using AuthService.DAL.Contexts;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using SharedLibrary.Dtos;
 using SharedLibrary.Requests;
 using SharedLibrary.Responses;
 
@@ -36,7 +36,7 @@ public class GetUsersDataForAdminConsumer(AppDbContext _appDbContext) : IConsume
             })
             .ToListAsync();
 
-        var response = new DataListDto<GetUsersDataForAdminResponse>
+        var response = new PaginatedResponse<GetUsersDataForAdminResponse>
         {
             Datas = users,
             TotalCount = totalCount

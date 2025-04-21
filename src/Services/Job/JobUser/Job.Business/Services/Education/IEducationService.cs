@@ -7,6 +7,6 @@ namespace Job.Business.Services.Education
         Task CreateEducationAsync(EducationCreateDto dto, Guid resumeId);
         Task<ICollection<Core.Entities.Education>> CreateBulkEducationAsync(ICollection<EducationCreateDto> dtos,Guid resumeId);
         Task UpdateEducationAsync(EducationUpdateDto dto);
-        Task<ICollection<Core.Entities.Education>> UpdateBulkEducationAsync(ICollection<EducationUpdateDto> dtos, Guid resumeId);
+        Task<ICollection<Core.Entities.Education>> UpdateBulkEducationAsync(ICollection<EducationUpdateDto> dtos, ICollection<Core.Entities.Education> existEducations, Guid resumeId);
     }
 }

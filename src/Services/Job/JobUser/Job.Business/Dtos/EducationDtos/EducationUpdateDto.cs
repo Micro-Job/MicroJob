@@ -6,7 +6,7 @@ namespace Job.Business.Dtos.EducationDtos
 {
     public record EducationUpdateDto
     {
-        public string Id {  get; set; }
+        public string? Id {  get; set; }
         public string InstitutionName { get; set; }
         public string Profession { get; set; }
         public DateTime StartDate { get; set; }

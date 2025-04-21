@@ -1,4 +1,4 @@
-using Job.Business.Dtos.ExperienceDtos;
+﻿using Job.Business.Dtos.ExperienceDtos;
 using Job.Business.Exceptions.Common;
 using Job.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
@@ -17,7 +17,7 @@ public class ExperienceService(JobDbContext context) : IExperienceService
             .ToList();
 
         await context.Experiences.AddRangeAsync(experiencesToAdd);
-        await context.SaveChangesAsync();
+        //await context.SaveChangesAsync();
 
         return experiencesToAdd;
     }
@@ -36,24 +36,58 @@ public class ExperienceService(JobDbContext context) : IExperienceService
             await context.SaveChangesAsync();
     }
 
-    public async Task<ICollection<Core.Entities.Experience>> UpdateBulkExperienceAsync(
-        ICollection<ExperienceUpdateDto> dtos,
-        Guid resumeId
-    )
+    public async Task<ICollection<Core.Entities.Experience>> UpdateBulkExperienceAsync(ICollection<ExperienceUpdateDto> updateDtos, ICollection<Core.Entities.Experience> existingExperiences, Guid resumeId)
     {
-        var experiencesToUpdate = new List<Core.Entities.Experience>();
+        var resultList = new List<Core.Entities.Experience>();
+        var createDtos = new List<ExperienceCreateDto>();
 
-        foreach (var dto in dtos)
+        var dtoIds = updateDtos
+            .Where(x => !string.IsNullOrWhiteSpace(x.Id))
+            .Select(x => Guid.Parse(x.Id))
+            .ToHashSet();
+
+        foreach (var dto in updateDtos)
         {
-            var experience = await UpdateExperienceAsync(dto, resumeId, saveChanges: false);
+            if (!string.IsNullOrWhiteSpace(dto.Id))
+            {
+                var existing = existingExperiences.FirstOrDefault(e => e.Id == Guid.Parse(dto.Id));
+                if (existing != null)
+                {
+                    MapExperienceDtoToEntityForUpdate(existing, dto);
+                    resultList.Add(existing);
+                }
+            }
+            else
+            {
+                var createDto = new ExperienceCreateDto
+                {
+                    OrganizationName = dto.OrganizationName,
+                    PositionName = dto.PositionName,
+                    PositionDescription = dto.PositionDescription,
+                    StartDate = dto.StartDate,
+                    EndDate = dto.EndDate,
+                    IsCurrentOrganization = dto.IsCurrentOrganization
+                };
 
-            experiencesToUpdate.Add(experience);
+                createDtos.Add(createDto);
+            }
         }
 
-        await context.SaveChangesAsync();
+        var experiencesToRemove = existingExperiences.Where(e => !dtoIds.Contains(e.Id)).ToList();
 
-        return experiencesToUpdate;
+        if (experiencesToRemove.Count != 0)
+            context.Experiences.RemoveRange(experiencesToRemove);
+
+        if (createDtos.Count > 0)
+        {
+            var newExperiences = await CreateBulkExperienceAsync(createDtos, resumeId);
+            resultList.AddRange(newExperiences);
+        }
+
+        return resultList;
     }
+
+
 
     public async Task<Core.Entities.Experience> UpdateExperienceAsync(
         ExperienceUpdateDto dto,
