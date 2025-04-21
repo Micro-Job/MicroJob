@@ -174,6 +174,9 @@
   <data name="LENGTH_MUST_BE_BETWEEN_1_500" xml:space="preserve">
     <value>Uzunluq 1-500 arası olmalıdır</value>
   </data>
+  <data name="LENGTH_MUST_BE_BETWEEN_1_8192" xml:space="preserve">
+    <value>Uzunluq 1-8192 arası olmalıdır</value>
+  </data>
   <data name="LOGIN_REQUIRED" xml:space="preserve">
     <value>Davam etmək üçün yenidən daxil olun</value>
   </data>

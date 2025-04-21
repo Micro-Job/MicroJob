@@ -1,5 +1,6 @@
 ﻿using JobCompany.Business.Dtos.CategoryDtos;
 using JobCompany.Business.Dtos.CompanyDtos;
+using JobCompany.Business.Dtos.MessageDtos;
 using JobCompany.Business.Dtos.NumberDtos;
 using JobCompany.Business.Dtos.SkillDtos;
 using JobCompany.Core.Entites;
@@ -39,5 +40,6 @@ namespace JobCompany.Business.Dtos.VacancyDtos
         public Guid? ExamId { get; set; }
         public bool IsSaved { get; set; }
         public Guid CompanyUserId { get; set; }
+        public ICollection<string>? Messages { get; set; }
     }
 }

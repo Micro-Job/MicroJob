@@ -1,5 +1,7 @@
 ﻿using JobCompany.Business.Dtos.Common;
+using JobCompany.Business.Dtos.CompanyDtos;
 using JobCompany.Business.Dtos.MessageDtos;
+using JobCompany.Business.Dtos.NumberDtos;
 using JobCompany.Business.Dtos.VacancyDtos;
 using JobCompany.Business.Exceptions.Common;
 using JobCompany.Business.Extensions;
@@ -285,6 +287,83 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
 
         _context.Messages.Remove(message);
         await _context.SaveChangesAsync();
+    }
+    #endregion
+
+
+    #region Company
+    public async Task<CompanyProfileDto> GetCompanyDetailsAsync(string companyUserId)
+    {
+        var currentLanguage = _currentUser.LanguageCode;
+        var companyUserGuid = Guid.Parse(companyUserId);
+
+        var companyProfile = await _context.Companies
+            .Where(c => c.UserId == companyUserGuid)
+            .Include(x => x.Category.Translations)
+            .Include(x => x.City.Translations)
+            .Include(x => x.Country.Translations)
+            .Select(x => new CompanyProfileDto
+            {
+                Id = x.Id,
+                Name = x.CompanyName,
+                Information = x.CompanyInformation,
+                Location = x.CompanyLocation,
+                WebLink = x.WebLink,
+                CreatedDate = x.CreatedDate,
+                EmployeeCount = x.EmployeeCount.HasValue ? x.EmployeeCount.Value : null,
+                CompanyLogo = $"{_currentUser.BaseUrl}/{x.CompanyLogo}",
+                Category = x.Category.GetTranslation(currentLanguage, GetTranslationPropertyName.Name),
+                City = x.City != null ? x.City.GetTranslation(currentLanguage, GetTranslationPropertyName.Name) : null,
+                Country = x.Country != null ? x.Country.GetTranslation(currentLanguage, GetTranslationPropertyName.Name) : null,
+                CategoryId = x.CategoryId,
+                CityId = x.CityId,
+                CountryId = x.CountryId,
+                Email = x.Email,
+                CompanyNumbers = x.CompanyNumbers != null
+                    ? x.CompanyNumbers.Select(cn => new CompanyNumberDto
+                    {
+                        Id = cn.Id,
+                        Number = cn.Number,
+                    }).ToList()
+                    : new List<CompanyNumberDto>()
+            })
+            .FirstOrDefaultAsync()
+                ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>(MessageHelper.GetMessage("NOT_FOUND"));
+
+        return companyProfile;
+    }
+
+    public async Task<DataListDto<VacancyGetByCompanyIdDto>> GetVacanciesByCompanyUserIdAsync(string companyUserId, int skip = 1, int take = 9)
+    {
+        var companyUserGuid = Guid.Parse(companyUserId);
+
+        var query = _context.Vacancies.Where(x => x.Company.UserId == companyUserGuid).AsQueryable().AsNoTracking();
+
+        var vacancies = await query
+            .Skip(Math.Max(0, (skip - 1) * take))
+            .Take(take)
+            .Select(x => new VacancyGetByCompanyIdDto
+            {
+                VacancyId = x.Id,
+                CompanyName = x.CompanyName,
+                Title = x.Title,
+                Location = x.Location,
+                CompanyLogo = $"{_currentUser.BaseUrl}/{x.Company.CompanyLogo}",
+                WorkStyle = x.WorkStyle,
+                WorkType = x.WorkType,
+                StartDate = x.StartDate,
+                ViewCount = x.ViewCount,
+                MainSalary = x.MainSalary,
+                MaxSalary = x.MaxSalary,
+                Status = x.VacancyStatus
+            })
+            .ToListAsync();
+
+        return new DataListDto<VacancyGetByCompanyIdDto>
+        {
+            Datas = vacancies,
+            TotalCount = await query.CountAsync()
+        };
     }
     #endregion
 }

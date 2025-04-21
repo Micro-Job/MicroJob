@@ -194,18 +194,20 @@ namespace Job.Business.Services.Resume
             await UpdatePhoneNumbersAsync(resume, updateDto.PhoneNumbers, updateDto.IsMainNumber);
 
             resume.Educations = updateDto.Educations != null
-                ? await _educationService.UpdateBulkEducationAsync(updateDto.Educations, resume.Id)
+                ? await _educationService.UpdateBulkEducationAsync(updateDto.Educations, resume.Educations, resume.Id)
                 : [];
 
             resume.Experiences = updateDto.Experiences != null
-                ? await _experienceService.UpdateBulkExperienceAsync(updateDto.Experiences, resume.Id)
+                ? await _experienceService.UpdateBulkExperienceAsync(updateDto.Experiences, resume.Experiences, resume.Id)
                 : [];
 
             resume.Languages = updateDto.Languages != null
                 ? await _languageService.UpdateBulkLanguageAsync(updateDto.Languages, resume.Id)
                 : [];
 
-            resume.Certificates = await UpdateCertificatesAsync(updateDto.Certificates ?? []);
+            resume.Certificates = updateDto.Certificates != null
+                ? await _certificateService.UpdateBulkCertificateAsync(updateDto.Certificates, resume.Certificates)
+                : [];
 
             UpdateResumeSkills(resume, updateDto.SkillIds);
 
@@ -457,7 +459,7 @@ namespace Job.Business.Services.Resume
                 IsCitizen = resume.IsCitizen,
                 MilitarySituation = resume.MilitarySituation,
                 Adress = resume.Adress,
-                Position = resume.Position.Name,
+                Position = resume.Position?.Name,
 
                 Skills = resume.ResumeSkills.Select(s => new SkillGetByIdDto
                 {
@@ -686,16 +688,8 @@ namespace Job.Business.Services.Resume
             }
             else
             {
-                _context.Numbers.RemoveRange(resume.PhoneNumbers);
-                resume.PhoneNumbers = await _numberService.UpdateBulkNumberAsync(phoneNumbers, resume.Id);
+                resume.PhoneNumbers = await _numberService.UpdateBulkNumberAsync(phoneNumbers, resume.PhoneNumbers, resume.Id);
             }
-        }
-
-        private async Task<ICollection<Core.Entities.Certificate>> UpdateCertificatesAsync(ICollection<CertificateUpdateDto>? certificatesDto)
-        {
-            return certificatesDto != null
-                ? await _certificateService.UpdateBulkCertificateAsync(certificatesDto)
-                : [];
         }
 
         private static void UpdateResumeSkills(Core.Entities.Resume resume, IEnumerable<Guid>? skillIds)

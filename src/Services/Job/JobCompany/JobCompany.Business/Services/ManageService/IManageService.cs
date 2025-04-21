@@ -1,4 +1,5 @@
 ﻿using JobCompany.Business.Dtos.Common;
+using JobCompany.Business.Dtos.CompanyDtos;
 using JobCompany.Business.Dtos.MessageDtos;
 using JobCompany.Business.Dtos.VacancyDtos;
 
@@ -17,4 +18,7 @@ public interface IManageService
     Task CreateMessageAsync(CreateMessageDto dto);
     Task UpdateMessageAsync(string id, UpdateMessageDto dto);
     Task DeleteMessageAsync(string id);
+
+    Task<CompanyProfileDto> GetCompanyDetailsAsync(string companyUserId);
+    Task<DataListDto<VacancyGetByCompanyIdDto>> GetVacanciesByCompanyUserIdAsync(string companyUserId, int skip = 1, int take = 9);
 }

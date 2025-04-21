@@ -7,3 +7,9 @@ public class GetUsersDataForAdminResponse
     public string Email { get; set; }
     public string MainPhoneNumber { get; set; }
 }
+
+public class PaginatedResponse<GetUsersDataForAdminResponse>
+{
+    public List<GetUsersDataForAdminResponse> Datas { get; set; } = [];
+    public int TotalCount { get; set; }
+}

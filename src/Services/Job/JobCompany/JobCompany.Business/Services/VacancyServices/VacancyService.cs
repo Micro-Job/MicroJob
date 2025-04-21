@@ -3,6 +3,7 @@ using System.Security.Claims;
 using JobCompany.Business.Dtos.CategoryDtos;
 using JobCompany.Business.Dtos.Common;
 using JobCompany.Business.Dtos.CompanyDtos;
+using JobCompany.Business.Dtos.MessageDtos;
 using JobCompany.Business.Dtos.NumberDtos;
 using JobCompany.Business.Dtos.SkillDtos;
 using JobCompany.Business.Dtos.VacancyDtos;
@@ -263,6 +264,14 @@ namespace JobCompany.Business.Services.VacancyServices
 
             var vacancyDto = await _context
                     .Vacancies.Where(x => x.Id == vacancyGuid)
+                    .Include(v => v.VacancySkills)
+                            .ThenInclude(vs => vs.Skill)
+                                .ThenInclude(s => s.Translations)
+                    .Include(x => x.Category)
+                        .ThenInclude(x => x.Translations)
+                    .Include(x => x.VacancyMessages)
+                        .ThenInclude(c => c.Message)
+                            .ThenInclude(x => x.Translations)
                     .Select(x => new VacancyGetByIdDto
                     {
                         Id = x.Id,
@@ -290,16 +299,23 @@ namespace JobCompany.Business.Services.VacancyServices
                         VacancyNumbers = x
                             .VacancyNumbers.Select(vn => new VacancyNumberDto
                             {
+                                Id = vn.Id,
                                 VacancyNumber = vn.Number,
                             })
                             .ToList(),
-                        Skills = x
-                            .VacancySkills.Where(vc => vc.Skill != null)
-                            .Select(vc => new SkillDto { Name = vc.Skill.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name) })
-                            .ToList(),
+                        Skills = x.VacancySkills
+                                .Where(vc => vc.Skill != null)
+                                .Select(vc => new SkillDto
+                                {
+                                    Id = vc.Skill.Id,
+                                    Name = vc.Skill.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name)
+                                }).ToList(),
                         CompanyName = x.CompanyName,
                         CategoryName = x.Category.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name),
-                        CompanyUserId = x.Company.UserId
+                        CompanyUserId = x.Company.UserId,
+                        Messages = _currentUser.UserGuid == x.Company.UserId
+                            ? x.VacancyMessages.Select(vm => vm.Message.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Content)).ToList()
+                            : null
                     })
                     .FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
 

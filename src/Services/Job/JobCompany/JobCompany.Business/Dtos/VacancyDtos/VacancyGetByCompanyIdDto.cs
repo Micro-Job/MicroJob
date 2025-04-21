@@ -15,5 +15,6 @@ namespace JobCompany.Business.Dtos.VacancyDtos
         public int? ViewCount { get; set; }
         public decimal? MainSalary { get; set; }
         public decimal? MaxSalary { get; set; }
+        public VacancyStatus Status { get; set; }
     }
 }
