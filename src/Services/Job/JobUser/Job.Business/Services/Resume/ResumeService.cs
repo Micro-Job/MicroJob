@@ -226,7 +226,7 @@ namespace Job.Business.Services.Resume
                 .AsQueryable()
                 .AsNoTracking();
 
-            query = ApplyFilters(query, fullname, isPublic, professionDegree, citizenship, isExperience, skillIds, languages);
+            query = ApplyFilters(query, fullname, isPublic, professionDegree, citizenship, isExperience, skillIds, languages, jobStatus);
 
             var resumes = await query.Select(x => new ResumeListDto
             {
@@ -265,11 +265,16 @@ namespace Job.Business.Services.Resume
             };
         }
 
-        private IQueryable<Core.Entities.Resume> ApplyFilters(IQueryable<Core.Entities.Resume> query, string? fullname, bool? isPublic, ProfessionDegree? professionDegree, Citizenship? citizenship, bool? isExperience, List<string>? skillIds, List<LanguageFilterDto>? languages)
+        private IQueryable<Core.Entities.Resume> ApplyFilters(IQueryable<Core.Entities.Resume> query, string? fullname, bool? isPublic, ProfessionDegree? professionDegree, Citizenship? citizenship, bool? isExperience, List<string>? skillIds, List<LanguageFilterDto>? languages, JobStatus? jobStatus)
         {
             if (isPublic != null)
             {
                 query = query.Where(x => x.IsPublic == isPublic);
+            }
+
+            if (jobStatus != null)
+            {
+                query = query.Where(x => x.User.JobStatus == jobStatus);
             }
 
             if (!string.IsNullOrEmpty(fullname))
@@ -313,44 +318,57 @@ namespace Job.Business.Services.Resume
             return query;
         }
 
-        public async Task<DataListDto<ResumeListDto>> GetSavedResumesAsync(string? fullName, int skip, int take)
+        public async Task<DataListDto<ResumeListDto>> GetSavedResumesAsync(string? fullName, bool? isPublic, JobStatus? jobStatus, ProfessionDegree? professionDegree, Citizenship? citizenship, bool? isExperience, List<string>? skillIds, List<LanguageFilterDto>? languages, int skip, int take)
         {
-            var query = _context.SavedResumes.Include(sr => sr.Resume).ThenInclude(r => r.ResumeSkills).ThenInclude(rs => rs.Skill.Translations).Where(x => x.CompanyUserId == _currentUser.UserGuid);
+            var resumeQuery = _context.SavedResumes
+                .Where(sr => sr.CompanyUserId == _currentUser.UserGuid)
+                .Include(sr => sr.Resume)
+                    .ThenInclude(r => r.ResumeSkills)
+                        .ThenInclude(rs => rs.Skill.Translations)
+                .Include(sr => sr.Resume.Languages)
+                .Include(sr => sr.Resume.CompanyResumeAccesses)
+                .Select(sr => sr.Resume)
+                .AsNoTracking();
 
-            var resumes = await query.Select(x => new ResumeListDto
-            {
-                Id = x.ResumeId,
-                FullName = x.Resume.IsPublic ? $"{x.Resume.FirstName} {x.Resume.LastName}" : null,
-                ProfileImage = (x.Resume.IsPublic || (x.Resume.CompanyResumeAccesses != null && x.Resume.CompanyResumeAccesses.Any(cra => cra.CompanyUserId == _currentUser.UserGuid))) && x.Resume.UserPhoto != null
-                ? $"{_currentUser.BaseUrl}/{x.Resume.UserPhoto}"
-                : null,
-                IsSaved = x.Resume.SavedResumes.Any(sr => sr.ResumeId == x.ResumeId && sr.CompanyUserId == _currentUser.UserGuid),
-                IsPublic = x.Resume.IsPublic,
-                JobStatus = x.Resume.User.JobStatus,
-                LastWork = x.Resume.Experiences
-                    .OrderByDescending(e => e.StartDate)
-                    .Select(e => new LastWorkDto
-                    {
-                        CompanyName = e.OrganizationName,
-                        Position = e.PositionName,
-                        StartDate = e.StartDate,
-                        EndDate = e.EndDate
-                    })
-                    .FirstOrDefault(),
-                SkillsName = x.Resume.ResumeSkills
-                .Select(s => s.Skill.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name))
-                .ToList(),
-                Position = x.Resume.Position != null ? x.Resume.Position.Name : null,
-                HasAccess = x.Resume.IsPublic || (x.Resume.CompanyResumeAccesses != null && x.Resume.CompanyResumeAccesses.Any(cra => cra.CompanyUserId == _currentUser.UserGuid))
-            })
-            .Skip(Math.Max(0, (skip - 1) * take))
-            .Take(take)
-            .ToListAsync();
+            resumeQuery = ApplyFilters(resumeQuery, fullName, isPublic, professionDegree, citizenship, isExperience, skillIds, languages, jobStatus);
+
+            var resumes = await resumeQuery
+               .Select(x => new ResumeListDto
+               {
+                   Id = x.Id,
+                   FullName = x.IsPublic ? $"{x.FirstName} {x.LastName}" : x.CompanyResumeAccesses.Any(cra => cra.CompanyUserId == _currentUser.UserGuid) ? $"{x.FirstName} {x.LastName}" : null,
+                   ProfileImage = x.UserPhoto != null
+                       ? x.IsPublic || x.CompanyResumeAccesses.Any(cra => cra.CompanyUserId == _currentUser.UserGuid)
+                           ? $"{_currentUser.BaseUrl}/{x.UserPhoto}"
+                           : null
+                       : null,
+                   IsSaved = true,
+                   IsPublic = x.IsPublic,
+                   JobStatus = x.User.JobStatus,
+                   LastWork = x.Experiences
+                       .OrderByDescending(e => e.StartDate)
+                       .Select(e => new LastWorkDto
+                       {
+                           CompanyName = e.OrganizationName,
+                           Position = e.PositionName,
+                           StartDate = e.StartDate,
+                           EndDate = e.EndDate
+                       })
+                       .FirstOrDefault(),
+                   SkillsName = x.ResumeSkills
+                       .Select(s => s.Skill.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name))
+                       .ToList(),
+                   Position = x.Position != null ? x.Position.Name : null,
+                   HasAccess = x.IsPublic || x.CompanyResumeAccesses.Any(cra => cra.CompanyUserId == _currentUser.UserGuid)
+               })
+               .Skip(Math.Max(0, (skip - 1) * take))
+               .Take(take)
+               .ToListAsync();
 
             return new DataListDto<ResumeListDto>
             {
                 Datas = resumes,
-                TotalCount = await query.CountAsync()
+                TotalCount = await resumeQuery.CountAsync()
             };
         }
 

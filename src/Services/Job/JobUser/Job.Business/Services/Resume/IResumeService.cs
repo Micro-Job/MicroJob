@@ -25,7 +25,10 @@ namespace Job.Business.Services.Resume
             List<LanguageFilterDto>? languages,
             int skip,
             int take);
-        Task<DataListDto<ResumeListDto>> GetSavedResumesAsync(string? fullName , int skip , int take);
+
+        Task<DataListDto<ResumeListDto>> GetSavedResumesAsync(string? fullName, bool? isPublic, JobStatus? jobStatus, ProfessionDegree? professionDegree, Citizenship? citizenship,
+            bool? isExperience, List<string>? skillIds, List<LanguageFilterDto>? languages, int skip, int take);
+
         Task<ResumeDetailItemDto> GetByIdResumeAysnc(string id);
         Task ToggleSaveResumeAsync(string resumeId);
         Task<bool> IsExistResumeAsync();
