@@ -258,7 +258,7 @@ namespace JobCompany.Business.Services.VacancyServices
         public async Task<VacancyGetByIdDto> GetByIdVacancyAsync(string id)
         {
             var vacancyGuid = Guid.Parse(id);
-
+                
             Guid? userGuid = _currentUser.UserGuid;
 
             var vacancyDto = await _context
@@ -274,6 +274,7 @@ namespace JobCompany.Business.Services.VacancyServices
                         Location = x.Location,
                         ViewCount = x.ViewCount,
                         WorkType = x.WorkType,
+                        WorkStyle = x.WorkStyle,
                         MainSalary = x.MainSalary,
                         MaxSalary = x.MaxSalary,
                         Requirement = x.Requirement,
