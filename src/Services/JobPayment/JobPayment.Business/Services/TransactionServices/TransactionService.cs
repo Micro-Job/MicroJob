@@ -106,7 +106,10 @@ namespace JobPayment.Business.Services.TransactionServices
 
         public async Task<TransactionDetailDto> GetTransactionDetailAsync(string transactionId)
         {
-            var transaction = await _context.Transactions.Where(x => x.Id == Guid.Parse(transactionId) && x.UserId == _currentUser.UserGuid)
+            //TODO : bu hisse hem de admin ve ya operator terefinden islenir deye UserId silindi amma silinmeli deyil (muveqqeti hell)
+            //var transaction = await _context.Transactions.Where(x => x.Id == Guid.Parse(transactionId) && x.UserId == _currentUser.UserGuid)
+
+            var transaction = await _context.Transactions.Where(x => x.Id == Guid.Parse(transactionId))
             .Select(x => new TransactionDetailDto
             {
                 CompanyName = null,

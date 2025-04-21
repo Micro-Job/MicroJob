@@ -25,7 +25,7 @@ namespace JobCompany.Business.Consumers
         {
             var vacancyGuid = Guid.Parse(context.Message.vacancyId);
 
-            var vacancy = await _context.Vacancies.FirstOrDefaultAsync(v => v.Id == vacancyGuid)
+            var vacancy = await _context.Vacancies.Include(x=> x.Company).FirstOrDefaultAsync(v => v.Id == vacancyGuid)
                 ?? throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
 
             var balanceResponse = await _balanceRequest.GetResponse<CheckBalanceResponse>(new CheckBalanceRequest
@@ -44,13 +44,18 @@ namespace JobCompany.Business.Consumers
                         InformationType = InformationType.Vacancy,
                         UserId = vacancy.Company.UserId
                     });
+
+                    vacancy.PaymentDate = DateTime.Now.AddDays(1);
+                    vacancy.VacancyStatus = VacancyStatus.Active;
+                    await _context.SaveChangesAsync();
+
                     await _notificationService.CreateNotificationAsync(new CreateNotificationDto
                     {
                         SenderId = null,
                         InformationId = vacancyGuid,
                         NotificationType = NotificationType.VacancyAccept,
                         InformationName = vacancy.Title,
-                        ReceiverId = vacancy.Company.UserId
+                        ReceiverId = (Guid)vacancy.CompanyId
                     });
                     if (vacancy.VacancyStatus == VacancyStatus.Update)
                     {
@@ -70,12 +75,12 @@ namespace JobCompany.Business.Consumers
                             ReceiverIds = appliedUserIds
                         });
                     }
-
-                    vacancy.PaymentDate = DateTime.Now.AddDays(1);
-                    vacancy.VacancyStatus = VacancyStatus.Active;
                 }
                 else
                 {
+                    vacancy.VacancyStatus = VacancyStatus.PendingActive;
+                    await _context.SaveChangesAsync();
+
                     await _notificationService.CreateNotificationAsync(new CreateNotificationDto
                     {
                         SenderId = null,
@@ -84,7 +89,6 @@ namespace JobCompany.Business.Consumers
                         InformationName = vacancy.Title,
                         ReceiverId = vacancy.Company.UserId
                     });
-                    vacancy.VacancyStatus = VacancyStatus.PendingActive;
                 }
             }
 

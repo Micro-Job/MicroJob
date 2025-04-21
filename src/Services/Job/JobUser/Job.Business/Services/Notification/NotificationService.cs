@@ -32,7 +32,6 @@ namespace Job.Business.Services.Notification
             };
 
             await _context.Notifications.AddAsync(notification);
-            await _context.SaveChangesAsync();
         }
 
         public async Task<PaginatedNotificationDto> GetUserNotificationsAsync(bool? IsSeen, int skip = 1, int take = 6)

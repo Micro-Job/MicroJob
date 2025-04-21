@@ -290,7 +290,6 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
     }
     #endregion
 
-
     #region Company
     public async Task<CompanyProfileDto> GetCompanyDetailsAsync(string companyUserId)
     {
