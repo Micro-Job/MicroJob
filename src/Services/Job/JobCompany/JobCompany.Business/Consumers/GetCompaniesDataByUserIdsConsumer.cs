@@ -15,12 +15,18 @@ public class GetCompaniesDataByUserIdsConsumer(JobCompanyDbContext _jobCompanyDb
 
         if (userIds.Count == 0)
         {
-            await context.RespondAsync(new GetCompaniesDataByUserIdsResponse { Companies = new Dictionary<Guid, CompanyNameAndImageDto>() });
+            await context.RespondAsync(new GetCompaniesDataByUserIdsResponse { Companies = [] });
             return;
         }
+        
+        var query = _jobCompanyDb.Companies.Where(c => userIds.Contains(c.UserId));
 
-        var companies = await _jobCompanyDb.Companies
-            .Where(u => userIds.Contains(u.UserId))
+        if (!string.IsNullOrEmpty(context.Message.CompanyName))
+        {
+            query = query.Where(c => c.CompanyName != null && c.CompanyName.ToLower().Contains(context.Message.CompanyName));
+        }
+
+        var companies = await query
             .ToDictionaryAsync(
                 u => u.UserId,
                 u => new CompanyNameAndImageDto { CompanyName = u.CompanyName, CompanyLogo = u.CompanyLogo }

@@ -2,6 +2,7 @@
 using AuthService.Business.Services.UserServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SharedLibrary.Enums;
 
 namespace AuthService.API.Controllers
 {
@@ -15,6 +16,13 @@ namespace AuthService.API.Controllers
         {
             var data = await userService.GetUserInformationAsync();
             return Ok(data);
+        }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetAllUsers(UserRole userRole, string? searchTerm, int pageIndex = 1, int pageSize = 10)
+        {
+            var result = await userService.GetAllUsersAsync(userRole, searchTerm, pageIndex, pageSize);
+            return Ok(result);
         }
 
         [HttpPut("[action]")]

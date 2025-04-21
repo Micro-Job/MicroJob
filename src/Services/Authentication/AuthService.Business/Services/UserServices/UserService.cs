@@ -22,12 +22,14 @@ namespace AuthService.Business.Services.UserServices
         private readonly AppDbContext _context;
         private readonly IFileService _fileService;
         private readonly ICurrentUser _currentUser;
+        private readonly IRequestClient<GetCompaniesDataByUserIdsRequest> _companyDataRequest;
 
-        public UserService(AppDbContext context, IFileService fileService, ICurrentUser currentUser)
+        public UserService(AppDbContext context, IFileService fileService, ICurrentUser currentUser, IRequestClient<GetCompaniesDataByUserIdsRequest> companyDataRequest)
         {
             _context = context;
             _fileService = fileService;
             _currentUser = currentUser;
+            _companyDataRequest = companyDataRequest;
         }
 
         /// <summary> Loginde olan User informasiyası </summary>
@@ -46,7 +48,7 @@ namespace AuthService.Business.Services.UserServices
                         Image = x.Image != null ? $"{_currentUser.BaseUrl}/{x.Image}" : null,
                         UserRole = x.UserRole,
                         JobStatus = x.JobStatus,
-                    }) ??throw new NotFoundException<User>(MessageHelper.GetMessage("NOTFOUNDEXCEPTION_USER"));
+                    }) ?? throw new NotFoundException<User>(MessageHelper.GetMessage("NOTFOUNDEXCEPTION_USER"));
 
             return user;
         }
@@ -119,5 +121,83 @@ namespace AuthService.Business.Services.UserServices
                 ImageUrl = $"{_currentUser.BaseUrl}/{user.Image}",
             };
         }
+
+        /// <summary> Admin paneldə bütün istifadəçilər siyahısının göründüyü hissə </summary>  
+        public async Task<DataListDto<BasicUserInfoDto>> GetAllUsersAsync(UserRole userRole, string? searchTerm, int pageIndex = 1, int pageSize = 10)
+        {
+            var userQuery = _context.Users.Where(u => u.UserRole == userRole);
+
+            if (searchTerm != null)
+                searchTerm = searchTerm.Trim().ToLower();
+
+            List<Guid> filteredUserIds = [];
+            Dictionary<Guid, CompanyNameAndImageDto> companyDataByUserId = [];
+
+            // CompanyUser və EmployeeUserdirsə şirkət adını gətirmək üçün jobcompany-yə sorğu atır
+            if (userRole == UserRole.CompanyUser || userRole == UserRole.EmployeeUser)
+            {
+                var allUserIds = await userQuery.Select(u => u.Id).ToListAsync();
+
+                var companyResponse = await _companyDataRequest.GetResponse<GetCompaniesDataByUserIdsResponse>(
+                    new GetCompaniesDataByUserIdsRequest
+                    {
+                        UserIds = allUserIds,
+                        CompanyName = string.IsNullOrWhiteSpace(searchTerm) ? null : searchTerm
+                    });
+
+                companyDataByUserId = companyResponse.Message.Companies;
+                filteredUserIds = companyDataByUserId.Keys.ToList();
+
+                if (filteredUserIds.Count == 0)
+                {
+                    return new DataListDto<BasicUserInfoDto>
+                    {
+                        Datas = [],
+                        TotalCount = 0
+                    };
+                }
+
+                userQuery = userQuery.Where(u => filteredUserIds.Contains(u.Id));
+            }
+            else if (userRole == UserRole.SimpleUser && !string.IsNullOrWhiteSpace(searchTerm))
+            {
+                // SimpleUser üçün searchTerm varsa, fullname ilə axtarış edir
+                userQuery = userQuery
+                    .Where(u => (u.FirstName + " " + u.LastName).ToLower().Contains(searchTerm));
+            }
+
+            var totalCount = await userQuery.CountAsync();
+
+            var users = await userQuery
+                .Skip((pageIndex - 1) * pageSize)
+                .Take(pageSize)
+                .Select(u => new BasicUserInfoDto
+                {
+                    UserId = u.Id,
+                    FullName = $"{u.FirstName} {u.LastName}",
+                    Email = u.Email,
+                    MainPhoneNumber = u.MainPhoneNumber
+                })
+                .ToListAsync();
+
+            // CompanyUser və EmployeeUser üçün CompanyName əvəzlənməsi
+            if (companyDataByUserId.Count != 0)
+            {
+                foreach (var user in users)
+                {
+                    if (companyDataByUserId.TryGetValue(user.UserId, out var companyInfo))
+                    {
+                        user.FullName = companyInfo.CompanyName ?? user.FullName;
+                    }
+                }
+            }
+
+            return new DataListDto<BasicUserInfoDto>
+            {
+                Datas = users,
+                TotalCount = totalCount
+            };
+        }
+
     }
 }
