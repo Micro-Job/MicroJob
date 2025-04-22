@@ -1,4 +1,5 @@
-﻿using JobCompany.Business.Consumers;
+﻿using JobCompany.Business.BackgroundServices;
+using JobCompany.Business.Consumers;
 using JobCompany.Business.Services.AnswerServices;
 using JobCompany.Business.Services.ApplicationServices;
 using JobCompany.Business.Services.CategoryServices;
@@ -27,6 +28,7 @@ namespace JobCompany.Business
         public static void AddJobCompanyServices(this IServiceCollection services)
         {
             services.AddHttpContextAccessor();
+            services.AddHostedService<PeriodicPayPublisherService>();
             services.AddScoped<IFileService, FileService>();
             services.AddScoped<IVacancyService, VacancyService>();
             services.AddScoped<IStatusService, StatusService>();
@@ -65,11 +67,11 @@ namespace JobCompany.Business
                 x.AddConsumer<GetCompaniesDataByUserIdsConsumer>();
                 x.AddConsumer<VacancyAcceptConsumer>();
                 x.AddConsumer<CheckApplicationConsumer>();
+                x.AddConsumer<PeriodicVacancyPayConsumer>();
 
                 x.SetKebabCaseEndpointNameFormatter();
 
-                x.UsingRabbitMq(
-                    (context, cfg) =>
+                x.UsingRabbitMq((context, cfg) =>
                     {
                         cfg.Host(cString);
 

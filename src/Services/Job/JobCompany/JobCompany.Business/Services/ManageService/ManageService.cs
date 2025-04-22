@@ -170,7 +170,8 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
             WorkStyle = x.WorkStyle,
             WorkType = x.WorkType,
             //bu yaradilma tarixidir(normalda baslama tarixi olur)
-            StartDate = x.CreatedDate
+            StartDate = x.CreatedDate,
+            EndDate = x.EndDate
         })
         .Skip((skip - 1) * take)
         .Take(take)

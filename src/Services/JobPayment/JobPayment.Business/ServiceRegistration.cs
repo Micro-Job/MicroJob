@@ -34,6 +34,7 @@ namespace JobPayment.Business
             {
                 x.AddConsumer<CreateBalanceConsumer>();
                 x.AddConsumer<CheckBalanceConsumer>();
+                x.AddConsumer<CheckBalancesConsumer>();
                 x.AddConsumer<PayConsumer>();
 
                 x.SetKebabCaseEndpointNameFormatter();

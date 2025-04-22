@@ -13,5 +13,7 @@ namespace JobPayment.Business.Services.BalanceServices
         public Task IncreaseBalanceAsync(string packetId);
         public Task<Balance> GetOwnBalanceAsync();
         public Task<Balance> GetUserBalanceByIdAsync(Guid userId);
+
+        public Task<List<Balance>> GetUsersBalancesAsync(ICollection<Guid> userIds);
     }
 }

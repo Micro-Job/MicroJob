@@ -35,13 +35,13 @@ namespace JobPayment.Business.Services.BalanceServices
             });
 
             myBalance.Coin += existPacket.Coin;
-                
+
             await _context.SaveChangesAsync();
         }
 
         public async Task<Balance> GetOwnBalanceAsync()
         {
-            var myBalance = await _context.Balances.FirstOrDefaultAsync(x=> x.UserId == _currentUser.UserGuid) 
+            var myBalance = await _context.Balances.FirstOrDefaultAsync(x => x.UserId == _currentUser.UserGuid)
                             ?? throw new NotFoundException<Balance>();
 
             return myBalance;
@@ -49,10 +49,17 @@ namespace JobPayment.Business.Services.BalanceServices
 
         public async Task<Balance> GetUserBalanceByIdAsync(Guid userId)
         {
-            var userBalance = await _context.Balances.FirstOrDefaultAsync(x=> x.UserId == userId) 
+            var userBalance = await _context.Balances.FirstOrDefaultAsync(x => x.UserId == userId)
                                     ?? throw new NotFoundException<Balance>("Balance mövcud deyil");
 
             return userBalance;
+        }
+
+        public async Task<List<Balance>> GetUsersBalancesAsync(ICollection<Guid> userIds)
+        {
+            List<Balance> userBalances = await _context.Balances.Where(x => userIds.Contains(x.UserId)).ToListAsync();
+
+            return userBalances;
         }
     }
 }

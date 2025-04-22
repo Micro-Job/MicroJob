@@ -129,18 +129,18 @@ namespace JobCompany.Business.Services.VacancyServices
             await _context.Vacancies.AddAsync(vacancy);
             await _context.SaveChangesAsync();
 
-            if (vacancyDto.SkillIds != null)
-            {
-                await _publishEndpoint.Publish(
-                    new VacancyCreatedEvent
-                    {
-                        SenderId = (Guid)_currentUser.UserGuid,
-                        SkillIds = vacancyDto.SkillIds,
-                        InformationId = vacancy.Id,
-                        InformatioName = vacancy.Title,
-                    }
-                );
-            }
+            //if (vacancyDto.SkillIds != null)
+            //{
+            //    await _publishEndpoint.Publish(
+            //        new VacancyCreatedEvent
+            //        {
+            //            SenderId = (Guid)_currentUser.UserGuid,
+            //            SkillIds = vacancyDto.SkillIds,
+            //            InformationId = vacancy.Id,
+            //            InformatioName = vacancy.Title,
+            //        }
+            //    );
+            //}
         }
 
         public async Task DeleteAsync(List<string> ids)
