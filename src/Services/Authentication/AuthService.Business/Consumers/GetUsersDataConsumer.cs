@@ -17,7 +17,7 @@ public class GetUsersDataConsumer(AppDbContext _appDbContext) : IConsumer<GetUse
         if (!string.IsNullOrEmpty(context.Message.FullName))
         {
             var fullName = context.Message.FullName.Trim().ToLower();
-            query = query.Where(x => $"{x.FirstName} {x.LastName}".ToLower().Contains(fullName));
+            query = query.Where(x => (x.FirstName + " " + x.LastName).ToLower().Contains(fullName));
         }
 
         var users = await query
