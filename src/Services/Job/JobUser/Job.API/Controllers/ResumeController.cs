@@ -1,6 +1,7 @@
 using Job.Business.Dtos.LanguageDtos;
 using Job.Business.Dtos.ResumeDtos;
 using Job.Business.Services.Resume;
+using Job.Core.Entities;
 using Job.Core.Enums;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Enums;
@@ -58,9 +59,17 @@ namespace Job.API.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetSavedResumes(string? fullname, int skip = 1, int take = 9)
+        public async Task<IActionResult> GetSavedResumes([FromQuery] string? fullname,
+            [FromQuery] bool? isPublic,
+            [FromQuery] ProfessionDegree? professionDegree,
+            [FromQuery] Citizenship? citizenship,
+            [FromQuery] bool? isExperience,
+            [FromQuery] JobStatus? jobStatus,
+            [FromQuery] List<string>? skillIds,
+            [FromQuery] List<LanguageFilterDto>? languages,
+            [FromQuery] int skip = 1, [FromQuery] int take = 9)
         {
-            return Ok(await _resumeService.GetSavedResumesAsync(fullname, skip, take));
+            return Ok(await _resumeService.GetSavedResumesAsync(fullname, isPublic, jobStatus, professionDegree,citizenship, isExperience, skillIds, languages, skip, take));
         }
 
         [HttpPost("[action]")]
