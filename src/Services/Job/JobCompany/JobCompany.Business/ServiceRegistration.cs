@@ -28,7 +28,7 @@ namespace JobCompany.Business
         public static void AddJobCompanyServices(this IServiceCollection services)
         {
             services.AddHttpContextAccessor();
-            services.AddHostedService<PeriodicPayPublisherService>();
+            //services.AddHostedService<PeriodicPayPublisherService>();
             services.AddScoped<IFileService, FileService>();
             services.AddScoped<IVacancyService, VacancyService>();
             services.AddScoped<IStatusService, StatusService>();
