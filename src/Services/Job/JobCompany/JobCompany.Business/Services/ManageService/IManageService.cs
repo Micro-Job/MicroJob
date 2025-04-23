@@ -1,4 +1,5 @@
-﻿using JobCompany.Business.Dtos.Common;
+﻿using JobCompany.Business.Dtos.CategoryDtos;
+using JobCompany.Business.Dtos.Common;
 using JobCompany.Business.Dtos.CompanyDtos;
 using JobCompany.Business.Dtos.MessageDtos;
 using JobCompany.Business.Dtos.VacancyDtos;
@@ -21,4 +22,10 @@ public interface IManageService
 
     Task<CompanyProfileDto> GetCompanyDetailsAsync(string companyUserId);
     Task<DataListDto<VacancyGetByCompanyIdDto>> GetVacanciesByCompanyUserIdAsync(string companyUserId, int skip = 1, int take = 9);
+
+    Task<DataListDto<CategoryWithTranslationsDto>> GetAllCategoriesAsync(int pageNumber = 1, int pageSize = 10);
+    Task<CategoryDto> GetCategoryByIdAsync(string id);
+    Task CreateCategoryAsync(CategoryCreateDto dto);
+    Task UpdateCategoryAsync(string id, List<CategoryTranslationDto> categories);
+    Task DeleteCategoryAsync(string id);
 }

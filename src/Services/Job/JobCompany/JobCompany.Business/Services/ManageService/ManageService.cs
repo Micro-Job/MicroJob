@@ -1,4 +1,5 @@
-﻿using JobCompany.Business.Dtos.Common;
+﻿using JobCompany.Business.Dtos.CategoryDtos;
+using JobCompany.Business.Dtos.Common;
 using JobCompany.Business.Dtos.CompanyDtos;
 using JobCompany.Business.Dtos.MessageDtos;
 using JobCompany.Business.Dtos.NumberDtos;
@@ -34,7 +35,7 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
         var vacancyGuid = Guid.Parse(dto.VacancyId);
         var vacancyMessageGuid = Guid.Parse(dto.VacancyMessageId);
 
-        if (await _context.Messages.AnyAsync(x=> x.Id == vacancyMessageGuid))
+        if (await _context.Messages.AnyAsync(x => x.Id == vacancyMessageGuid))
             throw new NotFoundException<Message>(MessageHelper.GetMessage("NOT_FOUND"));
 
         var vacancy = await _context.Vacancies
@@ -109,13 +110,13 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
         await _context.SaveChangesAsync();
     }
 
-    public async Task<DataListDto<VacancyGetAllDto>> GetAllVacanciesAsync(string? vacancyName , string? startMinDate ,  string? startMaxDate , string? endMinDate , string? endMaxDate , string? companyName , byte? vacancyStatus , int skip = 1,int take = 10)
+    public async Task<DataListDto<VacancyGetAllDto>> GetAllVacanciesAsync(string? vacancyName, string? startMinDate, string? startMaxDate, string? endMinDate, string? endMaxDate, string? companyName, byte? vacancyStatus, int skip = 1, int take = 10)
     {
         var query = _context.Vacancies
-            .Where(x => x.VacancyStatus == VacancyStatus.Pending || 
+            .Where(x => x.VacancyStatus == VacancyStatus.Pending ||
                         x.VacancyStatus == VacancyStatus.Active ||
                         x.VacancyStatus == VacancyStatus.Reject ||
-                        x.VacancyStatus == VacancyStatus.PendingUpdate) 
+                        x.VacancyStatus == VacancyStatus.PendingUpdate)
             .OrderBy(x => x.VacancyStatus)
             .AsQueryable()
             .AsNoTracking();
@@ -151,7 +152,7 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
                 query = query.Where(x => x.EndDate <= Max);
         }
 
-        if(companyName != null)
+        if (companyName != null)
             query = query.Where(x => x.CompanyName.Contains(companyName));
 
         if (vacancyName != null)
@@ -364,6 +365,106 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
             Datas = vacancies,
             TotalCount = await query.CountAsync()
         };
+    }
+    #endregion
+
+    #region Category
+    public async Task<DataListDto<CategoryWithTranslationsDto>> GetAllCategoriesAsync(int pageNumber = 1, int pageSize = 10)
+    {
+        var query = _context.Categories.AsQueryable();
+
+        var totalCount = await query.CountAsync();
+
+        var categoryDtos = await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .Select(m => new CategoryWithTranslationsDto
+            {
+                Id = m.Id,
+                IsCompany = m.IsCompany,
+                Translations = m.Translations.Select(t => new CategoryTranslationDto
+                {
+                    Language = t.Language,
+                    Name = t.Name
+                }).ToList()
+            }).ToListAsync();
+
+        return new DataListDto<CategoryWithTranslationsDto>
+        {
+            Datas = categoryDtos,
+            TotalCount = totalCount
+        };
+    }
+
+    public async Task<CategoryDto> GetCategoryByIdAsync(string id)
+    {
+        var categoryGuid = Guid.Parse(id);
+        var category = await _context.Categories
+            .Include(m => m.Translations)
+            .FirstOrDefaultAsync(m => m.Id == categoryGuid)
+            ?? throw new NotFoundException<Message>(MessageHelper.GetMessage("NOT_FOUND"));
+
+        return new CategoryDto
+        {
+            Id = category.Id,
+            IsCompany = category.IsCompany,
+            Name = category.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name)
+        };
+    }
+
+    public async Task CreateCategoryAsync(CategoryCreateDto dto)
+    {
+        var category = new Category
+        {
+            IsCompany = false,
+            Translations = dto.Categories.Select(t => new CategoryTranslation
+            {
+                Name = t.Name,
+                Language = t.language
+            }).ToList()
+        };
+        await _context.Categories.AddAsync(category);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task UpdateCategoryAsync(string id, List<CategoryTranslationDto> categories)
+    {
+        var categoryGuid = Guid.Parse(id);
+        var category = await _context.Categories
+            .Include(m => m.Translations)
+            .FirstOrDefaultAsync(m => m.Id == categoryGuid)
+            ?? throw new NotFoundException<Category>(MessageHelper.GetMessage("NOT_FOUND"));
+        foreach (var dtoTranslation in categories)
+        {
+            var existingTranslation = category.Translations
+                .FirstOrDefault(t => t.Language == dtoTranslation.Language);
+            if (existingTranslation != null) // Mövcud olan tərcüməni yeniləyirik
+            {
+                existingTranslation.Name = dtoTranslation.Name;
+            }
+            else // Yeni tərcümə əlavə edirik
+            {
+                category.Translations.Add(new CategoryTranslation
+                {
+                    CategoryId = categoryGuid,
+                    Language = dtoTranslation.Language,
+                    Name = dtoTranslation.Name
+                });
+            }
+        }
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task DeleteCategoryAsync(string id)
+    {
+        var categoryGuid = Guid.Parse(id);
+        var category = await _context.Categories
+            .Include(m => m.Translations)
+            .FirstOrDefaultAsync(m => m.Id == categoryGuid)
+            ?? throw new NotFoundException<Category>(MessageHelper.GetMessage("NOT_FOUND"));
+        
+        _context.Categories.Remove(category);
+        await _context.SaveChangesAsync();
     }
     #endregion
 }
