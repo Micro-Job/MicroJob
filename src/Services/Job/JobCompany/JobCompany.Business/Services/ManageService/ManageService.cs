@@ -10,6 +10,7 @@ using JobCompany.Business.Statistics;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using MassTransit;
+using MassTransit.SagaStateMachine;
 using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Enums;
 using SharedLibrary.Events;
@@ -116,8 +117,8 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
             .Where(x => x.VacancyStatus == VacancyStatus.Pending ||
                         x.VacancyStatus == VacancyStatus.Active ||
                         x.VacancyStatus == VacancyStatus.Reject ||
-                        x.VacancyStatus == VacancyStatus.PendingUpdate)
-            .OrderBy(x => x.VacancyStatus)
+                        x.VacancyStatus == VacancyStatus.PendingUpdate) 
+            .OrderBy(x => x.VacancyStatus).ThenBy(x=> x.CreatedDate)
             .AsQueryable()
             .AsNoTracking();
 
@@ -183,6 +184,58 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
             Datas = data,
             TotalCount = await query.CountAsync()
         };
+    }
+
+    public async Task<VacancyGetByIdDto> GetByIdVacancyAsync(Guid vacancyGuid)
+    {
+        var vacancyDto = await _context.Vacancies
+            .Where(x => x.Id == vacancyGuid)
+                .Include(x => x.Category)
+                    .ThenInclude(x => x.Translations)
+                .Include(x => x.VacancyMessages)
+                    .ThenInclude(c => c.Message)
+                        .ThenInclude(x => x.Translations)
+                .Select(x => new VacancyGetByIdDto
+                {
+                    Id = x.Id,
+                    Title = x.Title,
+                    CompanyId = x.CompanyId,
+                    CompanyLogo = $"{_currentUser.BaseUrl}/{x.Company.CompanyLogo}",
+                    StartDate = x.StartDate,
+                    EndDate = x.EndDate,
+                    Location = x.Location,
+                    ViewCount = x.ViewCount,
+                    WorkType = x.WorkType,
+                    WorkStyle = x.WorkStyle,
+                    MainSalary = x.MainSalary,
+                    MaxSalary = x.MaxSalary,
+                    Requirement = x.Requirement,
+                    Description = x.Description,
+                    Email = x.Email,
+                    Gender = x.Gender,
+                    Military = x.Military,
+                    Family = x.Family,
+                    Driver = x.Driver,
+                    Citizenship = x.Citizenship,
+                    ExamId = x.ExamId,
+                    VacancyNumbers = x
+                        .VacancyNumbers.Select(vn => new VacancyNumberDto
+                        {
+                            Id = vn.Id,
+                            VacancyNumber = vn.Number,
+                        })
+                        .ToList(),
+                    CompanyName = x.CompanyName,
+                    CategoryName = x.Category.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name),
+                    CompanyUserId = x.Company.UserId,
+                    //Messages = _currentUser.UserGuid == x.Company.UserId
+                    //    ? x.VacancyMessages.Select(vm => vm.Message.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Content)).ToList()
+                    //    : null,
+                    VacancyStatus = x.VacancyStatus
+                })
+                .FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
+
+        return vacancyDto;
     }
 
     #endregion
