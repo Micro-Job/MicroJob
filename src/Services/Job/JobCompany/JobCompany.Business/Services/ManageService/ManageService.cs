@@ -36,7 +36,7 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
         var vacancyGuid = Guid.Parse(dto.VacancyId);
         var vacancyMessageGuid = Guid.Parse(dto.VacancyMessageId);
 
-        if (await _context.Messages.AnyAsync(x => x.Id == vacancyMessageGuid))
+        if (!await _context.Messages.AnyAsync(x => x.Id == vacancyMessageGuid))
             throw new NotFoundException<Message>(MessageHelper.GetMessage("NOT_FOUND"));
 
         var vacancy = await _context.Vacancies
