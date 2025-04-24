@@ -36,7 +36,7 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
         var vacancyGuid = Guid.Parse(dto.VacancyId);
         var vacancyMessageGuid = Guid.Parse(dto.VacancyMessageId);
 
-        if (await _context.Messages.AnyAsync(x => x.Id == vacancyMessageGuid))
+        if (!await _context.Messages.AnyAsync(x => x.Id == vacancyMessageGuid))
             throw new NotFoundException<Message>(MessageHelper.GetMessage("NOT_FOUND"));
 
         var vacancy = await _context.Vacancies
@@ -300,7 +300,7 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
         };
     }
 
-    public async Task<Message> CreateMessageAsync(CreateMessageDto dto)
+    public async Task<MessageWithTranslationsDto> CreateMessageAsync(CreateMessageDto dto)
     {
         var message = new Message
         {
@@ -316,7 +316,16 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
         await _context.Messages.AddAsync(message);
         await _context.SaveChangesAsync();
 
-        return message;
+        return new MessageWithTranslationsDto
+        {
+            Id = message.Id,
+            CreatedDate = message.CreatedDate,
+            Translations = message.Translations.Select(t => new MessageTranslationDto
+            {
+                Language = t.Language,
+                Content = t.Content
+            }).ToList()
+        };
     }
 
     public async Task UpdateMessageAsync(string id, UpdateMessageDto dto)

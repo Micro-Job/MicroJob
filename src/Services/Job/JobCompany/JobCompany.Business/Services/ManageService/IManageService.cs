@@ -20,7 +20,7 @@ public interface IManageService
     Task<DataListDto<MessageWithTranslationsDto>> GetAllMessagesAsync(int pageNumber = 1, int pageSize = 10);
     Task<List<MessageSelectDto>> GetAllMessagesForSelectAsync();
     Task<MessageDto> GetMessageByIdAsync(string id);
-    Task<Message> CreateMessageAsync(CreateMessageDto dto);
+    Task<MessageWithTranslationsDto> CreateMessageAsync(CreateMessageDto dto);
     Task UpdateMessageAsync(string id, UpdateMessageDto dto);
     Task DeleteMessageAsync(string id);
 
