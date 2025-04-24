@@ -114,7 +114,6 @@ namespace Job.API
             });
 
             var app = builder.Build();
-            app.UseStaticFiles();
 
             if (app.Environment.IsDevelopment())
             {
@@ -126,6 +125,7 @@ namespace Job.API
             }
 
             app.UseHttpsRedirection();
+            app.UseCors("_myAllowSpecificOrigins");
             app.UseStaticFiles();
             app.UseMiddleware<LanguageMiddleware>();
 
@@ -134,7 +134,6 @@ namespace Job.API
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.UseCors("_myAllowSpecificOrigins");
             app.MapControllers();
 
             app.Run();

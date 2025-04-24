@@ -552,7 +552,7 @@ namespace JobCompany.Business.Services.VacancyServices
                 {
                     Id = v.Id,
                     Title = v.Title,
-                    CompanyLogo = v.CompanyLogo != null ? $"{_currentUser.BaseUrl}/{v.CompanyLogo}" : null,
+                    CompanyLogo = v.Company.CompanyLogo != null ? $"{_currentUser.BaseUrl}/{v.Company.CompanyLogo}" : null,
                     CompanyName = v.CompanyName,
                     StartDate = v.StartDate,
                     Location = v.Location,
@@ -708,7 +708,7 @@ namespace JobCompany.Business.Services.VacancyServices
             {
                 Id = x.Vacancy.Id,
                 Title = x.Vacancy.Title,
-                CompanyLogo = x.Vacancy.CompanyLogo != null ? $"{_currentUser.BaseUrl}/{x.Vacancy.CompanyLogo}" : null,
+                CompanyLogo = x.Vacancy.Company.CompanyLogo != null ? $"{_currentUser.BaseUrl}/{x.Vacancy.Company.CompanyLogo}" : null,
                 CompanyName = x.Vacancy.CompanyName,
                 StartDate = x.Vacancy.StartDate,
                 Location = x.Vacancy.Location,

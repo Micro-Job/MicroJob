@@ -7,5 +7,6 @@ public enum UserRole : byte
     CompanyUser = 3,
     SuperAdmin = 4,
     Admin = 5,
-    Operator = 6
+    Operator = 6,
+    ChiefOperator = 7
 }
