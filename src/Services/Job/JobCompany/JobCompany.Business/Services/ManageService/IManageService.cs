@@ -11,6 +11,8 @@ public interface IManageService
     Task VacancyRejectAsync(VacancyStatusUpdateDto dto);
     Task ToggleBlockVacancyStatusAsync(VacancyStatusUpdateDto dto);
     Task<DataListDto<VacancyGetAllDto>> GetAllVacanciesAsync(string? vacancyName, string? startMinDate, string? startMaxDate, string? endMinDate, string? endMaxDate, string? companyName, byte? vacancyStatus, int skip = 1, int take = 10);
+    Task<VacancyGetByIdDto> GetByIdVacancyAsync(Guid vacancyGuid);
+
 
 
     Task<DataListDto<MessageWithTranslationsDto>> GetAllMessagesAsync(int pageNumber = 1, int pageSize = 10);

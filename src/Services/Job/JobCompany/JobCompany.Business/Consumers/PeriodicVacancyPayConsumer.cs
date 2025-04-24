@@ -22,12 +22,13 @@ namespace JobCompany.Business.Consumers
         {
             var mustPayVacancies = await _context.Vacancies
                 .Where(x => x.PaymentDate != null &&
-                            x.PaymentDate <= DateTime.Now &&
+                            x.PaymentDate <= DateTime.Now.AddHours(4) &&
                             x.VacancyStatus == VacancyStatus.Active)
                 .Select(x => new
                 {
                     x.Id,
                     x.Company.UserId,
+                    x.CompanyId,
                     x.Title
                 })
                 .AsNoTracking()
@@ -60,7 +61,7 @@ namespace JobCompany.Business.Consumers
                             InformationId = item.Id,
                             InformationName = item.Title,
                             NotificationType = NotificationType.VacancySuccessDailyPayment,
-                            ReceiverId = item.UserId,
+                            ReceiverId = (Guid)item.CompanyId,
                             SenderId = null
                         });
                     }
@@ -76,7 +77,7 @@ namespace JobCompany.Business.Consumers
                             InformationId = item.Id,
                             InformationName = item.Title,
                             NotificationType = NotificationType.VacancyFailedDailyPayment,
-                            ReceiverId = item.UserId,
+                            ReceiverId = (Guid)item.CompanyId,
                             SenderId = null
                         });
                     }

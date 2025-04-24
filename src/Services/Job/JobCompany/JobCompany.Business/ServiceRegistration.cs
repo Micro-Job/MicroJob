@@ -17,6 +17,7 @@ using JobCompany.Business.Services.StatusServices;
 using JobCompany.Business.Services.VacancyComment;
 using JobCompany.Business.Services.VacancyServices;
 using MassTransit;
+using MassTransit.Middleware;
 using Microsoft.Extensions.DependencyInjection;
 using SharedLibrary.ExternalServices.FileService;
 using SharedLibrary.HelperServices.Current;
@@ -28,7 +29,7 @@ namespace JobCompany.Business
         public static void AddJobCompanyServices(this IServiceCollection services)
         {
             services.AddHttpContextAccessor();
-            services.AddHostedService<PeriodicPayPublisherService>();
+            //services.AddHostedService<PeriodicPayPublisherService>();
             services.AddScoped<IFileService, FileService>();
             services.AddScoped<IVacancyService, VacancyService>();
             services.AddScoped<IStatusService, StatusService>();
@@ -72,12 +73,13 @@ namespace JobCompany.Business
                 x.SetKebabCaseEndpointNameFormatter();
 
                 x.UsingRabbitMq((context, cfg) =>
-                    {
-                        cfg.Host(cString);
+                {
+                    cfg.Host(cString);
 
-                        cfg.ConfigureEndpoints(context);
-                    }
-                );
+                    cfg.ConfigureEndpoints(context);
+                });
+
+                x.AddInMemoryInboxOutbox();
             });
 
             return services;

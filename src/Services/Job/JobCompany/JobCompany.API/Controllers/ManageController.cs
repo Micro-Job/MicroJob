@@ -39,6 +39,11 @@ namespace JobCompany.API.Controllers
             return Ok(await _manageService.GetAllVacanciesAsync(vacancyName, startMinDate, startMaxDate, endMinDate, endMaxDate, companyName, vacancyStatus, skip, take));
         }
 
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetByIdVacancy(Guid id)
+        {
+            return Ok(_manageService.GetByIdVacancyAsync(id));
+        }
 
 
         [HttpGet("[action]")]

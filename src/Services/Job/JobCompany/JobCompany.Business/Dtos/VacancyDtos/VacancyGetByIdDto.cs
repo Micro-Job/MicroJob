@@ -35,11 +35,11 @@ namespace JobCompany.Business.Dtos.VacancyDtos
         public Driver Driver { get; set; }
         public FamilySituation Family { get; set; }
         public Citizenship Citizenship { get; set; }
-        public ICollection<SkillDto> Skills { get; set; }
         public string CategoryName { get; set; }
         public Guid? ExamId { get; set; }
         public bool IsSaved { get; set; }
         public Guid CompanyUserId { get; set; }
         public ICollection<string>? Messages { get; set; }
+        public VacancyStatus? VacancyStatus { get; set; }
     }
 }
