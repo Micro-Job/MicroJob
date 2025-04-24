@@ -3,6 +3,7 @@ using JobCompany.Business.Dtos.Common;
 using JobCompany.Business.Dtos.CompanyDtos;
 using JobCompany.Business.Dtos.MessageDtos;
 using JobCompany.Business.Dtos.VacancyDtos;
+using JobCompany.Core.Entites;
 
 namespace JobCompany.Business.Services.ManageService;
 
@@ -16,7 +17,7 @@ public interface IManageService
 
     Task<DataListDto<MessageWithTranslationsDto>> GetAllMessagesAsync(int pageNumber = 1, int pageSize = 10);
     Task<MessageDto> GetMessageByIdAsync(string id);
-    Task CreateMessageAsync(CreateMessageDto dto);
+    Task<Message> CreateMessageAsync(CreateMessageDto dto);
     Task UpdateMessageAsync(string id, UpdateMessageDto dto);
     Task DeleteMessageAsync(string id);
 

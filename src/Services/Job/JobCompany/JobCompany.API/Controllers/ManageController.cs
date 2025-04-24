@@ -57,8 +57,7 @@ namespace JobCompany.API.Controllers
         [HttpPost("[action]")]
         public async Task<IActionResult> CreateMessage(CreateMessageDto dto)
         {
-            await _manageService.CreateMessageAsync(dto);
-            return Ok();
+            return Ok(await _manageService.CreateMessageAsync(dto));
         }
 
         [HttpPut("[action]/{id}")]

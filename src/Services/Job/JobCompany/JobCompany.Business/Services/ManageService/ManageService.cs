@@ -232,10 +232,11 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
         };
     }
 
-    public async Task CreateMessageAsync(CreateMessageDto dto)
+    public async Task<Message> CreateMessageAsync(CreateMessageDto dto)
     {
         var message = new Message
         {
+            Id = Guid.NewGuid(),
             CreatedDate = DateTime.Now,
             Translations = dto.Translations.Select(t => new MessageTranslation
             {
@@ -246,6 +247,8 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
 
         await _context.Messages.AddAsync(message);
         await _context.SaveChangesAsync();
+
+        return message;
     }
 
     public async Task UpdateMessageAsync(string id, UpdateMessageDto dto)

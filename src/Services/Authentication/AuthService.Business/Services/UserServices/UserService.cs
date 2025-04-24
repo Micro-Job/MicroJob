@@ -1,5 +1,7 @@
 ﻿using AuthService.Business.Dtos;
 using AuthService.Business.Exceptions.UserException;
+using AuthService.Business.HelperServices.Email;
+using AuthService.Business.HelperServices.TokenHandler;
 using AuthService.Core.Entities;
 using AuthService.DAL.Contexts;
 using MassTransit;
@@ -22,13 +24,17 @@ namespace AuthService.Business.Services.UserServices
         private readonly AppDbContext _context;
         private readonly IFileService _fileService;
         private readonly ICurrentUser _currentUser;
+        private readonly ITokenHandler _tokenHandler;
+        private readonly IEmailService _emailService;
         private readonly IRequestClient<GetCompaniesDataByUserIdsRequest> _companyDataRequest;
 
-        public UserService(AppDbContext context, IFileService fileService, ICurrentUser currentUser, IRequestClient<GetCompaniesDataByUserIdsRequest> companyDataRequest)
+        public UserService(AppDbContext context, IFileService fileService, ICurrentUser currentUser, ITokenHandler tokenHandler, IEmailService emailService, IRequestClient<GetCompaniesDataByUserIdsRequest> companyDataRequest)
         {
             _context = context;
             _fileService = fileService;
             _currentUser = currentUser;
+            _tokenHandler = tokenHandler;
+            _emailService = emailService;
             _companyDataRequest = companyDataRequest;
         }
 
@@ -199,5 +205,122 @@ namespace AuthService.Business.Services.UserServices
             };
         }
 
+
+        #region Operatorlar
+
+        /// <summary> Admin paneldə bütün operatorlar siyahısının göründüyü hissə </summary>
+        public async Task<DataListDto<OperatorInfoDto>> GetAllOperatorsAsync(string? searchTerm, int pageIndex = 1, int pageSize = 10)
+        {
+            var operatorsQuery = _context.Users
+                .Where(u => u.UserRole == UserRole.Operator || u.UserRole == UserRole.ChiefOperator)
+                .AsNoTracking();
+
+            if (searchTerm != null)
+                searchTerm = searchTerm.Trim().ToLower();
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                operatorsQuery = operatorsQuery.Where(u => (u.FirstName + " " + u.LastName).ToLower().Contains(searchTerm));
+            }
+
+            var totalCount = await operatorsQuery.CountAsync();
+
+            var users = await operatorsQuery
+                .Skip((pageIndex - 1) * pageSize)
+                .Take(pageSize)
+                .Select(u => new OperatorInfoDto
+                {
+                    UserId = u.Id,
+                    FullName = $"{u.FirstName} {u.LastName}",
+                    Email = u.Email,
+                    MainPhoneNumber = u.MainPhoneNumber,
+                    UserRole = UserRole.Operator,
+                }).ToListAsync();
+
+            return new DataListDto<OperatorInfoDto>
+            {
+                Datas = users,
+                TotalCount = totalCount
+            };
+        }
+
+        public async Task<OperatorInfoDto> GetOperatorByIdAsync(string id)
+        {
+            var userId = Guid.Parse(id);
+
+            var operatorInfo = await _context.Users
+                .Where(u => (u.UserRole == UserRole.Operator || u.UserRole == UserRole.ChiefOperator) && u.Id == userId)
+                .Select(u => new OperatorInfoDto
+                {
+                    UserId = u.Id,
+                    FullName = $"{u.FirstName} {u.LastName}",
+                    Email = u.Email,
+                    MainPhoneNumber = u.MainPhoneNumber,
+                    UserRole = UserRole.Operator,
+                }).FirstOrDefaultAsync()
+                ?? throw new NotFoundException<User>(MessageHelper.GetMessage("NOTFOUNDEXCEPTION_USER"));
+
+            return operatorInfo;
+        }
+
+        public async Task AddOperatorAsync(OperatorAddDto dto)
+        {
+            bool isExist = await _context.Users.AnyAsync(u => u.Email == dto.Email.Trim());
+
+            if (isExist) throw new UserExistException(MessageHelper.GetMessage("USEREXISTEXCEPTION_EMAIL"));
+
+            isExist = await _context.Users.AnyAsync(u => u.MainPhoneNumber == dto.MainPhoneNumber.Trim());
+
+            if (isExist) throw new UserExistException(MessageHelper.GetMessage("USEREXISTEXCEPTION_PHONE"));
+
+            var userId = Guid.NewGuid();
+
+            var user = new User
+            {
+                Id = userId,
+                FirstName = dto.FirstName.Trim(),
+                LastName = dto.LastName.Trim(),
+                Email = dto.Email.Trim(),
+                MainPhoneNumber = dto.MainPhoneNumber.Trim(),
+                UserRole = dto.UserRole,
+                RegistrationDate = DateTime.Now,
+                Password = userId.ToString(),
+            };
+
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task UpdateOperatorAsync(OperatorUpdateDto dto)
+        {
+            var user = await _context.Users
+                .Where(u => u.UserRole == UserRole.Operator && u.Id == dto.UserId)
+                .FirstOrDefaultAsync()
+                ?? throw new NotFoundException<User>(MessageHelper.GetMessage("NOTFOUNDEXCEPTION_USER"));
+
+            if (user.Email != dto.Email.Trim())
+            {
+                bool isExist = await _context.Users.AnyAsync(u => u.Email == dto.Email.Trim());
+
+                if (isExist) throw new UserExistException(MessageHelper.GetMessage("USEREXISTEXCEPTION_EMAIL"));
+            }
+
+            if (user.MainPhoneNumber != dto.MainPhoneNumber.Trim())
+            {
+                bool isExist = await _context.Users.AnyAsync(u => u.MainPhoneNumber == dto.MainPhoneNumber.Trim());
+
+                if (isExist) throw new UserExistException(MessageHelper.GetMessage("USEREXISTEXCEPTION_PHONE"));
+            }
+
+            user.FirstName = dto.FirstName.Trim();
+            user.LastName = dto.LastName.Trim();
+            user.Email = dto.Email.Trim();
+            user.MainPhoneNumber = dto.MainPhoneNumber.Trim();
+            user.UserRole = dto.UserRole;
+
+            await _context.SaveChangesAsync();
+        }
+
+        #endregion
     }
 }
