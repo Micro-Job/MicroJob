@@ -48,6 +48,12 @@ namespace JobCompany.API.Controllers
             return Ok(await _manageService.GetAllMessagesAsync(pageNumber, pageSize));
         }
 
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetAllMessagesForSelect()
+        {
+            return Ok(await _manageService.GetAllMessagesForSelectAsync());
+        }
+
         [HttpGet("[action]/{id}")]
         public async Task<IActionResult> GetMessageById(string id)
         {

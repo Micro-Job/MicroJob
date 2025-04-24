@@ -216,6 +216,21 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
         };
     }
 
+    /// <summary> </summary>
+    public async Task<List<MessageSelectDto>> GetAllMessagesForSelectAsync()
+    {
+        var messages = await _context.Messages
+            .AsNoTracking()
+            .Include(m => m.Translations)
+            .Select(m => new MessageSelectDto
+            {
+                Id = m.Id,
+                Content = m.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Content)
+            }).ToListAsync();
+
+        return messages;
+    }
+
     public async Task<MessageDto> GetMessageByIdAsync(string id)
     {
         var messageGuid = Guid.Parse(id);
