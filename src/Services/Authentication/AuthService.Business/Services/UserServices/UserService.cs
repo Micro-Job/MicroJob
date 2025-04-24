@@ -2,6 +2,7 @@
 using AuthService.Business.Exceptions.UserException;
 using AuthService.Business.HelperServices.Email;
 using AuthService.Business.HelperServices.TokenHandler;
+using AuthService.Business.Services.Auth;
 using AuthService.Core.Entities;
 using AuthService.DAL.Contexts;
 using MassTransit;
@@ -24,17 +25,15 @@ namespace AuthService.Business.Services.UserServices
         private readonly AppDbContext _context;
         private readonly IFileService _fileService;
         private readonly ICurrentUser _currentUser;
-        private readonly ITokenHandler _tokenHandler;
-        private readonly IEmailService _emailService;
+        private readonly IAuthService _authService;
         private readonly IRequestClient<GetCompaniesDataByUserIdsRequest> _companyDataRequest;
 
-        public UserService(AppDbContext context, IFileService fileService, ICurrentUser currentUser, ITokenHandler tokenHandler, IEmailService emailService, IRequestClient<GetCompaniesDataByUserIdsRequest> companyDataRequest)
+        public UserService(AppDbContext context, IFileService fileService, ICurrentUser currentUser, IAuthService authService, IRequestClient<GetCompaniesDataByUserIdsRequest> companyDataRequest)
         {
             _context = context;
             _fileService = fileService;
             _currentUser = currentUser;
-            _tokenHandler = tokenHandler;
-            _emailService = emailService;
+            _authService = authService;
             _companyDataRequest = companyDataRequest;
         }
 
@@ -289,6 +288,8 @@ namespace AuthService.Business.Services.UserServices
 
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
+
+            await _authService.ResetPasswordAsync(user.Email);
         }
 
         public async Task UpdateOperatorAsync(OperatorUpdateDto dto)
