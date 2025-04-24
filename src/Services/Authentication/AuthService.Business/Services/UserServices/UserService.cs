@@ -295,7 +295,7 @@ namespace AuthService.Business.Services.UserServices
         public async Task UpdateOperatorAsync(OperatorUpdateDto dto)
         {
             var user = await _context.Users
-                .Where(u => u.UserRole == UserRole.Operator && u.Id == dto.UserId)
+                .Where(u => (u.UserRole == UserRole.Operator || u.UserRole == UserRole.ChiefOperator) && u.Id == dto.UserId)
                 .FirstOrDefaultAsync()
                 ?? throw new NotFoundException<User>(MessageHelper.GetMessage("NOTFOUNDEXCEPTION_USER"));
 
