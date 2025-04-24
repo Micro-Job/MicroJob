@@ -233,7 +233,7 @@ namespace AuthService.Business.Services.UserServices
                     FullName = $"{u.FirstName} {u.LastName}",
                     Email = u.Email,
                     MainPhoneNumber = u.MainPhoneNumber,
-                    UserRole = UserRole.Operator,
+                    UserRole = u.UserRole,
                 }).ToListAsync();
 
             return new DataListDto<OperatorInfoDto>
@@ -255,7 +255,7 @@ namespace AuthService.Business.Services.UserServices
                     FullName = $"{u.FirstName} {u.LastName}",
                     Email = u.Email,
                     MainPhoneNumber = u.MainPhoneNumber,
-                    UserRole = UserRole.Operator,
+                    UserRole = u.UserRole,
                 }).FirstOrDefaultAsync()
                 ?? throw new NotFoundException<User>(MessageHelper.GetMessage("NOTFOUNDEXCEPTION_USER"));
 
