@@ -6,7 +6,7 @@ namespace Job.Business.Dtos.LanguageDtos
 {
     public record LanguageUpdateDto
     {
-        public string Id { get; set; }
+        public string? Id { get; set; }
         public Language LanguageName { get; set; }
         public LanguageLevel LanguageLevel { get; set; }
     }
