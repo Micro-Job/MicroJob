@@ -37,8 +37,8 @@ services:
       - "5003:8080"
     networks:
       - public-network
-    volumes:
-      - hiri_wwwroot_data:/app/wwwroot  
+    # volumes:
+      # - hiri_wwwroot_data:/app/wwwroot  
       
   jobcompany:
     container_name: jobcompany-service
@@ -49,8 +49,8 @@ services:
       - "5004:8080"
     networks:
       - public-network
-    volumes:
-      - hiri_wwwroot_data:/app/wwwroot 
+    # volumes:
+      # - hiri_wwwroot_data:/app/wwwroot 
       
   jobpayment:
     container_name: jobpayment-service
@@ -64,6 +64,6 @@ services:
 networks:
   public-network:
     external: true
-volumes:
-  hiri_wwwroot_data:
-    driver: local
+# volumes:
+#   hiri_wwwroot_data:
+#     driver: local
