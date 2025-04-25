@@ -14,7 +14,10 @@ namespace JobPayment.DAL.Configurations
         public void Configure(EntityTypeBuilder<Balance> builder)
         {
             //TODO : uniquelik yeni elave edilib deye migration vurulmalidir(Migrationdan sonra sil)
-            builder.HasIndex(x => x.UserId).IsUnique();
+            builder.HasIndex(x => x.UserId)
+                .IsUnique();
+
+            //builder.HasOne(x => x.User).WithOne(x => x.Balance).HasForeignKey<Balance>(x=> x.UserId).OnDelete(DeleteBehavior.Restrict);
 
             builder.HasMany(x => x.Tranzactions)
                 .WithOne(x => x.Balance)

@@ -14,9 +14,18 @@ namespace JobPayment.Business.Consumers
     {
         public async Task Consume(ConsumeContext<CreateBalanceEvent> context)
         {
+            var message = context.Message;
+
+            await _context.Users.AddAsync(new User
+            {
+                Id = message.UserId,
+                FirstName = message.FirstName,
+                LastName = message.LastName
+            });
+
             await _context.Balances.AddAsync(new Balance
             {
-                UserId = context.Message.UserId,
+                UserId = message.UserId,
                 Coin = 0,
                 BonusCoin = 0,
             });

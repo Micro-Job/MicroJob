@@ -70,7 +70,7 @@ namespace JobCompany.Business.Consumers
                         await _context.Vacancies.Where(v => v.Id == item.Id)
                         .ExecuteUpdateAsync(setter => setter
                         .SetProperty(v => v.PaymentDate, (DateTime?)null)
-                        .SetProperty(v => v.VacancyStatus, VacancyStatus.Deactive));
+                        .SetProperty(v => v.VacancyStatus, VacancyStatus.PendingActive));
 
                         await _notificationService.CreateNotificationAsync(new CreateNotificationDto
                         {

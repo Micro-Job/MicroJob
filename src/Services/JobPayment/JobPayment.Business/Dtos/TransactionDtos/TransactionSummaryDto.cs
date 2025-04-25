@@ -6,7 +6,7 @@ namespace JobPayment.Business.Dtos.TransactionDtos;
 public class TransactionSummaryDto
 {
     public Guid Id { get; set; }
-    public string? Name { get; set; }
+    public string? FullName { get; set; }
     public Guid? UserId { get; set; }
     public DateTime? CreatedDate { get; set; }
     public TransactionType TransactionType { get; set; }

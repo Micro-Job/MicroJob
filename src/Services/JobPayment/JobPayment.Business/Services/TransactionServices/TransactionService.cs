@@ -210,54 +210,23 @@ namespace JobPayment.Business.Services.TransactionServices
             if (informationType != null)
                 query = query.Where(x => x.InformationType == (InformationType)informationType);
 
-            var userIds = await query
-                .Where(x => x.UserId != Guid.Empty)
-                .Select(x => x.UserId)
-                .Distinct()
-                .ToListAsync();
+            int totalCount = await query.CountAsync();
 
-            var response = await _usersDataRequest.GetResponse<GetUsersDataResponse>(new GetUsersDataRequest
+            var transactions = await query.Select(x=> new TransactionSummaryDto
             {
-                UserIds = userIds,
-                FullName = searchTerm
-            });
-
-            var filteredUserIds = response.Message.Users
-                .Select(x => x.UserId)
-                .Distinct()
-                .ToList();
-
-            var filteredQuery = query.Where(x => filteredUserIds.Contains(x.UserId));
-
-            var totalCount = await filteredQuery.CountAsync();
-
-            var transactions = await filteredQuery
-                .Skip((skip - 1) * take)
-                .Take(take)
-                .Select(x => new TransactionSummaryDto
-                {
-                    Id = x.Id,
-                    Coin = x.Coin,
-                    CreatedDate = x.CreatedDate,
-                    InformationId = x.InformationId,
-                    InformationType = x.InformationType,
-                    TransactionStatus = x.TransactionStatus,
-                    TransactionType = x.TranzactionType,
-                    UserId = x.UserId,
-                }).ToListAsync();
-
-            if (response.Message.Users != null)
-            {
-                var userDictionary = response.Message.Users.ToDictionary(x => x.UserId, x => $"{x.FirstName} {x.LastName}");
-
-                foreach (var transaction in transactions)
-                {
-                    if (transaction.UserId.HasValue && userDictionary.TryGetValue(transaction.UserId.Value, out var fullName))
-                    {
-                        transaction.Name = fullName;
-                    }
-                }
-            }
+                Id = x.Id,
+                Coin = x.Coin,
+                CreatedDate = x.CreatedDate,
+                InformationId = x.InformationId,
+                InformationType = x.InformationType,
+                TransactionStatus = x.TransactionStatus,
+                TransactionType = x.TranzactionType,
+                UserId = x.UserId,
+                FullName = x.User.FirstName + x.User.LastName
+            })
+            .Skip(skip - 1)
+            .Take(take)
+            .ToListAsync();
 
             return new DataListDto<TransactionSummaryDto>
             {

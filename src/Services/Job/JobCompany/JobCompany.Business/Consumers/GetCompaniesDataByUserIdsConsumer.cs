@@ -23,7 +23,7 @@ public class GetCompaniesDataByUserIdsConsumer(JobCompanyDbContext _jobCompanyDb
 
         if (!string.IsNullOrEmpty(context.Message.CompanyName))
         {
-            query = query.Where(c => c.CompanyName != null && c.CompanyName.ToLower().Contains(context.Message.CompanyName));
+            query = query.Where(c => c.CompanyName != null && c.CompanyName.Contains(context.Message.CompanyName));
         }
 
         var companies = await query

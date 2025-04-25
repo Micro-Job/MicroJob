@@ -7,14 +7,12 @@ using System.Threading.Tasks;
 
 namespace JobPayment.Core.Entities
 {
-    public class Deposit : BaseEntity
+    public class User : BaseEntity
     {
-        public decimal? Amount { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
 
-        public Guid BalanceId { get; set; }
         public Balance Balance { get; set; }
-            
-        public Guid TransactionId { get; set; }
-        public Transaction Transaction { get; set; }
+        public ICollection<Transaction>? Transactions { get; set; }
     }
 }

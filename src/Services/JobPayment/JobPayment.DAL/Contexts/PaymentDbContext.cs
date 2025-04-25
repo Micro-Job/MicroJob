@@ -13,6 +13,7 @@ namespace JobPayment.DAL.Contexts
         public PaymentDbContext(DbContextOptions options) : base(options) { }
 
 
+        public DbSet<User> Users { get; set; }
         public DbSet<Balance> Balances { get; set; }
         public DbSet<OldPacket> OldPackets { get; set; }
         public DbSet<Packet> Packets { get; set; }
