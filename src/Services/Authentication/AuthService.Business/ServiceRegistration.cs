@@ -43,8 +43,7 @@ namespace AuthService.Business
                 x.AddConsumer<GetUsersDataConsumer>();
                 x.AddConsumer<GetUserEmailConsumer>(); 
                 x.AddConsumer<GetUserPhotoConsumer>();
-                x.AddConsumer<UpdateUserJobStatusEventConsumer>();
-                x.AddConsumer<GetUsersDataForAdminConsumer>();                
+                x.AddConsumer<UpdateUserJobStatusEventConsumer>();              
 
                 x.SetKebabCaseEndpointNameFormatter();
                 x.UsingRabbitMq((context, cfg) =>

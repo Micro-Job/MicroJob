@@ -121,7 +121,6 @@ namespace JobCompany.Business.Services.NotificationServices
             }
 
             await _context.Notifications.AddRangeAsync(notifications);
-            await _context.SaveChangesAsync();
         }
     }
 }

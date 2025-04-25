@@ -2,6 +2,8 @@
 using AuthService.Business.Services.UserServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SharedLibrary.Attributes;
+using SharedLibrary.Enums;
 
 namespace AuthService.API.Controllers
 {
@@ -17,6 +19,14 @@ namespace AuthService.API.Controllers
             return Ok(data);
         }
 
+        [AuthorizeRole(UserRole.Admin, UserRole.Operator)]
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetAllUsers(UserRole userRole, string? searchTerm, int pageIndex = 1, int pageSize = 10)
+        {
+            var result = await userService.GetAllUsersAsync(userRole, searchTerm, pageIndex, pageSize);
+            return Ok(result);
+        }
+
         [HttpPut("[action]")]
         public async Task<IActionResult> UpdateUserInformationAsync(UserUpdateDto dto)
         {
@@ -27,6 +37,38 @@ namespace AuthService.API.Controllers
         public async Task<IActionResult> UpdateUserProfileImageAsync([FromForm] UserProfileImageUpdateDto dto)
         {
             return Ok(await userService.UpdateUserProfileImageAsync(dto));
+        }
+
+        [AuthorizeRole(UserRole.Admin)]
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetAllOperators(string? searchTerm, int pageIndex = 1, int pageSize = 10)
+        {
+            var result = await userService.GetAllOperatorsAsync(searchTerm, pageIndex, pageSize);
+            return Ok(result);
+        }
+
+        [AuthorizeRole(UserRole.Admin)]
+        [HttpGet("[action]/{userId}")]
+        public async Task<IActionResult> GetOperatorById(string userId)
+        {
+            var result = await userService.GetOperatorByIdAsync(userId);
+            return Ok(result);
+        }
+
+        [AuthorizeRole(UserRole.Admin)]
+        [HttpPost("[action]")]
+        public async Task<IActionResult> AddOperator(OperatorAddDto dto)
+        {
+            await userService.AddOperatorAsync(dto);
+            return Ok();
+        }
+
+        [AuthorizeRole(UserRole.Admin)]
+        [HttpPut("[action]")]
+        public async Task<IActionResult> UpdateOperator(OperatorUpdateDto dto)
+        {
+            await userService.UpdateOperatorAsync(dto);
+            return Ok();
         }
     }
 }

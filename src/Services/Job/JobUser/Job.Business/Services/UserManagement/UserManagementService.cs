@@ -22,22 +22,9 @@ using SharedLibrary.Responses;
 
 namespace Job.Business.Services.UserManagement;
 
-public class UserManagementService(JobDbContext _context, IRequestClient<GetUsersDataForAdminRequest> _allUsersDataRequest,
-    IRequestClient<GetUserDataRequest> _userDataRequest, IConfiguration _configuration, ICurrentUser _currentUser) : IUserManagementService
+public class UserManagementService(JobDbContext _context, IRequestClient<GetUserDataRequest> _userDataRequest, 
+    IConfiguration _configuration, ICurrentUser _currentUser) : IUserManagementService
 {
-    public async Task<PaginatedResponse<GetUsersDataForAdminResponse>> GetAllUsersAsync(UserRole userRole, string? searchTerm, int pageIndex = 1, int pageSize = 10)
-    {
-        var response = await _allUsersDataRequest.GetResponse<PaginatedResponse<GetUsersDataForAdminResponse>>(new GetUsersDataForAdminRequest
-        {
-            UserRole = userRole,
-            SearchTerm = searchTerm,
-            PageIndex = pageIndex,
-            PageSize = pageSize
-        });
-
-        return response.Message;
-    }
-
     public async Task<UserPersonalInfoDto> GetPersonalInfoAsync(string userId)
     {
         var userGuid = Guid.Parse(userId);

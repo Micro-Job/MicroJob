@@ -10,13 +10,6 @@ namespace Job.API.Controllers;
 [AuthorizeRole(UserRole.Admin, UserRole.Operator)]
 public class UserManagementController(IUserManagementService _service) : ControllerBase
 {
-    [HttpGet("[action]")]
-    public async Task<IActionResult> GetAllUsers(UserRole userRole, string? searchTerm, int pageIndex = 1, int pageSize = 10)
-    {
-        var result = await _service.GetAllUsersAsync(userRole, searchTerm, pageIndex, pageSize);
-        return Ok(result);
-    }
-
     [HttpGet("[action]/{userId}")]
     public async Task<IActionResult> GetPersonalInfo(string userId)
     {

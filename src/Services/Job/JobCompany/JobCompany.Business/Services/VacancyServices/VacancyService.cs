@@ -129,18 +129,18 @@ namespace JobCompany.Business.Services.VacancyServices
             await _context.Vacancies.AddAsync(vacancy);
             await _context.SaveChangesAsync();
 
-            if (vacancyDto.SkillIds != null)
-            {
-                await _publishEndpoint.Publish(
-                    new VacancyCreatedEvent
-                    {
-                        SenderId = (Guid)_currentUser.UserGuid,
-                        SkillIds = vacancyDto.SkillIds,
-                        InformationId = vacancy.Id,
-                        InformatioName = vacancy.Title,
-                    }
-                );
-            }
+            //if (vacancyDto.SkillIds != null)
+            //{
+            //    await _publishEndpoint.Publish(
+            //        new VacancyCreatedEvent
+            //        {
+            //            SenderId = (Guid)_currentUser.UserGuid,
+            //            SkillIds = vacancyDto.SkillIds,
+            //            InformationId = vacancy.Id,
+            //            InformatioName = vacancy.Title,
+            //        }
+            //    );
+            //}
         }
 
         public async Task DeleteAsync(List<string> ids)
@@ -223,11 +223,19 @@ namespace JobCompany.Business.Services.VacancyServices
         }
 
         /// <summary> şirkət id'sinə görə vacanciyaların gətirilməsi </summary>
-        public async Task<DataListDto<VacancyGetByCompanyIdDto>> GetVacanciesByCompanyIdAsync(string companyId, int skip = 1, int take = 9)
+        public async Task<DataListDto<VacancyGetByCompanyIdDto>> GetVacanciesByCompanyIdAsync(string companyId, Guid? vacancyId , int skip = 1, int take = 9)
         {
             var companyGuid = Guid.Parse(companyId);
 
-            var query = _context.Vacancies.Where(x => x.CompanyId == companyGuid && x.VacancyStatus == VacancyStatus.Active && x.EndDate >= DateTime.Now).AsQueryable().AsNoTracking();
+            var query = _context.Vacancies
+                .Where(x => x.CompanyId == companyGuid && 
+                            x.VacancyStatus == VacancyStatus.Active && 
+                            x.EndDate >= DateTime.Now)
+                .AsQueryable()
+                .AsNoTracking();
+
+            if (vacancyId != null)
+                query = query.Where(x=> x.Id != vacancyId);
 
             var vacancies = await query
                 .Select(x => new VacancyGetByCompanyIdDto
@@ -262,11 +270,8 @@ namespace JobCompany.Business.Services.VacancyServices
                 
             Guid? userGuid = _currentUser.UserGuid;
 
-            var vacancyDto = await _context
-                    .Vacancies.Where(x => x.Id == vacancyGuid)
-                    .Include(v => v.VacancySkills)
-                            .ThenInclude(vs => vs.Skill)
-                                .ThenInclude(s => s.Translations)
+            var vacancyDto = await _context.Vacancies
+                .Where(x => x.Id == vacancyGuid)
                     .Include(x => x.Category)
                         .ThenInclude(x => x.Translations)
                     .Include(x => x.VacancyMessages)
@@ -303,13 +308,13 @@ namespace JobCompany.Business.Services.VacancyServices
                                 VacancyNumber = vn.Number,
                             })
                             .ToList(),
-                        Skills = x.VacancySkills
-                                .Where(vc => vc.Skill != null)
-                                .Select(vc => new SkillDto
-                                {
-                                    Id = vc.Skill.Id,
-                                    Name = vc.Skill.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name)
-                                }).ToList(),
+                        //Skills = x.VacancySkills
+                        //        .Where(vc => vc.Skill != null)
+                        //        .Select(vc => new SkillDto
+                        //        {
+                        //            Id = vc.Skill.Id,
+                        //            Name = vc.Skill.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name)
+                        //        }).ToList(),
                         CompanyName = x.CompanyName,
                         CategoryName = x.Category.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name),
                         CompanyUserId = x.Company.UserId,
@@ -319,10 +324,10 @@ namespace JobCompany.Business.Services.VacancyServices
                     })
                     .FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
 
-            var existVacancy = await _context.Vacancies.FirstOrDefaultAsync(x => x.Id == vacancyGuid);
 
             if (vacancyDto.CompanyUserId != userGuid)
             {
+                var existVacancy = await _context.Vacancies.FirstOrDefaultAsync(x => x.Id == vacancyGuid);
                 existVacancy.ViewCount++;
                 await _context.SaveChangesAsync();
             }
@@ -547,7 +552,7 @@ namespace JobCompany.Business.Services.VacancyServices
                 {
                     Id = v.Id,
                     Title = v.Title,
-                    CompanyLogo = v.CompanyLogo != null ? $"{_currentUser.BaseUrl}/{v.CompanyLogo}" : null,
+                    CompanyLogo = v.Company.CompanyLogo != null ? $"{_currentUser.BaseUrl}/{v.Company.CompanyLogo}" : null,
                     CompanyName = v.CompanyName,
                     StartDate = v.StartDate,
                     Location = v.Location,
@@ -703,7 +708,7 @@ namespace JobCompany.Business.Services.VacancyServices
             {
                 Id = x.Vacancy.Id,
                 Title = x.Vacancy.Title,
-                CompanyLogo = x.Vacancy.CompanyLogo != null ? $"{_currentUser.BaseUrl}/{x.Vacancy.CompanyLogo}" : null,
+                CompanyLogo = x.Vacancy.Company.CompanyLogo != null ? $"{_currentUser.BaseUrl}/{x.Vacancy.Company.CompanyLogo}" : null,
                 CompanyName = x.Vacancy.CompanyName,
                 StartDate = x.Vacancy.StartDate,
                 Location = x.Vacancy.Location,

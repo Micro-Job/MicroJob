@@ -1,5 +1,8 @@
 ﻿using AuthService.Business.Dtos;
 using AuthService.Business.Exceptions.UserException;
+using AuthService.Business.HelperServices.Email;
+using AuthService.Business.HelperServices.TokenHandler;
+using AuthService.Business.Services.Auth;
 using AuthService.Core.Entities;
 using AuthService.DAL.Contexts;
 using MassTransit;
@@ -22,12 +25,16 @@ namespace AuthService.Business.Services.UserServices
         private readonly AppDbContext _context;
         private readonly IFileService _fileService;
         private readonly ICurrentUser _currentUser;
+        private readonly IAuthService _authService;
+        private readonly IRequestClient<GetCompaniesDataByUserIdsRequest> _companyDataRequest;
 
-        public UserService(AppDbContext context, IFileService fileService, ICurrentUser currentUser)
+        public UserService(AppDbContext context, IFileService fileService, ICurrentUser currentUser, IAuthService authService, IRequestClient<GetCompaniesDataByUserIdsRequest> companyDataRequest)
         {
             _context = context;
             _fileService = fileService;
             _currentUser = currentUser;
+            _authService = authService;
+            _companyDataRequest = companyDataRequest;
         }
 
         /// <summary> Loginde olan User informasiyası </summary>
@@ -46,7 +53,7 @@ namespace AuthService.Business.Services.UserServices
                         Image = x.Image != null ? $"{_currentUser.BaseUrl}/{x.Image}" : null,
                         UserRole = x.UserRole,
                         JobStatus = x.JobStatus,
-                    }) ??throw new NotFoundException<User>(MessageHelper.GetMessage("NOTFOUNDEXCEPTION_USER"));
+                    }) ?? throw new NotFoundException<User>(MessageHelper.GetMessage("NOTFOUNDEXCEPTION_USER"));
 
             return user;
         }
@@ -119,5 +126,202 @@ namespace AuthService.Business.Services.UserServices
                 ImageUrl = $"{_currentUser.BaseUrl}/{user.Image}",
             };
         }
+
+        /// <summary> Admin paneldə bütün istifadəçilər siyahısının göründüyü hissə </summary>  
+        public async Task<DataListDto<BasicUserInfoDto>> GetAllUsersAsync(UserRole userRole, string? searchTerm, int pageIndex = 1, int pageSize = 10)
+        {
+            var userQuery = _context.Users.Where(u => u.UserRole == userRole).AsNoTracking();
+
+            if (searchTerm != null)
+                searchTerm = searchTerm.Trim().ToLower();
+
+            List<Guid> filteredUserIds = [];
+            Dictionary<Guid, CompanyNameAndImageDto> companyDataByUserId = [];
+
+            // CompanyUser və EmployeeUserdirsə şirkət adını gətirmək üçün jobcompany-yə sorğu atır
+            if (userRole == UserRole.CompanyUser || userRole == UserRole.EmployeeUser)
+            {
+                var allUserIds = await userQuery.Select(u => u.Id).ToListAsync();
+
+                var companyResponse = await _companyDataRequest.GetResponse<GetCompaniesDataByUserIdsResponse>(
+                    new GetCompaniesDataByUserIdsRequest
+                    {
+                        UserIds = allUserIds,
+                        CompanyName = string.IsNullOrWhiteSpace(searchTerm) ? null : searchTerm
+                    });
+
+                companyDataByUserId = companyResponse.Message.Companies;
+                filteredUserIds = companyDataByUserId.Keys.ToList();
+
+                if (filteredUserIds.Count == 0)
+                {
+                    return new DataListDto<BasicUserInfoDto>
+                    {
+                        Datas = [],
+                        TotalCount = 0
+                    };
+                }
+
+                userQuery = userQuery.Where(u => filteredUserIds.Contains(u.Id));
+            }
+            else if (userRole == UserRole.SimpleUser && !string.IsNullOrWhiteSpace(searchTerm))
+            {
+                // SimpleUser üçün searchTerm varsa, fullname ilə axtarış edir
+                userQuery = userQuery
+                    .Where(u => (u.FirstName + " " + u.LastName).ToLower().Contains(searchTerm));
+            }
+
+            var totalCount = await userQuery.CountAsync();
+
+            var users = await userQuery
+                .Skip((pageIndex - 1) * pageSize)
+                .Take(pageSize)
+                .Select(u => new BasicUserInfoDto
+                {
+                    UserId = u.Id,
+                    FullName = $"{u.FirstName} {u.LastName}",
+                    Email = u.Email,
+                    MainPhoneNumber = u.MainPhoneNumber
+                })
+                .ToListAsync();
+
+            // CompanyUser və EmployeeUser üçün CompanyName əvəzlənməsi
+            if (companyDataByUserId.Count != 0)
+            {
+                foreach (var user in users)
+                {
+                    if (companyDataByUserId.TryGetValue(user.UserId, out var companyInfo))
+                    {
+                        user.FullName = companyInfo.CompanyName ?? user.FullName;
+                    }
+                }
+            }
+
+            return new DataListDto<BasicUserInfoDto>
+            {
+                Datas = users,
+                TotalCount = totalCount
+            };
+        }
+
+
+        #region Operatorlar
+
+        /// <summary> Admin paneldə bütün operatorlar siyahısının göründüyü hissə </summary>
+        public async Task<DataListDto<OperatorInfoDto>> GetAllOperatorsAsync(string? searchTerm, int pageIndex = 1, int pageSize = 10)
+        {
+            var operatorsQuery = _context.Users
+                .Where(u => u.UserRole == UserRole.Operator || u.UserRole == UserRole.ChiefOperator)
+                .AsNoTracking();
+
+            if (searchTerm != null)
+                searchTerm = searchTerm.Trim().ToLower();
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                operatorsQuery = operatorsQuery.Where(u => (u.FirstName + " " + u.LastName).ToLower().Contains(searchTerm));
+            }
+
+            var totalCount = await operatorsQuery.CountAsync();
+
+            var users = await operatorsQuery
+                .Skip((pageIndex - 1) * pageSize)
+                .Take(pageSize)
+                .Select(u => new OperatorInfoDto
+                {
+                    UserId = u.Id,
+                    FullName = $"{u.FirstName} {u.LastName}",
+                    Email = u.Email,
+                    MainPhoneNumber = u.MainPhoneNumber,
+                    UserRole = u.UserRole,
+                }).ToListAsync();
+
+            return new DataListDto<OperatorInfoDto>
+            {
+                Datas = users,
+                TotalCount = totalCount
+            };
+        }
+
+        public async Task<OperatorInfoDto> GetOperatorByIdAsync(string id)
+        {
+            var userId = Guid.Parse(id);
+
+            var operatorInfo = await _context.Users
+                .Where(u => (u.UserRole == UserRole.Operator || u.UserRole == UserRole.ChiefOperator) && u.Id == userId)
+                .Select(u => new OperatorInfoDto
+                {
+                    UserId = u.Id,
+                    FullName = $"{u.FirstName} {u.LastName}",
+                    Email = u.Email,
+                    MainPhoneNumber = u.MainPhoneNumber,
+                    UserRole = u.UserRole,
+                }).FirstOrDefaultAsync()
+                ?? throw new NotFoundException<User>(MessageHelper.GetMessage("NOTFOUNDEXCEPTION_USER"));
+
+            return operatorInfo;
+        }
+
+        public async Task AddOperatorAsync(OperatorAddDto dto)
+        {
+            bool isExist = await _context.Users.AnyAsync(u => u.Email == dto.Email.Trim());
+
+            if (isExist) throw new UserExistException(MessageHelper.GetMessage("USEREXISTEXCEPTION_EMAIL"));
+
+            isExist = await _context.Users.AnyAsync(u => u.MainPhoneNumber == dto.MainPhoneNumber.Trim());
+
+            if (isExist) throw new UserExistException(MessageHelper.GetMessage("USEREXISTEXCEPTION_PHONE"));
+
+            var userId = Guid.NewGuid();
+
+            var user = new User
+            {
+                Id = userId,
+                FirstName = dto.FirstName.Trim(),
+                LastName = dto.LastName.Trim(),
+                Email = dto.Email.Trim(),
+                MainPhoneNumber = dto.MainPhoneNumber.Trim(),
+                UserRole = dto.UserRole,
+                RegistrationDate = DateTime.Now,
+                Password = userId.ToString(),
+            };
+
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
+
+            await _authService.ResetPasswordAsync(user.Email);
+        }
+
+        public async Task UpdateOperatorAsync(OperatorUpdateDto dto)
+        {
+            var user = await _context.Users
+                .Where(u => (u.UserRole == UserRole.Operator || u.UserRole == UserRole.ChiefOperator) && u.Id == dto.UserId)
+                .FirstOrDefaultAsync()
+                ?? throw new NotFoundException<User>(MessageHelper.GetMessage("NOTFOUNDEXCEPTION_USER"));
+
+            if (user.Email != dto.Email.Trim())
+            {
+                bool isExist = await _context.Users.AnyAsync(u => u.Email == dto.Email.Trim());
+
+                if (isExist) throw new UserExistException(MessageHelper.GetMessage("USEREXISTEXCEPTION_EMAIL"));
+            }
+
+            if (user.MainPhoneNumber != dto.MainPhoneNumber.Trim())
+            {
+                bool isExist = await _context.Users.AnyAsync(u => u.MainPhoneNumber == dto.MainPhoneNumber.Trim());
+
+                if (isExist) throw new UserExistException(MessageHelper.GetMessage("USEREXISTEXCEPTION_PHONE"));
+            }
+
+            user.FirstName = dto.FirstName.Trim();
+            user.LastName = dto.LastName.Trim();
+            user.Email = dto.Email.Trim();
+            user.MainPhoneNumber = dto.MainPhoneNumber.Trim();
+            user.UserRole = dto.UserRole;
+
+            await _context.SaveChangesAsync();
+        }
+
+        #endregion
     }
 }

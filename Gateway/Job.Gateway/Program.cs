@@ -54,7 +54,6 @@ namespace Job.Gateway
             app.UseAuthorization();
             app.UseCustomExceptionHandler();
             app.UseCors("_myAllowSpecificOrigins");
-            //app.UseCustomExceptionHandler();
             app.MapControllers();
             await app.UseOcelot();
             app.Run();

@@ -1,4 +1,5 @@
-﻿using JobCompany.Business.Dtos.MessageDtos;
+﻿using JobCompany.Business.Dtos.CategoryDtos;
+using JobCompany.Business.Dtos.MessageDtos;
 using JobCompany.Business.Dtos.VacancyDtos;
 using JobCompany.Business.Services.ManageService;
 using Microsoft.AspNetCore.Mvc;
@@ -39,12 +40,23 @@ namespace JobCompany.API.Controllers
             return Ok(await _manageService.GetAllVacanciesAsync(vacancyName, startMinDate, startMaxDate, endMinDate, endMaxDate, companyName, vacancyStatus, skip, take));
         }
 
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetByIdVacancy(Guid id)
+        {
+            return Ok(await _manageService.GetByIdVacancyAsync(id));
+        }
 
 
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllMessages(int pageNumber, int pageSize)
         {
             return Ok(await _manageService.GetAllMessagesAsync(pageNumber, pageSize));
+        }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetAllMessagesForSelect()
+        {
+            return Ok(await _manageService.GetAllMessagesForSelectAsync());
         }
 
         [HttpGet("[action]/{id}")]
@@ -56,8 +68,7 @@ namespace JobCompany.API.Controllers
         [HttpPost("[action]")]
         public async Task<IActionResult> CreateMessage(CreateMessageDto dto)
         {
-            await _manageService.CreateMessageAsync(dto);
-            return Ok();
+            return Ok(await _manageService.CreateMessageAsync(dto));
         }
 
         [HttpPut("[action]/{id}")]
@@ -74,6 +85,8 @@ namespace JobCompany.API.Controllers
             return Ok();
         }
 
+
+
         [HttpGet("[action]")]
         public async Task<IActionResult> GetCompanyDetails(string companyUserId)
         {
@@ -84,6 +97,41 @@ namespace JobCompany.API.Controllers
         public async Task<IActionResult> GetVacanciesByCompanyUserId(string companyUserId, int skip = 1, int take = 9)
         {
             return Ok(await _manageService.GetVacanciesByCompanyUserIdAsync(companyUserId, skip, take));
+        }
+
+
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetAllCategories(int pageNumber, int pageSize)
+        {
+            return Ok(await _manageService.GetAllCategoriesAsync(pageNumber, pageSize));
+        }
+
+        [HttpGet("[action]/{id}")]
+        public async Task<IActionResult> GetCategoryById(string id)
+        {
+            return Ok(await _manageService.GetCategoryByIdAsync(id));
+        }
+
+        [HttpPost("[action]")]
+        public async Task<IActionResult> CreateCategory(CategoryCreateDto dto)
+        {
+            await _manageService.CreateCategoryAsync(dto);
+            return Ok();
+        }
+
+        [HttpPut("[action]/{id}")]
+        public async Task<IActionResult> UpdateCategory(string id, List<CategoryTranslationDto> categories)
+        {
+            await _manageService.UpdateCategoryAsync(id, categories);
+            return Ok();
+        }
+
+        [HttpDelete("[action]/{id}")]
+        public async Task<IActionResult> DeleteCategory(string id)
+        {
+            await _manageService.DeleteCategoryAsync(id);
+            return Ok();
         }
     }
 }

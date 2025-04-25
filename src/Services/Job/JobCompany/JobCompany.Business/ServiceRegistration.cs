@@ -1,4 +1,5 @@
-﻿using JobCompany.Business.Consumers;
+﻿using JobCompany.Business.BackgroundServices;
+using JobCompany.Business.Consumers;
 using JobCompany.Business.Services.AnswerServices;
 using JobCompany.Business.Services.ApplicationServices;
 using JobCompany.Business.Services.CategoryServices;
@@ -16,6 +17,7 @@ using JobCompany.Business.Services.StatusServices;
 using JobCompany.Business.Services.VacancyComment;
 using JobCompany.Business.Services.VacancyServices;
 using MassTransit;
+using MassTransit.Middleware;
 using Microsoft.Extensions.DependencyInjection;
 using SharedLibrary.ExternalServices.FileService;
 using SharedLibrary.HelperServices.Current;
@@ -27,6 +29,7 @@ namespace JobCompany.Business
         public static void AddJobCompanyServices(this IServiceCollection services)
         {
             services.AddHttpContextAccessor();
+            //services.AddHostedService<PeriodicPayPublisherService>();
             services.AddScoped<IFileService, FileService>();
             services.AddScoped<IVacancyService, VacancyService>();
             services.AddScoped<IStatusService, StatusService>();
@@ -65,17 +68,18 @@ namespace JobCompany.Business
                 x.AddConsumer<GetCompaniesDataByUserIdsConsumer>();
                 x.AddConsumer<VacancyAcceptConsumer>();
                 x.AddConsumer<CheckApplicationConsumer>();
+                x.AddConsumer<PeriodicVacancyPayConsumer>();
 
                 x.SetKebabCaseEndpointNameFormatter();
 
-                x.UsingRabbitMq(
-                    (context, cfg) =>
-                    {
-                        cfg.Host(cString);
+                x.UsingRabbitMq((context, cfg) =>
+                {
+                    cfg.Host(cString);
 
-                        cfg.ConfigureEndpoints(context);
-                    }
-                );
+                    cfg.ConfigureEndpoints(context);
+                });
+
+                x.AddInMemoryInboxOutbox();
             });
 
             return services;

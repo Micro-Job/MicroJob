@@ -1,4 +1,5 @@
-﻿using JobCompany.Business.Dtos.Common;
+﻿using JobCompany.Business.Dtos.CategoryDtos;
+using JobCompany.Business.Dtos.Common;
 using JobCompany.Business.Dtos.CompanyDtos;
 using JobCompany.Business.Dtos.MessageDtos;
 using JobCompany.Business.Dtos.NumberDtos;
@@ -9,6 +10,7 @@ using JobCompany.Business.Statistics;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using MassTransit;
+using MassTransit.SagaStateMachine;
 using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Enums;
 using SharedLibrary.Events;
@@ -34,11 +36,13 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
         var vacancyGuid = Guid.Parse(dto.VacancyId);
         var vacancyMessageGuid = Guid.Parse(dto.VacancyMessageId);
 
-        if (await _context.Messages.AnyAsync(x=> x.Id == vacancyMessageGuid))
+        if (!await _context.Messages.AnyAsync(x => x.Id == vacancyMessageGuid))
             throw new NotFoundException<Message>(MessageHelper.GetMessage("NOT_FOUND"));
 
         var vacancy = await _context.Vacancies
             .Include(v => v.Applications)
+            .Include(v => v.Company)
+            .Include(v => v.VacancyMessages)
             .FirstOrDefaultAsync(v => v.Id == vacancyGuid)
             ?? throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
 
@@ -56,12 +60,18 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
             .SetProperty(a => a.IsDeleted, true)
         );
 
-        vacancy.VacancyCommentId = vacancyMessageGuid;
+        //vacancy.VacancyCommentId = vacancyMessageGuid; TODO: burda vakansiya kommentinə niyə mesajın id-sini veririk? 
+        vacancy.VacancyMessages?.Add(new VacancyMessage
+        {
+            MessageId = vacancyMessageGuid,
+            VacancyId = vacancyGuid,
+        });
+
         vacancy.VacancyStatus = VacancyStatus.Reject;
 
         var newNotification = new Notification
         {
-            ReceiverId = vacancy.Company.UserId,
+            ReceiverId = vacancy.Company.Id,
             SenderId = null,
             NotificationType = NotificationType.VacancyReject,
             InformationId = vacancyGuid,
@@ -109,14 +119,14 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
         await _context.SaveChangesAsync();
     }
 
-    public async Task<DataListDto<VacancyGetAllDto>> GetAllVacanciesAsync(string? vacancyName , string? startMinDate ,  string? startMaxDate , string? endMinDate , string? endMaxDate , string? companyName , byte? vacancyStatus , int skip = 1,int take = 10)
+    public async Task<DataListDto<VacancyGetAllDto>> GetAllVacanciesAsync(string? vacancyName, string? startMinDate, string? startMaxDate, string? endMinDate, string? endMaxDate, string? companyName, byte? vacancyStatus, int skip = 1, int take = 10)
     {
         var query = _context.Vacancies
-            .Where(x => x.VacancyStatus == VacancyStatus.Pending || 
+            .Where(x => x.VacancyStatus == VacancyStatus.Pending ||
                         x.VacancyStatus == VacancyStatus.Active ||
                         x.VacancyStatus == VacancyStatus.Reject ||
-                        x.VacancyStatus == VacancyStatus.PendingUpdate) 
-            .OrderBy(x => x.VacancyStatus)
+                        x.VacancyStatus == VacancyStatus.PendingUpdate)
+            .OrderBy(x => x.VacancyStatus).ThenBy(x => x.CreatedDate)
             .AsQueryable()
             .AsNoTracking();
 
@@ -151,7 +161,7 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
                 query = query.Where(x => x.EndDate <= Max);
         }
 
-        if(companyName != null)
+        if (companyName != null)
             query = query.Where(x => x.CompanyName.Contains(companyName));
 
         if (vacancyName != null)
@@ -170,7 +180,8 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
             WorkStyle = x.WorkStyle,
             WorkType = x.WorkType,
             //bu yaradilma tarixidir(normalda baslama tarixi olur)
-            StartDate = x.CreatedDate
+            StartDate = x.CreatedDate,
+            EndDate = x.EndDate
         })
         .Skip((skip - 1) * take)
         .Take(take)
@@ -181,6 +192,58 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
             Datas = data,
             TotalCount = await query.CountAsync()
         };
+    }
+
+    public async Task<VacancyGetByIdDto> GetByIdVacancyAsync(Guid vacancyGuid)
+    {
+        var vacancyDto = await _context.Vacancies
+            .Where(x => x.Id == vacancyGuid)
+                .Include(x => x.Category)
+                    .ThenInclude(x => x.Translations)
+                .Include(x => x.VacancyMessages)
+                    .ThenInclude(c => c.Message)
+                        .ThenInclude(x => x.Translations)
+                .Select(x => new VacancyGetByIdDto
+                {
+                    Id = x.Id,
+                    Title = x.Title,
+                    CompanyId = x.CompanyId,
+                    CompanyLogo = $"{_currentUser.BaseUrl}/{x.Company.CompanyLogo}",
+                    StartDate = x.StartDate,
+                    EndDate = x.EndDate,
+                    Location = x.Location,
+                    ViewCount = x.ViewCount,
+                    WorkType = x.WorkType,
+                    WorkStyle = x.WorkStyle,
+                    MainSalary = x.MainSalary,
+                    MaxSalary = x.MaxSalary,
+                    Requirement = x.Requirement,
+                    Description = x.Description,
+                    Email = x.Email,
+                    Gender = x.Gender,
+                    Military = x.Military,
+                    Family = x.Family,
+                    Driver = x.Driver,
+                    Citizenship = x.Citizenship,
+                    ExamId = x.ExamId,
+                    VacancyNumbers = x
+                        .VacancyNumbers.Select(vn => new VacancyNumberDto
+                        {
+                            Id = vn.Id,
+                            VacancyNumber = vn.Number,
+                        })
+                        .ToList(),
+                    CompanyName = x.CompanyName,
+                    CategoryName = x.Category.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name),
+                    CompanyUserId = x.Company.UserId,
+                    //Messages = _currentUser.UserGuid == x.Company.UserId
+                    //    ? x.VacancyMessages.Select(vm => vm.Message.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Content)).ToList()
+                    //    : null,
+                    VacancyStatus = x.VacancyStatus
+                })
+                .FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
+
+        return vacancyDto;
     }
 
     #endregion
@@ -214,6 +277,21 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
         };
     }
 
+    /// <summary> </summary>
+    public async Task<List<MessageSelectDto>> GetAllMessagesForSelectAsync()
+    {
+        var messages = await _context.Messages
+            .AsNoTracking()
+            .Include(m => m.Translations)
+            .Select(m => new MessageSelectDto
+            {
+                Id = m.Id,
+                Content = m.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Content)
+            }).ToListAsync();
+
+        return messages;
+    }
+
     public async Task<MessageDto> GetMessageByIdAsync(string id)
     {
         var messageGuid = Guid.Parse(id);
@@ -230,10 +308,11 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
         };
     }
 
-    public async Task CreateMessageAsync(CreateMessageDto dto)
+    public async Task<MessageWithTranslationsDto> CreateMessageAsync(CreateMessageDto dto)
     {
         var message = new Message
         {
+            Id = Guid.NewGuid(),
             CreatedDate = DateTime.Now,
             Translations = dto.Translations.Select(t => new MessageTranslation
             {
@@ -244,6 +323,17 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
 
         await _context.Messages.AddAsync(message);
         await _context.SaveChangesAsync();
+
+        return new MessageWithTranslationsDto
+        {
+            Id = message.Id,
+            CreatedDate = message.CreatedDate,
+            Translations = message.Translations.Select(t => new MessageTranslationDto
+            {
+                Language = t.Language,
+                Content = t.Content
+            }).ToList()
+        };
     }
 
     public async Task UpdateMessageAsync(string id, UpdateMessageDto dto)
@@ -289,7 +379,6 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
         await _context.SaveChangesAsync();
     }
     #endregion
-
 
     #region Company
     public async Task<CompanyProfileDto> GetCompanyDetailsAsync(string companyUserId)
@@ -364,6 +453,106 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
             Datas = vacancies,
             TotalCount = await query.CountAsync()
         };
+    }
+    #endregion
+
+    #region Category
+    public async Task<DataListDto<CategoryWithTranslationsDto>> GetAllCategoriesAsync(int pageNumber = 1, int pageSize = 10)
+    {
+        var query = _context.Categories.AsQueryable();
+
+        var totalCount = await query.CountAsync();
+
+        var categoryDtos = await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .Select(m => new CategoryWithTranslationsDto
+            {
+                Id = m.Id,
+                IsCompany = m.IsCompany,
+                Translations = m.Translations.Select(t => new CategoryTranslationDto
+                {
+                    Language = t.Language,
+                    Name = t.Name
+                }).ToList()
+            }).ToListAsync();
+
+        return new DataListDto<CategoryWithTranslationsDto>
+        {
+            Datas = categoryDtos,
+            TotalCount = totalCount
+        };
+    }
+
+    public async Task<CategoryDto> GetCategoryByIdAsync(string id)
+    {
+        var categoryGuid = Guid.Parse(id);
+        var category = await _context.Categories
+            .Include(m => m.Translations)
+            .FirstOrDefaultAsync(m => m.Id == categoryGuid)
+            ?? throw new NotFoundException<Message>(MessageHelper.GetMessage("NOT_FOUND"));
+
+        return new CategoryDto
+        {
+            Id = category.Id,
+            IsCompany = category.IsCompany,
+            Name = category.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name)
+        };
+    }
+
+    public async Task CreateCategoryAsync(CategoryCreateDto dto)
+    {
+        var category = new Category
+        {
+            IsCompany = false,
+            Translations = dto.Categories.Select(t => new CategoryTranslation
+            {
+                Name = t.Name,
+                Language = t.language
+            }).ToList()
+        };
+        await _context.Categories.AddAsync(category);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task UpdateCategoryAsync(string id, List<CategoryTranslationDto> categories)
+    {
+        var categoryGuid = Guid.Parse(id);
+        var category = await _context.Categories
+            .Include(m => m.Translations)
+            .FirstOrDefaultAsync(m => m.Id == categoryGuid)
+            ?? throw new NotFoundException<Category>(MessageHelper.GetMessage("NOT_FOUND"));
+        foreach (var dtoTranslation in categories)
+        {
+            var existingTranslation = category.Translations
+                .FirstOrDefault(t => t.Language == dtoTranslation.Language);
+            if (existingTranslation != null) // Mövcud olan tərcüməni yeniləyirik
+            {
+                existingTranslation.Name = dtoTranslation.Name;
+            }
+            else // Yeni tərcümə əlavə edirik
+            {
+                category.Translations.Add(new CategoryTranslation
+                {
+                    CategoryId = categoryGuid,
+                    Language = dtoTranslation.Language,
+                    Name = dtoTranslation.Name
+                });
+            }
+        }
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task DeleteCategoryAsync(string id)
+    {
+        var categoryGuid = Guid.Parse(id);
+        var category = await _context.Categories
+            .Include(m => m.Translations)
+            .FirstOrDefaultAsync(m => m.Id == categoryGuid)
+            ?? throw new NotFoundException<Category>(MessageHelper.GetMessage("NOT_FOUND"));
+
+        _context.Categories.Remove(category);
+        await _context.SaveChangesAsync();
     }
     #endregion
 }

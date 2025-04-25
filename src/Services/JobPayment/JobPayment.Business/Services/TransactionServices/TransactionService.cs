@@ -5,8 +5,11 @@ using JobPayment.Business.Services.DepositServices;
 using JobPayment.Core.Entities;
 using JobPayment.Core.Enums;
 using JobPayment.DAL.Contexts;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Shared.Requests;
+using Shared.Responses;
 using SharedLibrary.Enums;
 using SharedLibrary.Exceptions;
 using SharedLibrary.Extensions;
@@ -20,7 +23,7 @@ using System.Threading.Tasks;
 
 namespace JobPayment.Business.Services.TransactionServices
 {
-    public class TransactionService(PaymentDbContext _context, IDepositService _depositService, ICurrentUser _currentUser) : ITransactionService
+    public class TransactionService(PaymentDbContext _context, IDepositService _depositService, ICurrentUser _currentUser, IRequestClient<GetUsersDataRequest> _usersDataRequest) : ITransactionService
     {
         public async Task CreateTransactionAsync(CreateTransactionDto dto)
         {
@@ -106,7 +109,10 @@ namespace JobPayment.Business.Services.TransactionServices
 
         public async Task<TransactionDetailDto> GetTransactionDetailAsync(string transactionId)
         {
-            var transaction = await _context.Transactions.Where(x => x.Id == Guid.Parse(transactionId) && x.UserId == _currentUser.UserGuid)
+            //TODO : bu hisse hem de admin ve ya operator terefinden islenir deye UserId silindi amma silinmeli deyil (muveqqeti hell)
+            //var transaction = await _context.Transactions.Where(x => x.Id == Guid.Parse(transactionId) && x.UserId == _currentUser.UserGuid)
+
+            var transaction = await _context.Transactions.Where(x => x.Id == Guid.Parse(transactionId))
             .Select(x => new TransactionDetailDto
             {
                 CompanyName = null,
@@ -122,7 +128,7 @@ namespace JobPayment.Business.Services.TransactionServices
             return transaction;
         }
 
-        public async Task<DataListDto<TransactionListDto>> GetAllTransactionsByUserIdAsync(string userId , string? startDate, string? endDate, byte? transactionStatus, byte? informationType, byte? transactionType , int skip , int take)
+        public async Task<DataListDto<TransactionListDto>> GetAllTransactionsByUserIdAsync(string userId, string? startDate, string? endDate, byte? transactionStatus, byte? informationType, byte? transactionType, int skip, int take)
         {
             var query = _context.Transactions
                 .Where(x => x.UserId == Guid.Parse(userId))
@@ -172,6 +178,91 @@ namespace JobPayment.Business.Services.TransactionServices
             {
                 Datas = transactions,
                 TotalCount = await query.CountAsync(),
+            };
+        }
+
+        public async Task<DataListDto<TransactionSummaryDto>> GetAllTransactionsAsync(string? searchTerm, string? startDate, string? endDate, byte? transactionStatus, byte? informationType, byte? transactionType, int skip = 1, int take = 7)
+        {
+            var query = _context.Transactions
+                .OrderByDescending(x => x.CreatedDate)
+                .AsNoTracking();
+
+            if (startDate != null)
+            {
+                DateTime? Min = startDate.ToNullableDateTime();
+                if (Min != null)
+                    query = query.Where(x => x.CreatedDate >= Min);
+            }
+
+            if (endDate != null)
+            {
+                DateTime? Max = endDate.ToNullableDateTime();
+                if (Max != null)
+                    query = query.Where(x => x.CreatedDate <= Max);
+            }
+
+            if (transactionStatus != null)
+                query = query.Where(x => x.TransactionStatus == (TransactionStatus)transactionStatus);
+
+            if (transactionType != null)
+                query = query.Where(x => x.TranzactionType == (TransactionType)transactionType);
+
+            if (informationType != null)
+                query = query.Where(x => x.InformationType == (InformationType)informationType);
+
+            var userIds = await query
+                .Where(x => x.UserId != Guid.Empty)
+                .Select(x => x.UserId)
+                .Distinct()
+                .ToListAsync();
+
+            var response = await _usersDataRequest.GetResponse<GetUsersDataResponse>(new GetUsersDataRequest
+            {
+                UserIds = userIds,
+                FullName = searchTerm
+            });
+
+            var filteredUserIds = response.Message.Users
+                .Select(x => x.UserId)
+                .Distinct()
+                .ToList();
+
+            var filteredQuery = query.Where(x => filteredUserIds.Contains(x.UserId));
+
+            var totalCount = await filteredQuery.CountAsync();
+
+            var transactions = await filteredQuery
+                .Skip((skip - 1) * take)
+                .Take(take)
+                .Select(x => new TransactionSummaryDto
+                {
+                    Id = x.Id,
+                    Coin = x.Coin,
+                    CreatedDate = x.CreatedDate,
+                    InformationId = x.InformationId,
+                    InformationType = x.InformationType,
+                    TransactionStatus = x.TransactionStatus,
+                    TransactionType = x.TranzactionType,
+                    UserId = x.UserId,
+                }).ToListAsync();
+
+            if (response.Message.Users != null)
+            {
+                var userDictionary = response.Message.Users.ToDictionary(x => x.UserId, x => $"{x.FirstName} {x.LastName}");
+
+                foreach (var transaction in transactions)
+                {
+                    if (transaction.UserId.HasValue && userDictionary.TryGetValue(transaction.UserId.Value, out var fullName))
+                    {
+                        transaction.Name = fullName;
+                    }
+                }
+            }
+
+            return new DataListDto<TransactionSummaryDto>
+            {
+                Datas = transactions,
+                TotalCount = totalCount,
             };
         }
     }
