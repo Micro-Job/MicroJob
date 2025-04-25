@@ -64,3 +64,6 @@ services:
 networks:
   public-network:
     external: true
+volumes:
+  hiri_wwwroot_data:
+    driver: local
