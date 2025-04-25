@@ -3,6 +3,7 @@ using JobCompany.Business.Dtos.AnswerDtos;
 using JobCompany.Business.Dtos.Common;
 using JobCompany.Business.Dtos.ExamDtos;
 using JobCompany.Business.Dtos.QuestionDtos;
+using JobCompany.Business.Exceptions.ExamExceptions;
 using JobCompany.Business.Services.QuestionServices;
 using JobCompany.Core.Entites;
 using JobCompany.Core.Enums;
@@ -203,7 +204,7 @@ namespace JobCompany.Business.Services.ExamServices
             var hasTakenExam = await _context.UserExams.AnyAsync(x => x.ExamId == examGuid && x.UserId == _currentUser.UserGuid && x.VacancyId == vacancyGuid);
             
             if (hasTakenExam)
-                throw new BadRequestException("Siz bu imtahandan artıq keçmisiniz");
+                throw new ExamAlreadyTakenException(MessageHelper.GetMessage("EXAM_ALREADY_TAKEN"));
 
             var data = await _context.Exams.Where(x=> x.Id == examGuid)
                 .Select(x=> new GetExamIntroDto

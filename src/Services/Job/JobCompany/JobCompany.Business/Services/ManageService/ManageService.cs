@@ -41,6 +41,8 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
 
         var vacancy = await _context.Vacancies
             .Include(v => v.Applications)
+            .Include(v => v.Company)
+            .Include(v => v.VacancyMessages)
             .FirstOrDefaultAsync(v => v.Id == vacancyGuid)
             ?? throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
 
@@ -58,12 +60,18 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
             .SetProperty(a => a.IsDeleted, true)
         );
 
-        vacancy.VacancyCommentId = vacancyMessageGuid;
+        //vacancy.VacancyCommentId = vacancyMessageGuid; TODO: burda vakansiya kommentinə niyə mesajın id-sini veririk? 
+        vacancy.VacancyMessages?.Add(new VacancyMessage
+        {
+            MessageId = vacancyMessageGuid,
+            VacancyId = vacancyGuid,
+        });
+
         vacancy.VacancyStatus = VacancyStatus.Reject;
 
         var newNotification = new Notification
         {
-            ReceiverId = vacancy.Company.UserId,
+            ReceiverId = vacancy.Company.Id,
             SenderId = null,
             NotificationType = NotificationType.VacancyReject,
             InformationId = vacancyGuid,
@@ -96,7 +104,12 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
         if (vacancy.VacancyStatus != VacancyStatus.Block)
         {
             vacancy.VacancyStatus = VacancyStatus.Block;
-            vacancy.VacancyCommentId = Guid.Parse(dto.VacancyMessageId);
+            //vacancy.VacancyCommentId = Guid.Parse(dto.VacancyMessageId);  ?? TODO: burda vakansiya kommentinə niyə mesajın id-sini veririk?
+            vacancy.VacancyMessages?.Add(new VacancyMessage
+            {
+                MessageId = Guid.Parse(dto.VacancyMessageId),
+                VacancyId = vacancy.Id,
+            });
         }
         else
         {
@@ -117,8 +130,8 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
             .Where(x => x.VacancyStatus == VacancyStatus.Pending ||
                         x.VacancyStatus == VacancyStatus.Active ||
                         x.VacancyStatus == VacancyStatus.Reject ||
-                        x.VacancyStatus == VacancyStatus.PendingUpdate) 
-            .OrderBy(x => x.VacancyStatus).ThenBy(x=> x.CreatedDate)
+                        x.VacancyStatus == VacancyStatus.PendingUpdate)
+            .OrderBy(x => x.VacancyStatus).ThenBy(x => x.CreatedDate)
             .AsQueryable()
             .AsNoTracking();
 
@@ -542,7 +555,7 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
             .Include(m => m.Translations)
             .FirstOrDefaultAsync(m => m.Id == categoryGuid)
             ?? throw new NotFoundException<Category>(MessageHelper.GetMessage("NOT_FOUND"));
-        
+
         _context.Categories.Remove(category);
         await _context.SaveChangesAsync();
     }

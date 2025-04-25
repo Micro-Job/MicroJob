@@ -150,6 +150,9 @@
   <data name="END_DATE_MUST_NOT_BE_IN_THE_PAST" xml:space="preserve">
     <value>The end time cannot be in the past.</value>
   </data>
+  <data name="EXAM_ALREADY_TAKEN" xml:space="preserve">
+    <value>You have already taken this exam.</value>
+  </data>
   <data name="GREATER_THAN_OR_EQUAL_TO_ZERO" xml:space="preserve">
     <value>Number must be greater than or equal to 0</value>
   </data>
