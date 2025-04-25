@@ -150,6 +150,9 @@
   <data name="END_DATE_MUST_NOT_BE_IN_THE_PAST" xml:space="preserve">
     <value>Bitiş vaxtı keçmişdə ola bilməz</value>
   </data>
+  <data name="EXAM_ALREADY_TAKEN" xml:space="preserve">
+    <value>Siz bu imtahanda artıq iştirak etmisiniz.</value>
+  </data>
   <data name="GREATER_THAN_OR_EQUAL_TO_ZERO" xml:space="preserve">
     <value>Say 0-dan böyük və ya 0-a bərabər olmalıdır</value>
   </data>
