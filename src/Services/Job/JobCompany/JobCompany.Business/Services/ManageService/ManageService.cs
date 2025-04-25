@@ -104,7 +104,12 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
         if (vacancy.VacancyStatus != VacancyStatus.Block)
         {
             vacancy.VacancyStatus = VacancyStatus.Block;
-            vacancy.VacancyCommentId = Guid.Parse(dto.VacancyMessageId);
+            //vacancy.VacancyCommentId = Guid.Parse(dto.VacancyMessageId);  ?? TODO: burda vakansiya kommentinə niyə mesajın id-sini veririk?
+            vacancy.VacancyMessages?.Add(new VacancyMessage
+            {
+                MessageId = Guid.Parse(dto.VacancyMessageId),
+                VacancyId = vacancy.Id,
+            });
         }
         else
         {
