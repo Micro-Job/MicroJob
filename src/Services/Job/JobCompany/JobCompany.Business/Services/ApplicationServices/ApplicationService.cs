@@ -393,6 +393,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                 {
                     VacancyId = application.VacancyId,
                     VacancyName = application.Vacancy.Title,
+                    IsSavedVacancy = application.Vacancy.SavedVacancies.Any(x => x.UserId == _currentUser.UserGuid),
                     CompanyId = application.Vacancy.CompanyId,
                     CompanyName = application.Vacancy.Company.CompanyName,
                     CompanyLogo = $"{_currentUser.BaseUrl}/{application.Vacancy.Company.CompanyLogo}",
