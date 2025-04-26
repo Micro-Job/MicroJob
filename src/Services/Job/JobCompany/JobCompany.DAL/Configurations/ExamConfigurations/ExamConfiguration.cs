@@ -9,6 +9,10 @@ namespace JobCompany.DAL.Configurations.ExamConfigurations
         public void Configure(EntityTypeBuilder<Exam> builder)
         {
             builder.HasKey(e => e.Id);
+
+            //ToDO : bura gore migration vurulmalidir
+            builder.Property(x=> x.IntroDescription).HasMaxLength(4096);
+
             builder.HasOne(e => e.Company)
                    .WithMany(c => c.Exams)
                    .HasForeignKey(e => e.CompanyId)

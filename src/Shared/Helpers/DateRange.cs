@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SharedLibrary.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -51,5 +52,10 @@ namespace SharedLibrary.Helpers
             }
             return res;
         }
+
+        //public static DateTime ConvertDateTimeRange(DateFilter? dateFilter)
+        //{
+
+        //}
     }
 }

@@ -41,8 +41,8 @@ namespace AuthService.Business.Services.Auth
             {
                 Id = Guid.NewGuid(),
                 Email = dto.Email,
-                FirstName = dto.FirstName,
-                LastName = dto.LastName,
+                FirstName = dto.FirstName.Trim(),
+                LastName = dto.LastName.Trim(),
                 MainPhoneNumber = dto.MainPhoneNumber,
                 RegistrationDate = DateTime.Now,
                 JobStatus = JobStatus.ActivelySeekingJob,
@@ -54,7 +54,7 @@ namespace AuthService.Business.Services.Auth
             await _context.SaveChangesAsync();
 
             await _publishEndpoint.Publish(new UserRegisteredEvent { UserId = user.Id, JobStatus = user.JobStatus });
-            await _createBalance(user.Id);
+            await _createBalance(user.Id , user.FirstName , user.LastName);
 
             //await _publisher.SendEmail(
             //    new EmailMessage
@@ -108,7 +108,7 @@ namespace AuthService.Business.Services.Auth
             );
 
             await _publishEndpoint.Publish(new UserRegisteredEvent { UserId = user.Id });
-            await _createBalance(user.Id);
+            await _createBalance(user.Id , user.FirstName , user.LastName);
             //await _publisher.SendEmail(
             //    new EmailMessage
             //    {
@@ -258,7 +258,7 @@ namespace AuthService.Business.Services.Auth
         }
 
 
-        private async Task _createBalance(Guid userId)
+        private async Task _createBalance(Guid userId , string firstName , string lastName)
         {
             await _publishEndpoint.Publish(new CreateBalanceEvent
             {

@@ -21,5 +21,12 @@ namespace JobPayment.API.Controllers
             await _packetService.CreatePacketAsync(dto);
             return Ok();
         }
+
+        [HttpPut("[action]")]
+        public async Task<IActionResult> UpdatePacket(UpdatePacketDto dto)
+        {
+            await _packetService.UpdatePacketAsync(dto);
+            return Ok();
+        }
     }
 }

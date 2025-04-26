@@ -21,5 +21,7 @@ namespace JobCompany.Business.Services.VacancyServices
         Task<List<VacancyGetAllDto>> SimilarVacanciesAsync(string vacancyId, int take = 6);
 
         Task<DataListDto<VacancyGetAllDto>> GetAllSavedVacancyAsync(int skip, int take, string? vacancyName);
+
+        Task DeleteVacancyAsync(Guid vacancyId);
     }
 }

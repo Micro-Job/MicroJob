@@ -3,6 +3,7 @@ using JobCompany.Business.Dtos.AnswerDtos;
 using JobCompany.Business.Dtos.Common;
 using JobCompany.Business.Dtos.ExamDtos;
 using JobCompany.Business.Dtos.QuestionDtos;
+using JobCompany.Business.Exceptions.ExamExceptions;
 using JobCompany.Business.Services.QuestionServices;
 using JobCompany.Core.Entites;
 using JobCompany.Core.Enums;
@@ -17,7 +18,7 @@ using SharedLibrary.HelperServices.Current;
 
 namespace JobCompany.Business.Services.ExamServices
 {
-    public class ExamService(JobCompanyDbContext _context,IQuestionService _questionService,ICurrentUser _currentUser) : IExamService
+    public class ExamService(JobCompanyDbContext _context, IQuestionService _questionService, ICurrentUser _currentUser) : IExamService
     {
         public async Task<Guid> CreateExamAsync(CreateExamDto dto)
         {
@@ -191,7 +192,7 @@ namespace JobCompany.Business.Services.ExamServices
             return new DataListDto<ExamListDto>
             {
                 Datas = exams,
-                TotalCount = await query.CountAsync(),   
+                TotalCount = await query.CountAsync(),
             };
         }
 
@@ -201,12 +202,12 @@ namespace JobCompany.Business.Services.ExamServices
             var vacancyGuid = Guid.Parse(vacancyId);
 
             var hasTakenExam = await _context.UserExams.AnyAsync(x => x.ExamId == examGuid && x.UserId == _currentUser.UserGuid && x.VacancyId == vacancyGuid);
-            
-            if (hasTakenExam)
-                throw new BadRequestException("Siz bu imtahandan artıq keçmisiniz");
 
-            var data = await _context.Exams.Where(x=> x.Id == examGuid)
-                .Select(x=> new GetExamIntroDto
+            if (hasTakenExam)
+                return new GetExamIntroDto { IsTaken = true };
+
+            var data = await _context.Exams.Where(x => x.Id == examGuid)
+                .Select(x => new GetExamIntroDto
                 {
                     CompanyName = x.Company.CompanyName,
                     IntroDescription = x.IntroDescription,
@@ -326,16 +327,16 @@ namespace JobCompany.Business.Services.ExamServices
 
             var userExam = new UserExam
             {
-                UserId = userGuid, 
+                UserId = userGuid,
                 ExamId = dto.ExamId,
                 VacancyId = dto.VacancyId,
                 TrueAnswerCount = (byte)trueCount,
-                FalseAnswerCount = (byte)falseCount, 
+                FalseAnswerCount = (byte)falseCount,
             };
 
 
             _context.UserExams.Add(userExam);
-            await _context.SaveChangesAsync(); 
+            await _context.SaveChangesAsync();
 
             return new SubmitExamResultDto
             {

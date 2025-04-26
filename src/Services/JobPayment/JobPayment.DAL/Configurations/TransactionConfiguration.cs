@@ -13,7 +13,11 @@ namespace JobPayment.DAL.Configurations
     {
         public void Configure(EntityTypeBuilder<Transaction> builder)
         {
-            builder.HasIndex(x=> x.UserId);
+            builder.HasIndex(x => x.UserId);
+
+            builder.HasOne(x => x.User)
+                .WithMany(x => x.Transactions)
+                .HasForeignKey(x => x.UserId);
 
             builder.Property(x => x.CreatedDate)
                 .HasDefaultValueSql("GETUTCDATE()");

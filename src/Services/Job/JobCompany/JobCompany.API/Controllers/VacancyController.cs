@@ -98,5 +98,12 @@ namespace JobCompany.API.Controllers
         {
             return Ok(await _vacancyService.GetAllSavedVacancyAsync(skip, take, vacancyName));
         }
+
+        [HttpPut("[action]")]
+        public async Task<IActionResult> DeleteVacancy(Guid vacancyId)
+        {
+            await _vacancyService.DeleteVacancyAsync(vacancyId);
+            return Ok();
+        }
     }
 }

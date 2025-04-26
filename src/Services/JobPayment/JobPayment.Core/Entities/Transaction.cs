@@ -32,6 +32,7 @@ namespace JobPayment.Core.Entities
         public DateTime? CreatedDate { get; set; }
 
         public Guid UserId { get; set; }
+        public User User { get; set; }
 
         public Guid BalanceId { get; set; }
         public Balance Balance { get; set; }

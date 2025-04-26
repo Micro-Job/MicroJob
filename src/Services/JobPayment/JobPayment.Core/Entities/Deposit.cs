@@ -10,7 +10,6 @@ namespace JobPayment.Core.Entities
     public class Deposit : BaseEntity
     {
         public decimal? Amount { get; set; }
-        
 
         public Guid BalanceId { get; set; }
         public Balance Balance { get; set; }
