@@ -4,6 +4,7 @@ using JobPayment.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JobPayment.DAL.Migrations
 {
     [DbContext(typeof(PaymentDbContext))]
-    partial class PaymentDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250426073848_CreatedUserTable")]
+    partial class CreatedUserTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -38,9 +41,6 @@ namespace JobPayment.DAL.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
 
                     b.ToTable("Balances");
                 });
@@ -209,8 +209,6 @@ namespace JobPayment.DAL.Migrations
 
                     b.HasIndex("BalanceId");
 
-                    b.HasIndex("UserId");
-
                     b.ToTable("Transactions");
                 });
 
@@ -233,17 +231,6 @@ namespace JobPayment.DAL.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("JobPayment.Core.Entities.Balance", b =>
-                {
-                    b.HasOne("JobPayment.Core.Entities.User", "User")
-                        .WithOne("Balance")
-                        .HasForeignKey("JobPayment.Core.Entities.Balance", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("JobPayment.Core.Entities.Deposit", b =>
                 {
                     b.HasOne("JobPayment.Core.Entities.Balance", "Balance")
@@ -255,7 +242,7 @@ namespace JobPayment.DAL.Migrations
                     b.HasOne("JobPayment.Core.Entities.Transaction", "Transaction")
                         .WithOne("Deposit")
                         .HasForeignKey("JobPayment.Core.Entities.Deposit", "TransactionId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Balance");
@@ -293,15 +280,7 @@ namespace JobPayment.DAL.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("JobPayment.Core.Entities.User", "User")
-                        .WithMany("Transactions")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.Navigation("Balance");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("JobPayment.Core.Entities.Balance", b =>
@@ -325,14 +304,6 @@ namespace JobPayment.DAL.Migrations
                 {
                     b.Navigation("Deposit")
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("JobPayment.Core.Entities.User", b =>
-                {
-                    b.Navigation("Balance")
-                        .IsRequired();
-
-                    b.Navigation("Transactions");
                 });
 #pragma warning restore 612, 618
         }

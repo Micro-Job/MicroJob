@@ -1,4 +1,5 @@
 ﻿using JobPayment.Business.Services.BalanceServices;
+using JobPayment.DAL.Contexts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -10,7 +11,7 @@ namespace JobPayment.API.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class BalanceController(IBalanceService _balanceService) : ControllerBase
+    public class BalanceController(IBalanceService _balanceService , PaymentDbContext _context) : ControllerBase
     {
         [HttpPost("[action]")]
         public async Task<IActionResult> IncreaseBalance(string packetId)
