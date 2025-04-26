@@ -14,5 +14,6 @@ namespace JobCompany.Business.Dtos.ExamDtos
         public float LimitRate { get; set; }
         public string FullName { get; set; }
         public string IntroDescription { get; set; }
+        public bool IsTaken { get; set; } // İstifadəçinin əvvəl bu imtahanı verib-vermədiyini göstərir
     }
 }
