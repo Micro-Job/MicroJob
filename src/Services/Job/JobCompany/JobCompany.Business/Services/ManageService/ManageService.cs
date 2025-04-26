@@ -97,29 +97,15 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
 
     public async Task ToggleBlockVacancyStatusAsync(VacancyStatusUpdateDto dto)
     {
-        var vacancy = await _context.Vacancies
-            .FirstOrDefaultAsync(v => v.Id == Guid.Parse(dto.VacancyId))
+        var vacancy = await _context.Vacancies.FirstOrDefaultAsync(v => v.Id == Guid.Parse(dto.VacancyId))
             ?? throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
 
-        if (vacancy.VacancyStatus != VacancyStatus.Block)
+        vacancy.VacancyStatus = VacancyStatus.Block;
+        vacancy.VacancyMessages?.Add(new VacancyMessage
         {
-            vacancy.VacancyStatus = VacancyStatus.Block;
-            //vacancy.VacancyCommentId = Guid.Parse(dto.VacancyMessageId);  ?? TODO: burda vakansiya kommentinə niyə mesajın id-sini veririk?
-            vacancy.VacancyMessages?.Add(new VacancyMessage
-            {
-                MessageId = Guid.Parse(dto.VacancyMessageId),
-                VacancyId = vacancy.Id,
-            });
-        }
-        else
-        {
-            vacancy.VacancyStatus = VacancyStatus.Deactive;
-
-            if (vacancy.VacancyCommentId != null)
-            {
-                vacancy.VacancyCommentId = null;
-            }
-        }
+            MessageId = Guid.Parse(dto.VacancyMessageId),
+            VacancyId = vacancy.Id,
+        });
 
         await _context.SaveChangesAsync();
     }
@@ -130,7 +116,7 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
             .Where(x => x.VacancyStatus == VacancyStatus.Pending ||
                         x.VacancyStatus == VacancyStatus.Active ||
                         x.VacancyStatus == VacancyStatus.Reject ||
-                        x.VacancyStatus == VacancyStatus.PendingUpdate)
+                        x.VacancyStatus == VacancyStatus.Update)
             .OrderBy(x => x.VacancyStatus).ThenBy(x => x.CreatedDate)
             .AsQueryable()
             .AsNoTracking();

@@ -729,5 +729,28 @@ namespace JobCompany.Business.Services.VacancyServices
                 TotalCount = await query.CountAsync()
             };
         }
+
+        /// <summary>
+        /// Vakansiyanın şirkət tərəfindən ləğv edilməsi
+        /// </summary>
+        /// <param name="vacancyId"></param>
+        /// <returns></returns>
+        public async Task DeleteVacancyAsync(Guid vacancyId)
+        {
+            var vacancy = await _context.Vacancies.Include(x => x.Applications).FirstOrDefaultAsync(x => x.Id == vacancyId)
+                ?? throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
+
+            vacancy.PaymentDate = null;
+            vacancy.VacancyStatus = VacancyStatus.Deleted;
+
+            if (vacancy.Applications != null)
+            {
+                await _context.Applications.Where(x=> vacancy.Applications.Select(a=>a.Id).Contains(x.Id))
+                    .ExecuteUpdateAsync(setter=> setter
+                                                        .SetProperty(a=> a.IsDeleted , true)
+                                                        .SetProperty(a=> a.IsActive , false));
+            }
+            await _context.SaveChangesAsync();
+        }
     }
 }

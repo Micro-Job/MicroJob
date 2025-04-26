@@ -20,27 +20,40 @@ namespace JobCompany.Business.Consumers
     {
         public async Task Consume(ConsumeContext<PeriodicVacancyPayEvent> context)
         {
+            var dateTimeNow = DateTime.Now.AddHours(4);
+
             var mustPayVacancies = await _context.Vacancies
                 .Where(x => x.PaymentDate != null &&
-                            x.PaymentDate <= DateTime.Now.AddHours(4) &&
+                            x.PaymentDate <= dateTimeNow &&
                             x.VacancyStatus == VacancyStatus.Active)
                 .Select(x => new
                 {
                     x.Id,
                     x.Company.UserId,
                     x.CompanyId,
+                    x.EndDate,
                     x.Title
                 })
                 .AsNoTracking()
                 .ToListAsync();
 
+            //TODO : bu hisse optimize olunmalıdır(executeUpdateler problemdir)Procedure istifade edile biler butun datalar yigildiqdan sonra sql terefde
             if (mustPayVacancies != null)
             {
-                foreach (var item in mustPayVacancies)
+                foreach (var vacancy in mustPayVacancies)
                 {
+                    if(vacancy.EndDate < dateTimeNow)
+                    {
+                        await _context.Vacancies.Where(v => v.Id == vacancy.Id)
+                        .ExecuteUpdateAsync(setter => setter
+                        .SetProperty(v => v.PaymentDate, (DateTime?)null)
+                        .SetProperty(v => v.VacancyStatus, VacancyStatus.Deactive));
+                        continue;
+                    }
+
                     var response = await _balanceRequest.GetResponse<CheckBalanceResponse>(new CheckBalanceRequest
                     {
-                        UserId = item.UserId,
+                        UserId = vacancy.UserId,
                         InformationType = InformationType.Vacancy
                     });
 
@@ -48,36 +61,36 @@ namespace JobCompany.Business.Consumers
                     {
                         await _publishEndpoint.Publish(new PayEvent
                         {
-                            UserId = item.UserId,
-                            InformationId = item.Id,
+                            UserId = vacancy.UserId,
+                            InformationId = vacancy.Id,
                             InformationType = InformationType.Vacancy,
                         });
 
-                        await _context.Vacancies.Where(v => v.Id == item.Id)
+                        await _context.Vacancies.Where(v => v.Id == vacancy.Id)
                         .ExecuteUpdateAsync(setter => setter.SetProperty(v => v.PaymentDate, v => v.PaymentDate.Value.AddDays(1)));
 
                         await _notificationService.CreateNotificationAsync(new CreateNotificationDto
                         {
-                            InformationId = item.Id,
-                            InformationName = item.Title,
+                            InformationId = vacancy.Id,
+                            InformationName = vacancy.Title,
                             NotificationType = NotificationType.VacancySuccessDailyPayment,
-                            ReceiverId = (Guid)item.CompanyId,
+                            ReceiverId = (Guid)vacancy.CompanyId,
                             SenderId = null
                         });
                     }
                     else
                     {
-                        await _context.Vacancies.Where(v => v.Id == item.Id)
+                        await _context.Vacancies.Where(v => v.Id == vacancy.Id)
                         .ExecuteUpdateAsync(setter => setter
                         .SetProperty(v => v.PaymentDate, (DateTime?)null)
                         .SetProperty(v => v.VacancyStatus, VacancyStatus.PendingActive));
 
                         await _notificationService.CreateNotificationAsync(new CreateNotificationDto
                         {
-                            InformationId = item.Id,
-                            InformationName = item.Title,
+                            InformationId = vacancy.Id,
+                            InformationName = vacancy.Title,
                             NotificationType = NotificationType.VacancyFailedDailyPayment,
-                            ReceiverId = (Guid)item.CompanyId,
+                            ReceiverId = (Guid)vacancy.CompanyId,
                             SenderId = null
                         });
                     }

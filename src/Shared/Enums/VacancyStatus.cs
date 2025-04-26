@@ -29,5 +29,8 @@ public enum VacancyStatus
     /// Vakansiya operator terefinden qebul edilerse ve sirketin balansinda yeteri qeder coin varsa
     /// </summary>
     Active = 9,
+    /// <summary>
+    /// Sirket terefinden vakansiya legv edilerse(silinerse)
+    /// </summary>
     Deleted = 10
 }
