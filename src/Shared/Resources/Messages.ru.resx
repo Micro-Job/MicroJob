@@ -141,6 +141,12 @@
   <data name="CANNOT_CHANGE_STATUS" xml:space="preserve">
     <value>Статус не может быть изменен</value>
   </data>
+  <data name="DESCRIPTION_MUST_NOT_EXCEED_4096_CHAR" xml:space="preserve">
+    <value>Длина вводного описания не должна превышать 4096 символов.</value>
+  </data>
+  <data name="DURATION_MUST_BE_GREATER_THAN_ZERO" xml:space="preserve">
+    <value>Длительность должна быть больше нуля.</value>
+  </data>
   <data name="EMAIL_ALREADY_USED" xml:space="preserve">
     <value>Этот адрес электронной почты используется другой компанией.</value>
   </data>
@@ -179,6 +185,9 @@
   </data>
   <data name="LENGTH_MUST_BE_BETWEEN_1_8192" xml:space="preserve">
     <value>Длина должна быть от 1 до 8192</value>
+  </data>
+  <data name="LIMIT_RATE_MUST_BE_BETWEEN_0_100" xml:space="preserve">
+    <value>Минимальный балл для сдачи экзамена должен быть от 0 до 100.</value>
   </data>
   <data name="LOGIN_REQUIRED" xml:space="preserve">
     <value>Пожалуйста, войдите снова, чтобы продолжить</value>
