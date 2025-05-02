@@ -51,6 +51,32 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
              .Select(a => a.UserId)
              .ToList();
 
+        //vacancy.VacancyCommentId = vacancyMessageGuid; TODO: burda vakansiya kommentinə niyə mesajın id-sini veririk? 
+        vacancy.VacancyMessages?.Add(new VacancyMessage
+        {
+            MessageId = vacancyMessageGuid,
+            VacancyId = vacancyGuid,
+        });
+
+        if (vacancy.VacancyStatus == VacancyStatus.Active)
+        {
+            ///summary
+            /// Vakansiya reject olunanda bu vakansiyaya muraciet edenlere bildiris getmesi
+            ///summary
+            await _publishEndpoint.Publish(
+                new NotificationToUserEvent
+                {
+                    InformationId = vacancyGuid,
+                    SenderId = null,
+                    ReceiverIds = appliedUserIds,
+                    InformationName = vacancy.Title,
+                    NotificationType = NotificationType.VacancyReject,
+                    SenderName = null,
+                    SenderImage = null,
+                }
+            );
+        }
+
         ///summary
         /// Vakansiya reject olunanda bu vakansiyaya olunan muracietlerin isdeleted olunmasi
         ///summary
@@ -59,13 +85,6 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
         .ExecuteUpdateAsync(setters => setters
             .SetProperty(a => a.IsDeleted, true)
         );
-
-        //vacancy.VacancyCommentId = vacancyMessageGuid; TODO: burda vakansiya kommentinə niyə mesajın id-sini veririk? 
-        vacancy.VacancyMessages?.Add(new VacancyMessage
-        {
-            MessageId = vacancyMessageGuid,
-            VacancyId = vacancyGuid,
-        });
 
         vacancy.VacancyStatus = VacancyStatus.Reject;
 
@@ -80,19 +99,6 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
         };
         await _context.Notifications.AddAsync(newNotification);
         await _context.SaveChangesAsync();
-
-        ///summary
-        /// Vakansiya reject olunanda bu vakansiyaya muraciet edenlere bildiris getmesi
-        ///summary
-        await _publishEndpoint.Publish(
-            new VacancyDeletedEvent
-            {
-                InformationId = vacancyGuid,
-                SenderId = (Guid)_currentUser.UserGuid,
-                UserIds = appliedUserIds,
-                InformationName = vacancy.Title,
-            }
-        );
     }
 
     public async Task ToggleBlockVacancyStatusAsync(VacancyStatusUpdateDto dto)

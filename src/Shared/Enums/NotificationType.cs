@@ -42,6 +42,10 @@ public enum NotificationType : byte
     /// Vakansiya elaninin gundelik pul cixmasi 
     /// </summary>
     VacancySuccessDailyPayment = 10,
-    VacancyFailedDailyPayment = 11
+    VacancyFailedDailyPayment = 11,
+    /// <summary>
+    /// Müraciət statusunun dəyişməsi
+    /// </summary>  
+    ApplicationStatusUpdate = 12,
 }
 

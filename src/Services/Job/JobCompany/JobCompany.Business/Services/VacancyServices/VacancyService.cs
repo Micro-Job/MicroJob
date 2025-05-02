@@ -514,7 +514,7 @@ namespace JobCompany.Business.Services.VacancyServices
                         .Where(vs => skillsToRemove.Contains(vs.SkillId))
                         .ToList();
 
-                    _context.VacancySkills.RemoveRange(vacancySkillsToRemove);  // skilllər silinir
+                    _context.VacancySkills.RemoveRange(vacancySkillsToRemove);  // skillər silinir
                 }
             }
 
@@ -526,19 +526,21 @@ namespace JobCompany.Business.Services.VacancyServices
                 .Select(a => a.UserId)
                 .ToListAsync();
 
-            await _publishEndpoint.Publish(
-                new VacancyUpdatedEvent
+            await _publishEndpoint.Publish(  //Vakansiya update olunduqda müraciət edən userlərə notification göndərilir
+                new NotificationToUserEvent
                 {
                     InformationId = vacancyGuid,
                     SenderId = (Guid)_currentUser.UserGuid,
-                    UserIds = userIds,
+                    ReceiverIds = userIds,
                     InformationName = existingVacancy.Title,
+                    NotificationType = NotificationType.VacancyUpdate,
+                    SenderName = existingVacancy.CompanyName,
+                    SenderImage = $"{_currentUser.BaseUrl}/{existingVacancy.CompanyLogo}",
                 }
             );
         }
 
         /// <summary> Şirkət profilində vakansiya axtarışı vakansiya filterlere görə </summary>
-
         public async Task<DataListDto<VacancyGetAllDto>> GetAllVacanciesAsync(string? titleName, string? categoryId, string? countryId, string? cityId, decimal? minSalary, decimal? maxSalary, string? companyId, byte? workStyle, byte? workType, int skip = 1, int take = 9)
         {
             var query = _context.Vacancies.Where(x => x.VacancyStatus == VacancyStatus.Active && x.EndDate > DateTime.Now)
