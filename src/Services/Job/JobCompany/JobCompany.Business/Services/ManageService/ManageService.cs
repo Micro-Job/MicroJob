@@ -240,9 +240,12 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
     #endregion
 
     #region Message
-    public async Task<DataListDto<MessageWithTranslationsDto>> GetAllMessagesAsync(int pageNumber = 1, int pageSize = 10)
+    public async Task<DataListDto<MessageWithTranslationsDto>> GetAllMessagesAsync(string? content, int pageNumber = 1, int pageSize = 10)
     {
         var query = _context.Messages.AsQueryable();
+
+        if (content != null)
+            query = query.Where(x => x.Translations.Any(z => z.Content.Contains(content)));
 
         var totalCount = await query.CountAsync();
 

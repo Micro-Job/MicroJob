@@ -48,9 +48,9 @@ namespace JobCompany.API.Controllers
 
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetAllMessages(int pageNumber, int pageSize)
+        public async Task<IActionResult> GetAllMessages(string? content, int pageNumber, int pageSize)
         {
-            return Ok(await _manageService.GetAllMessagesAsync(pageNumber, pageSize));
+            return Ok(await _manageService.GetAllMessagesAsync(content, pageNumber, pageSize));
         }
 
         [HttpGet("[action]")]
