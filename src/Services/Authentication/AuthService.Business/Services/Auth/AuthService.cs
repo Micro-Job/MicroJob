@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using System.Linq;
+using System.Security.Claims;
 using AuthService.Business.Dtos;
 using AuthService.Business.Exceptions.UserException;
 using AuthService.Business.HelperServices.Email;
@@ -6,6 +7,7 @@ using AuthService.Business.HelperServices.TokenHandler;
 using AuthService.Business.Publishers;
 using AuthService.Core.Entities;
 using AuthService.DAL.Contexts;
+using Azure.Core;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -191,7 +193,7 @@ namespace AuthService.Business.Services.Auth
             _context.Users.Update(user);
             await _context.SaveChangesAsync();
 
-            return new TokenResponseDto
+            var responseDto = new TokenResponseDto
             {
                 UserId = user.Id.ToString(),
                 FullName = user.FirstName + " " + user.LastName,
@@ -201,6 +203,23 @@ namespace AuthService.Business.Services.Auth
                 Expires = newRefreshToken.Expires,
                 UserImage = user.Image != null ? $"{_authServiceBaseUrl}/{user.Image}" : null
             };
+
+            if (user.UserRole == UserRole.CompanyUser || user.UserRole == UserRole.EmployeeUser)
+            {
+                var companyResponse = await _companyDataClient.GetResponse<GetCompaniesDataByUserIdsResponse>(
+                    new GetCompaniesDataByUserIdsRequest
+                    {
+                        UserIds = [user.Id]
+                    });
+
+                var companyData = companyResponse.Message.Companies[user.Id];
+
+                //TODO : burada sekili haradan getirirse ele bir basa ordan baseUrl-i goturub getirsin burada menimsedilmesin
+                responseDto.FullName = companyData.CompanyName;
+                responseDto.UserImage = $"{_configuration["JobCompany:BaseUrl"]}/{companyData.CompanyLogo}" ?? null;
+            }
+
+            return responseDto;
         }
 
         /// <summary>

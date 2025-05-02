@@ -9,9 +9,7 @@ using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using MassTransit;
 using MassTransit.Initializers;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.OpenApi.Extensions;
 using Shared.Events;
 using Shared.Requests;
@@ -32,10 +30,8 @@ namespace JobCompany.Business.Services.ApplicationServices
         readonly IRequestClient<GetUsersDataRequest> _getUserDataClient;
         readonly IRequestClient<GetResumeDataRequest> _getResumeDataClient;
         readonly IPublishEndpoint _publishEndpoint;
-        readonly IConfiguration _configuration;
         private readonly ICurrentUser _currentUser;
         private readonly string? _authServiceBaseUrl;
-        private readonly IRequestClient<GetUserDataRequest> _requestUser;
         private readonly IRequestClient<GetResumeIdsByUserIdsRequest> _resumeIdsRequest;
         private readonly IRequestClient<GetFilteredUserIdsRequest> _filteredUserIdsRequest;
 
@@ -45,7 +41,6 @@ namespace JobCompany.Business.Services.ApplicationServices
             IRequestClient<GetUsersDataRequest> client,
             IRequestClient<GetResumeDataRequest> requestClient,
             IPublishEndpoint publishEndpoint,
-            IConfiguration configuration,
             ICurrentUser currentUser,
             IRequestClient<GetUserDataRequest> requestUser,
             IRequestClient<GetResumeIdsByUserIdsRequest> resumeIdsRequest,
@@ -56,9 +51,6 @@ namespace JobCompany.Business.Services.ApplicationServices
             _getUserDataClient = client;
             _getResumeDataClient = requestClient;
             _publishEndpoint = publishEndpoint;
-            _configuration = configuration;
-            _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
-            _requestUser = requestUser;
             _resumeIdsRequest = resumeIdsRequest;
             _filteredUserIdsRequest = filteredUserIdsRequest;
         }
@@ -70,8 +62,8 @@ namespace JobCompany.Business.Services.ApplicationServices
 
             var existApplication =
                 await _context.Applications.FirstOrDefaultAsync(x =>
-                    x.Id == applicationGuid && x.UserId == _currentUser.UserGuid
-                ) ?? throw new NotFoundException<Application>(MessageHelper.GetMessage("NOT_FOUND"));
+                    x.Id == applicationGuid && x.UserId == _currentUser.UserGuid) 
+                ?? throw new NotFoundException<Application>(MessageHelper.GetMessage("NOT_FOUND"));
             if (existApplication.IsActive == false)
                 throw new ApplicationStatusIsDeactiveException(MessageHelper.GetMessage("APPLICATION_IS_DEACTIVE"));
             existApplication.IsActive = false;
