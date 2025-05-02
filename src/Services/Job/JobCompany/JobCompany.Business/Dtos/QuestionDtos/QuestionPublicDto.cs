@@ -10,5 +10,6 @@ public class QuestionPublicDto
     public string Image { get; set; }
     public QuestionType QuestionType { get; set; }
     public bool IsRequired { get; set; }
+    public int Order { get; set; }
     public List<AnswerPublicDto> Answers { get; set; }
 }
