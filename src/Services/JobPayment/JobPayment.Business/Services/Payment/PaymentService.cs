@@ -16,23 +16,38 @@ namespace JobPayment.Business.Services.Payment
             var myBalance = await _balanceService.GetUserBalanceByIdAsync(dto.UserId);
             var price = await _priceService.GetPriceByInformationTypeAsync(dto.InformationType);
 
-            if(price.Coin > myBalance.Coin)
-                throw new InsufficientBalanceException();
-
-            await _transactionService.CreateTransactionAsync(new CreateTransactionDto
+            if(myBalance.Coin >= price.Coin)
             {
-                Amount = null,
-                BalanceId = myBalance.Id,
-                BeforeBalanceCoin = myBalance.Coin,
-                Coin = price.Coin,
-                InformationId = dto.InformationId,
-                InformationType = dto.InformationType,
-                TranzactionType = TransactionType.OutCome,
-                TransactionStatus = TransactionStatus.Success,
-                UserId = dto.UserId
-            });
+                await _transactionService.CreateTransactionAsync(new CreateTransactionDto
+                {
+                    Amount = null,
+                    BalanceId = myBalance.Id,
+                    BeforeBalanceCoin = myBalance.Coin,
+                    Coin = price.Coin,
+                    InformationId = dto.InformationId,
+                    InformationType = dto.InformationType,
+                    TranzactionType = TransactionType.OutCome,
+                    TransactionStatus = TransactionStatus.Success,
+                    UserId = dto.UserId
+                });
 
-            myBalance.Coin = myBalance.Coin - price.Coin;
+                myBalance.Coin = myBalance.Coin - price.Coin;
+            }
+            else
+            {
+                await _transactionService.CreateTransactionAsync(new CreateTransactionDto
+                {
+                    Amount = null,
+                    BalanceId = myBalance.Id,
+                    BeforeBalanceCoin = myBalance.Coin,
+                    Coin = price.Coin,
+                    InformationId = dto.InformationId,
+                    InformationType = dto.InformationType,
+                    TranzactionType = TransactionType.OutCome,
+                    TransactionStatus = TransactionStatus.Failed,
+                    UserId = dto.UserId
+                });
+            }
 
             await _context.SaveChangesAsync();
         }

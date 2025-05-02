@@ -105,5 +105,12 @@ namespace JobCompany.API.Controllers
             await _vacancyService.DeleteVacancyAsync(vacancyId);
             return Ok();
         }
+
+        [HttpPut("[action]")]
+        public async Task<IActionResult> TogglePauseVacancy(Guid vacancyId)
+        {
+            await _vacancyService.TogglePauseVacancyAsync(vacancyId);
+            return Ok();
+        }
     }
 }

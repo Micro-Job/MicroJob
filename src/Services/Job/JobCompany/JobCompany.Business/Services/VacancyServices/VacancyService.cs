@@ -27,25 +27,14 @@ using SharedLibrary.Exceptions;
 using SharedLibrary.ExternalServices.FileService;
 using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;
+using SharedLibrary.Requests;
+using SharedLibrary.Responses;
 using SharedLibrary.Statics;
 
 namespace JobCompany.Business.Services.VacancyServices
 {
-    public class VacancyService : IVacancyService
+    public class VacancyService(JobCompanyDbContext _context, IFileService _fileService, IPublishEndpoint _publishEndpoint, ICurrentUser _currentUser, IRequestClient<CheckBalanceRequest> _checkBalanceRequest) : IVacancyService
     {
-        private readonly JobCompanyDbContext _context;
-        private readonly IFileService _fileService;
-        private readonly IPublishEndpoint _publishEndpoint;
-        private readonly ICurrentUser _currentUser;
-
-        public VacancyService(JobCompanyDbContext context, IFileService fileService, IPublishEndpoint publishEndpoint, ICurrentUser currentUser)
-        {
-            _context = context;
-            _fileService = fileService;
-            _publishEndpoint = publishEndpoint;
-            _currentUser = currentUser;
-        }
-
         /// <summary> vacancy yaradılması </summary>
         /// vacancy yaradilan zaman exam yaradılması
         public async Task CreateVacancyAsync(CreateVacancyDto vacancyDto, ICollection<CreateNumberDto>? numberDto)
@@ -411,7 +400,7 @@ namespace JobCompany.Business.Services.VacancyServices
                     .Include(v => v.VacancyNumbers)
                     .FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
 
-            if (existingVacancy.VacancyStatus == VacancyStatus.Block && existingVacancy.VacancyStatus == VacancyStatus.Reject)
+            if (existingVacancy.VacancyStatus == VacancyStatus.Block)
                 throw new VacancyUpdateException(MessageHelper.GetMessage("VACANCY_UPDATE"));
 
             existingVacancy.CompanyId = Guid.Parse(vacancyDto.CompanyId);
@@ -639,9 +628,16 @@ namespace JobCompany.Business.Services.VacancyServices
             await _context.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Pause - Vakansiyanın artıq işaxtaranların qarşısına çıxmamağı və növbəti günün ödənişini etməməsi üçündür.
+        /// </summary>
+        /// <param name="vacancyId"></param>
+        /// <returns></returns>
+        /// <exception cref="NotFoundException{Vacancy}"></exception>
+        /// <exception cref="VacancyStatusNotToggableException"></exception>
         public async Task TogglePauseVacancyAsync(Guid vacancyId)
         {
-            var vacancy = await _context.Vacancies.FirstOrDefaultAsync(x => x.Id == vacancyId)
+            var vacancy = await _context.Vacancies.FirstOrDefaultAsync(x => x.Id == vacancyId && x.Company.UserId == _currentUser.UserGuid)
                 ?? throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
 
             if (vacancy.VacancyStatus == VacancyStatus.Active)
@@ -650,7 +646,29 @@ namespace JobCompany.Business.Services.VacancyServices
             }
             else if (vacancy.VacancyStatus == VacancyStatus.Pause)
             {
-                vacancy.VacancyStatus = VacancyStatus.Active;
+                if (DateTime.Now > vacancy.PaymentDate)
+                {
+                    var balanceResponse = await _checkBalanceRequest.GetResponse<CheckBalanceResponse>(new CheckBalanceRequest
+                    {
+                        InformationType = InformationType.Vacancy,
+                        UserId = (Guid)_currentUser.UserGuid!
+                    });
+
+                    if (balanceResponse.Message.HasEnoughBalance)
+                    {
+                        vacancy.VacancyStatus = VacancyStatus.Active;
+                        vacancy.PaymentDate = DateTime.Now.AddDays(1);
+                    }
+                    else
+                    {
+                        vacancy.VacancyStatus = VacancyStatus.PendingActive;
+                        vacancy.PaymentDate = null;
+                    }
+                }
+                else
+                {
+                    vacancy.VacancyStatus = VacancyStatus.Active;
+                }
             }
             else
                 throw new VacancyStatusNotToggableException(MessageHelper.GetMessage("VACANCY_STATUS_NOT_TOGGABLE"));

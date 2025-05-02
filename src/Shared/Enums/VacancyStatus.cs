@@ -22,7 +22,7 @@ public enum VacancyStatus
     Update = 6,
     Pause = 7,
     /// <summary>
-    /// Operator terefinden qebul edilib amma sirketin yeteri qeder coini yoxdursa
+    /// Operator terefinden qebul edilib , sirket terefinden pause verilib daha sonra aktiv edilib ve s. amma sirketin yeteri qeder coini yoxdursa
     /// </summary>
     PendingActive = 8,
     /// <summary>
