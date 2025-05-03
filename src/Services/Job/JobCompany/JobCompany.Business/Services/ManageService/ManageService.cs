@@ -457,9 +457,12 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
     #endregion
 
     #region Category
-    public async Task<DataListDto<CategoryWithTranslationsDto>> GetAllCategoriesAsync(int pageNumber = 1, int pageSize = 10)
+    public async Task<DataListDto<CategoryWithTranslationsDto>> GetAllCategoriesAsync(string? content , int pageNumber = 1, int pageSize = 10)
     {
-        var query = _context.Categories.AsQueryable();
+        var query = _context.Categories.Include(x=> x.Translations).AsQueryable();
+
+        if (content != null)
+            query = query.Where(x=> x.Translations.Any(x=> x.Name.Contains(content)));
 
         var totalCount = await query.CountAsync();
 

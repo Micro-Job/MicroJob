@@ -10,6 +10,7 @@ using JobCompany.DAL.Contexts;
 using MassTransit;
 using MassTransit.Initializers;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.OpenApi.Extensions;
 using Shared.Events;
 using Shared.Requests;
@@ -32,6 +33,7 @@ namespace JobCompany.Business.Services.ApplicationServices
         readonly IRequestClient<GetResumeDataRequest> _getResumeDataClient;
         readonly IPublishEndpoint _publishEndpoint;
         private readonly ICurrentUser _currentUser;
+        private readonly IConfiguration _configuration;
         private readonly string? _authServiceBaseUrl;
         private readonly IRequestClient<GetResumeIdsByUserIdsRequest> _resumeIdsRequest;
         private readonly IRequestClient<GetFilteredUserIdsRequest> _filteredUserIdsRequest;
@@ -47,7 +49,8 @@ namespace JobCompany.Business.Services.ApplicationServices
             IRequestClient<GetUserDataRequest> requestUser,
             IRequestClient<GetResumeIdsByUserIdsRequest> resumeIdsRequest,
             IRequestClient<GetFilteredUserIdsRequest> filteredUserIdsRequest,
-            IRequestClient<GetResumeUserPhotoRequest> userPhotoRequest)
+            IRequestClient<GetResumeUserPhotoRequest> userPhotoRequest,
+            IConfiguration configuration)
         {
             _currentUser = currentUser;
             _context = context;
@@ -57,6 +60,7 @@ namespace JobCompany.Business.Services.ApplicationServices
             _resumeIdsRequest = resumeIdsRequest;
             _filteredUserIdsRequest = filteredUserIdsRequest;
             _userPhotoRequest = userPhotoRequest;
+            _configuration = configuration;
         }
 
         /// <summary> Yaradılan müraciətin geri alınması </summary>
