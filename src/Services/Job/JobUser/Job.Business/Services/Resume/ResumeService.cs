@@ -130,6 +130,7 @@ namespace Job.Business.Services.Resume
                                             }).ToList(),
                                             PhoneNumbers = resume.PhoneNumbers.Select(p => new NumberGetByIdDto
                                             {
+                                                PhoneNumberId = p.Id,
                                                 PhoneNumber = p.PhoneNumber
                                             }).ToList(),
                                             Educations = resume.Educations.Select(e => new EducationGetByIdDto
