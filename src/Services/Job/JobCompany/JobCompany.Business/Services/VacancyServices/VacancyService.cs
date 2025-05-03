@@ -309,7 +309,8 @@ namespace JobCompany.Business.Services.VacancyServices
                         CompanyUserId = x.Company.UserId,
                         Messages = _currentUser.UserGuid == x.Company.UserId
                             ? x.VacancyMessages.Select(vm => vm.Message.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Content)).ToList()
-                            : null
+                            : null,
+                        VacancyStatus = x.VacancyStatus
                     })
                     .FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
 
