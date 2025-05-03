@@ -1,6 +1,7 @@
 ﻿using Job.Core.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System.Reflection.Emit;
 
 namespace Job.DAL.Configurations
 {
@@ -9,6 +10,14 @@ namespace Job.DAL.Configurations
         public void Configure(EntityTypeBuilder<User> builder)
         {
             builder.HasKey(u => u.Id);
+
+            builder.Property(e => e.FirstName)
+                .IsRequired()
+            .HasMaxLength(50);
+
+            builder.Property(e => e.LastName)
+                .IsRequired()
+                .HasMaxLength(50);
 
             builder.HasMany(u => u.Notifications)
                 .WithOne(sv => sv.Receiver)
