@@ -102,9 +102,9 @@ namespace JobCompany.API.Controllers
 
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetAllCategories(int pageNumber, int pageSize)
+        public async Task<IActionResult> GetAllCategories(string? content , int pageNumber, int pageSize)
         {
-            return Ok(await _manageService.GetAllCategoriesAsync(pageNumber, pageSize));
+            return Ok(await _manageService.GetAllCategoriesAsync(content , pageNumber, pageSize));
         }
 
         [HttpGet("[action]/{id}")]

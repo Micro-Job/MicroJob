@@ -31,7 +31,7 @@ public interface IManageService
 
 
 
-    Task<DataListDto<CategoryWithTranslationsDto>> GetAllCategoriesAsync(int pageNumber = 1, int pageSize = 10);
+    Task<DataListDto<CategoryWithTranslationsDto>> GetAllCategoriesAsync(string? content , int pageNumber = 1, int pageSize = 10);
     Task<CategoryDto> GetCategoryByIdAsync(string id);
     Task CreateCategoryAsync(CategoryCreateDto dto);
     Task UpdateCategoryAsync(string id, List<CategoryTranslationDto> categories);
