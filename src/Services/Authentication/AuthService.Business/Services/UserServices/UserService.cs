@@ -226,11 +226,16 @@ namespace AuthService.Business.Services.UserServices
         #region Operatorlar
 
         /// <summary> Admin paneldə bütün operatorlar siyahısının göründüyü hissə </summary>
-        public async Task<DataListDto<OperatorInfoDto>> GetAllOperatorsAsync(string? fullName, string? email, string? phoneNumber, int pageIndex = 1, int pageSize = 10)
+        public async Task<DataListDto<OperatorInfoDto>> GetAllOperatorsAsync(UserRole? userRole, string? fullName, string? email, string? phoneNumber, int pageIndex = 1, int pageSize = 10)
         {
             var operatorsQuery = _context.Users
-                .Where(u => u.UserRole == UserRole.Operator || u.UserRole == UserRole.ChiefOperator)
-                .AsNoTracking();
+            .AsNoTracking()
+            .Where(u => userRole == null
+                ? (u.UserRole == UserRole.Operator || u.UserRole == UserRole.ChiefOperator)
+                : u.UserRole == userRole);
+
+            if (userRole != null)
+                operatorsQuery = operatorsQuery.Where(u => u.UserRole == userRole);
 
             if (!string.IsNullOrWhiteSpace(fullName))
             {
@@ -269,7 +274,7 @@ namespace AuthService.Business.Services.UserServices
                 Datas = users,
                 TotalCount = totalCount
             };
-        }
+         }
 
         public async Task<OperatorInfoDto> GetOperatorByIdAsync(string id)
         {

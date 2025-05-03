@@ -10,7 +10,7 @@ namespace AuthService.Business.Services.UserServices
         Task<UserProfileImageUpdateResponseDto> UpdateUserProfileImageAsync(UserProfileImageUpdateDto dto);
         Task<DataListDto<BasicUserInfoDto>> GetAllUsersAsync(UserRole userRole, string? fullName, string? email, string? phoneNumber, int pageIndex = 1, int pageSize = 10);
 
-        Task<DataListDto<OperatorInfoDto>> GetAllOperatorsAsync(string? fullName, string? email, string? phoneNumber, int pageIndex = 1, int pageSize = 10);
+        Task<DataListDto<OperatorInfoDto>> GetAllOperatorsAsync(UserRole? userRole,string? fullName, string? email, string? phoneNumber, int pageIndex = 1, int pageSize = 10);
         Task<OperatorInfoDto> GetOperatorByIdAsync(string userId);
         Task AddOperatorAsync(OperatorAddDto dto);
         Task UpdateOperatorAsync(OperatorUpdateDto dto);

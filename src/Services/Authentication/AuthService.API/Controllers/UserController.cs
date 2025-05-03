@@ -41,9 +41,9 @@ namespace AuthService.API.Controllers
 
         [AuthorizeRole(UserRole.Admin)]
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetAllOperators(string? fullName, string? email, string? phoneNumber, int pageIndex = 1, int pageSize = 10)
+        public async Task<IActionResult> GetAllOperators(UserRole? userRole, string? fullName, string? email, string? phoneNumber, int pageIndex = 1, int pageSize = 10)
         {
-            var result = await userService.GetAllOperatorsAsync(fullName, email, phoneNumber, pageIndex, pageSize);
+            var result = await userService.GetAllOperatorsAsync(userRole, fullName, email, phoneNumber, pageIndex, pageSize);
             return Ok(result);
         }
 
