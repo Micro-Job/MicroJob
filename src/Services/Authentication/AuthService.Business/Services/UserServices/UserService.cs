@@ -8,6 +8,7 @@ using AuthService.DAL.Contexts;
 using MassTransit;
 using MassTransit.Initializers;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.Enums;
 using SharedLibrary.Exceptions;
@@ -130,16 +131,24 @@ namespace AuthService.Business.Services.UserServices
         /// <summary> Admin paneldə bütün istifadəçilər siyahısının göründüyü hissə </summary>  
         public async Task<DataListDto<BasicUserInfoDto>> GetAllUsersAsync(UserRole userRole, string? searchTerm, int pageIndex = 1, int pageSize = 10)
         {
-            var userQuery = _context.Users.Where(u => u.UserRole == userRole).AsNoTracking();
-
-            if (searchTerm != null)
-                searchTerm = searchTerm.Trim().ToLower();
+            var userQuery = _context.Users.Where(u => u.UserRole == userRole)
+                .Select(x => new
+                {
+                    x.Id,
+                    x.FirstName,
+                    x.LastName,
+                    x.Email,
+                    x.MainPhoneNumber
+                })
+                .Skip((pageIndex - 1) * pageSize).Take(pageSize)
+                .AsQueryable()
+                .AsNoTracking();
 
             List<Guid> filteredUserIds = [];
             Dictionary<Guid, CompanyNameAndImageDto> companyDataByUserId = [];
 
             // CompanyUser və EmployeeUserdirsə şirkət adını gətirmək üçün jobcompany-yə sorğu atır
-            if (userRole == UserRole.CompanyUser || userRole == UserRole.EmployeeUser)
+            if (userRole == UserRole.CompanyUser)
             {
                 var allUserIds = await userQuery.Select(u => u.Id).ToListAsync();
 
@@ -147,7 +156,7 @@ namespace AuthService.Business.Services.UserServices
                     new GetCompaniesDataByUserIdsRequest
                     {
                         UserIds = allUserIds,
-                        CompanyName = string.IsNullOrWhiteSpace(searchTerm) ? null : searchTerm
+                        CompanyName = searchTerm
                     });
 
                 companyDataByUserId = companyResponse.Message.Companies;
@@ -164,18 +173,16 @@ namespace AuthService.Business.Services.UserServices
 
                 userQuery = userQuery.Where(u => filteredUserIds.Contains(u.Id));
             }
-            else if (userRole == UserRole.SimpleUser && !string.IsNullOrWhiteSpace(searchTerm))
+            else if ((userRole == UserRole.SimpleUser || userRole == UserRole.EmployeeUser) && !string.IsNullOrWhiteSpace(searchTerm))
             {
                 // SimpleUser üçün searchTerm varsa, fullname ilə axtarış edir
                 userQuery = userQuery
-                    .Where(u => (u.FirstName + " " + u.LastName).ToLower().Contains(searchTerm));
+                    .Where(u => (u.FirstName + u.LastName).Contains(searchTerm));
             }
 
             var totalCount = await userQuery.CountAsync();
 
             var users = await userQuery
-                .Skip((pageIndex - 1) * pageSize)
-                .Take(pageSize)
                 .Select(u => new BasicUserInfoDto
                 {
                     UserId = u.Id,
