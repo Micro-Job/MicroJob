@@ -10,6 +10,7 @@ using JobCompany.DAL.Contexts;
 using MassTransit;
 using MassTransit.Initializers;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.OpenApi.Extensions;
 using Shared.Events;
 using Shared.Requests;
@@ -28,6 +29,7 @@ namespace JobCompany.Business.Services.ApplicationServices
     public class ApplicationService : IApplicationService
     {
         private readonly JobCompanyDbContext _context;
+        private readonly IConfiguration _configuration;
         readonly IRequestClient<GetUsersDataRequest> _getUserDataClient;
         readonly IRequestClient<GetResumeDataRequest> _getResumeDataClient;
         readonly IPublishEndpoint _publishEndpoint;
@@ -40,6 +42,7 @@ namespace JobCompany.Business.Services.ApplicationServices
 
         public ApplicationService(
             JobCompanyDbContext context,
+            IConfiguration configuration,
             IRequestClient<GetUsersDataRequest> client,
             IRequestClient<GetResumeDataRequest> requestClient,
             IPublishEndpoint publishEndpoint,
@@ -50,6 +53,7 @@ namespace JobCompany.Business.Services.ApplicationServices
             IRequestClient<GetResumeUserPhotoRequest> userPhotoRequest)
         {
             _currentUser = currentUser;
+            _configuration = configuration;
             _context = context;
             _getUserDataClient = client;
             _getResumeDataClient = requestClient;

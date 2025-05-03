@@ -1,28 +1,19 @@
-﻿using System.Linq;
-using System.Security.Claims;
-using AuthService.Business.Dtos;
+﻿using AuthService.Business.Dtos;
 using AuthService.Business.Exceptions.UserException;
 using AuthService.Business.HelperServices.Email;
 using AuthService.Business.HelperServices.TokenHandler;
-using AuthService.Business.Publishers;
 using AuthService.Core.Entities;
 using AuthService.DAL.Contexts;
-using Azure.Core;
 using MassTransit;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using SharedLibrary.Dtos.EmailDtos;
-using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.Enums;
 using SharedLibrary.Events;
 using SharedLibrary.Exceptions;
-using SharedLibrary.ExternalServices.FileService;
 using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;
 using SharedLibrary.Requests;
 using SharedLibrary.Responses;
-using SharedLibrary.Statics;
 
 namespace AuthService.Business.Services.Auth
 {
@@ -34,7 +25,7 @@ namespace AuthService.Business.Services.Auth
         {
             dto.MainPhoneNumber = dto.MainPhoneNumber.Trim();
             dto.Email = dto.Email.Trim();
-            await CheckUserExistAsync(dto.Email , dto.MainPhoneNumber);
+            await CheckUserExistAsync(dto.Email, dto.MainPhoneNumber);
 
             if (dto.Password != dto.ConfirmPassword)
                 throw new WrongPasswordException();
@@ -55,8 +46,14 @@ namespace AuthService.Business.Services.Auth
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
 
-            await _publishEndpoint.Publish(new UserRegisteredEvent { UserId = user.Id, JobStatus = user.JobStatus });
-            await _createBalance(user.Id , user.FirstName , user.LastName);
+            await _publishEndpoint.Publish(new UserRegisteredEvent
+            {
+                UserId = user.Id,
+                JobStatus = user.JobStatus,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+            });
+            await CreateBalance(user.Id, user.FirstName, user.LastName);
 
             //await _publisher.SendEmail(
             //    new EmailMessage
@@ -109,8 +106,13 @@ namespace AuthService.Business.Services.Auth
                 }
             );
 
-            await _publishEndpoint.Publish(new UserRegisteredEvent { UserId = user.Id });
-            await _createBalance(user.Id , user.FirstName , user.LastName);
+            await _publishEndpoint.Publish(new UserRegisteredEvent
+            {
+                UserId = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName
+            });
+            await CreateBalance(user.Id, user.FirstName, user.LastName);
             //await _publisher.SendEmail(
             //    new EmailMessage
             //    {
@@ -277,11 +279,13 @@ namespace AuthService.Business.Services.Auth
         }
 
 
-        private async Task _createBalance(Guid userId , string firstName , string lastName)
+        private async Task CreateBalance(Guid userId, string firstName, string lastName)
         {
             await _publishEndpoint.Publish(new CreateBalanceEvent
             {
                 UserId = userId,
+                FirstName = firstName,
+                LastName = lastName
             });
         }
         /// <summary>

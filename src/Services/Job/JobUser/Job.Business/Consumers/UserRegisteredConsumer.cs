@@ -3,16 +3,21 @@ using Job.DAL.Contexts;
 using MassTransit;
 using SharedLibrary.Events;
 
-namespace Job.Business.Consumers
-{
-    public class UserRegisteredConsumer(JobDbContext _context) : IConsumer<UserRegisteredEvent>
-    {
-        public async Task Consume(ConsumeContext<UserRegisteredEvent> context)
-        {
-            var newUser = new User { Id = context.Message.UserId  , JobStatus = context.Message.JobStatus};
+namespace Job.Business.Consumers;
 
-            await _context.Users.AddAsync(newUser);
-            await _context.SaveChangesAsync();
-        }
+public class UserRegisteredConsumer(JobDbContext _context) : IConsumer<UserRegisteredEvent>
+{
+    public async Task Consume(ConsumeContext<UserRegisteredEvent> context)
+    {
+        var newUser = new User
+        {
+            Id = context.Message.UserId,
+            JobStatus = context.Message.JobStatus,
+            FirstName = context.Message.FirstName,
+            LastName = context.Message.LastName
+        };
+
+        await _context.Users.AddAsync(newUser);
+        await _context.SaveChangesAsync();
     }
 }
