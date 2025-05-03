@@ -53,7 +53,6 @@ namespace JobCompany.Business.Services.ApplicationServices
             IConfiguration configuration)
         {
             _currentUser = currentUser;
-            _configuration = configuration;
             _context = context;
             _getUserDataClient = client;
             _getResumeDataClient = requestClient;
