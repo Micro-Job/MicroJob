@@ -141,13 +141,12 @@ namespace AuthService.Business.Services.UserServices
                     x.MainPhoneNumber
                 })
                 .Skip((pageIndex - 1) * pageSize).Take(pageSize)
-                .AsQueryable()
                 .AsNoTracking();
 
             List<Guid> filteredUserIds = [];
             Dictionary<Guid, CompanyNameAndImageDto> companyDataByUserId = [];
 
-            // CompanyUser və EmployeeUserdirsə şirkət adını gətirmək üçün jobcompany-yə sorğu atır
+            // CompanyUser-dirsə şirkət adını gətirmək üçün jobcompany-yə sorğu atır
             if (userRole == UserRole.CompanyUser)
             {
                 var allUserIds = await userQuery.Select(u => u.Id).ToListAsync();
@@ -192,7 +191,7 @@ namespace AuthService.Business.Services.UserServices
                 })
                 .ToListAsync();
 
-            // CompanyUser və EmployeeUser üçün CompanyName əvəzlənməsi
+            // CompanyUser üçün CompanyName əvəzlənməsi
             if (companyDataByUserId.Count != 0)
             {
                 foreach (var user in users)

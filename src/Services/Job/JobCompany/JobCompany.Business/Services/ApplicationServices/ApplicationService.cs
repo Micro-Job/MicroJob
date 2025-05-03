@@ -29,6 +29,7 @@ namespace JobCompany.Business.Services.ApplicationServices
     public class ApplicationService : IApplicationService
     {
         private readonly JobCompanyDbContext _context;
+        private readonly IConfiguration _configuration;
         readonly IRequestClient<GetUsersDataRequest> _getUserDataClient;
         readonly IRequestClient<GetResumeDataRequest> _getResumeDataClient;
         readonly IPublishEndpoint _publishEndpoint;
@@ -42,6 +43,7 @@ namespace JobCompany.Business.Services.ApplicationServices
 
         public ApplicationService(
             JobCompanyDbContext context,
+            IConfiguration configuration,
             IRequestClient<GetUsersDataRequest> client,
             IRequestClient<GetResumeDataRequest> requestClient,
             IPublishEndpoint publishEndpoint,
@@ -53,6 +55,7 @@ namespace JobCompany.Business.Services.ApplicationServices
             IConfiguration configuration)
         {
             _currentUser = currentUser;
+            _configuration = configuration;
             _context = context;
             _getUserDataClient = client;
             _getResumeDataClient = requestClient;
