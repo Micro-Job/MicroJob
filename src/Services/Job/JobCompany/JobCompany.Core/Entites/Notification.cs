@@ -12,5 +12,7 @@ public class Notification : BaseEntity
     public bool IsSeen { get; set; }
     public Guid InformationId { get; set; }
     public string? InformationName { get; set; }
+    public string? SenderName {  get; set; }
+    public string? SenderImage { get; set; }
     public NotificationType NotificationType { get; set; }
 }

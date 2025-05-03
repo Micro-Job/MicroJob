@@ -6,7 +6,9 @@ namespace Job.Core.Entities
     {
         public Guid Id { get; set; }
         public Resume? Resume { get; set; }
-
+        public string FirstName { get; set; } = null!;
+        public string LastName { get; set; } = null!;
+        public string? Image { get; set; }  
         public JobStatus JobStatus { get; set; }
 
         public ICollection<Notification>? Notifications { get; set; }
