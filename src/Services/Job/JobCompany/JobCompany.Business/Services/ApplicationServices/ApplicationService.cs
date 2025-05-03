@@ -34,7 +34,6 @@ namespace JobCompany.Business.Services.ApplicationServices
         readonly IRequestClient<GetResumeDataRequest> _getResumeDataClient;
         readonly IPublishEndpoint _publishEndpoint;
         private readonly ICurrentUser _currentUser;
-        private readonly IConfiguration _configuration;
         private readonly string? _authServiceBaseUrl;
         private readonly IRequestClient<GetResumeIdsByUserIdsRequest> _resumeIdsRequest;
         private readonly IRequestClient<GetFilteredUserIdsRequest> _filteredUserIdsRequest;
@@ -43,7 +42,6 @@ namespace JobCompany.Business.Services.ApplicationServices
 
         public ApplicationService(
             JobCompanyDbContext context,
-            IConfiguration configuration,
             IRequestClient<GetUsersDataRequest> client,
             IRequestClient<GetResumeDataRequest> requestClient,
             IPublishEndpoint publishEndpoint,
