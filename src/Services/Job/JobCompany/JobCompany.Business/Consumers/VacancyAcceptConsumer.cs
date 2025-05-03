@@ -64,13 +64,11 @@ namespace JobCompany.Business.Consumers
                          .Select(a => a.UserId)
                          .ToListAsync();
 
-                        //TODO : burada notificationlarda ümumi olaraq problem var.Bu formada olmalı deyil(Yeni ki hem userin hem
-                        //de sirketin notificationları olmalı deyil bir yerden idare edilmelidir.Buradaki kimi problemlere getirib cixarir)
-                        await _notificationService.CreateBulkNotificationAsync(new CreateBulkNotificationDto
+                        await _publishEndpoint.Publish(new NotificationToUserEvent
                         {
                             SenderId = vacancy.Company.UserId,
                             InformationId = vacancyGuid,
-                            NotificationType = NotificationType.VacancyAccept,
+                            NotificationType = NotificationType.VacancyUpdate,
                             InformationName = vacancy.Title,
                             ReceiverIds = appliedUserIds
                         });
