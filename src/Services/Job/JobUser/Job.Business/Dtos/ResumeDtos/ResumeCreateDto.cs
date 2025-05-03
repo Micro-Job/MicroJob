@@ -51,7 +51,7 @@ namespace Job.Business.Dtos.ResumeDtos
                 .MaximumLength(50).WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_50"));
 
             RuleFor(x => x.Position)
-                .NotEmpty().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
+                //.NotEmpty().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
                 .MaximumLength(100).WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_100"));
 
             RuleFor(x => x.Adress)

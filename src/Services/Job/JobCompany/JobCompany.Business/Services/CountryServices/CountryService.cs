@@ -47,12 +47,13 @@ namespace JobCompany.Business.Services.CountryServices
         public async Task<ICollection<CountryListDto>> GetAllCountryAsync()
         {
             var countries = await _context.Countries
-                .IncludeTranslations()
+            .Include(x=> x.Translations)
             .Select(b => new CountryListDto
             {
                 Id = b.Id,
                 CountryName = b.GetTranslation(_user.LanguageCode,GetTranslationPropertyName.Name),
             })
+            .OrderBy(x=> x.CountryName)
             .ToListAsync();
 
             return countries;
