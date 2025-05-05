@@ -238,6 +238,7 @@ namespace JobCompany.Business.Services.ExamServices
                     Image = eq.Question.Image != null ? $"{_currentUser.BaseUrl}/{eq.Question.Image}" : null,
                     QuestionType = eq.Question.QuestionType,
                     IsRequired = eq.Question.IsRequired,
+                    Order = eq.Question.Order,
                     Answers = eq.Question.Answers.Select(a => new AnswerPublicDto
                     {
                         Id = a.Id,
