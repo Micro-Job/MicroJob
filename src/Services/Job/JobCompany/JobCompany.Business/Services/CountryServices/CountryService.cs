@@ -11,10 +11,8 @@ using SharedLibrary.HelperServices.Current;
 
 namespace JobCompany.Business.Services.CountryServices
 {
-    public class CountryService(JobCompanyDbContext context, ICurrentUser _user) : ICountryService
+    public class CountryService(JobCompanyDbContext _context, ICurrentUser _user) : ICountryService
     {
-        readonly JobCompanyDbContext _context = context;
-
         public async Task CreateCountryAsync(CountryCreateDto dto)
         {
             Country country = new();
@@ -47,13 +45,13 @@ namespace JobCompany.Business.Services.CountryServices
         public async Task<ICollection<CountryListDto>> GetAllCountryAsync()
         {
             var countries = await _context.Countries
-            .Include(x=> x.Translations)
-            .Select(b => new CountryListDto
+            .AsNoTracking()
+            .Select(c => new CountryListDto
             {
-                Id = b.Id,
-                CountryName = b.GetTranslation(_user.LanguageCode,GetTranslationPropertyName.Name),
+                Id = c.Id,
+                CountryName = c.Translations.Where(t => t.Language == _user.LanguageCode).Select(t => t.Name).FirstOrDefault(),
             })
-            .OrderBy(x=> x.CountryName)
+            .OrderBy(c => c.CountryName)
             .ToListAsync();
 
             return countries;
