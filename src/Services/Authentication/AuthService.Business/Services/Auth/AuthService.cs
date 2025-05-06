@@ -1,26 +1,19 @@
-﻿using System.Security.Claims;
-using AuthService.Business.Dtos;
+﻿using AuthService.Business.Dtos;
 using AuthService.Business.Exceptions.UserException;
 using AuthService.Business.HelperServices.Email;
 using AuthService.Business.HelperServices.TokenHandler;
-using AuthService.Business.Publishers;
 using AuthService.Core.Entities;
 using AuthService.DAL.Contexts;
 using MassTransit;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using SharedLibrary.Dtos.EmailDtos;
-using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.Enums;
 using SharedLibrary.Events;
 using SharedLibrary.Exceptions;
-using SharedLibrary.ExternalServices.FileService;
 using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;
 using SharedLibrary.Requests;
 using SharedLibrary.Responses;
-using SharedLibrary.Statics;
 
 namespace AuthService.Business.Services.Auth
 {
@@ -32,7 +25,7 @@ namespace AuthService.Business.Services.Auth
         {
             dto.MainPhoneNumber = dto.MainPhoneNumber.Trim();
             dto.Email = dto.Email.Trim();
-            await CheckUserExistAsync(dto.Email , dto.MainPhoneNumber);
+            await CheckUserExistAsync(dto.Email, dto.MainPhoneNumber);
 
             if (dto.Password != dto.ConfirmPassword)
                 throw new WrongPasswordException();
@@ -53,8 +46,14 @@ namespace AuthService.Business.Services.Auth
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
 
-            await _publishEndpoint.Publish(new UserRegisteredEvent { UserId = user.Id, JobStatus = user.JobStatus });
-            await _createBalance(user.Id , user.FirstName , user.LastName);
+            await _publishEndpoint.Publish(new UserRegisteredEvent
+            {
+                UserId = user.Id,
+                JobStatus = user.JobStatus,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+            });
+            await CreateBalance(user.Id, user.FirstName, user.LastName);
 
             //await _publisher.SendEmail(
             //    new EmailMessage
@@ -107,8 +106,13 @@ namespace AuthService.Business.Services.Auth
                 }
             );
 
-            await _publishEndpoint.Publish(new UserRegisteredEvent { UserId = user.Id });
-            await _createBalance(user.Id , user.FirstName , user.LastName);
+            await _publishEndpoint.Publish(new UserRegisteredEvent
+            {
+                UserId = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName
+            });
+            await CreateBalance(user.Id, user.FirstName, user.LastName);
             //await _publisher.SendEmail(
             //    new EmailMessage
             //    {
@@ -160,8 +164,9 @@ namespace AuthService.Business.Services.Auth
 
                 var companyData = companyResponse.Message.Companies[user.Id];
 
-                //TODO : burada sekili haradan getirirse ele bir basa ordan baseUrl-i goturub getirsin burada menimsedilmesin
-                responseDto.FullName = companyData.CompanyName;
+                if (user.UserRole == UserRole.CompanyUser)
+                    responseDto.FullName = companyData.CompanyName;
+
                 responseDto.UserImage = $"{_configuration["JobCompany:BaseUrl"]}/{companyData.CompanyLogo}" ?? null;
             }
 
@@ -191,7 +196,7 @@ namespace AuthService.Business.Services.Auth
             _context.Users.Update(user);
             await _context.SaveChangesAsync();
 
-            return new TokenResponseDto
+            var responseDto = new TokenResponseDto
             {
                 UserId = user.Id.ToString(),
                 FullName = user.FirstName + " " + user.LastName,
@@ -201,6 +206,23 @@ namespace AuthService.Business.Services.Auth
                 Expires = newRefreshToken.Expires,
                 UserImage = user.Image != null ? $"{_authServiceBaseUrl}/{user.Image}" : null
             };
+
+            if (user.UserRole == UserRole.CompanyUser || user.UserRole == UserRole.EmployeeUser)
+            {
+                var companyResponse = await _companyDataClient.GetResponse<GetCompaniesDataByUserIdsResponse>(
+                    new GetCompaniesDataByUserIdsRequest
+                    {
+                        UserIds = [user.Id]
+                    });
+
+                var companyData = companyResponse.Message.Companies[user.Id];
+
+                //TODO : burada sekili haradan getirirse ele bir basa ordan baseUrl-i goturub getirsin burada menimsedilmesin
+                responseDto.FullName = companyData.CompanyName;
+                responseDto.UserImage = $"{_configuration["JobCompany:BaseUrl"]}/{companyData.CompanyLogo}" ?? null;
+            }
+
+            return responseDto;
         }
 
         /// <summary>
@@ -258,11 +280,13 @@ namespace AuthService.Business.Services.Auth
         }
 
 
-        private async Task _createBalance(Guid userId , string firstName , string lastName)
+        private async Task CreateBalance(Guid userId, string firstName, string lastName)
         {
             await _publishEndpoint.Publish(new CreateBalanceEvent
             {
                 UserId = userId,
+                FirstName = firstName,
+                LastName = lastName
             });
         }
         /// <summary>

@@ -11,6 +11,7 @@ public class QuestionUpdateDto
     public IFormFile? Image { get; set; }
     public QuestionType QuestionType { get; set; }
     public bool IsRequired { get; set; }
+    public int Order { get; set; }
     public bool IsImageDeleted { get; set; } // Şəkil silinirsə true olacaq
     public ICollection<UpdateAnswerDto>? Answers { get; set; }
 }

@@ -51,6 +51,32 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
              .Select(a => a.UserId)
              .ToList();
 
+        //vacancy.VacancyCommentId = vacancyMessageGuid; TODO: burda vakansiya kommentinə niyə mesajın id-sini veririk? 
+        vacancy.VacancyMessages?.Add(new VacancyMessage
+        {
+            MessageId = vacancyMessageGuid,
+            VacancyId = vacancyGuid,
+        });
+
+        if (vacancy.VacancyStatus == VacancyStatus.Active)
+        {
+            ///summary
+            /// Vakansiya reject olunanda bu vakansiyaya muraciet edenlere bildiris getmesi
+            ///summary
+            await _publishEndpoint.Publish(
+                new NotificationToUserEvent
+                {
+                    InformationId = vacancyGuid,
+                    SenderId = null,
+                    ReceiverIds = appliedUserIds,
+                    InformationName = vacancy.Title,
+                    NotificationType = NotificationType.VacancyReject,
+                    SenderName = null,
+                    SenderImage = null,
+                }
+            );
+        }
+
         ///summary
         /// Vakansiya reject olunanda bu vakansiyaya olunan muracietlerin isdeleted olunmasi
         ///summary
@@ -59,13 +85,6 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
         .ExecuteUpdateAsync(setters => setters
             .SetProperty(a => a.IsDeleted, true)
         );
-
-        //vacancy.VacancyCommentId = vacancyMessageGuid; TODO: burda vakansiya kommentinə niyə mesajın id-sini veririk? 
-        vacancy.VacancyMessages?.Add(new VacancyMessage
-        {
-            MessageId = vacancyMessageGuid,
-            VacancyId = vacancyGuid,
-        });
 
         vacancy.VacancyStatus = VacancyStatus.Reject;
 
@@ -80,19 +99,6 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
         };
         await _context.Notifications.AddAsync(newNotification);
         await _context.SaveChangesAsync();
-
-        ///summary
-        /// Vakansiya reject olunanda bu vakansiyaya muraciet edenlere bildiris getmesi
-        ///summary
-        await _publishEndpoint.Publish(
-            new VacancyDeletedEvent
-            {
-                InformationId = vacancyGuid,
-                SenderId = (Guid)_currentUser.UserGuid,
-                UserIds = appliedUserIds,
-                InformationName = vacancy.Title,
-            }
-        );
     }
 
     public async Task ToggleBlockVacancyStatusAsync(VacancyStatusUpdateDto dto)
@@ -240,9 +246,12 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
     #endregion
 
     #region Message
-    public async Task<DataListDto<MessageWithTranslationsDto>> GetAllMessagesAsync(int pageNumber = 1, int pageSize = 10)
+    public async Task<DataListDto<MessageWithTranslationsDto>> GetAllMessagesAsync(string? content, int pageNumber = 1, int pageSize = 10)
     {
         var query = _context.Messages.AsQueryable();
+
+        if (content != null)
+            query = query.Where(x => x.Translations.Any(z => z.Content.Contains(content)));
 
         var totalCount = await query.CountAsync();
 
@@ -448,9 +457,12 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
     #endregion
 
     #region Category
-    public async Task<DataListDto<CategoryWithTranslationsDto>> GetAllCategoriesAsync(int pageNumber = 1, int pageSize = 10)
+    public async Task<DataListDto<CategoryWithTranslationsDto>> GetAllCategoriesAsync(string? content , int pageNumber = 1, int pageSize = 10)
     {
-        var query = _context.Categories.AsQueryable();
+        var query = _context.Categories.Include(x=> x.Translations).AsQueryable();
+
+        if (content != null)
+            query = query.Where(x=> x.Translations.Any(x=> x.Name.Contains(content)));
 
         var totalCount = await query.CountAsync();
 

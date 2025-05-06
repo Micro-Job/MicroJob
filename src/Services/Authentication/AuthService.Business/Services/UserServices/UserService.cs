@@ -8,6 +8,7 @@ using AuthService.DAL.Contexts;
 using MassTransit;
 using MassTransit.Initializers;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.Enums;
 using SharedLibrary.Exceptions;
@@ -128,18 +129,37 @@ namespace AuthService.Business.Services.UserServices
         }
 
         /// <summary> Admin paneldə bütün istifadəçilər siyahısının göründüyü hissə </summary>  
-        public async Task<DataListDto<BasicUserInfoDto>> GetAllUsersAsync(UserRole userRole, string? searchTerm, int pageIndex = 1, int pageSize = 10)
+        public async Task<DataListDto<BasicUserInfoDto>> GetAllUsersAsync(UserRole userRole, string? fullName, string? email, string? phoneNumber, int pageIndex = 1, int pageSize = 10)
         {
-            var userQuery = _context.Users.Where(u => u.UserRole == userRole).AsNoTracking();
+            var userQuery = _context.Users.Where(u => u.UserRole == userRole)
+                .Select(x => new
+                {
+                    x.Id,
+                    x.FirstName,
+                    x.LastName,
+                    x.Email,
+                    x.MainPhoneNumber
+                })
+                .Skip((pageIndex - 1) * pageSize).Take(pageSize)
+                .AsNoTracking();
 
-            if (searchTerm != null)
-                searchTerm = searchTerm.Trim().ToLower();
+            if (!string.IsNullOrEmpty(email))
+            {
+                email = email.Trim().ToLower();
+                userQuery = userQuery.Where(u => u.Email.Contains(email));
+            }
+
+            if (!string.IsNullOrEmpty(phoneNumber))
+            {
+                phoneNumber = phoneNumber.Trim();
+                userQuery = userQuery.Where(u => u.MainPhoneNumber.Contains(phoneNumber));
+            }
 
             List<Guid> filteredUserIds = [];
             Dictionary<Guid, CompanyNameAndImageDto> companyDataByUserId = [];
 
-            // CompanyUser və EmployeeUserdirsə şirkət adını gətirmək üçün jobcompany-yə sorğu atır
-            if (userRole == UserRole.CompanyUser || userRole == UserRole.EmployeeUser)
+            // CompanyUser-dirsə şirkət adını gətirmək üçün jobcompany-yə sorğu atır
+            if (userRole == UserRole.CompanyUser)
             {
                 var allUserIds = await userQuery.Select(u => u.Id).ToListAsync();
 
@@ -147,7 +167,7 @@ namespace AuthService.Business.Services.UserServices
                     new GetCompaniesDataByUserIdsRequest
                     {
                         UserIds = allUserIds,
-                        CompanyName = string.IsNullOrWhiteSpace(searchTerm) ? null : searchTerm
+                        CompanyName = fullName
                     });
 
                 companyDataByUserId = companyResponse.Message.Companies;
@@ -164,18 +184,16 @@ namespace AuthService.Business.Services.UserServices
 
                 userQuery = userQuery.Where(u => filteredUserIds.Contains(u.Id));
             }
-            else if (userRole == UserRole.SimpleUser && !string.IsNullOrWhiteSpace(searchTerm))
+            else if ((userRole == UserRole.SimpleUser || userRole == UserRole.EmployeeUser) && !string.IsNullOrWhiteSpace(fullName))
             {
                 // SimpleUser üçün searchTerm varsa, fullname ilə axtarış edir
                 userQuery = userQuery
-                    .Where(u => (u.FirstName + " " + u.LastName).ToLower().Contains(searchTerm));
+                    .Where(u => (u.FirstName + u.LastName).Contains(fullName));
             }
 
             var totalCount = await userQuery.CountAsync();
 
             var users = await userQuery
-                .Skip((pageIndex - 1) * pageSize)
-                .Take(pageSize)
                 .Select(u => new BasicUserInfoDto
                 {
                     UserId = u.Id,
@@ -185,7 +203,7 @@ namespace AuthService.Business.Services.UserServices
                 })
                 .ToListAsync();
 
-            // CompanyUser və EmployeeUser üçün CompanyName əvəzlənməsi
+            // CompanyUser üçün CompanyName əvəzlənməsi
             if (companyDataByUserId.Count != 0)
             {
                 foreach (var user in users)
@@ -208,18 +226,33 @@ namespace AuthService.Business.Services.UserServices
         #region Operatorlar
 
         /// <summary> Admin paneldə bütün operatorlar siyahısının göründüyü hissə </summary>
-        public async Task<DataListDto<OperatorInfoDto>> GetAllOperatorsAsync(string? searchTerm, int pageIndex = 1, int pageSize = 10)
+        public async Task<DataListDto<OperatorInfoDto>> GetAllOperatorsAsync(UserRole? userRole, string? fullName, string? email, string? phoneNumber, int pageIndex = 1, int pageSize = 10)
         {
             var operatorsQuery = _context.Users
-                .Where(u => u.UserRole == UserRole.Operator || u.UserRole == UserRole.ChiefOperator)
-                .AsNoTracking();
+            .AsNoTracking()
+            .Where(u => userRole == null
+                ? (u.UserRole == UserRole.Operator || u.UserRole == UserRole.ChiefOperator)
+                : u.UserRole == userRole);
 
-            if (searchTerm != null)
-                searchTerm = searchTerm.Trim().ToLower();
+            if (userRole != null)
+                operatorsQuery = operatorsQuery.Where(u => u.UserRole == userRole);
 
-            if (!string.IsNullOrWhiteSpace(searchTerm))
+            if (!string.IsNullOrWhiteSpace(fullName))
             {
-                operatorsQuery = operatorsQuery.Where(u => (u.FirstName + " " + u.LastName).ToLower().Contains(searchTerm));
+                fullName = fullName.Trim().ToLower();
+                operatorsQuery = operatorsQuery.Where(u => (u.FirstName + " " + u.LastName).ToLower().Contains(fullName));
+            }
+
+            if (!string.IsNullOrWhiteSpace(email))
+            {
+                email = email.Trim().ToLower();
+                operatorsQuery = operatorsQuery.Where(o => o.Email.Contains(email));
+            }
+
+            if (!string.IsNullOrWhiteSpace(phoneNumber))
+            {
+                phoneNumber = phoneNumber.Trim();
+                operatorsQuery = operatorsQuery.Where(o => o.MainPhoneNumber.Contains(phoneNumber));
             }
 
             var totalCount = await operatorsQuery.CountAsync();
@@ -241,7 +274,7 @@ namespace AuthService.Business.Services.UserServices
                 Datas = users,
                 TotalCount = totalCount
             };
-        }
+         }
 
         public async Task<OperatorInfoDto> GetOperatorByIdAsync(string id)
         {

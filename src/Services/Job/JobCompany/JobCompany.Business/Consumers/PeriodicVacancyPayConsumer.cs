@@ -42,6 +42,7 @@ namespace JobCompany.Business.Consumers
             {
                 foreach (var vacancy in mustPayVacancies)
                 {
+                    //TODO : bu olsun mu ps Nermin:olmasin
                     if(vacancy.EndDate < dateTimeNow)
                     {
                         await _context.Vacancies.Where(v => v.Id == vacancy.Id)
@@ -80,6 +81,13 @@ namespace JobCompany.Business.Consumers
                     }
                     else
                     {
+                        await _publishEndpoint.Publish(new PayEvent
+                        {
+                            UserId = vacancy.UserId,
+                            InformationId = vacancy.Id,
+                            InformationType = InformationType.Vacancy,
+                        });
+
                         await _context.Vacancies.Where(v => v.Id == vacancy.Id)
                         .ExecuteUpdateAsync(setter => setter
                         .SetProperty(v => v.PaymentDate, (DateTime?)null)

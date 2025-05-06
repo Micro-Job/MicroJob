@@ -1,25 +1,15 @@
-﻿using System.Data;
-using System.Security.Claims;
-using JobCompany.Business.Dtos.CategoryDtos;
-using JobCompany.Business.Dtos.Common;
-using JobCompany.Business.Dtos.CompanyDtos;
-using JobCompany.Business.Dtos.MessageDtos;
+﻿using JobCompany.Business.Dtos.Common;
 using JobCompany.Business.Dtos.NumberDtos;
 using JobCompany.Business.Dtos.SkillDtos;
 using JobCompany.Business.Dtos.VacancyDtos;
 using JobCompany.Business.Exceptions.VacancyExceptions;
 using JobCompany.Business.Extensions;
-using JobCompany.Business.Services.ExamServices;
 using JobCompany.Business.Statistics;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using MassTransit;
 using MassTransit.Initializers;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Shared.Dtos.VacancyDtos;
-using Shared.Events;
 using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.Enums;
 using SharedLibrary.Events;
@@ -27,25 +17,15 @@ using SharedLibrary.Exceptions;
 using SharedLibrary.ExternalServices.FileService;
 using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;
+using SharedLibrary.Requests;
+using SharedLibrary.Responses;
 using SharedLibrary.Statics;
+using System.Data;
 
 namespace JobCompany.Business.Services.VacancyServices
 {
-    public class VacancyService : IVacancyService
+    public class VacancyService(JobCompanyDbContext _context, IFileService _fileService, IPublishEndpoint _publishEndpoint, ICurrentUser _currentUser, IRequestClient<CheckBalanceRequest> _checkBalanceRequest) : IVacancyService
     {
-        private readonly JobCompanyDbContext _context;
-        private readonly IFileService _fileService;
-        private readonly IPublishEndpoint _publishEndpoint;
-        private readonly ICurrentUser _currentUser;
-
-        public VacancyService(JobCompanyDbContext context, IFileService fileService, IPublishEndpoint publishEndpoint, ICurrentUser currentUser)
-        {
-            _context = context;
-            _fileService = fileService;
-            _publishEndpoint = publishEndpoint;
-            _currentUser = currentUser;
-        }
-
         /// <summary> vacancy yaradılması </summary>
         /// vacancy yaradilan zaman exam yaradılması
         public async Task CreateVacancyAsync(CreateVacancyDto vacancyDto, ICollection<CreateNumberDto>? numberDto)
@@ -320,7 +300,8 @@ namespace JobCompany.Business.Services.VacancyServices
                         CompanyUserId = x.Company.UserId,
                         Messages = _currentUser.UserGuid == x.Company.UserId
                             ? x.VacancyMessages.Select(vm => vm.Message.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Content)).ToList()
-                            : null
+                            : null,
+                        VacancyStatus = x.VacancyStatus
                     })
                     .FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
 
@@ -411,7 +392,7 @@ namespace JobCompany.Business.Services.VacancyServices
                     .Include(v => v.VacancyNumbers)
                     .FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
 
-            if (existingVacancy.VacancyStatus == VacancyStatus.Block && existingVacancy.VacancyStatus == VacancyStatus.Reject)
+            if (existingVacancy.VacancyStatus == VacancyStatus.Block)
                 throw new VacancyUpdateException(MessageHelper.GetMessage("VACANCY_UPDATE"));
 
             existingVacancy.CompanyId = Guid.Parse(vacancyDto.CompanyId);
@@ -514,7 +495,7 @@ namespace JobCompany.Business.Services.VacancyServices
                         .Where(vs => skillsToRemove.Contains(vs.SkillId))
                         .ToList();
 
-                    _context.VacancySkills.RemoveRange(vacancySkillsToRemove);  // skilllər silinir
+                    _context.VacancySkills.RemoveRange(vacancySkillsToRemove);  // skillər silinir
                 }
             }
 
@@ -526,26 +507,29 @@ namespace JobCompany.Business.Services.VacancyServices
                 .Select(a => a.UserId)
                 .ToListAsync();
 
-            await _publishEndpoint.Publish(
-                new VacancyUpdatedEvent
+            await _publishEndpoint.Publish(  //Vakansiya update olunduqda müraciət edən userlərə notification göndərilir
+                new NotificationToUserEvent
                 {
                     InformationId = vacancyGuid,
                     SenderId = (Guid)_currentUser.UserGuid,
-                    UserIds = userIds,
+                    ReceiverIds = userIds,
                     InformationName = existingVacancy.Title,
+                    NotificationType = NotificationType.VacancyUpdate,
+                    SenderName = existingVacancy.CompanyName,
+                    SenderImage = $"{_currentUser.BaseUrl}/{existingVacancy.CompanyLogo}",
                 }
             );
         }
 
         /// <summary> Şirkət profilində vakansiya axtarışı vakansiya filterlere görə </summary>
-
         public async Task<DataListDto<VacancyGetAllDto>> GetAllVacanciesAsync(string? titleName, string? categoryId, string? countryId, string? cityId, decimal? minSalary, decimal? maxSalary, string? companyId, byte? workStyle, byte? workType, int skip = 1, int take = 9)
         {
             var query = _context.Vacancies.Where(x => x.VacancyStatus == VacancyStatus.Active && x.EndDate > DateTime.Now)
-                .AsNoTracking()
-                .AsQueryable();
+                .AsNoTracking();               
 
             query = ApplyVacancyFilters(query, titleName, categoryId, countryId, cityId, null, minSalary, maxSalary, companyId, workStyle, workType);
+
+            query = query.OrderByDescending(x => x.CreatedDate);
 
             var vacancies = await query
                 .Select(v => new VacancyGetAllDto
@@ -639,9 +623,16 @@ namespace JobCompany.Business.Services.VacancyServices
             await _context.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Pause - Vakansiyanın artıq işaxtaranların qarşısına çıxmamağı və növbəti günün ödənişini etməməsi üçündür.
+        /// </summary>
+        /// <param name="vacancyId"></param>
+        /// <returns></returns>
+        /// <exception cref="NotFoundException{Vacancy}"></exception>
+        /// <exception cref="VacancyStatusNotToggableException"></exception>
         public async Task TogglePauseVacancyAsync(Guid vacancyId)
         {
-            var vacancy = await _context.Vacancies.FirstOrDefaultAsync(x => x.Id == vacancyId)
+            var vacancy = await _context.Vacancies.FirstOrDefaultAsync(x => x.Id == vacancyId && x.Company.UserId == _currentUser.UserGuid)
                 ?? throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
 
             if (vacancy.VacancyStatus == VacancyStatus.Active)
@@ -650,7 +641,29 @@ namespace JobCompany.Business.Services.VacancyServices
             }
             else if (vacancy.VacancyStatus == VacancyStatus.Pause)
             {
-                vacancy.VacancyStatus = VacancyStatus.Active;
+                if (DateTime.Now > vacancy.PaymentDate)
+                {
+                    var balanceResponse = await _checkBalanceRequest.GetResponse<CheckBalanceResponse>(new CheckBalanceRequest
+                    {
+                        InformationType = InformationType.Vacancy,
+                        UserId = (Guid)_currentUser.UserGuid!
+                    });
+
+                    if (balanceResponse.Message.HasEnoughBalance)
+                    {
+                        vacancy.VacancyStatus = VacancyStatus.Active;
+                        vacancy.PaymentDate = DateTime.Now.AddDays(1);
+                    }
+                    else
+                    {
+                        vacancy.VacancyStatus = VacancyStatus.PendingActive;
+                        vacancy.PaymentDate = null;
+                    }
+                }
+                else
+                {
+                    vacancy.VacancyStatus = VacancyStatus.Active;
+                }
             }
             else
                 throw new VacancyStatusNotToggableException(MessageHelper.GetMessage("VACANCY_STATUS_NOT_TOGGABLE"));

@@ -141,6 +141,12 @@
   <data name="CANNOT_CHANGE_STATUS" xml:space="preserve">
     <value>Status cannot be changed.</value>
   </data>
+  <data name="DESCRIPTION_MUST_NOT_EXCEED_4096_CHAR" xml:space="preserve">
+    <value>Intro description must not exceed 4096 characters.</value>
+  </data>
+  <data name="DURATION_MUST_BE_GREATER_THAN_ZERO" xml:space="preserve">
+    <value>Duration must be greater than zero.</value>
+  </data>
   <data name="EMAIL_ALREADY_USED" xml:space="preserve">
     <value>This email is used by another company.</value>
   </data>
@@ -179,6 +185,9 @@
   </data>
   <data name="LENGTH_MUST_BE_BETWEEN_1_8192" xml:space="preserve">
     <value>Length must be between 1 and 8192</value>
+  </data>
+  <data name="LIMIT_RATE_MUST_BE_BETWEEN_0_100" xml:space="preserve">
+    <value>The minimum score for passing the exam must be between 0 - 100</value>
   </data>
   <data name="LOGIN_REQUIRED" xml:space="preserve">
     <value>Please log in again to continue</value>

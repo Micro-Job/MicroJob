@@ -288,6 +288,7 @@ namespace JobCompany.DAL.Migrations
 
                     b.Property<string>("IntroDescription")
                         .IsRequired()
+                        .HasMaxLength(4096)
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsTemplate")
@@ -395,6 +396,12 @@ namespace JobCompany.DAL.Migrations
                     b.Property<Guid?>("SenderId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("SenderImage")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SenderName")
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CreatedDate");
@@ -415,6 +422,9 @@ namespace JobCompany.DAL.Migrations
 
                     b.Property<bool>("IsRequired")
                         .HasColumnType("bit");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
 
                     b.Property<int>("QuestionType")
                         .HasColumnType("int");

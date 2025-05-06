@@ -21,9 +21,9 @@ namespace AuthService.API.Controllers
 
         [AuthorizeRole(UserRole.Admin, UserRole.Operator)]
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetAllUsers(UserRole userRole, string? searchTerm, int pageIndex = 1, int pageSize = 10)
+        public async Task<IActionResult> GetAllUsers(UserRole userRole, string? fullName, string? email, string? phoneNumber, int pageIndex = 1, int pageSize = 10)
         {
-            var result = await userService.GetAllUsersAsync(userRole, searchTerm, pageIndex, pageSize);
+            var result = await userService.GetAllUsersAsync(userRole, fullName, email, phoneNumber, pageIndex, pageSize);
             return Ok(result);
         }
 
@@ -41,9 +41,9 @@ namespace AuthService.API.Controllers
 
         [AuthorizeRole(UserRole.Admin)]
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetAllOperators(string? searchTerm, int pageIndex = 1, int pageSize = 10)
+        public async Task<IActionResult> GetAllOperators(UserRole? userRole, string? fullName, string? email, string? phoneNumber, int pageIndex = 1, int pageSize = 10)
         {
-            var result = await userService.GetAllOperatorsAsync(searchTerm, pageIndex, pageSize);
+            var result = await userService.GetAllOperatorsAsync(userRole, fullName, email, phoneNumber, pageIndex, pageSize);
             return Ok(result);
         }
 

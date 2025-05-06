@@ -9,7 +9,6 @@ using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using MassTransit;
 using MassTransit.Initializers;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.OpenApi.Extensions;
@@ -18,6 +17,7 @@ using Shared.Requests;
 using Shared.Responses;
 using SharedLibrary.Dtos.ApplicationDtos;
 using SharedLibrary.Enums;
+using SharedLibrary.Events;
 using SharedLibrary.Exceptions;
 using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;
@@ -29,15 +29,15 @@ namespace JobCompany.Business.Services.ApplicationServices
     public class ApplicationService : IApplicationService
     {
         private readonly JobCompanyDbContext _context;
+        private readonly IConfiguration _configuration;
         readonly IRequestClient<GetUsersDataRequest> _getUserDataClient;
         readonly IRequestClient<GetResumeDataRequest> _getResumeDataClient;
         readonly IPublishEndpoint _publishEndpoint;
-        readonly IConfiguration _configuration;
         private readonly ICurrentUser _currentUser;
         private readonly string? _authServiceBaseUrl;
-        private readonly IRequestClient<GetUserDataRequest> _requestUser;
         private readonly IRequestClient<GetResumeIdsByUserIdsRequest> _resumeIdsRequest;
         private readonly IRequestClient<GetFilteredUserIdsRequest> _filteredUserIdsRequest;
+        private readonly IRequestClient<GetResumeUserPhotoRequest> _userPhotoRequest;
 
 
         public ApplicationService(
@@ -45,22 +45,22 @@ namespace JobCompany.Business.Services.ApplicationServices
             IRequestClient<GetUsersDataRequest> client,
             IRequestClient<GetResumeDataRequest> requestClient,
             IPublishEndpoint publishEndpoint,
-            IConfiguration configuration,
             ICurrentUser currentUser,
             IRequestClient<GetUserDataRequest> requestUser,
             IRequestClient<GetResumeIdsByUserIdsRequest> resumeIdsRequest,
-            IRequestClient<GetFilteredUserIdsRequest> filteredUserIdsRequest)
+            IRequestClient<GetFilteredUserIdsRequest> filteredUserIdsRequest,
+            IRequestClient<GetResumeUserPhotoRequest> userPhotoRequest,
+            IConfiguration configuration)
         {
             _currentUser = currentUser;
             _context = context;
             _getUserDataClient = client;
             _getResumeDataClient = requestClient;
             _publishEndpoint = publishEndpoint;
-            _configuration = configuration;
-            _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
-            _requestUser = requestUser;
             _resumeIdsRequest = resumeIdsRequest;
             _filteredUserIdsRequest = filteredUserIdsRequest;
+            _userPhotoRequest = userPhotoRequest;
+            _configuration = configuration;
         }
 
         /// <summary> Yaradılan müraciətin geri alınması </summary>
@@ -70,8 +70,8 @@ namespace JobCompany.Business.Services.ApplicationServices
 
             var existApplication =
                 await _context.Applications.FirstOrDefaultAsync(x =>
-                    x.Id == applicationGuid && x.UserId == _currentUser.UserGuid
-                ) ?? throw new NotFoundException<Application>(MessageHelper.GetMessage("NOT_FOUND"));
+                    x.Id == applicationGuid && x.UserId == _currentUser.UserGuid) 
+                ?? throw new NotFoundException<Application>(MessageHelper.GetMessage("NOT_FOUND"));
             if (existApplication.IsActive == false)
                 throw new ApplicationStatusIsDeactiveException(MessageHelper.GetMessage("APPLICATION_IS_DEACTIVE"));
             existApplication.IsActive = false;
@@ -92,6 +92,8 @@ namespace JobCompany.Business.Services.ApplicationServices
                 {
                     Application = x,
                     VacancyId = x.VacancyId,
+                    CompanyName = x.Vacancy.Company.CompanyName,
+                    CompanyLogo = x.Vacancy.Company.CompanyLogo,
                     VacancyTitle = x.Vacancy.Title
                 })
                 .FirstOrDefaultAsync()
@@ -102,15 +104,17 @@ namespace JobCompany.Business.Services.ApplicationServices
             application.StatusId = statusGuid;
             await _context.SaveChangesAsync();
 
+            //Müraciət statusu dəyişildikdə notification göndərilir
             await _publishEndpoint.Publish(
-                new UpdateUserApplicationStatusEvent
+                new NotificationToUserEvent
                 {
-                    UserId = application.UserId,
+                    ReceiverIds = [application.UserId],
                     SenderId = (Guid)_currentUser.UserGuid,
                     InformationId = existAppVacancy.VacancyId,
-                    InformationName = existAppVacancy.VacancyTitle
-                    //Content =
-                    //    $"{vacancy.CompanyName} şirkətinin müraciət statusu dəyişdirildi: {application.Status.Name}",
+                    InformationName = existAppVacancy.VacancyTitle,
+                    NotificationType = NotificationType.ApplicationStatusUpdate,
+                    SenderImage = $"{_currentUser.BaseUrl}/{existAppVacancy.CompanyLogo}",
+                    SenderName = existAppVacancy.CompanyName,
                 }
             );
         }
@@ -326,16 +330,36 @@ namespace JobCompany.Business.Services.ApplicationServices
             };
 
             await _context.Applications.AddAsync(newApplication);
-            await _context.SaveChangesAsync();
 
-            await _publishEndpoint.Publish(new VacancyApplicationEvent
+            //await _publishEndpoint.Publish(new VacancyApplicationEvent
+            //{
+            //    UserId = vacancyInfo.Company.Id,
+            //    SenderId = userGuid,
+            //    VacancyId = vacancyGuid,
+            //    InformationId = userGuid,
+            //    InformationName = vacancyInfo.Title,
+            //});
+
+            var userPhotoResp = await _userPhotoRequest.GetResponse<GetResumeUserPhotoResponse>(new GetResumeUserPhotoRequest
             {
-                UserId = vacancyInfo.Company.Id,
+                UserId = userGuid
+            });
+
+            var notification = new Notification
+            {
                 SenderId = userGuid,
-                VacancyId = vacancyGuid,
+                SenderName = _currentUser.UserFullName,
+                SenderImage = $"{_configuration["AuthService:BaseUrl"]}{userPhotoResp.Message.ProfileImage}",
+                NotificationType = NotificationType.Application,
+                CreatedDate = DateTime.Now,
                 InformationId = userGuid,
                 InformationName = vacancyInfo.Title,
-            });
+                IsSeen = false,
+                ReceiverId = vacancyInfo.Company.Id,
+            };
+
+            await _context.Notifications.AddAsync(notification);
+            await _context.SaveChangesAsync();
         }
 
         public async Task<PaginatedApplicationDto> GetUserApplicationsAsync(string? vacancyName, int skip, int take)
@@ -343,7 +367,7 @@ namespace JobCompany.Business.Services.ApplicationServices
             var query = _context.Applications
                 .Where(a => a.UserId == _currentUser.UserGuid && a.IsActive);
 
-            if(!string.IsNullOrEmpty(vacancyName)) // Vakansiya adına görə filterlənmə
+            if (!string.IsNullOrEmpty(vacancyName)) // Vakansiya adına görə filterlənmə
             {
                 vacancyName = vacancyName.Trim();
                 query = query.Where(a => a.Vacancy.Title.ToLower().Contains(vacancyName.ToLower()));
@@ -393,6 +417,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                 {
                     VacancyId = application.VacancyId,
                     VacancyName = application.Vacancy.Title,
+                    IsSavedVacancy = application.Vacancy.SavedVacancies.Any(x => x.UserId == _currentUser.UserGuid),
                     CompanyId = application.Vacancy.CompanyId,
                     CompanyName = application.Vacancy.Company.CompanyName,
                     CompanyLogo = $"{_currentUser.BaseUrl}/{application.Vacancy.Company.CompanyLogo}",

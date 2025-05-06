@@ -17,17 +17,21 @@ public interface IManageService
 
 
 
-    Task<DataListDto<MessageWithTranslationsDto>> GetAllMessagesAsync(int pageNumber = 1, int pageSize = 10);
+    Task<DataListDto<MessageWithTranslationsDto>> GetAllMessagesAsync(string? content,int pageNumber = 1, int pageSize = 10);
     Task<List<MessageSelectDto>> GetAllMessagesForSelectAsync();
     Task<MessageDto> GetMessageByIdAsync(string id);
     Task<MessageWithTranslationsDto> CreateMessageAsync(CreateMessageDto dto);
     Task UpdateMessageAsync(string id, UpdateMessageDto dto);
     Task DeleteMessageAsync(string id);
 
+
+
     Task<CompanyProfileDto> GetCompanyDetailsAsync(string companyUserId);
     Task<DataListDto<VacancyGetByCompanyIdDto>> GetVacanciesByCompanyUserIdAsync(string companyUserId, int skip = 1, int take = 9);
 
-    Task<DataListDto<CategoryWithTranslationsDto>> GetAllCategoriesAsync(int pageNumber = 1, int pageSize = 10);
+
+
+    Task<DataListDto<CategoryWithTranslationsDto>> GetAllCategoriesAsync(string? content , int pageNumber = 1, int pageSize = 10);
     Task<CategoryDto> GetCategoryByIdAsync(string id);
     Task CreateCategoryAsync(CategoryCreateDto dto);
     Task UpdateCategoryAsync(string id, List<CategoryTranslationDto> categories);

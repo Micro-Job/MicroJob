@@ -58,6 +58,7 @@ namespace JobCompany.Business.Services.QuestionServices
                         dto.Image != null ? $"{fileResult.FilePath}/{fileResult.FileName}" : null,
                     QuestionType = dto.QuestionType,
                     IsRequired = dto.IsRequired,
+                    Order = dto.Order
                 };
 
                 var questionId = question.Id.ToString();
@@ -103,6 +104,7 @@ namespace JobCompany.Business.Services.QuestionServices
                     question.Title = dto.Title;
                     question.QuestionType = dto.QuestionType;
                     question.IsRequired = dto.IsRequired;
+                    question.Order = dto.Order;
 
                     if (dto.IsImageDeleted) // Əgər user şəkili silmək istəyibsə
                     {
@@ -129,6 +131,7 @@ namespace JobCompany.Business.Services.QuestionServices
                         Title = dto.Title,
                         QuestionType = dto.QuestionType,
                         IsRequired = dto.IsRequired,
+                        Order = dto.Order,
                         Answers = dto.Answers?.Select(a => new Answer
                         {
                             Text = a.Text,
