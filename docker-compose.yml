@@ -11,6 +11,7 @@ services:
       - auth
       - jobuser
       - jobcompany
+      - jobpayment
     environment:
       - VIRTUAL_HOST=job-api.siesco.studio
       - VIRTUAL_PORT=8080
@@ -36,6 +37,8 @@ services:
       - "5003:8080"
     networks:
       - public-network
+    # volumes:
+      # - hiri_wwwroot_data:/app/wwwroot  
       
   jobcompany:
     container_name: jobcompany-service
@@ -46,6 +49,21 @@ services:
       - "5004:8080"
     networks:
       - public-network
+    # volumes:
+      # - hiri_wwwroot_data:/app/wwwroot 
+      
+  jobpayment:
+    container_name: jobpayment-service
+    build:
+      context: .
+      dockerfile: src/Services/JobPayment/JobPayment.API/Dockerfile
+    ports:
+      - "5016:8080"
+    networks:
+      - public-network
 networks:
   public-network:
     external: true
+# volumes:
+#   hiri_wwwroot_data:
+#     driver: local
