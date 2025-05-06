@@ -222,7 +222,7 @@ namespace JobPayment.Business.Services.TransactionServices
                 TransactionStatus = x.TransactionStatus,
                 TransactionType = x.TranzactionType,
                 UserId = x.UserId,
-                FullName = x.User.FirstName + x.User.LastName
+                FullName = x.User.FirstName + " " + x.User.LastName
             })
             .Skip((skip - 1) * take)
             .Take(take)
