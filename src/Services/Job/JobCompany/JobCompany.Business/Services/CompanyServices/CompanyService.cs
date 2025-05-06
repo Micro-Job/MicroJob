@@ -132,7 +132,7 @@ namespace JobCompany.Business.Services.CompanyServices
 
         public async Task<DataListDto<CompanyDto>> GetAllCompaniesAsync(string? searchTerm, int skip = 1, int take = 12)
         {
-            var query = _context.Companies.AsQueryable();
+            var query = _context.Companies.AsNoTracking();
 
             if (!string.IsNullOrWhiteSpace(searchTerm))
                 query = query.Where(x => x.CompanyName.Contains(searchTerm));
@@ -159,7 +159,6 @@ namespace JobCompany.Business.Services.CompanyServices
             };
         }
 
-        //TODO : bu hissede email ve phonenumber ucun job proyektindeki endpointe sorgu atmaq mumkundur mu?
         /// <summary> İdyə görə şirkət detaili consumer metodundan istifadə ilə </summary>
         public async Task<CompanyDetailItemDto> GetCompanyDetailAsync(string id)
         {
