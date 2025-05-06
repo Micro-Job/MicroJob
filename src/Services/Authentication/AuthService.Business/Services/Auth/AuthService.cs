@@ -19,8 +19,6 @@ namespace AuthService.Business.Services.Auth
 {
     public class AuthService(AppDbContext _context, ITokenHandler _tokenHandler, IPublishEndpoint _publishEndpoint, IConfiguration _configuration, IEmailService _emailService, ICurrentUser _currentUser, IRequestClient<GetCompaniesDataByUserIdsRequest> _companyDataClient) : IAuthService
     {
-        private readonly string? _authServiceBaseUrl = _configuration["AuthService:BaseUrl"];
-
         public async Task RegisterAsync(RegisterDto dto)
         {
             dto.MainPhoneNumber = dto.MainPhoneNumber.Trim();
@@ -151,7 +149,7 @@ namespace AuthService.Business.Services.Auth
                 AccessToken = accessToken,
                 RefreshToken = refreshToken.Token,
                 Expires = refreshToken.Expires,
-                UserImage = user.Image != null ? $"{_authServiceBaseUrl}/{user.Image}" : null
+                UserImage = user.Image != null ? $"{_currentUser.BaseUrl}/{user.Image}" : null
             };
 
             if (user.UserRole == UserRole.CompanyUser || user.UserRole == UserRole.EmployeeUser)
@@ -204,7 +202,7 @@ namespace AuthService.Business.Services.Auth
                 RefreshToken = newRefreshToken.Token,
                 UserStatusId = (byte)user.UserRole,
                 Expires = newRefreshToken.Expires,
-                UserImage = user.Image != null ? $"{_authServiceBaseUrl}/{user.Image}" : null
+                UserImage = user.Image != null ? $"{_currentUser.BaseUrl}/{user.Image}" : null
             };
 
             if (user.UserRole == UserRole.CompanyUser || user.UserRole == UserRole.EmployeeUser)
