@@ -53,6 +53,7 @@ namespace JobCompany.Business.Services.NotificationServices
                     SenderId = n.Notification.SenderId,
                     InformationId = n.Notification.InformationId,
                     InformationName = n.Notification.InformationName,
+                    NotificationType = n.Notification.NotificationType,
                     CreatedDate = n.Notification.CreatedDate,
                     SenderImage = $"{_configuration["AuthService:BaseUrl"]}{n.User?.ProfileImage}",
                     SenderName = n.User != null ? $"{n.User.FirstName} {n.User.LastName}" : null,

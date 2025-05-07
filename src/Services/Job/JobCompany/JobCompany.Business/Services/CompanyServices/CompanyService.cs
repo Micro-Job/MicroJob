@@ -70,7 +70,7 @@ namespace JobCompany.Business.Services.CompanyServices
 
             if (dto.CompanyLogo != null)
             {
-                if (!string.IsNullOrEmpty(company.CompanyLogo) && company.CompanyLogo != Path.Combine(FilePaths.image , "defaultlogo.jpg"))
+                if (!string.IsNullOrEmpty(company.CompanyLogo) && company.CompanyLogo != Path.Combine(FilePaths.image, "defaultlogo.jpg"))
                 {
                     _fileService.DeleteFile(company.CompanyLogo);
                 }
@@ -137,6 +137,9 @@ namespace JobCompany.Business.Services.CompanyServices
             if (!string.IsNullOrWhiteSpace(searchTerm))
                 query = query.Where(x => x.CompanyName.Contains(searchTerm));
 
+            skip = !string.IsNullOrWhiteSpace(searchTerm) ? 1 : Math.Max(1, skip);
+            var offset = (skip - 1) * take;
+
             var companies = await query
                 .Select(c => new CompanyDto
                 {
@@ -145,7 +148,7 @@ namespace JobCompany.Business.Services.CompanyServices
                     CompanyImage = c.CompanyLogo != null ? $"{_currentUser.BaseUrl}/{c.CompanyLogo}" : null,
                     CompanyVacancyCount = c.Vacancies != null ? c.Vacancies.Count(v => v.VacancyStatus == VacancyStatus.Active && v.EndDate > DateTime.Now) : 0,
                 })
-                .Skip(Math.Max(0, (skip - 1) * take))
+                .Skip(offset)
                 .Take(take)
                 .ToListAsync();
 
@@ -154,8 +157,7 @@ namespace JobCompany.Business.Services.CompanyServices
             return new DataListDto<CompanyDto>
             {
                 Datas = companies,
-                TotalCount = count,
-                //TotalPage = (int)Math.Ceiling((double)count / take)
+                TotalCount = count
             };
         }
 

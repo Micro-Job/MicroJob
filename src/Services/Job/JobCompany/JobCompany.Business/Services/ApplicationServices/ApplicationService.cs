@@ -61,6 +61,7 @@ namespace JobCompany.Business.Services.ApplicationServices
             _filteredUserIdsRequest = filteredUserIdsRequest;
             _userPhotoRequest = userPhotoRequest;
             _configuration = configuration;
+            _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
         }
 
         /// <summary> Yaradılan müraciətin geri alınması </summary>
@@ -370,7 +371,7 @@ namespace JobCompany.Business.Services.ApplicationServices
             if (!string.IsNullOrEmpty(vacancyName)) // Vakansiya adına görə filterlənmə
             {
                 vacancyName = vacancyName.Trim();
-                query = query.Where(a => a.Vacancy.Title.ToLower().Contains(vacancyName.ToLower()));
+                query = query.Where(a => a.Vacancy.Title.Contains(vacancyName));
             }
 
             int totalCount = await query.CountAsync();
@@ -386,7 +387,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                     CompanyId = a.Vacancy.CompanyId,
                     CompanyLogo = a.Vacancy.Company.CompanyLogo != null ? $"{_currentUser.BaseUrl}/{a.Vacancy.Company.CompanyLogo}" : null,
                     CompanyName = a.Vacancy.Company.CompanyName,
-                    WorkType = a.Vacancy.WorkType != null ? a.Vacancy.WorkType.GetDisplayName() : null,
+                    WorkType = a.Vacancy.WorkType,
                     VacancyStatus = a.Vacancy.VacancyStatus,
                     Status = a.Status.StatusEnum,
                     StatusColor = a.Status.StatusColor,

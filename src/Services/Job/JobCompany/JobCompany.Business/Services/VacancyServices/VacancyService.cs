@@ -686,7 +686,7 @@ namespace JobCompany.Business.Services.VacancyServices
             {
                 Id = x.Id,
                 Title = x.Title,
-                CompanyLogo = x.CompanyLogo != null ? $"{_currentUser.BaseUrl}/{x.CompanyLogo}" : null,
+                CompanyLogo = x.CompanyLogo != null ? $"{_currentUser.BaseUrl}/{x.Company.CompanyLogo}" : null,
                 CompanyName = x.CompanyName,
                 StartDate = x.StartDate,
                 Location = x.Location,
