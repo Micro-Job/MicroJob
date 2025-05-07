@@ -9,91 +9,85 @@ using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;
 
-namespace JobCompany.Business.Services.CityServices
+namespace JobCompany.Business.Services.CityServices;
+
+public class CityService(JobCompanyDbContext _context, ICurrentUser _user) : ICityService
 {
-    public class CityService(JobCompanyDbContext context, ICurrentUser _user) : ICityService
+    public async Task CreateCityAsync(CreateCityDto dto)
     {
-        readonly JobCompanyDbContext _context = context;
-
-        public async Task CreateCityAsync(CreateCityDto dto)
+        var city = new City
         {
-            City city = new City
+            CountryId = dto.CountryId,
+            Translations = dto.Cities.Select(x => new CityTranslation
             {
-                CountryId = dto.CountryId  
-            };
-            await _context.Cities.AddAsync(city); 
-            await _context.SaveChangesAsync();
-
-            var cityTranslations = dto.Cities.Select(x => new CityTranslation
-            {
-                CityId = city.Id,
                 Language = x.language,
                 Name = x.Name.Trim()
-            }).ToList();
+            }).ToList()
+        };
 
-            await _context.CityTranslations.AddRangeAsync(cityTranslations);
-            await _context.SaveChangesAsync();
-        }
+        await _context.Cities.AddAsync(city);
+        await _context.SaveChangesAsync();
+    }
 
-        public async Task<ICollection<CityListDto>> GetAllCitiesAsync()
+    public async Task<ICollection<CityListDto>> GetAllCitiesAsync()
+    {
+        var cities = await _context.Cities
+        .AsNoTracking()
+        .IncludeTranslations()
+        .Select(b => new CityListDto
         {
-            var cities = await _context.Cities
-                .IncludeTranslations()
-            .Select(b => new CityListDto
-            {
-                Id = b.Id,
-                CityName = b.GetTranslation(_user.LanguageCode,GetTranslationPropertyName.Name),
-                CountryId = b.CountryId,
-            })
-            .ToListAsync();
+            Id = b.Id,
+            CityName = b.GetTranslation(_user.LanguageCode, GetTranslationPropertyName.Name),
+            CountryId = b.CountryId,
+        })
+        .ToListAsync();
 
-            return cities;
-        }
+        return cities;
+    }
 
-        public async Task UpdateCityAsync(List<UpdateCityDto> cities)
+    public async Task UpdateCityAsync(List<UpdateCityDto> cities)
+    {
+        var cityTranslations = await _context.CityTranslations
+        .Where(x => cities.Select(b => b.Id).Contains(x.Id))
+        .ToListAsync();
+
+        foreach (var translation in cityTranslations)
         {
-            var cityTranslations = await _context.CityTranslations
-            .Where(x => cities.Select(b => b.Id).Contains(x.Id))
-            .ToListAsync();
-
-            foreach (var translation in cityTranslations)
+            var city = cities.FirstOrDefault(b => b.Id == translation.Id);
+            if (city != null)
             {
-                var city = cities.FirstOrDefault(b => b.Id == translation.Id);
-                if (city != null)
-                {
-                    translation.Name = city.Name;
-                }
+                translation.Name = city.Name;
             }
-            await _context.SaveChangesAsync();
         }
+        await _context.SaveChangesAsync();
+    }
 
-        public async Task<ICollection<CityNameDto>> GetAllCitiesByCountryIdAsync(string countryId)
-        {
-            var guidCountryId = Guid.Parse(countryId);
+    public async Task<ICollection<CityNameDto>> GetAllCitiesByCountryIdAsync(string countryId)
+    {
+        var guidCountryId = Guid.Parse(countryId);
 
-            var cities = await _context.Cities
-                .IncludeTranslations()
-                .Where(city => city.CountryId == guidCountryId)
-                .Select(b => new CityNameDto
-                {
-                    Id = b.Id,
-                    CityName = b.GetTranslation(_user.LanguageCode,GetTranslationPropertyName.Name),
-                })
-                .ToListAsync();
+        var cities = await _context.Cities
+            .AsNoTracking()
+            .Where(city => city.CountryId == guidCountryId)
+            .Select(c => new CityNameDto
+            {
+                Id = c.Id,
+                CityName = c.Translations.Where(t => t.Language == _user.LanguageCode).Select(t => t.Name).FirstOrDefault(),
+            })
+            .OrderBy(c => c.CityName)
+            .ToListAsync();
 
-            return cities;
-        }
+        return cities;
+    }
 
-        public async Task DeleteCityAsync(string cityId)
-        {
-            var cityGuid = Guid.Parse(cityId);
-            var city = await _context.Cities.Include(x => x.Translations).Where(x => x.Id == cityGuid).FirstOrDefaultAsync()
-                ?? throw new NotFoundException<City>(MessageHelper.GetMessage("NOT_FOUND"));
+    public async Task DeleteCityAsync(string cityId)
+    {
+        var cityGuid = Guid.Parse(cityId);
 
-            var cityTranslations = city.Translations.Select(x => x).ToList();
-            _context.CityTranslations.RemoveRange(cityTranslations);
-            _context.Cities.Remove(city);
-            await _context.SaveChangesAsync();
-        }
+        var city = await _context.Cities.FindAsync(cityGuid) ?? throw new NotFoundException<City>(MessageHelper.GetMessage("NOT_FOUND"));
+
+        _context.Cities.Remove(city);
+
+        await _context.SaveChangesAsync();
     }
 }

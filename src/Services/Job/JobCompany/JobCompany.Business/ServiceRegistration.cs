@@ -12,7 +12,6 @@ using JobCompany.Business.Services.ManageService;
 using JobCompany.Business.Services.NotificationServices;
 using JobCompany.Business.Services.QuestionServices;
 using JobCompany.Business.Services.ReportServices;
-using JobCompany.Business.Services.Skill;
 using JobCompany.Business.Services.SkillServices;
 using JobCompany.Business.Services.StatusServices;
 using JobCompany.Business.Services.VacancyComment;

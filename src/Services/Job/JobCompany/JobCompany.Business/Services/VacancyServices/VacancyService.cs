@@ -1,25 +1,15 @@
-﻿using System.Data;
-using System.Security.Claims;
-using JobCompany.Business.Dtos.CategoryDtos;
-using JobCompany.Business.Dtos.Common;
-using JobCompany.Business.Dtos.CompanyDtos;
-using JobCompany.Business.Dtos.MessageDtos;
+﻿using JobCompany.Business.Dtos.Common;
 using JobCompany.Business.Dtos.NumberDtos;
 using JobCompany.Business.Dtos.SkillDtos;
 using JobCompany.Business.Dtos.VacancyDtos;
 using JobCompany.Business.Exceptions.VacancyExceptions;
 using JobCompany.Business.Extensions;
-using JobCompany.Business.Services.ExamServices;
 using JobCompany.Business.Statistics;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using MassTransit;
 using MassTransit.Initializers;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Shared.Dtos.VacancyDtos;
-using Shared.Events;
 using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.Enums;
 using SharedLibrary.Events;
@@ -30,6 +20,7 @@ using SharedLibrary.HelperServices.Current;
 using SharedLibrary.Requests;
 using SharedLibrary.Responses;
 using SharedLibrary.Statics;
+using System.Data;
 
 namespace JobCompany.Business.Services.VacancyServices
 {
@@ -534,10 +525,11 @@ namespace JobCompany.Business.Services.VacancyServices
         public async Task<DataListDto<VacancyGetAllDto>> GetAllVacanciesAsync(string? titleName, string? categoryId, string? countryId, string? cityId, decimal? minSalary, decimal? maxSalary, string? companyId, byte? workStyle, byte? workType, int skip = 1, int take = 9)
         {
             var query = _context.Vacancies.Where(x => x.VacancyStatus == VacancyStatus.Active && x.EndDate > DateTime.Now)
-                .AsNoTracking()
-                .AsQueryable();
+                .AsNoTracking();               
 
             query = ApplyVacancyFilters(query, titleName, categoryId, countryId, cityId, null, minSalary, maxSalary, companyId, workStyle, workType);
+
+            query = query.OrderByDescending(x => x.CreatedDate);
 
             var vacancies = await query
                 .Select(v => new VacancyGetAllDto

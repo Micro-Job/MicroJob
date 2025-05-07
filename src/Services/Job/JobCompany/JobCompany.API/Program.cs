@@ -59,6 +59,7 @@ namespace JobCompany.API
             builder.Services.AddFluentValidation(opt =>
             {
                 opt.RegisterValidatorsFromAssemblyContaining<CreateVacancyDto>();
+                opt.ImplicitlyValidateChildProperties = true;
             });
 
             builder.Services.AddAuth(
@@ -88,7 +89,8 @@ namespace JobCompany.API
                             .WithOrigins(
                                 "http://localhost:3000",
                                 "http://localhost:3001",
-                                "http://localhost:3002"
+                                "http://localhost:3002",
+                                "http://localhost:5000"
                             )
                             .AllowAnyMethod()
                             .AllowAnyHeader()
@@ -98,6 +100,9 @@ namespace JobCompany.API
             });
 
             var app = builder.Build();
+
+            app.UseCors("AllowSwagger");
+
 
             if (app.Environment.IsDevelopment())
             {
