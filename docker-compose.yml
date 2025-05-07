@@ -24,6 +24,8 @@ services:
       dockerfile: src/Services/Authentication/AuthService.API/Dockerfile
     ports:
       - "5002:8080"
+    volumes:
+      - ./src/Services/Authentication/AuthService.API/wwwroot:/app/wwwroot 
     networks:
       - public-network
 
@@ -34,9 +36,11 @@ services:
       dockerfile: src/Services/Job/JobUser/Job.API/Dockerfile
     ports:
       - "5003:8080"
+    volumes:
+      - ./src/Services/Job/JobUser/Job.API/wwwroot:/app/wwwroot  
     networks:
       - public-network
-      
+
   jobcompany:
     container_name: jobcompany-service
     build:
@@ -44,8 +48,66 @@ services:
       dockerfile: src/Services/Job/JobCompany/JobCompany.API/Dockerfile
     ports:
       - "5004:8080"
+    volumes:
+      - ./src/Services/Job/JobCompany/JobCompany.API/wwwroot:/app/wwwroot  
     networks:
       - public-network
+
 networks:
   public-network:
     external: true
+
+
+
+
+# version: '3.8'
+# services:
+#   gateway:
+#     container_name: job-gateway
+#     build:
+#       context: .
+#       dockerfile: Gateway/Job.Gateway/Dockerfile
+#     ports:
+#       - "5001:8080"
+#     depends_on:
+#       - auth
+#       - jobuser
+#       - jobcompany
+#     environment:
+#       - VIRTUAL_HOST=job-api.siesco.studio
+#       - VIRTUAL_PORT=8080
+#     networks:
+#       - public-network
+
+#   auth:
+#     container_name: job-auth-service
+#     build:
+#       context: .
+#       dockerfile: src/Services/Authentication/AuthService.API/Dockerfile
+#     ports:
+#       - "5002:8080"
+#     networks:
+#       - public-network
+
+#   jobuser:
+#     container_name: jobuser-service
+#     build:
+#       context: .
+#       dockerfile: src/Services/Job/JobUser/Job.API/Dockerfile
+#     ports:
+#       - "5003:8080"
+#     networks:
+#       - public-network
+      
+#   jobcompany:
+#     container_name: jobcompany-service
+#     build:
+#       context: .
+#       dockerfile: src/Services/Job/JobCompany/JobCompany.API/Dockerfile
+#     ports:
+#       - "5004:8080"
+#     networks:
+#       - public-network
+# networks:
+#   public-network:
+#     external: true
