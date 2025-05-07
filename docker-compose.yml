@@ -25,6 +25,8 @@ services:
       dockerfile: src/Services/Authentication/AuthService.API/Dockerfile
     ports:
       - "5002:8080"
+    volumes:
+      - ./src/Services/Authentication/AuthService.API/wwwroot:/app/wwwroot 
     networks:
       - public-network
 
@@ -35,10 +37,10 @@ services:
       dockerfile: src/Services/Job/JobUser/Job.API/Dockerfile
     ports:
       - "5003:8080"
+    volumes:
+      - ./src/Services/Job/JobUser/Job.API/wwwroot:/app/wwwroot  
     networks:
       - public-network
-    # volumes:
-      # - hiri_wwwroot_data:/app/wwwroot  
       
   jobcompany:
     container_name: jobcompany-service
@@ -47,10 +49,10 @@ services:
       dockerfile: src/Services/Job/JobCompany/JobCompany.API/Dockerfile
     ports:
       - "5004:8080"
+    volumes:
+      - ./src/Services/Job/JobCompany/JobCompany.API/wwwroot:/app/wwwroot 
     networks:
       - public-network
-    # volumes:
-      # - hiri_wwwroot_data:/app/wwwroot 
       
   jobpayment:
     container_name: jobpayment-service
@@ -59,11 +61,11 @@ services:
       dockerfile: src/Services/JobPayment/JobPayment.API/Dockerfile
     ports:
       - "5016:8080"
+    volumes:
+      - ./src/Services/JobPayment/JobPayment.API/wwwroot:/app/wwwroot  
     networks:
       - public-network
+
 networks:
   public-network:
     external: true
-# volumes:
-#   hiri_wwwroot_data:
-#     driver: local
