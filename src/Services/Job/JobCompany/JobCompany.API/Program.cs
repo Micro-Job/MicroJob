@@ -59,6 +59,7 @@ namespace JobCompany.API
             builder.Services.AddFluentValidation(opt =>
             {
                 opt.RegisterValidatorsFromAssemblyContaining<CreateVacancyDto>();
+                opt.ImplicitlyValidateChildProperties = true;
             });
 
             builder.Services.AddAuth(
