@@ -418,7 +418,7 @@ namespace JobCompany.Business.Services.VacancyServices
             existingVacancy.Driver = vacancyDto.Driver;
             existingVacancy.Family = vacancyDto.Family;
             existingVacancy.Citizenship = vacancyDto.Citizenship;
-            existingVacancy.VacancyStatus = VacancyStatus.Update;
+            existingVacancy.VacancyStatus = existingVacancy.VacancyStatus == VacancyStatus.Pending ? VacancyStatus.Pending : VacancyStatus.Update;
             existingVacancy.CategoryId = Guid.Parse(
                 vacancyDto.CategoryId ?? throw new Exception(MessageHelper.GetMessage("NOT_FOUND"))
             );
