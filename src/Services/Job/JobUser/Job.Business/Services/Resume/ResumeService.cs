@@ -253,7 +253,7 @@ namespace Job.Business.Services.Resume
                 Position = x.Position != null ? x.Position.Name : null,
                 HasAccess = x.IsPublic ? true : x.CompanyResumeAccesses.Any(cra => cra.CompanyUserId == _currentUser.UserGuid)
             })
-            .Skip(Math.Max(0, (skip - 1) * take))
+            .Skip((skip - 1) * take)
             .Take(take)
             .ToListAsync();
 

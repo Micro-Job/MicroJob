@@ -16,6 +16,7 @@ namespace JobCompany.Business.Consumers
 {
     public class VacancyAcceptConsumer(JobCompanyDbContext _context, IRequestClient<CheckBalanceRequest> _balanceRequest, IPublishEndpoint _publishEndpoint, INotificationService _notificationService, IConfiguration _configuration) : IConsumer<VacancyAcceptEvent>
     {
+        //TODO : burada update olunmun vakansiyani accept ederken problemler var eger vaxti kecmiyibse odemeli deyil ve s kimi seyler nezere alinmayib
         public async Task Consume(ConsumeContext<VacancyAcceptEvent> context)
         {
             var vacancyGuid = Guid.Parse(context.Message.vacancyId);
@@ -41,8 +42,6 @@ namespace JobCompany.Business.Consumers
                     });
 
                     vacancy.PaymentDate = DateTime.Now.AddDays(1);
-                    vacancy.VacancyStatus = VacancyStatus.Active;
-                    await _context.SaveChangesAsync();
 
                     await _notificationService.CreateNotificationAsync(new CreateNotificationDto
                     {
@@ -56,7 +55,7 @@ namespace JobCompany.Business.Consumers
                     {
                         var appliedUserIds = await _context.Applications
                          .Where(a => !a.IsDeleted && a.VacancyId == vacancyGuid)
-                         .Select(a => a.UserId)
+                         .Select(a => a.UserId) 
                          .ToListAsync();
 
                         await _publishEndpoint.Publish(new NotificationToUserEvent
@@ -70,7 +69,7 @@ namespace JobCompany.Business.Consumers
                             ReceiverIds = appliedUserIds
                         });
                     }
-                    if (vacancy.VacancySkills != null)
+                    if (vacancy.VacancySkills != null && vacancy.VacancyStatus == VacancyStatus.Pending)
                     {
                         await _publishEndpoint.Publish(
                             new VacancyCreatedEvent
@@ -82,6 +81,7 @@ namespace JobCompany.Business.Consumers
                             }
                         );
                     }
+                    vacancy.VacancyStatus = VacancyStatus.Active;
                 }
                 else
                 {
