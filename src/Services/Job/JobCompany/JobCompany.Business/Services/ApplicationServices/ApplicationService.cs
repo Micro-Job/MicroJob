@@ -111,7 +111,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                 {
                     ReceiverIds = [application.UserId],
                     SenderId = (Guid)_currentUser.UserGuid,
-                    InformationId = existAppVacancy.VacancyId,
+                    InformationId = applicationGuid,
                     InformationName = existAppVacancy.VacancyTitle,
                     NotificationType = NotificationType.ApplicationStatusUpdate,
                     SenderImage = $"{_currentUser.BaseUrl}/{existAppVacancy.CompanyLogo}",
@@ -346,6 +346,11 @@ namespace JobCompany.Business.Services.ApplicationServices
                 UserId = userGuid
             });
 
+            var resumeIdResp = await _resumeIdsRequest.GetResponse<GetResumeIdsByUserIdsResponse>(new GetResumeIdsByUserIdsRequest
+            {
+                UserIds = [userGuid]
+            });
+
             var notification = new Notification
             {
                 SenderId = userGuid,
@@ -353,7 +358,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                 SenderImage = $"{_configuration["AuthService:BaseUrl"]}{userPhotoResp.Message.ProfileImage}",
                 NotificationType = NotificationType.Application,
                 CreatedDate = DateTime.Now,
-                InformationId = vacancyGuid,
+                InformationId = resumeIdResp.Message.ResumeIds[userGuid],
                 InformationName = vacancyInfo.Title,
                 IsSeen = false,
                 ReceiverId = vacancyInfo.Company.Id,
