@@ -332,20 +332,13 @@ namespace JobCompany.Business.Services.ApplicationServices
 
             await _context.Applications.AddAsync(newApplication);
 
-            //await _publishEndpoint.Publish(new VacancyApplicationEvent
-            //{
-            //    UserId = vacancyInfo.Company.Id,
-            //    SenderId = userGuid,
-            //    VacancyId = vacancyGuid,
-            //    InformationId = userGuid,
-            //    InformationName = vacancyInfo.Title,
-            //});
-
             var userPhotoResp = await _userPhotoRequest.GetResponse<GetResumeUserPhotoResponse>(new GetResumeUserPhotoRequest
             {
                 UserId = userGuid
             });
 
+            //TODO: Notification-da resumeid-ni informationId-yə set eləmək üçün JobUser proyektindən resumeid-ni gətirirəm.
+            //TODO: Amma məncə JobUser proyektində userid-yə görə resume detallarını gətirən bir endpoint yazsaq və notification-da informationId-yə userId-ni set etsək daha yaxşı olar. Sən necə fikirləşirsən?
             var resumeIdResp = await _resumeIdsRequest.GetResponse<GetResumeIdsByUserIdsResponse>(new GetResumeIdsByUserIdsRequest
             {
                 UserIds = [userGuid]

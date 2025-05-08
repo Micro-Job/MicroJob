@@ -1,6 +1,7 @@
 using AuthService.Business;
 using AuthService.Business.Dtos;
 using AuthService.DAL.Contexts;
+using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -11,9 +12,12 @@ using SharedLibrary.ServiceRegistration;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers()
-               .AddFluentValidation(x => x.RegisterValidatorsFromAssemblyContaining<RegisterDto>())
                .AddNewtonsoftJson(options =>
                    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+
+builder.Services.AddValidatorsFromAssemblyContaining<RegisterDto>()
+                .AddFluentValidationAutoValidation()
+                .AddFluentValidationClientsideAdapters();
 
 builder.Services.AddEndpointsApiExplorer();
 

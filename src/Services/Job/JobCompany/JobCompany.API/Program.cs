@@ -1,3 +1,4 @@
+using FluentValidation;
 using FluentValidation.AspNetCore;
 using JobCompany.Business;
 using JobCompany.Business.Dtos.VacancyDtos;
@@ -56,11 +57,9 @@ namespace JobCompany.API
                 options.UseSqlServer(builder.Configuration.GetConnectionString("MSSQL"))
             );
 
-            builder.Services.AddFluentValidation(opt =>
-            {
-                opt.RegisterValidatorsFromAssemblyContaining<CreateVacancyDto>();
-                opt.ImplicitlyValidateChildProperties = true;
-            });
+            builder.Services.AddValidatorsFromAssemblyContaining<CreateVacancyDto>()
+                .AddFluentValidationAutoValidation()
+                .AddFluentValidationClientsideAdapters();
 
             builder.Services.AddAuth(
                 builder.Configuration["Jwt:Issuer"]!,

@@ -1,8 +1,8 @@
+using FluentValidation;
 using FluentValidation.AspNetCore;
 using Job.Business;
 //using Job.Business.BackgroundServices;
-using Job.Business.Consumers;
-using Job.Business.Services.Resume;
+using Job.Business.Dtos.ResumeDtos;
 using Job.DAL.Contexts;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
@@ -73,12 +73,9 @@ namespace Job.API
 
             //builder.Services.AddHostedService<RabbitMqBackgroundService>();
 
-
-            builder.Services.AddFluentValidation(opt =>
-            {
-                opt.RegisterValidatorsFromAssemblyContaining<ResumeService>();
-            });
-
+            builder.Services.AddValidatorsFromAssemblyContaining<ResumeCreateDto>()
+                .AddFluentValidationAutoValidation()
+                .AddFluentValidationClientsideAdapters();
 
             var IconBuilder = builder.Configuration.SetBasePath(Directory.GetCurrentDirectory())
                                     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
