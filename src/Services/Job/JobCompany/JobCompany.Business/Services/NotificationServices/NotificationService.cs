@@ -17,7 +17,7 @@ namespace JobCompany.Business.Services.NotificationServices
     {
         public async Task<DataListDto<NotificationDto>> GetUserNotificationsAsync(bool? IsSeen, int skip, int take)
         {
-            var query = _context.Notifications.Where(n => n.Receiver.UserId == _currentUser.UserGuid).AsNoTracking().AsQueryable();
+            var query = _context.Notifications.Where(n => n.Receiver.UserId == _currentUser.UserGuid).AsNoTracking();
 
             if (IsSeen != null)
             {

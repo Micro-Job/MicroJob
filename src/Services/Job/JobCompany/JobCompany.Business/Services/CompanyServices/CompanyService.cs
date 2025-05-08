@@ -70,14 +70,18 @@ namespace JobCompany.Business.Services.CompanyServices
 
             if (dto.CompanyLogo != null)
             {
-                if (!string.IsNullOrEmpty(company.CompanyLogo) && company.CompanyLogo != Path.Combine(FilePaths.image, "defaultlogo.jpg"))
+                var defaultLogo = Path.Combine(FilePaths.image, "defaultlogo.jpg").NormalizeSlashes();
+
+                var currentLogo = company.CompanyLogo.NormalizeSlashes();
+
+                if (!string.IsNullOrEmpty(currentLogo) && currentLogo != defaultLogo)
                 {
                     _fileService.DeleteFile(company.CompanyLogo);
                 }
 
-                FileDto fileResult = await _fileService.UploadAsync(FilePaths.image, dto.CompanyLogo);
+                var fileResult = await _fileService.UploadAsync(FilePaths.image, dto.CompanyLogo);
 
-                company.CompanyLogo = $"{fileResult.FilePath}/{fileResult.FileName}";
+                company.CompanyLogo = Path.Combine(fileResult.FilePath, fileResult.FileName).NormalizeSlashes();
             }
             else
             {

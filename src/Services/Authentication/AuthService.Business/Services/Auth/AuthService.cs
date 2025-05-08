@@ -215,7 +215,6 @@ namespace AuthService.Business.Services.Auth
 
                 var companyData = companyResponse.Message.Companies[user.Id];
 
-                //TODO : burada sekili haradan getirirse ele bir basa ordan baseUrl-i goturub getirsin burada menimsedilmesin
                 responseDto.FullName = companyData.CompanyName;
                 responseDto.UserImage = $"{_configuration["JobCompany:BaseUrl"]}/{companyData.CompanyLogo}" ?? null;
             }

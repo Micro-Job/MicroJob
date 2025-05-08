@@ -1,7 +1,6 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Job.Business;
-//using Job.Business.BackgroundServices;
 using Job.Business.Dtos.ResumeDtos;
 using Job.DAL.Contexts;
 using MassTransit;
@@ -71,8 +70,6 @@ namespace Job.API
                 opt.UseSqlServer(configuration.GetConnectionString("MSSQL"));
             });
 
-            //builder.Services.AddHostedService<RabbitMqBackgroundService>();
-
             builder.Services.AddValidatorsFromAssemblyContaining<ResumeCreateDto>()
                 .AddFluentValidationAutoValidation()
                 .AddFluentValidationClientsideAdapters();
@@ -84,8 +81,6 @@ namespace Job.API
             var newBuilder = IconBuilder.Build();
 
             builder.Services.AddMassTransit(newBuilder["RabbitMQ:Username"]!, newBuilder["RabbitMQ:Password"]!, newBuilder["RabbitMQ:Hostname"]!, newBuilder["RabbitMQ:Port"]!);
-            //TODO : Bu neye gore var
-            //builder.Services.AddHostedService<RabbitMqBackgroundService>();
 
             // Add Job Services
             builder.Services.AddJobServices();

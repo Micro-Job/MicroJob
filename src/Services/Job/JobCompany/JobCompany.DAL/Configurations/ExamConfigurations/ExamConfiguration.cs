@@ -10,7 +10,6 @@ namespace JobCompany.DAL.Configurations.ExamConfigurations
         {
             builder.HasKey(e => e.Id);
 
-            //ToDO : bura gore migration vurulmalidir
             builder.Property(x=> x.IntroDescription).HasMaxLength(4096);
 
             builder.HasOne(e => e.Company)
