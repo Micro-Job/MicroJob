@@ -203,19 +203,18 @@ namespace JobCompany.Business.Services.VacancyServices
         }
 
         /// <summary> şirkət id'sinə görə vacanciyaların gətirilməsi </summary>
-        public async Task<DataListDto<VacancyGetByCompanyIdDto>> GetVacanciesByCompanyIdAsync(string companyId, Guid? vacancyId , int skip = 1, int take = 9)
+        public async Task<DataListDto<VacancyGetByCompanyIdDto>> GetVacanciesByCompanyIdAsync(string companyId, Guid? vacancyId, int skip = 1, int take = 9)
         {
             var companyGuid = Guid.Parse(companyId);
 
             var query = _context.Vacancies
-                .Where(x => x.CompanyId == companyGuid && 
-                            x.VacancyStatus == VacancyStatus.Active && 
+                .Where(x => x.CompanyId == companyGuid &&
+                            x.VacancyStatus == VacancyStatus.Active &&
                             x.EndDate >= DateTime.Now)
-                .AsQueryable()
                 .AsNoTracking();
 
             if (vacancyId != null)
-                query = query.Where(x=> x.Id != vacancyId);
+                query = query.Where(x => x.Id != vacancyId);
 
             var vacancies = await query
                 .Select(x => new VacancyGetByCompanyIdDto
@@ -231,6 +230,7 @@ namespace JobCompany.Business.Services.VacancyServices
                     ViewCount = x.ViewCount,
                     MainSalary = x.MainSalary,
                     MaxSalary = x.MaxSalary,
+                    IsSaved = x.SavedVacancies.Any(sv => sv.UserId == _currentUser.UserGuid && sv.VacancyId == x.Id),
                 })
                 .Skip(Math.Max(0, (skip - 1) * take))
                 .Take(take)
@@ -247,7 +247,7 @@ namespace JobCompany.Business.Services.VacancyServices
         public async Task<VacancyGetByIdDto> GetByIdVacancyAsync(string id)
         {
             var vacancyGuid = Guid.Parse(id);
-                
+
             Guid? userGuid = _currentUser.UserGuid;
 
             var vacancyDto = await _context.Vacancies
@@ -525,7 +525,7 @@ namespace JobCompany.Business.Services.VacancyServices
         public async Task<DataListDto<VacancyGetAllDto>> GetAllVacanciesAsync(string? titleName, string? categoryId, string? countryId, string? cityId, decimal? minSalary, decimal? maxSalary, string? companyId, byte? workStyle, byte? workType, int skip = 1, int take = 9)
         {
             var query = _context.Vacancies.Where(x => x.VacancyStatus == VacancyStatus.Active && x.EndDate > DateTime.Now)
-                .AsNoTracking();               
+                .AsNoTracking();
 
             query = ApplyVacancyFilters(query, titleName, categoryId, countryId, cityId, null, minSalary, maxSalary, companyId, workStyle, workType);
 
@@ -758,10 +758,10 @@ namespace JobCompany.Business.Services.VacancyServices
 
             if (vacancy.Applications != null)
             {
-                await _context.Applications.Where(x=> vacancy.Applications.Select(a=>a.Id).Contains(x.Id))
-                    .ExecuteUpdateAsync(setter=> setter
-                                                        .SetProperty(a=> a.IsDeleted , true)
-                                                        .SetProperty(a=> a.IsActive , false));
+                await _context.Applications.Where(x => vacancy.Applications.Select(a => a.Id).Contains(x.Id))
+                    .ExecuteUpdateAsync(setter => setter
+                                                        .SetProperty(a => a.IsDeleted, true)
+                                                        .SetProperty(a => a.IsActive, false));
             }
             await _context.SaveChangesAsync();
         }
