@@ -353,7 +353,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                 SenderImage = $"{_configuration["AuthService:BaseUrl"]}{userPhotoResp.Message.ProfileImage}",
                 NotificationType = NotificationType.Application,
                 CreatedDate = DateTime.Now,
-                InformationId = userGuid,
+                InformationId = vacancyGuid,
                 InformationName = vacancyInfo.Title,
                 IsSeen = false,
                 ReceiverId = vacancyInfo.Company.Id,
