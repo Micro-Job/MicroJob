@@ -20,13 +20,7 @@ namespace JobCompany.Business.Services.NotificationServices
             var query = _context.Notifications.Where(n => n.Receiver.UserId == _currentUser.UserGuid).AsNoTracking();
 
             if (IsSeen != null)
-            {
                 query = query.Where(n => n.IsSeen == IsSeen).OrderByDescending(n => n.CreatedDate);
-            }
-            else
-            {
-                query = query.OrderBy(n => n.IsSeen).ThenByDescending(n => n.CreatedDate);
-            }
 
             var usersDataResponse = await _usersDataClient.GetResponse<GetUsersDataResponse>(new GetUsersDataRequest
             {

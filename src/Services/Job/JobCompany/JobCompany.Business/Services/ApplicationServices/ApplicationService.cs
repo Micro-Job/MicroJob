@@ -309,16 +309,14 @@ namespace JobCompany.Business.Services.ApplicationServices
                 throw new ApplicationIsAlreadyExistException(MessageHelper.GetMessage("APPLICATION_ALREADY_EXIST"));
 
             var vacancyInfo = await _context.Vacancies
-                .Include(v => v.Company)
-                .ThenInclude(c => c.Statuses)
                 .Where(v => v.Id == vacancyGuid)
-                .Select(v => new { v.Company, v.Title, v.VacancyStatus })
-                .FirstOrDefaultAsync() ?? throw new NotFoundException<Company>("NOT_FOUND");
+                .Select(v => new {v.Title, v.VacancyStatus , v.CompanyId , v.EndDate })
+                .FirstOrDefaultAsync() ?? throw new NotFoundException<Company>(MessageHelper.GetMessage("NOT_FOUND"));
 
+            if (vacancyInfo.EndDate <= DateTime.Now) throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
             if (vacancyInfo.VacancyStatus == VacancyStatus.Pause) throw new VacancyPausedException();
 
-            var companyStatus = vacancyInfo.Company.Statuses
-                .FirstOrDefault(s => s.StatusEnum == StatusEnum.Pending) ??
+            var companyStatus = await _context.Statuses.FirstOrDefaultAsync(x=> x.StatusEnum == StatusEnum.Pending && x.CompanyId == vacancyInfo.CompanyId) ??
                 throw new NotFoundException<StatusEnum>(MessageHelper.GetMessage("NOT_FOUND"));
 
             var newApplication = new Application
@@ -331,6 +329,7 @@ namespace JobCompany.Business.Services.ApplicationServices
             };
 
             await _context.Applications.AddAsync(newApplication);
+            await _context.SaveChangesAsync();
 
             var userPhotoResp = await _userPhotoRequest.GetResponse<GetResumeUserPhotoResponse>(new GetResumeUserPhotoRequest
             {
@@ -354,7 +353,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                 InformationId = resumeIdResp.Message.ResumeIds[userGuid],
                 InformationName = vacancyInfo.Title,
                 IsSeen = false,
-                ReceiverId = vacancyInfo.Company.Id,
+                ReceiverId = (Guid)vacancyInfo.CompanyId!,
             };
 
             await _context.Notifications.AddAsync(notification);
