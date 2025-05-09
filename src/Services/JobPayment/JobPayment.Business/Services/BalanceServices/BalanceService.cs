@@ -50,7 +50,7 @@ namespace JobPayment.Business.Services.BalanceServices
         public async Task<Balance> GetUserBalanceByIdAsync(Guid userId)
         {
             var userBalance = await _context.Balances.FirstOrDefaultAsync(x => x.UserId == userId)
-                                    ?? throw new NotFoundException<Balance>("Balance mövcud deyil");
+                                    ?? throw new NotFoundException<Balance>();
 
             return userBalance;
         }

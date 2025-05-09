@@ -140,7 +140,7 @@ namespace JobCompany.Business.Services.VacancyServices
                 .ExecuteUpdateAsync(x => x.SetProperty(v => v.VacancyStatus, VacancyStatus.Deactive));
 
             if (deletedCount == 0)
-                throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
+                throw new NotFoundException<Vacancy>();
         }
 
         /// <summary> Şirkətin profilində bütün vakansiyalarını gətirmək(Filterlerle birlikde) </summary>
@@ -303,7 +303,7 @@ namespace JobCompany.Business.Services.VacancyServices
                             : null,
                         VacancyStatus = x.VacancyStatus
                     })
-                    .FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
+                    .FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>();
 
 
             if (vacancyDto.CompanyUserId != userGuid)
@@ -375,7 +375,7 @@ namespace JobCompany.Business.Services.VacancyServices
                                     Id = vc.Skill.Id,
                                     Name = vc.Skill.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name)
                                 }).ToList()
-                }).FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
+                }).FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>();
 
             return vacancy;
         }
@@ -390,10 +390,10 @@ namespace JobCompany.Business.Services.VacancyServices
                     .Vacancies.Where(v => v.Id == vacancyGuid && v.Company.UserId == _currentUser.UserGuid)
                     .Include(v => v.VacancySkills)
                     .Include(v => v.VacancyNumbers)
-                    .FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
+                    .FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>();
 
             if (existingVacancy.VacancyStatus == VacancyStatus.Block)
-                throw new VacancyUpdateException(MessageHelper.GetMessage("VACANCY_UPDATE"));
+                throw new VacancyUpdateException();
 
             existingVacancy.CompanyId = Guid.Parse(vacancyDto.CompanyId);
             existingVacancy.CompanyName = vacancyDto.CompanyName;
@@ -402,9 +402,9 @@ namespace JobCompany.Business.Services.VacancyServices
             existingVacancy.EndDate = vacancyDto.EndDate;
             existingVacancy.Location = vacancyDto.Location;
             existingVacancy.CountryId = Guid.Parse(
-                vacancyDto.CountryId ?? throw new Exception(MessageHelper.GetMessage("NOT_FOUND"))
+                vacancyDto.CountryId ?? throw new NotFoundException<Country>()
             );
-            existingVacancy.CityId = Guid.Parse(vacancyDto.CityId ?? throw new Exception(MessageHelper.GetMessage("NOT_FOUND")));
+            existingVacancy.CityId = Guid.Parse(vacancyDto.CityId ?? throw new NotFoundException<City>());
             existingVacancy.Email = vacancyDto.Email;
             existingVacancy.ExamId = vacancyDto.ExamId;
             existingVacancy.WorkType = vacancyDto.WorkType;
@@ -420,7 +420,7 @@ namespace JobCompany.Business.Services.VacancyServices
             existingVacancy.Citizenship = vacancyDto.Citizenship;
             existingVacancy.VacancyStatus = existingVacancy.VacancyStatus == VacancyStatus.Pending ? VacancyStatus.Pending : VacancyStatus.Update;
             existingVacancy.CategoryId = Guid.Parse(
-                vacancyDto.CategoryId ?? throw new Exception(MessageHelper.GetMessage("NOT_FOUND"))
+                vacancyDto.CategoryId ?? throw new NotFoundException<Category>()
             );
 
             if (numberDtos is not null)
@@ -606,7 +606,7 @@ namespace JobCompany.Business.Services.VacancyServices
             Guid vacancyGuid = Guid.Parse(vacancyId);
 
             if (!await _context.Vacancies.AnyAsync(x => x.Id == vacancyGuid))
-                throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
+                throw new NotFoundException<Vacancy>();
 
             var vacancyCheck = await _context.SavedVacancies.FirstOrDefaultAsync(x => x.VacancyId == vacancyGuid);
 
@@ -633,7 +633,7 @@ namespace JobCompany.Business.Services.VacancyServices
         public async Task TogglePauseVacancyAsync(Guid vacancyId)
         {
             var vacancy = await _context.Vacancies.FirstOrDefaultAsync(x => x.Id == vacancyId && x.Company.UserId == _currentUser.UserGuid)
-                ?? throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
+                ?? throw new NotFoundException<Vacancy>();
 
             if (vacancy.VacancyStatus == VacancyStatus.Active)
             {
@@ -666,7 +666,7 @@ namespace JobCompany.Business.Services.VacancyServices
                 }
             }
             else
-                throw new VacancyStatusNotToggableException(MessageHelper.GetMessage("VACANCY_STATUS_NOT_TOGGABLE"));
+                throw new VacancyStatusNotToggableException();
 
             await _context.SaveChangesAsync();
         }
@@ -707,7 +707,6 @@ namespace JobCompany.Business.Services.VacancyServices
         public async Task<DataListDto<VacancyGetAllDto>> GetAllSavedVacancyAsync(int skip, int take, string? vacancyName)
         {
             var query = _context.SavedVacancies.Where(x => x.UserId == _currentUser.UserGuid)
-                                               .AsQueryable()
                                                .AsNoTracking();
 
             if (!string.IsNullOrEmpty(vacancyName))
@@ -751,7 +750,7 @@ namespace JobCompany.Business.Services.VacancyServices
         public async Task DeleteVacancyAsync(Guid vacancyId)
         {
             var vacancy = await _context.Vacancies.Include(x => x.Applications).FirstOrDefaultAsync(x => x.Id == vacancyId)
-                ?? throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
+                ?? throw new NotFoundException<Vacancy>();
 
             vacancy.PaymentDate = null;
             vacancy.VacancyStatus = VacancyStatus.Deleted;

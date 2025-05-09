@@ -135,7 +135,7 @@ public class UserManagementService(JobDbContext _context, IRequestClient<GetUser
                 CertificateFile = $"{_currentUser.BaseUrl}/{c.CertificateFile}"
             }).ToList()
         })
-        .FirstOrDefaultAsync() ?? throw new NotFoundException<Core.Entities.Resume>(MessageHelper.GetMessage("NOT_FOUND"));
+        .FirstOrDefaultAsync() ?? throw new NotFoundException<Core.Entities.Resume>();
 
         return resume;
     }

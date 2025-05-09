@@ -1,5 +1,6 @@
 ﻿using Job.Business.Exceptions.Common;
 using Microsoft.AspNetCore.Http;
+using SharedLibrary.Helpers;
 
 namespace Job.Business.Exceptions.ResumeExceptions;
 
@@ -11,7 +12,7 @@ public class ResumeIsPublicException : Exception, IBaseException
 
     public ResumeIsPublicException()
     {
-        ErrorMessage = "Resume is public";
+        ErrorMessage = MessageHelper.GetMessage("RESUME_IS_PUBLIC");
     }
 
     public ResumeIsPublicException(string? message) : base(message)

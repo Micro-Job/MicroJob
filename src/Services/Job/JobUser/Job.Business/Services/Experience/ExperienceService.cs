@@ -98,7 +98,7 @@ public class ExperienceService(JobDbContext context) : IExperienceService
         var experience =
             await context.Experiences.FirstOrDefaultAsync(e =>
                 e.ResumeId == resumeId && e.OrganizationName == dto.OrganizationName
-            ) ?? throw new NotFoundException<Core.Entities.Experience>(MessageHelper.GetMessage("NOT_FOUND"));
+            ) ?? throw new NotFoundException<Core.Entities.Experience>();
 
         MapExperienceDtoToEntityForUpdate(experience, dto);
 

@@ -54,7 +54,7 @@ namespace AuthService.Business.Services.UserServices
                         Image = x.Image != null ? $"{_currentUser.BaseUrl}/{x.Image}" : null,
                         UserRole = x.UserRole,
                         JobStatus = x.JobStatus,
-                    }) ?? throw new NotFoundException<User>(MessageHelper.GetMessage("NOTFOUNDEXCEPTION_USER"));
+                    }) ?? throw new UserNotFoundException();
 
             return user;
         }
@@ -65,14 +65,14 @@ namespace AuthService.Business.Services.UserServices
             var userQuery = _context.Users.AsQueryable();
             var user =
                 await userQuery.FirstOrDefaultAsync(u => u.Id == _currentUser.UserGuid)
-                ?? throw new NotFoundException<User>(MessageHelper.GetMessage("NOTFOUNDEXCEPTION_USER"));
+                ?? throw new UserNotFoundException();
             var isEmailTaken = await userQuery.FirstOrDefaultAsync(u =>
                 u.Id != user.Id && u.Email == dto.Email.Trim()
             );
 
             if (isEmailTaken is not null)
             {
-                throw new UserExistException("Email mövcuddur!");
+                throw new UserExistException();
             }
 
             var isPhoneTaken = await userQuery.FirstOrDefaultAsync(u =>
@@ -81,7 +81,7 @@ namespace AuthService.Business.Services.UserServices
 
             if (isPhoneTaken is not null)
             {
-                throw new UserExistException("Bu nömrə sistemdə artıq mövcuddur!");
+                throw new UserExistException();
             }
 
             user.FirstName = dto.FirstName.Trim();
@@ -105,7 +105,7 @@ namespace AuthService.Business.Services.UserServices
         public async Task<UserProfileImageUpdateResponseDto> UpdateUserProfileImageAsync(UserProfileImageUpdateDto dto)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == _currentUser.UserGuid)
-                        ?? throw new NotFoundException<User>(MessageHelper.GetMessage("NOTFOUNDEXCEPTION_USER"));
+                        ?? throw new UserNotFoundException();
 
             if (!string.IsNullOrEmpty(user.Image))
             {
@@ -290,7 +290,7 @@ namespace AuthService.Business.Services.UserServices
                     MainPhoneNumber = u.MainPhoneNumber,
                     UserRole = u.UserRole,
                 }).FirstOrDefaultAsync()
-                ?? throw new NotFoundException<User>(MessageHelper.GetMessage("NOTFOUNDEXCEPTION_USER"));
+                ?? throw new UserNotFoundException();
 
             return operatorInfo;
         }
@@ -330,7 +330,7 @@ namespace AuthService.Business.Services.UserServices
             var user = await _context.Users
                 .Where(u => (u.UserRole == UserRole.Operator || u.UserRole == UserRole.ChiefOperator) && u.Id == dto.UserId)
                 .FirstOrDefaultAsync()
-                ?? throw new NotFoundException<User>(MessageHelper.GetMessage("NOTFOUNDEXCEPTION_USER"));
+                ?? throw new UserNotFoundException();
 
             if (user.Email != dto.Email.Trim())
             {
