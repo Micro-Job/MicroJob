@@ -31,7 +31,7 @@ public class CategoryService(JobCompanyDbContext _context, ICurrentUser _user) :
     {
         var categoryId = Guid.Parse(id);
         var category = await _context.Categories.FindAsync(categoryId) ??
-            throw new NotFoundException<Category>(MessageHelper.GetMessage("NOT_FOUND"));
+            throw new NotFoundException<Category>();
 
         _context.Categories.Remove(category);
         await _context.SaveChangesAsync();

@@ -181,10 +181,10 @@ namespace AuthService.Business.Services.Auth
             );
 
             if (user == null)
-                throw new LoginFailedException(MessageHelper.GetMessage("AUTHENTICATION_FAILED"));
+                throw new LoginFailedException();
 
             if (user.RefreshTokenExpireDate < DateTime.Now)
-                throw new RefreshTokenExpiredException(MessageHelper.GetMessage("LOGIN_REQUIRED"));
+                throw new RefreshTokenExpiredException();
 
             var newToken = _tokenHandler.CreateToken(user, 60);
             var newRefreshToken = _tokenHandler.GenerateRefreshToken(newToken, 1440);
@@ -231,7 +231,7 @@ namespace AuthService.Business.Services.Auth
         public async Task ResetPasswordAsync(string email)
         {
             var user = await _context.Users.FirstOrDefaultAsync(x => x.Email == email)
-                ?? throw new NotFoundException<User>(MessageHelper.GetMessage("NOTFOUNDEXCEPTION_USER"));
+                ?? throw new UserNotFoundException();
 
             var token = _tokenHandler.CreatePasswordResetToken(user);
 
@@ -261,7 +261,7 @@ namespace AuthService.Business.Services.Auth
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
             if (user == null)
-                throw new NotFoundException<User>(MessageHelper.GetMessage("NOTFOUNDEXCEPTION_USER"));
+                throw new UserNotFoundException();
 
             var passwordToken = await _context.PasswordTokens.FirstOrDefaultAsync(pt =>
                 pt.Token == dto.Token && pt.UserId == user.Id && pt.ExpireTime > DateTime.Now

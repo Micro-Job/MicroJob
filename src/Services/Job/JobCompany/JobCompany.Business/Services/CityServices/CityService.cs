@@ -84,7 +84,7 @@ public class CityService(JobCompanyDbContext _context, ICurrentUser _user) : ICi
     {
         var cityGuid = Guid.Parse(cityId);
 
-        var city = await _context.Cities.FindAsync(cityGuid) ?? throw new NotFoundException<City>(MessageHelper.GetMessage("NOT_FOUND"));
+        var city = await _context.Cities.FindAsync(cityGuid) ?? throw new NotFoundException<City>();
 
         _context.Cities.Remove(city);
 

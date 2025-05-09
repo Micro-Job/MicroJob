@@ -76,7 +76,7 @@ public class PositionService(JobDbContext _context) : IPositionService
             if (isPositionExist)
                 return selectedPositionId.Value;
             else
-                throw new NotFoundException<Core.Entities.Position>(MessageHelper.GetMessage("NOT_FOUND"));
+                throw new NotFoundException<Core.Entities.Position>();
         }
 
         else

@@ -52,10 +52,10 @@ namespace JobCompany.Business.Services.CompanyServices
         public async Task<CompanyUpdateResponseDto> UpdateCompanyAsync(CompanyUpdateDto dto, ICollection<UpdateNumberDto>? numbersDto)
         {
             var company = await _context.Companies.Include(c => c.CompanyNumbers).FirstOrDefaultAsync(x => x.UserId == _currentUser.UserGuid)
-                ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>(MessageHelper.GetMessage("NOT_FOUND"));
+                ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>();
 
             if (dto.Email != null && await _context.Companies.AnyAsync(x => x.Email == dto.Email && x.Id != company.Id))
-                throw new EmailAlreadyUsedException(MessageHelper.GetMessage("EMAIL_ALREADY_USED"));
+                throw new EmailAlreadyUsedException();
 
             company.CompanyName = dto.CompanyName?.Trim();
             company.CompanyInformation = dto.CompanyInformation?.Trim();
@@ -188,7 +188,7 @@ namespace JobCompany.Business.Services.CompanyServices
                             Email = x.Email,
                         })
                         .FirstOrDefaultAsync()
-                    ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>(MessageHelper.GetMessage("NOT_FOUND"));
+                    ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>();
             return company;
         }
 
@@ -230,7 +230,7 @@ namespace JobCompany.Business.Services.CompanyServices
                         : new List<CompanyNumberDto>()
                 })
                 .FirstOrDefaultAsync()
-                    ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>(MessageHelper.GetMessage("NOT_FOUND"));
+                    ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>();
 
             return companyProfile;
         }
@@ -242,7 +242,7 @@ namespace JobCompany.Business.Services.CompanyServices
             return await _context.Companies.Where(x => x.Id == companyGuid)
                 .Select(x => x.CompanyName)
                 .FirstOrDefaultAsync()
-                ?? throw new NotFoundException<Company>("Şirkət mövcud deyil");
+                ?? throw new NotFoundException<Company>();
         }
     }
 }

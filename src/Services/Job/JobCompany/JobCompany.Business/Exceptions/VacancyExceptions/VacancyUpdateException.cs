@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using SharedLibrary.Exceptions.Common;
+using SharedLibrary.Helpers;
 
 namespace JobCompany.Business.Exceptions.VacancyExceptions;
 
@@ -11,7 +12,7 @@ public class VacancyUpdateException : Exception,IBaseException
 
     public VacancyUpdateException()
     {
-        ErrorMessage = "Vakansiya blok olundugu ucun update edilmir.";
+        ErrorMessage = MessageHelper.GetMessage("VACANCY_UPDATE");
     }
 
     public VacancyUpdateException(string message) : base(message)

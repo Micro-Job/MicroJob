@@ -98,7 +98,7 @@ namespace Job.Business.Services.Number
         {
             var number = await context.Numbers
                 .FirstOrDefaultAsync(n => n.PhoneNumber == numberUpdateDto.PhoneNumber)
-                ?? throw new NotFoundException<Core.Entities.Number>(MessageHelper.GetMessage("NOT_FOUND"));
+                ?? throw new NotFoundException<Core.Entities.Number>();
 
             number.PhoneNumber = numberUpdateDto.PhoneNumber;
             await context.SaveChangesAsync();

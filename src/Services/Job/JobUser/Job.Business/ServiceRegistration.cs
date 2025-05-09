@@ -53,6 +53,7 @@ namespace Job.Business
                 x.AddConsumer<GetResumeIdsByUserIdsConsumer>();
                 x.AddConsumer<GetFilteredUserIdsConsumer>();
                 x.AddConsumer<NotificationEventConsumer>();
+                x.AddConsumer<GetUserResumePhotoConsumer>();
 
                 x.SetKebabCaseEndpointNameFormatter();
 

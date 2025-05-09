@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using SharedLibrary.Exceptions.Common;
+using SharedLibrary.Helpers;
 
 namespace JobCompany.Business.Exceptions.ApplicationExceptions
 {
@@ -11,7 +12,7 @@ namespace JobCompany.Business.Exceptions.ApplicationExceptions
 
         public ApplicationStatusIsDeactiveException()
         {
-            ErrorMessage = "Müraciətin statusu deaktivdir.";
+            ErrorMessage = MessageHelper.GetMessage("APPLICATION_IS_DEACTIVE");
         }
 
         public ApplicationStatusIsDeactiveException(string message) : base(message)

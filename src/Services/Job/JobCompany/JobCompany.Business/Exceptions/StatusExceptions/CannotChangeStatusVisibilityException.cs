@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using SharedLibrary.Exceptions.Common;
+using SharedLibrary.Helpers;
 
 namespace JobCompany.Business.Exceptions.StatusExceptions;
 
@@ -11,7 +12,7 @@ public class CannotChangeStatusVisibilityException : Exception, IBaseException
 
     public CannotChangeStatusVisibilityException()
     {
-        ErrorMessage = "Statusa müraciət olduğu üçün statusu görünməz etmək olmaz.";
+        ErrorMessage = MessageHelper.GetMessage("CANNOT_CHANGE_STATUS");
     }
 
     public CannotChangeStatusVisibilityException(string message) : base(message)

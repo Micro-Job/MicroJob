@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Job.Business.Exceptions.Common;
 using Microsoft.AspNetCore.Http;
+using SharedLibrary.Helpers;
 
 namespace Job.Business.Exceptions.UserExceptions
 {
@@ -15,7 +16,7 @@ namespace Job.Business.Exceptions.UserExceptions
 
         public NotFoundUserException()
         {
-            ErrorMessage = "User not found";
+            ErrorMessage = MessageHelper.GetMessage("NOTFOUNDEXCEPTION_USER");
         }
 
         public NotFoundUserException(string? message) : base(message)

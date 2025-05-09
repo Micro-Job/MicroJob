@@ -378,7 +378,7 @@ namespace Job.Business.Services.Resume
             var resumeGuid = Guid.Parse(resumeId);
 
             if (!await _context.Resumes.AnyAsync(x => x.Id == resumeGuid))
-                throw new NotFoundException<Core.Entities.Resume>("CV mövcud deyil");
+                throw new NotFoundException<Core.Entities.Resume>();
 
             var existSaveResume = await _context.SavedResumes.FirstOrDefaultAsync(x => x.ResumeId == resumeGuid && x.CompanyUserId == _currentUser.UserGuid);
 
@@ -426,7 +426,7 @@ namespace Job.Business.Services.Resume
                     HasAccessByCompany = r.CompanyResumeAccesses.Any(x => x.CompanyUserId == userId),
                     r.IsPublic
                 })
-                .FirstOrDefaultAsync() ?? throw new NotFoundException<Core.Entities.Resume>(MessageHelper.GetMessage("NOT_FOUND"));
+                .FirstOrDefaultAsync() ?? throw new NotFoundException<Core.Entities.Resume>();
 
             bool hasApplied = false;
 
@@ -543,9 +543,9 @@ namespace Job.Business.Services.Resume
                 }).FirstOrDefaultAsync();
 
             if (resume == null)
-                throw new NotFoundException<Core.Entities.Resume>(MessageHelper.GetMessage("NOT_FOUND"));
+                throw new NotFoundException<Core.Entities.Resume>();
 
-            if (resume.IsPublic) throw new ResumeIsPublicException(MessageHelper.GetMessage("RESUME_IS_PUBLIC"));
+            if (resume.IsPublic) throw new ResumeIsPublicException();
 
             //TODO : bu hisse olmaya da biler.Bir basa exception qaytararaq
             var checkBalanceResponse = await _balanceRequest.GetResponse<CheckBalanceResponse>(new CheckBalanceRequest
@@ -658,7 +658,7 @@ namespace Job.Business.Services.Resume
                 .Include(r => r.Languages)
                 .Include(r => r.ResumeSkills)
                 .FirstOrDefaultAsync(r => r.UserId == userGuid)
-                ?? throw new NotFoundException<Core.Entities.Resume>(MessageHelper.GetMessage("NOT_FOUND"));
+                ?? throw new NotFoundException<Core.Entities.Resume>();
         }
 
         private static void UpdateResumePersonalInfo(Core.Entities.Resume resume, ResumeUpdateDto updateDto)
