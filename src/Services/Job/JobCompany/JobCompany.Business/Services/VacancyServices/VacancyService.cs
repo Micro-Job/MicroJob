@@ -252,6 +252,7 @@ namespace JobCompany.Business.Services.VacancyServices
 
             var vacancyDto = await _context.Vacancies
                 .Where(x => x.Id == vacancyGuid)
+                    .Include(x => x.Applications)
                     .Include(x => x.Category)
                         .ThenInclude(x => x.Translations)
                     .Include(x => x.VacancyMessages)
@@ -288,20 +289,14 @@ namespace JobCompany.Business.Services.VacancyServices
                                 VacancyNumber = vn.Number,
                             })
                             .ToList(),
-                        //Skills = x.VacancySkills
-                        //        .Where(vc => vc.Skill != null)
-                        //        .Select(vc => new SkillDto
-                        //        {
-                        //            Id = vc.Skill.Id,
-                        //            Name = vc.Skill.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name)
-                        //        }).ToList(),
                         CompanyName = x.CompanyName,
                         CategoryName = x.Category.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name),
                         CompanyUserId = x.Company.UserId,
                         Messages = _currentUser.UserGuid == x.Company.UserId
                             ? x.VacancyMessages.Select(vm => vm.Message.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Content)).ToList()
                             : null,
-                        VacancyStatus = x.VacancyStatus
+                        VacancyStatus = x.VacancyStatus,
+                        IsApplied = userGuid.HasValue && x.Applications.Any(a => a.UserId == userGuid.Value)
                     })
                     .FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>();
 
