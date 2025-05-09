@@ -148,6 +148,7 @@ namespace JobCompany.Business.Services.VacancyServices
         {
             var query = _context
                 .Vacancies.Where(x => x.Company.UserId == _currentUser.UserGuid)
+                .OrderByDescending(x => x.CreatedDate)
                 .AsNoTracking();
 
             query = ApplyVacancyFilters(
@@ -172,7 +173,7 @@ namespace JobCompany.Business.Services.VacancyServices
                     StartDate = x.StartDate,
                     Location = x.Location,
                     CompanyLogo = $"{_currentUser.BaseUrl}/{x.Company.CompanyLogo}",
-                    CompanyName = x.CompanyName,
+                    CompanyName = x.Company.IsCompany ? x.Company.CompanyName : x.CompanyName,
                     ViewCount = x.ViewCount,
                     WorkType = x.WorkType,
                     WorkStyle = x.WorkStyle,
@@ -180,7 +181,7 @@ namespace JobCompany.Business.Services.VacancyServices
                     MaxSalary = x.MaxSalary,
                     VacancyStatus = x.VacancyStatus
                 })
-                .Skip(Math.Max(0, (skip - 1) * take))
+                .Skip((skip - 1) * take)
                 .Take(take)
                 .ToListAsync();
 
@@ -211,6 +212,7 @@ namespace JobCompany.Business.Services.VacancyServices
                 .Where(x => x.CompanyId == companyGuid &&
                             x.VacancyStatus == VacancyStatus.Active &&
                             x.EndDate >= DateTime.Now)
+                .OrderByDescending(x => x.CreatedDate)
                 .AsNoTracking();
 
             if (vacancyId != null)
@@ -220,7 +222,7 @@ namespace JobCompany.Business.Services.VacancyServices
                 .Select(x => new VacancyGetByCompanyIdDto
                 {
                     VacancyId = x.Id,
-                    CompanyName = x.CompanyName,
+                    CompanyName = x.Company.IsCompany ? x.Company.CompanyName : x.CompanyName,
                     Title = x.Title,
                     Location = x.Location,
                     CompanyLogo = $"{_currentUser.BaseUrl}/{x.Company.CompanyLogo}",
@@ -232,7 +234,7 @@ namespace JobCompany.Business.Services.VacancyServices
                     MaxSalary = x.MaxSalary,
                     IsSaved = x.SavedVacancies.Any(sv => sv.UserId == _currentUser.UserGuid && sv.VacancyId == x.Id),
                 })
-                .Skip(Math.Max(0, (skip - 1) * take))
+                .Skip((skip - 1) * take)
                 .Take(take)
                 .ToListAsync();
 
@@ -295,7 +297,7 @@ namespace JobCompany.Business.Services.VacancyServices
                         //            Id = vc.Skill.Id,
                         //            Name = vc.Skill.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name)
                         //        }).ToList(),
-                        CompanyName = x.CompanyName,
+                        CompanyName = x.Company.IsCompany ? x.Company.CompanyName : x.CompanyName,
                         CategoryName = x.Category.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name),
                         CompanyUserId = x.Company.UserId,
                         Messages = _currentUser.UserGuid == x.Company.UserId
@@ -308,6 +310,9 @@ namespace JobCompany.Business.Services.VacancyServices
 
             if (vacancyDto.CompanyUserId != userGuid)
             {
+                if (vacancyDto.EndDate < DateTime.Now)
+                    throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
+
                 var existVacancy = await _context.Vacancies.FirstOrDefaultAsync(x => x.Id == vacancyGuid);
                 existVacancy.ViewCount++;
                 await _context.SaveChangesAsync();
@@ -332,7 +337,7 @@ namespace JobCompany.Business.Services.VacancyServices
                     Id = v.Id,
                     Title = v.Title,
                     CompanyId = v.CompanyId,
-                    CompanyName = v.CompanyName,
+                    CompanyName = v.Company.IsCompany ? v.Company.CompanyName : v.CompanyName,
                     CompanyUserId = v.Company.UserId,
                     CompanyLogo = $"{_currentUser.BaseUrl}/{v.Company.CompanyLogo}",
                     StartDate = v.StartDate,
@@ -525,11 +530,10 @@ namespace JobCompany.Business.Services.VacancyServices
         public async Task<DataListDto<VacancyGetAllDto>> GetAllVacanciesAsync(string? titleName, string? categoryId, string? countryId, string? cityId, decimal? minSalary, decimal? maxSalary, string? companyId, byte? workStyle, byte? workType, int skip = 1, int take = 9)
         {
             var query = _context.Vacancies.Where(x => x.VacancyStatus == VacancyStatus.Active && x.EndDate > DateTime.Now)
+                .OrderByDescending(x => x.CreatedDate)
                 .AsNoTracking();
 
             query = ApplyVacancyFilters(query, titleName, categoryId, countryId, cityId, null, minSalary, maxSalary, companyId, workStyle, workType);
-
-            query = query.OrderByDescending(x => x.CreatedDate);
 
             var vacancies = await query
                 .Select(v => new VacancyGetAllDto
@@ -537,7 +541,7 @@ namespace JobCompany.Business.Services.VacancyServices
                     Id = v.Id,
                     Title = v.Title,
                     CompanyLogo = v.Company.CompanyLogo != null ? $"{_currentUser.BaseUrl}/{v.Company.CompanyLogo}" : null,
-                    CompanyName = v.CompanyName,
+                    CompanyName = v.Company.IsCompany ? v.Company.CompanyName : v.CompanyName,
                     StartDate = v.StartDate,
                     Location = v.Location,
                     ViewCount = v.ViewCount,
@@ -682,12 +686,13 @@ namespace JobCompany.Business.Services.VacancyServices
 
             var vacancies = await _context.Vacancies
             .Where(x => x.CategoryId == mainVacancy.CategoryId && x.Id != mainVacancy.Id && x.VacancyStatus == VacancyStatus.Active && x.EndDate > DateTime.Now)
+            .OrderByDescending(x => x.CreatedDate)
             .Select(x => new VacancyGetAllDto
             {
                 Id = x.Id,
                 Title = x.Title,
                 CompanyLogo = x.CompanyLogo != null ? $"{_currentUser.BaseUrl}/{x.Company.CompanyLogo}" : null,
-                CompanyName = x.CompanyName,
+                CompanyName = x.Company.IsCompany ? x.Company.CompanyName : x.CompanyName,
                 StartDate = x.StartDate,
                 Location = x.Location,
                 ViewCount = x.ViewCount,
@@ -697,7 +702,6 @@ namespace JobCompany.Business.Services.VacancyServices
                 MaxSalary = x.MaxSalary,
                 IsSaved = x.SavedVacancies.Any(y => y.VacancyId == x.Id && y.UserId == _currentUser.UserGuid)
             })
-            .OrderByDescending(x => x.StartDate)
             .Take(take)
             .ToListAsync();
 
@@ -722,7 +726,7 @@ namespace JobCompany.Business.Services.VacancyServices
                 Id = x.Vacancy.Id,
                 Title = x.Vacancy.Title,
                 CompanyLogo = x.Vacancy.Company.CompanyLogo != null ? $"{_currentUser.BaseUrl}/{x.Vacancy.Company.CompanyLogo}" : null,
-                CompanyName = x.Vacancy.CompanyName,
+                CompanyName = x.Vacancy.Company.IsCompany ? x.Vacancy.Company.CompanyName : x.Vacancy.CompanyName,
                 StartDate = x.Vacancy.StartDate,
                 Location = x.Vacancy.Location,
                 ViewCount = x.Vacancy.ViewCount,

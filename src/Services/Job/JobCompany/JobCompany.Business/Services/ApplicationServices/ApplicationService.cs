@@ -313,7 +313,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                 .Select(v => new {v.Title, v.VacancyStatus , v.CompanyId , v.EndDate })
                 .FirstOrDefaultAsync() ?? throw new NotFoundException<Company>(MessageHelper.GetMessage("NOT_FOUND"));
 
-            if (vacancyInfo.EndDate <= DateTime.Now) throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
+            if (vacancyInfo.EndDate < DateTime.Now) throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
             if (vacancyInfo.VacancyStatus == VacancyStatus.Pause) throw new VacancyPausedException();
 
             var companyStatus = await _context.Statuses.FirstOrDefaultAsync(x=> x.StatusEnum == StatusEnum.Pending && x.CompanyId == vacancyInfo.CompanyId) ??
