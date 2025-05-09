@@ -37,7 +37,7 @@ namespace JobCompany.Business.Services.ApplicationServices
         private readonly string? _authServiceBaseUrl;
         private readonly IRequestClient<GetResumeIdsByUserIdsRequest> _resumeIdsRequest;
         private readonly IRequestClient<GetFilteredUserIdsRequest> _filteredUserIdsRequest;
-        private readonly IRequestClient<GetResumeUserPhotoRequest> _userPhotoRequest;
+        private readonly IRequestClient<GetUserResumePhotoRequest> _userPhotoRequest;
 
 
         public ApplicationService(
@@ -49,7 +49,7 @@ namespace JobCompany.Business.Services.ApplicationServices
             IRequestClient<GetUserDataRequest> requestUser,
             IRequestClient<GetResumeIdsByUserIdsRequest> resumeIdsRequest,
             IRequestClient<GetFilteredUserIdsRequest> filteredUserIdsRequest,
-            IRequestClient<GetResumeUserPhotoRequest> userPhotoRequest,
+            IRequestClient<GetUserResumePhotoRequest> userPhotoRequest,
             IConfiguration configuration)
         {
             _currentUser = currentUser;
@@ -329,28 +329,20 @@ namespace JobCompany.Business.Services.ApplicationServices
             };
 
             await _context.Applications.AddAsync(newApplication);
-            await _context.SaveChangesAsync();
 
-            var userPhotoResp = await _userPhotoRequest.GetResponse<GetResumeUserPhotoResponse>(new GetResumeUserPhotoRequest
+            var userPhotoResp = await _userPhotoRequest.GetResponse<GetUserResumePhotoResponse>(new GetUserResumePhotoRequest
             {
                 UserId = userGuid
-            });
-
-            //TODO: Notification-da resumeid-ni informationId-yə set eləmək üçün JobUser proyektindən resumeid-ni gətirirəm.
-            //TODO: Amma məncə JobUser proyektində userid-yə görə resume detallarını gətirən bir endpoint yazsaq və notification-da informationId-yə userId-ni set etsək daha yaxşı olar. Sən necə fikirləşirsən?
-            var resumeIdResp = await _resumeIdsRequest.GetResponse<GetResumeIdsByUserIdsResponse>(new GetResumeIdsByUserIdsRequest
-            {
-                UserIds = [userGuid]
             });
 
             var notification = new Notification
             {
                 SenderId = userGuid,
                 SenderName = _currentUser.UserFullName,
-                SenderImage = $"{_configuration["AuthService:BaseUrl"]}{userPhotoResp.Message.ProfileImage}",
+                SenderImage = $"{_configuration["JobUser:BaseUrl"]}{userPhotoResp.Message.ImageUrl}",
                 NotificationType = NotificationType.Application,
                 CreatedDate = DateTime.Now,
-                InformationId = resumeIdResp.Message.ResumeIds[userGuid],
+                InformationId = userPhotoResp.Message.ResumeId,
                 InformationName = vacancyInfo.Title,
                 IsSeen = false,
                 ReceiverId = (Guid)vacancyInfo.CompanyId!,
