@@ -79,6 +79,8 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials();
+
+        policy.WithOrigins("http://localhost:5000").AllowAnyMethod().AllowAnyHeader();
     });
 });
 builder.Services.AddAuth(builder.Configuration["Jwt:Issuer"]!, builder.Configuration["Jwt:Audience"]!, builder.Configuration["Jwt:SigningKey"]!);
@@ -87,7 +89,8 @@ var app = builder.Build();
 
 
 
-app.UseCors("AllowSwagger");
+//app.UseCors("AllowSwagger");
+app.UseCors("_myAllowSpecificOrigins");
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>
@@ -104,7 +107,6 @@ app.UseCustomExceptionHandler();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseCors("_myAllowSpecificOrigins");
 app.MapControllers();
 
 app.Run();
