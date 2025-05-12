@@ -303,7 +303,7 @@ namespace JobCompany.Business.Services.ApplicationServices
 
             var vacancyGuid = Guid.Parse(vacancyId);
 
-            if (await _context.Applications.AnyAsync(x => x.VacancyId == vacancyGuid && x.IsDeleted == false && x.UserId == userGuid))
+            if (await _context.Applications.AnyAsync(x => x.VacancyId == vacancyGuid && x.IsActive == true && x.UserId == userGuid))
                 throw new ApplicationIsAlreadyExistException();
 
             var vacancyInfo = await _context.Vacancies
