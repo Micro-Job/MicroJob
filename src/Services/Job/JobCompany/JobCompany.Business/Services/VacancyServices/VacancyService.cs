@@ -623,7 +623,7 @@ namespace JobCompany.Business.Services.VacancyServices
             else
             {
                 await _context.SavedVacancies.AddAsync(
-                    new SavedVacancy { UserId = _currentUser.UserGuid, VacancyId = vacancyGuid }
+                    new SavedVacancy { UserId = _currentUser.UserGuid, VacancyId = vacancyGuid, SavedAt = DateTime.UtcNow }
                 );
             }
             await _context.SaveChangesAsync();
@@ -722,6 +722,7 @@ namespace JobCompany.Business.Services.VacancyServices
             }
 
             var vacancies = await query
+            .OrderByDescending(x => x.SavedAt)
             .Select(x => new VacancyGetAllDto
             {
                 Id = x.Vacancy.Id,
@@ -730,6 +731,7 @@ namespace JobCompany.Business.Services.VacancyServices
                 CompanyName = x.Vacancy.Company.IsCompany ? x.Vacancy.Company.CompanyName : x.Vacancy.CompanyName,
                 StartDate = x.Vacancy.StartDate,
                 Location = x.Vacancy.Location,
+                SavedAt = x.SavedAt,
                 ViewCount = x.Vacancy.ViewCount,
                 WorkType = x.Vacancy.WorkType,
                 WorkStyle = x.Vacancy.WorkStyle,
