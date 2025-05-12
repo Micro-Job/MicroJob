@@ -224,7 +224,6 @@ namespace Job.Business.Services.Resume
                 .ThenInclude(rs => rs.Skill.Translations)
                 .Include(r => r.Languages)
                 .Include(r => r.CompanyResumeAccesses)
-                .AsQueryable()
                 .AsNoTracking();
 
             query = ApplyFilters(query, fullname, isPublic, professionDegree, citizenship, isExperience, skillIds, languages, jobStatus);
@@ -251,7 +250,7 @@ namespace Job.Business.Services.Resume
                 .Select(s => s.Skill.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name))
                 .ToList(),
                 Position = x.Position != null ? x.Position.Name : null,
-                HasAccess = x.IsPublic ? true : x.CompanyResumeAccesses.Any(cra => cra.CompanyUserId == _currentUser.UserGuid)
+                HasAccess = x.IsPublic || x.CompanyResumeAccesses.Any(cra => cra.CompanyUserId == _currentUser.UserGuid)
             })
             .Skip((skip - 1) * take)
             .Take(take)

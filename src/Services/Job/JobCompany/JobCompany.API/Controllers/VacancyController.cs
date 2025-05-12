@@ -36,9 +36,9 @@ namespace JobCompany.API.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetAllOwnVacancies(string? titleName, string? categoryId, string? countryId, string? cityId, VacancyStatus? IsActive, decimal? minSalary, decimal? maxSalary, byte? workStyle, byte? workType, int skip = 1, int take = 6)
+        public async Task<IActionResult> GetAllOwnVacancies(string? titleName, string? categoryId, string? countryId, string? cityId, VacancyStatus? IsActive, decimal? minSalary, decimal? maxSalary, byte? workStyle, byte? workType, [FromQuery] List<Guid>? skills, int skip = 1, int take = 6)
         {
-            var data = await _vacancyService.GetAllOwnVacanciesAsync(titleName, categoryId, countryId, cityId, IsActive, minSalary, maxSalary, workStyle, workType, skip, take);
+            var data = await _vacancyService.GetAllOwnVacanciesAsync(titleName, categoryId, countryId, cityId, IsActive, minSalary, maxSalary, workStyle, workType, skills, skip, take);
             return Ok(data);
         }
 
@@ -73,16 +73,16 @@ namespace JobCompany.API.Controllers
 
         [AllowAnonymous]
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetVacanciesByCompanyId(string companyId, Guid? vacancyId , int skip = 1, int take = 9)
+        public async Task<IActionResult> GetVacanciesByCompanyId(string companyId, Guid? vacancyId, int skip = 1, int take = 9)
         {
-            return Ok(await _vacancyService.GetVacanciesByCompanyIdAsync(companyId , vacancyId , skip, take));
+            return Ok(await _vacancyService.GetVacanciesByCompanyIdAsync(companyId, vacancyId, skip, take));
         }
 
         [AllowAnonymous]
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetAllVacancies(string? titleName, string? categoryId, string? countryId, string? cityId, decimal? minSalary, decimal? maxSalary, string? companyId, byte? workStyle, byte? workType, int skip = 1, int take = 9)
+        public async Task<IActionResult> GetAllVacancies(string? titleName, string? categoryId, string? countryId, string? cityId, decimal? minSalary, decimal? maxSalary, string? companyId, byte? workStyle, byte? workType, [FromQuery] List<Guid> skills, int skip = 1, int take = 9)
         {
-            return Ok(await _vacancyService.GetAllVacanciesAsync(titleName, categoryId, countryId, cityId, minSalary, maxSalary, companyId, workStyle, workType, skip, take));
+            return Ok(await _vacancyService.GetAllVacanciesAsync(titleName, categoryId, countryId, cityId, minSalary, maxSalary, companyId, workStyle, workType, skills, skip, take));
         }
 
         [HttpPost("[action]")]
