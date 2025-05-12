@@ -305,7 +305,8 @@ namespace JobCompany.Business.Services.VacancyServices
                             ? x.VacancyMessages.Select(vm => vm.Message.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Content)).ToList()
                             : null,
                         VacancyStatus = x.VacancyStatus,
-                        IsApplied = userGuid.HasValue && x.Applications.Any(a => a.UserId == userGuid.Value)
+                        IsApplied = userGuid.HasValue && x.Applications.Any(a => a.UserId == userGuid && a.IsActive == true),
+                        //ApplicationId = userGuid.HasValue ? x.Applications.Where(a=> a.UserId == userGuid && a.VacancyId == x.Id && a.).Select(a=> a.Id).FirstOrDefault(): null
                     })
                     .FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>();
 
@@ -373,7 +374,7 @@ namespace JobCompany.Business.Services.VacancyServices
                                 {
                                     Id = vn.Id,
                                     VacancyNumber = vn.Number,
-                                }).ToList() : new List<VacancyNumberDto>(),
+                                }).ToList() : null,
 
                     Skills = v.VacancySkills
                                 .Where(vc => vc.Skill != null)
