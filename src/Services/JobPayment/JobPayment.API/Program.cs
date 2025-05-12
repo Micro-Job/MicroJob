@@ -47,12 +47,14 @@ namespace JobPayment.API
                           .AllowAnyMethod()
                           .AllowAnyHeader()
                           .AllowCredentials();
+
+                    policy.WithOrigins("http://localhost:5000").AllowAnyMethod().AllowAnyHeader();
                 });
             });
 
             var app = builder.Build();
 
-            app.UseCors("AllowSwagger");
+            app.UseCors("_myAllowSpecificOrigins");
 
 
             if (app.Environment.IsDevelopment())

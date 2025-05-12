@@ -94,14 +94,17 @@ namespace JobCompany.API
                             .AllowAnyMethod()
                             .AllowAnyHeader()
                             .AllowCredentials();
+
+                        policy.WithOrigins("http://localhost:5000").AllowAnyMethod().AllowAnyHeader();
                     }
                 );
             });
 
             var app = builder.Build();
 
-            app.UseCors("AllowSwagger");
+            //app.UseCors("AllowSwagger");
 
+            app.UseCors("_myAllowSpecificOrigins");
 
             if (app.Environment.IsDevelopment())
             {
@@ -113,7 +116,6 @@ namespace JobCompany.API
             }
 
             app.UseHttpsRedirection();
-            app.UseCors("_myAllowSpecificOrigins");
             app.UseStaticFiles();
             app.UseMiddleware<LanguageMiddleware>();
 

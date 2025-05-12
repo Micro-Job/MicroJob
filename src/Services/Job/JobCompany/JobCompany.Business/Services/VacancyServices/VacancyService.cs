@@ -624,7 +624,7 @@ namespace JobCompany.Business.Services.VacancyServices
             else
             {
                 await _context.SavedVacancies.AddAsync(
-                    new SavedVacancy { UserId = _currentUser.UserGuid, VacancyId = vacancyGuid }
+                    new SavedVacancy { UserId = _currentUser.UserGuid, VacancyId = vacancyGuid, SavedAt = DateTime.Now }
                 );
             }
             await _context.SaveChangesAsync();
@@ -719,28 +719,29 @@ namespace JobCompany.Business.Services.VacancyServices
             if (!string.IsNullOrEmpty(vacancyName))
             {
                 vacancyName = vacancyName.Trim();
-                query = query.Where(x => x.Vacancy.Title.ToLower().Contains(vacancyName.ToLower()));
+                query = query.Where(x => x.Vacancy.Title.Contains(vacancyName));
             }
 
             var vacancies = await query
-            .Select(x => new VacancyGetAllDto
-            {
-                Id = x.Vacancy.Id,
-                Title = x.Vacancy.Title,
-                CompanyLogo = x.Vacancy.Company.CompanyLogo != null ? $"{_currentUser.BaseUrl}/{x.Vacancy.Company.CompanyLogo}" : null,
-                CompanyName = x.Vacancy.Company.IsCompany ? x.Vacancy.Company.CompanyName : x.Vacancy.CompanyName,
-                StartDate = x.Vacancy.StartDate,
-                Location = x.Vacancy.Location,
-                ViewCount = x.Vacancy.ViewCount,
-                WorkType = x.Vacancy.WorkType,
-                WorkStyle = x.Vacancy.WorkStyle,
-                MainSalary = x.Vacancy.MainSalary,
-                MaxSalary = x.Vacancy.MaxSalary,
-                IsSaved = true
-            })
-            .Skip(Math.Max(0, (skip - 1) * take))
-            .Take(take)
-            .ToListAsync();
+                .OrderByDescending(x => x.SavedAt)
+                .Select(x => new VacancyGetAllDto
+                {
+                    Id = x.Vacancy.Id,
+                    Title = x.Vacancy.Title,
+                    CompanyLogo = x.Vacancy.Company.CompanyLogo != null ? $"{_currentUser.BaseUrl}/{x.Vacancy.Company.CompanyLogo}" : null,
+                    CompanyName = x.Vacancy.Company.IsCompany ? x.Vacancy.Company.CompanyName : x.Vacancy.CompanyName,
+                    StartDate = x.Vacancy.StartDate,
+                    Location = x.Vacancy.Location,
+                    ViewCount = x.Vacancy.ViewCount,
+                    WorkType = x.Vacancy.WorkType,
+                    WorkStyle = x.Vacancy.WorkStyle,
+                    MainSalary = x.Vacancy.MainSalary,
+                    MaxSalary = x.Vacancy.MaxSalary,
+                    IsSaved = true
+                })
+                .Skip(Math.Max(0, (skip - 1) * take))
+                .Take(take)
+                .ToListAsync();
 
             return new DataListDto<VacancyGetAllDto>
             {
