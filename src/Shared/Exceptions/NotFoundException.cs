@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using SharedLibrary.Exceptions.Common;
+using SharedLibrary.Helpers;
 
 namespace SharedLibrary.Exceptions
 {
@@ -11,7 +12,7 @@ namespace SharedLibrary.Exceptions
 
         public NotFoundException() : base()
         {
-            ErrorMessage = $"{typeof(T).Name} mövcud deyil.";
+            ErrorMessage = MessageHelper.GetMessage("NOT_FOUND");
         }
 
         public NotFoundException(string? message) : base(message)

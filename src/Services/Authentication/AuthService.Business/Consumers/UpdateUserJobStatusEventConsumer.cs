@@ -12,7 +12,7 @@ public class UpdateUserJobStatusEventConsumer(AppDbContext _context) : IConsumer
 {
     public async Task Consume(ConsumeContext<UpdateUserJobStatusEvent> context)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == context.Message.UserId) ?? throw new NotFoundException<User>(MessageHelper.GetMessage("NOT_FOUND"));
+        var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == context.Message.UserId) ?? throw new NotFoundException<User>();
         user.JobStatus = context.Message.JobStatus;
         await _context.SaveChangesAsync();
     }

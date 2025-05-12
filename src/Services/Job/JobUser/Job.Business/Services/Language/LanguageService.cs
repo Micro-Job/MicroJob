@@ -38,7 +38,7 @@ namespace Job.Business.Services.Language
                 {
                     var language = await context.Languages
                         .FirstOrDefaultAsync(x => x.Id == parsedId && x.ResumeId == resumeId)
-                        ?? throw new NotFoundException<Core.Entities.Language>(MessageHelper.GetMessage("NOT_FOUND"));
+                        ?? throw new NotFoundException<Core.Entities.Language>();
 
                     MapLanguageDtoToEntityForUpdate(language, dto); // dil datasını güncəlləyirik
 
@@ -80,7 +80,7 @@ namespace Job.Business.Services.Language
 
             var language = await context.Languages
                 .FirstOrDefaultAsync(x => x.Id == parsedId && x.ResumeId == resumeId)
-                ?? throw new NotFoundException<Core.Entities.Language>(MessageHelper.GetMessage("NOT_FOUND"));
+                ?? throw new NotFoundException<Core.Entities.Language>();
 
             MapLanguageDtoToEntityForUpdate(language, dto);
 

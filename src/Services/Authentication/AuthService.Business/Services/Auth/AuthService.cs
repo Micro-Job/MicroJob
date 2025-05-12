@@ -19,8 +19,6 @@ namespace AuthService.Business.Services.Auth
 {
     public class AuthService(AppDbContext _context, ITokenHandler _tokenHandler, IPublishEndpoint _publishEndpoint, IConfiguration _configuration, IEmailService _emailService, ICurrentUser _currentUser, IRequestClient<GetCompaniesDataByUserIdsRequest> _companyDataClient) : IAuthService
     {
-        private readonly string? _authServiceBaseUrl = _configuration["AuthService:BaseUrl"];
-
         public async Task RegisterAsync(RegisterDto dto)
         {
             dto.MainPhoneNumber = dto.MainPhoneNumber.Trim();
@@ -151,7 +149,7 @@ namespace AuthService.Business.Services.Auth
                 AccessToken = accessToken,
                 RefreshToken = refreshToken.Token,
                 Expires = refreshToken.Expires,
-                UserImage = user.Image != null ? $"{_authServiceBaseUrl}/{user.Image}" : null
+                UserImage = user.Image != null ? $"{_currentUser.BaseUrl}/{user.Image}" : null
             };
 
             if (user.UserRole == UserRole.CompanyUser || user.UserRole == UserRole.EmployeeUser)
@@ -183,10 +181,10 @@ namespace AuthService.Business.Services.Auth
             );
 
             if (user == null)
-                throw new LoginFailedException(MessageHelper.GetMessage("AUTHENTICATION_FAILED"));
+                throw new LoginFailedException();
 
             if (user.RefreshTokenExpireDate < DateTime.Now)
-                throw new RefreshTokenExpiredException(MessageHelper.GetMessage("LOGIN_REQUIRED"));
+                throw new RefreshTokenExpiredException();
 
             var newToken = _tokenHandler.CreateToken(user, 60);
             var newRefreshToken = _tokenHandler.GenerateRefreshToken(newToken, 1440);
@@ -204,7 +202,7 @@ namespace AuthService.Business.Services.Auth
                 RefreshToken = newRefreshToken.Token,
                 UserStatusId = (byte)user.UserRole,
                 Expires = newRefreshToken.Expires,
-                UserImage = user.Image != null ? $"{_authServiceBaseUrl}/{user.Image}" : null
+                UserImage = user.Image != null ? $"{_currentUser.BaseUrl}/{user.Image}" : null
             };
 
             if (user.UserRole == UserRole.CompanyUser || user.UserRole == UserRole.EmployeeUser)
@@ -217,7 +215,6 @@ namespace AuthService.Business.Services.Auth
 
                 var companyData = companyResponse.Message.Companies[user.Id];
 
-                //TODO : burada sekili haradan getirirse ele bir basa ordan baseUrl-i goturub getirsin burada menimsedilmesin
                 responseDto.FullName = companyData.CompanyName;
                 responseDto.UserImage = $"{_configuration["JobCompany:BaseUrl"]}/{companyData.CompanyLogo}" ?? null;
             }
@@ -234,7 +231,7 @@ namespace AuthService.Business.Services.Auth
         public async Task ResetPasswordAsync(string email)
         {
             var user = await _context.Users.FirstOrDefaultAsync(x => x.Email == email)
-                ?? throw new NotFoundException<User>(MessageHelper.GetMessage("NOTFOUNDEXCEPTION_USER"));
+                ?? throw new UserNotFoundException();
 
             var token = _tokenHandler.CreatePasswordResetToken(user);
 
@@ -264,7 +261,7 @@ namespace AuthService.Business.Services.Auth
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
             if (user == null)
-                throw new NotFoundException<User>(MessageHelper.GetMessage("NOTFOUNDEXCEPTION_USER"));
+                throw new UserNotFoundException();
 
             var passwordToken = await _context.PasswordTokens.FirstOrDefaultAsync(pt =>
                 pt.Token == dto.Token && pt.UserId == user.Id && pt.ExpireTime > DateTime.Now

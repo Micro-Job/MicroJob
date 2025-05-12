@@ -445,6 +445,9 @@ namespace JobCompany.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime>("SavedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<Guid?>("UserId")
                         .IsRequired()
                         .HasColumnType("uniqueidentifier");

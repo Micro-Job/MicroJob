@@ -28,7 +28,7 @@ public class CountryService(JobCompanyDbContext _context, ICurrentUser _user) : 
     public async Task DeleteCountryAsync(string id)
     {
         var countryId = Guid.Parse(id);
-        var country = await _context.Countries.FindAsync(countryId) ?? throw new NotFoundException<Country>(MessageHelper.GetMessage("NOT_FOUND"));
+        var country = await _context.Countries.FindAsync(countryId) ?? throw new NotFoundException<Country>();
 
         _context.Countries.Remove(country);
         await _context.SaveChangesAsync();

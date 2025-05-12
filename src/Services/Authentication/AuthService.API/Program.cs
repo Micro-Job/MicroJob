@@ -1,6 +1,7 @@
 using AuthService.Business;
 using AuthService.Business.Dtos;
 using AuthService.DAL.Contexts;
+using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -11,9 +12,12 @@ using SharedLibrary.ServiceRegistration;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers()
-               .AddFluentValidation(x => x.RegisterValidatorsFromAssemblyContaining<RegisterDto>())
                .AddNewtonsoftJson(options =>
                    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+
+builder.Services.AddValidatorsFromAssemblyContaining<RegisterDto>()
+                .AddFluentValidationAutoValidation()
+                .AddFluentValidationClientsideAdapters();
 
 builder.Services.AddEndpointsApiExplorer();
 
@@ -75,6 +79,8 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials();
+
+        policy.WithOrigins("http://localhost:5000").AllowAnyMethod().AllowAnyHeader();
     });
 });
 builder.Services.AddAuth(builder.Configuration["Jwt:Issuer"]!, builder.Configuration["Jwt:Audience"]!, builder.Configuration["Jwt:SigningKey"]!);
@@ -83,7 +89,8 @@ var app = builder.Build();
 
 
 
-app.UseCors("AllowSwagger");
+//app.UseCors("AllowSwagger");
+app.UseCors("_myAllowSpecificOrigins");
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>
@@ -100,7 +107,6 @@ app.UseCustomExceptionHandler();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseCors("_myAllowSpecificOrigins");
 app.MapControllers();
 
 app.Run();

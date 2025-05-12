@@ -26,7 +26,7 @@ namespace Job.Business.Services.User
         {
             var user =
                 await _context.Users.FirstOrDefaultAsync(u => u.Id == _user.UserGuid)
-                ?? throw new NotFoundUserException(MessageHelper.GetMessage("NOTFOUNDEXCEPTION_USER"));
+                ?? throw new NotFoundUserException();
 
             user.JobStatus = dto.JobStatus;
 

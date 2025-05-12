@@ -1,4 +1,6 @@
-﻿namespace JobCompany.Business.Dtos.NotificationDtos
+﻿using SharedLibrary.Enums;
+
+namespace JobCompany.Business.Dtos.NotificationDtos
 {
     public class NotificationDto
     {
@@ -9,6 +11,7 @@
         public string? SenderImage { get; set; }
         public Guid InformationId { get; set; }
         public string? InformationName { get; set; }
+        public NotificationType NotificationType { get; set; }  
         public DateTime CreatedDate { get; set; }
         public bool IsSeen { get; set; }
     }

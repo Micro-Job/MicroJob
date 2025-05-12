@@ -37,7 +37,7 @@ namespace JobCompany.Business.Services.ApplicationServices
         private readonly string? _authServiceBaseUrl;
         private readonly IRequestClient<GetResumeIdsByUserIdsRequest> _resumeIdsRequest;
         private readonly IRequestClient<GetFilteredUserIdsRequest> _filteredUserIdsRequest;
-        private readonly IRequestClient<GetResumeUserPhotoRequest> _userPhotoRequest;
+        private readonly IRequestClient<GetUserResumePhotoRequest> _userPhotoRequest;
 
 
         public ApplicationService(
@@ -49,7 +49,7 @@ namespace JobCompany.Business.Services.ApplicationServices
             IRequestClient<GetUserDataRequest> requestUser,
             IRequestClient<GetResumeIdsByUserIdsRequest> resumeIdsRequest,
             IRequestClient<GetFilteredUserIdsRequest> filteredUserIdsRequest,
-            IRequestClient<GetResumeUserPhotoRequest> userPhotoRequest,
+            IRequestClient<GetUserResumePhotoRequest> userPhotoRequest,
             IConfiguration configuration)
         {
             _currentUser = currentUser;
@@ -61,6 +61,7 @@ namespace JobCompany.Business.Services.ApplicationServices
             _filteredUserIdsRequest = filteredUserIdsRequest;
             _userPhotoRequest = userPhotoRequest;
             _configuration = configuration;
+            _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
         }
 
         /// <summary> Yaradılan müraciətin geri alınması </summary>
@@ -70,10 +71,10 @@ namespace JobCompany.Business.Services.ApplicationServices
 
             var existApplication =
                 await _context.Applications.FirstOrDefaultAsync(x =>
-                    x.Id == applicationGuid && x.UserId == _currentUser.UserGuid) 
-                ?? throw new NotFoundException<Application>(MessageHelper.GetMessage("NOT_FOUND"));
+                    x.Id == applicationGuid && x.UserId == _currentUser.UserGuid)
+                ?? throw new NotFoundException<Application>();
             if (existApplication.IsActive == false)
-                throw new ApplicationStatusIsDeactiveException(MessageHelper.GetMessage("APPLICATION_IS_DEACTIVE"));
+                throw new ApplicationStatusIsDeactiveException();
             existApplication.IsActive = false;
             await _context.SaveChangesAsync();
         }
@@ -96,8 +97,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                     CompanyLogo = x.Vacancy.Company.CompanyLogo,
                     VacancyTitle = x.Vacancy.Title
                 })
-                .FirstOrDefaultAsync()
-            ?? throw new NotFoundException<Application>(MessageHelper.GetMessage("NOT_FOUND"));
+                .FirstOrDefaultAsync() ?? throw new NotFoundException<Application>();
 
             var application = existAppVacancy.Application;
 
@@ -110,7 +110,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                 {
                     ReceiverIds = [application.UserId],
                     SenderId = (Guid)_currentUser.UserGuid,
-                    InformationId = existAppVacancy.VacancyId,
+                    InformationId = applicationGuid,
                     InformationName = existAppVacancy.VacancyTitle,
                     NotificationType = NotificationType.ApplicationStatusUpdate,
                     SenderImage = $"{_currentUser.BaseUrl}/{existAppVacancy.CompanyLogo}",
@@ -142,7 +142,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                             .Select(s => s.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name))
                             .ToList(),
                     })
-                    .FirstOrDefaultAsync() ?? throw new NotFoundException<Application>(MessageHelper.GetMessage("NOT_FOUND"));
+                    .FirstOrDefaultAsync() ?? throw new NotFoundException<Application>();
 
             return application;
         }
@@ -174,9 +174,8 @@ namespace JobCompany.Business.Services.ApplicationServices
         /// <summary> Daxil olmus muracietler -> Şirkət üçün bütün müraciətlərin gətirilməsi </summary>
         public async Task<ICollection<ApplicationInfoListDto>> GetAllApplicationAsync(int skip = 1, int take = 9)
         {
-            var company =
-                await _context.Companies.FirstOrDefaultAsync(c => c.UserId == _currentUser.UserGuid)
-                ?? throw new NotFoundException<Company>(MessageHelper.GetMessage("NOT_FOUND"));
+            var company = await _context.Companies.FirstOrDefaultAsync(c => c.UserId == _currentUser.UserGuid)
+                ?? throw new NotFoundException<Company>();
 
             var applications = await _context.Applications
                 .Where(a => a.Vacancy.Company.UserId == _currentUser.UserGuid)
@@ -304,21 +303,19 @@ namespace JobCompany.Business.Services.ApplicationServices
 
             var vacancyGuid = Guid.Parse(vacancyId);
 
-            if (await _context.Applications.AnyAsync(x => x.VacancyId == vacancyGuid && x.IsDeleted == false && x.UserId == userGuid))
-                throw new ApplicationIsAlreadyExistException(MessageHelper.GetMessage("APPLICATION_ALREADY_EXIST"));
+            if (await _context.Applications.AnyAsync(x => x.VacancyId == vacancyGuid && x.IsActive == true && x.UserId == userGuid))
+                throw new ApplicationIsAlreadyExistException();
 
             var vacancyInfo = await _context.Vacancies
-                .Include(v => v.Company)
-                .ThenInclude(c => c.Statuses)
                 .Where(v => v.Id == vacancyGuid)
-                .Select(v => new { v.Company, v.Title, v.VacancyStatus })
-                .FirstOrDefaultAsync() ?? throw new NotFoundException<Company>("NOT_FOUND");
+                .Select(v => new { v.Title, v.VacancyStatus, v.CompanyId, v.EndDate })
+                .FirstOrDefaultAsync() ?? throw new NotFoundException<Company>();
 
+            if (vacancyInfo.EndDate < DateTime.Now) throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
             if (vacancyInfo.VacancyStatus == VacancyStatus.Pause) throw new VacancyPausedException();
 
-            var companyStatus = vacancyInfo.Company.Statuses
-                .FirstOrDefault(s => s.StatusEnum == StatusEnum.Pending) ??
-                throw new NotFoundException<StatusEnum>(MessageHelper.GetMessage("NOT_FOUND"));
+            var companyStatus = await _context.Statuses.FirstOrDefaultAsync(x => x.StatusEnum == StatusEnum.Pending && x.CompanyId == vacancyInfo.CompanyId) ??
+                throw new NotFoundException<StatusEnum>();
 
             var newApplication = new Application
             {
@@ -331,16 +328,7 @@ namespace JobCompany.Business.Services.ApplicationServices
 
             await _context.Applications.AddAsync(newApplication);
 
-            //await _publishEndpoint.Publish(new VacancyApplicationEvent
-            //{
-            //    UserId = vacancyInfo.Company.Id,
-            //    SenderId = userGuid,
-            //    VacancyId = vacancyGuid,
-            //    InformationId = userGuid,
-            //    InformationName = vacancyInfo.Title,
-            //});
-
-            var userPhotoResp = await _userPhotoRequest.GetResponse<GetResumeUserPhotoResponse>(new GetResumeUserPhotoRequest
+            var userPhotoResp = await _userPhotoRequest.GetResponse<GetUserResumePhotoResponse>(new GetUserResumePhotoRequest
             {
                 UserId = userGuid
             });
@@ -349,13 +337,13 @@ namespace JobCompany.Business.Services.ApplicationServices
             {
                 SenderId = userGuid,
                 SenderName = _currentUser.UserFullName,
-                SenderImage = $"{_configuration["AuthService:BaseUrl"]}{userPhotoResp.Message.ProfileImage}",
+                SenderImage = $"{_configuration["JobUser:BaseUrl"]}{userPhotoResp.Message.ImageUrl}",
                 NotificationType = NotificationType.Application,
                 CreatedDate = DateTime.Now,
-                InformationId = userGuid,
+                InformationId = userPhotoResp.Message.ResumeId,
                 InformationName = vacancyInfo.Title,
                 IsSeen = false,
-                ReceiverId = vacancyInfo.Company.Id,
+                ReceiverId = (Guid)vacancyInfo.CompanyId!,
             };
 
             await _context.Notifications.AddAsync(notification);
@@ -370,7 +358,7 @@ namespace JobCompany.Business.Services.ApplicationServices
             if (!string.IsNullOrEmpty(vacancyName)) // Vakansiya adına görə filterlənmə
             {
                 vacancyName = vacancyName.Trim();
-                query = query.Where(a => a.Vacancy.Title.ToLower().Contains(vacancyName.ToLower()));
+                query = query.Where(a => a.Vacancy.Title.Contains(vacancyName));
             }
 
             int totalCount = await query.CountAsync();
@@ -386,7 +374,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                     CompanyId = a.Vacancy.CompanyId,
                     CompanyLogo = a.Vacancy.Company.CompanyLogo != null ? $"{_currentUser.BaseUrl}/{a.Vacancy.Company.CompanyLogo}" : null,
                     CompanyName = a.Vacancy.Company.CompanyName,
-                    WorkType = a.Vacancy.WorkType != null ? a.Vacancy.WorkType.GetDisplayName() : null,
+                    WorkType = a.Vacancy.WorkType,
                     VacancyStatus = a.Vacancy.VacancyStatus,
                     Status = a.Status.StatusEnum,
                     StatusColor = a.Status.StatusColor,
@@ -436,7 +424,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                     .ToList()
                 })
                 .FirstOrDefaultAsync()
-                ?? throw new NotFoundException<Application>(MessageHelper.GetMessage("NOT_FOUND"));
+                ?? throw new NotFoundException<Application>();
 
             return application;
         }

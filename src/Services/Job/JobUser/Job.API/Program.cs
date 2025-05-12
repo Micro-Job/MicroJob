@@ -1,8 +1,7 @@
+using FluentValidation;
 using FluentValidation.AspNetCore;
 using Job.Business;
-//using Job.Business.BackgroundServices;
-using Job.Business.Consumers;
-using Job.Business.Services.Resume;
+using Job.Business.Dtos.ResumeDtos;
 using Job.DAL.Contexts;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
@@ -71,14 +70,9 @@ namespace Job.API
                 opt.UseSqlServer(configuration.GetConnectionString("MSSQL"));
             });
 
-            //builder.Services.AddHostedService<RabbitMqBackgroundService>();
-
-
-            builder.Services.AddFluentValidation(opt =>
-            {
-                opt.RegisterValidatorsFromAssemblyContaining<ResumeService>();
-            });
-
+            builder.Services.AddValidatorsFromAssemblyContaining<ResumeCreateDto>()
+                .AddFluentValidationAutoValidation()
+                .AddFluentValidationClientsideAdapters();
 
             var IconBuilder = builder.Configuration.SetBasePath(Directory.GetCurrentDirectory())
                                     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
@@ -87,8 +81,6 @@ namespace Job.API
             var newBuilder = IconBuilder.Build();
 
             builder.Services.AddMassTransit(newBuilder["RabbitMQ:Username"]!, newBuilder["RabbitMQ:Password"]!, newBuilder["RabbitMQ:Hostname"]!, newBuilder["RabbitMQ:Port"]!);
-            //TODO : Bu neye gore var
-            //builder.Services.AddHostedService<RabbitMqBackgroundService>();
 
             // Add Job Services
             builder.Services.AddJobServices();
@@ -110,13 +102,16 @@ namespace Job.API
                             .AllowAnyMethod()
                             .AllowAnyHeader()
                             .AllowCredentials();
+
+                        policy.WithOrigins("http://localhost:5000").AllowAnyMethod().AllowAnyHeader();
                     }
                 );
             });
 
             var app = builder.Build();
 
-            app.UseCors("AllowSwagger");
+            //app.UseCors("AllowSwagger");
+            app.UseCors("_myAllowSpecificOrigins");
 
 
             if (app.Environment.IsDevelopment())
@@ -129,7 +124,6 @@ namespace Job.API
             }
 
             app.UseHttpsRedirection();
-            app.UseCors("_myAllowSpecificOrigins");
             app.UseStaticFiles();
             app.UseMiddleware<LanguageMiddleware>();
 

@@ -78,7 +78,7 @@ public class NotificationService(JobDbContext _context, ICurrentUser _currentUse
     {
         var notification =
             await _context.Notifications.FirstOrDefaultAsync(x => x.Id == notificationId)
-            ?? throw new NotFoundException<Core.Entities.Notification>(MessageHelper.GetMessage("NOT_FOUND"));
+            ?? throw new NotFoundException<Core.Entities.Notification>();
 
         notification.IsSeen = true;
 

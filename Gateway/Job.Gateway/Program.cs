@@ -29,6 +29,12 @@ namespace Job.Gateway
                           .AllowAnyMethod()
                           .AllowAnyHeader()
                           .AllowCredentials();
+
+                    policy.WithOrigins("http://localhost:5000",
+                            "http://localhost:5001",
+                            "http://localhost:5002",
+                            "http://localhost:5082",
+                            "http://localhost:5003").AllowAnyMethod().AllowAnyHeader();
                 });
             });
 
@@ -42,15 +48,15 @@ namespace Job.Gateway
                 app.UseSwagger();
                 app.UseSwaggerUI(c =>
                 {
-                    c.SwaggerEndpoint("http://localhost:5001/swagger/index.html", "Auth Service");
-                    c.SwaggerEndpoint("http://localhost:5002/swagger/index.html", "User Service");
-                    c.SwaggerEndpoint("http://localhost:5082/swagger/index.html", "Company Service");
-                    c.SwaggerEndpoint("http://localhost:5003/swagger/index.html", "Payment Service");
-                    c.RoutePrefix = "swagger";
+                    c.SwaggerEndpoint("http://localhost:5001/swagger/v1/swagger.json", "Auth Service");
+                    c.SwaggerEndpoint("http://localhost:5002/swagger/v1/swagger.json", "User Service");
+                    c.SwaggerEndpoint("http://localhost:5082/swagger/v1/swagger.json", "Company Service");
+                    c.SwaggerEndpoint("http://localhost:5003/swagger/v1/swagger.json", "Payment Service");
+                    c.RoutePrefix = "swagger"; // This is the path for your gateway's Swagger UI
                     c.ConfigObject.AdditionalItems.Add("persistAuthorization", "true");
                 });
             }
-            
+
             app.UseAuthorization();
             app.UseCustomExceptionHandler();
             app.UseCors("_myAllowSpecificOrigins");

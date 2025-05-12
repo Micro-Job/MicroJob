@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using SharedLibrary.Exceptions.Common;
+using SharedLibrary.Helpers;
 
 namespace JobCompany.Business.Exceptions.VacancyExceptions;
 
@@ -11,7 +12,7 @@ public class VacancyStatusNotToggableException : Exception, IBaseException
 
     public VacancyStatusNotToggableException()
     {
-        ErrorMessage = "Vakansiya statusu dəyişdirilə bilməz.";
+        ErrorMessage = MessageHelper.GetMessage("VACANCY_STATUS_NOT_TOGGABLE");
     }
 
     public VacancyStatusNotToggableException(string message) : base(message)

@@ -43,7 +43,7 @@ namespace Job.Business.Services.Education
                     if (existingEducation is not null)
                         MapEducationDtoToEntityForUpdate(existingEducation, updatedEducation);
                     else
-                        throw new NotFoundException<Core.Entities.Education>(MessageHelper.GetMessage("NOT_FOUND"));
+                        throw new NotFoundException<Core.Entities.Education>();
 
                     allEducations.Add(existingEducation);
                 }
@@ -81,7 +81,7 @@ namespace Job.Business.Services.Education
         {
             var education =
                 await context.Educations.FindAsync(dto.Id)
-                ?? throw new NotFoundException<Core.Entities.Education>(MessageHelper.GetMessage("NOT_FOUND"));
+                ?? throw new NotFoundException<Core.Entities.Education>();
 
             MapEducationDtoToEntityForUpdate(education, dto);
         }

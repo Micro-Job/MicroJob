@@ -10,7 +10,7 @@ public class ApplicationDto
     public Guid? CompanyId { get; set; }
     public string CompanyLogo { get; set; }
     public string CompanyName { get; set; }
-    public string? WorkType { get; set; }
+    public WorkType? WorkType { get; set; }
     public VacancyStatus VacancyStatus { get; set; }
     public StatusEnum Status { get; set; }
     public string? StatusColor { get; set; }

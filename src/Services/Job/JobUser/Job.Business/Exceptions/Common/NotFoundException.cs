@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Job.Core.Entities;
 using Microsoft.AspNetCore.Http;
+using SharedLibrary.Helpers;
 
 namespace Job.Business.Exceptions.Common
 {
@@ -15,7 +16,7 @@ namespace Job.Business.Exceptions.Common
 
         public NotFoundException()
         {
-            ErrorMessage = typeof(T).Name + " not found";
+            ErrorMessage = MessageHelper.GetMessage("NOT_FOUND");
         }
 
         public NotFoundException(string? message) : base(message)

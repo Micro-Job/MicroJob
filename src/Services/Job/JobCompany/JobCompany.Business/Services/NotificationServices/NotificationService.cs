@@ -17,16 +17,10 @@ namespace JobCompany.Business.Services.NotificationServices
     {
         public async Task<DataListDto<NotificationDto>> GetUserNotificationsAsync(bool? IsSeen, int skip, int take)
         {
-            var query = _context.Notifications.Where(n => n.Receiver.UserId == _currentUser.UserGuid).AsNoTracking().AsQueryable();
+            var query = _context.Notifications.Where(n => n.Receiver.UserId == _currentUser.UserGuid).AsNoTracking();
 
             if (IsSeen != null)
-            {
                 query = query.Where(n => n.IsSeen == IsSeen).OrderByDescending(n => n.CreatedDate);
-            }
-            else
-            {
-                query = query.OrderBy(n => n.IsSeen).ThenByDescending(n => n.CreatedDate);
-            }
 
             var usersDataResponse = await _usersDataClient.GetResponse<GetUsersDataResponse>(new GetUsersDataRequest
             {
@@ -53,6 +47,7 @@ namespace JobCompany.Business.Services.NotificationServices
                     SenderId = n.Notification.SenderId,
                     InformationId = n.Notification.InformationId,
                     InformationName = n.Notification.InformationName,
+                    NotificationType = n.Notification.NotificationType,
                     CreatedDate = n.Notification.CreatedDate,
                     SenderImage = $"{_configuration["AuthService:BaseUrl"]}{n.User?.ProfileImage}",
                     SenderName = n.User != null ? $"{n.User.FirstName} {n.User.LastName}" : null,
@@ -72,7 +67,7 @@ namespace JobCompany.Business.Services.NotificationServices
             var notificationGuid = Guid.Parse(id);
 
             var notification = await _context.Notifications.FirstOrDefaultAsync(x => x.Id == notificationGuid && x.Receiver.UserId == _currentUser.UserGuid)
-                                            ?? throw new NotFoundException<Notification>(MessageHelper.GetMessage("NOT_FOUND"));
+                                            ?? throw new NotFoundException<Notification>();
 
             notification.IsSeen = true;
 

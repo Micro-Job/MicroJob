@@ -1,3 +1,4 @@
+using FluentValidation;
 using FluentValidation.AspNetCore;
 using JobCompany.Business;
 using JobCompany.Business.Dtos.VacancyDtos;
@@ -56,10 +57,9 @@ namespace JobCompany.API
                 options.UseSqlServer(builder.Configuration.GetConnectionString("MSSQL"))
             );
 
-            builder.Services.AddFluentValidation(opt =>
-            {
-                opt.RegisterValidatorsFromAssemblyContaining<CreateVacancyDto>();
-            });
+            builder.Services.AddValidatorsFromAssemblyContaining<CreateVacancyDto>()
+                .AddFluentValidationAutoValidation()
+                .AddFluentValidationClientsideAdapters();
 
             builder.Services.AddAuth(
                 builder.Configuration["Jwt:Issuer"]!,
@@ -94,14 +94,17 @@ namespace JobCompany.API
                             .AllowAnyMethod()
                             .AllowAnyHeader()
                             .AllowCredentials();
+
+                        policy.WithOrigins("http://localhost:5000").AllowAnyMethod().AllowAnyHeader();
                     }
                 );
             });
 
             var app = builder.Build();
 
-            app.UseCors("AllowSwagger");
+            //app.UseCors("AllowSwagger");
 
+            app.UseCors("_myAllowSpecificOrigins");
 
             if (app.Environment.IsDevelopment())
             {
@@ -113,7 +116,6 @@ namespace JobCompany.API
             }
 
             app.UseHttpsRedirection();
-            app.UseCors("_myAllowSpecificOrigins");
             app.UseStaticFiles();
             app.UseMiddleware<LanguageMiddleware>();
 

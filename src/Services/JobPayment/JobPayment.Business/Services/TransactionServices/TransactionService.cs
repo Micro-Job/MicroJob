@@ -212,7 +212,7 @@ namespace JobPayment.Business.Services.TransactionServices
 
             int totalCount = await query.CountAsync();
 
-            var transactions = await query.Select(x=> new TransactionSummaryDto
+            var transactions = await query.Select(x => new TransactionSummaryDto
             {
                 Id = x.Id,
                 Coin = x.Coin,
@@ -222,9 +222,9 @@ namespace JobPayment.Business.Services.TransactionServices
                 TransactionStatus = x.TransactionStatus,
                 TransactionType = x.TranzactionType,
                 UserId = x.UserId,
-                FullName = x.User.FirstName + x.User.LastName
+                FullName = x.User.FirstName + " " + x.User.LastName
             })
-            .Skip(skip - 1)
+            .Skip((skip - 1) * take)
             .Take(take)
             .ToListAsync();
 

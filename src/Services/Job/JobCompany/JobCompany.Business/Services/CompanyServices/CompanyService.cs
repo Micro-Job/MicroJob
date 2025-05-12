@@ -52,10 +52,10 @@ namespace JobCompany.Business.Services.CompanyServices
         public async Task<CompanyUpdateResponseDto> UpdateCompanyAsync(CompanyUpdateDto dto, ICollection<UpdateNumberDto>? numbersDto)
         {
             var company = await _context.Companies.Include(c => c.CompanyNumbers).FirstOrDefaultAsync(x => x.UserId == _currentUser.UserGuid)
-                ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>(MessageHelper.GetMessage("NOT_FOUND"));
+                ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>();
 
             if (dto.Email != null && await _context.Companies.AnyAsync(x => x.Email == dto.Email && x.Id != company.Id))
-                throw new EmailAlreadyUsedException(MessageHelper.GetMessage("EMAIL_ALREADY_USED"));
+                throw new EmailAlreadyUsedException();
 
             company.CompanyName = dto.CompanyName?.Trim();
             company.CompanyInformation = dto.CompanyInformation?.Trim();
@@ -70,14 +70,18 @@ namespace JobCompany.Business.Services.CompanyServices
 
             if (dto.CompanyLogo != null)
             {
-                if (!string.IsNullOrEmpty(company.CompanyLogo) && company.CompanyLogo != Path.Combine(FilePaths.image , "defaultlogo.jpg"))
+                var defaultLogo = Path.Combine(FilePaths.image, "defaultlogo.jpg").NormalizeSlashes();
+
+                var currentLogo = company.CompanyLogo.NormalizeSlashes();
+
+                if (!string.IsNullOrEmpty(currentLogo) && currentLogo != defaultLogo)
                 {
                     _fileService.DeleteFile(company.CompanyLogo);
                 }
 
-                FileDto fileResult = await _fileService.UploadAsync(FilePaths.image, dto.CompanyLogo);
+                var fileResult = await _fileService.UploadAsync(FilePaths.image, dto.CompanyLogo);
 
-                company.CompanyLogo = $"{fileResult.FilePath}/{fileResult.FileName}";
+                company.CompanyLogo = Path.Combine(fileResult.FilePath, fileResult.FileName).NormalizeSlashes();
             }
             else
             {
@@ -137,6 +141,9 @@ namespace JobCompany.Business.Services.CompanyServices
             if (!string.IsNullOrWhiteSpace(searchTerm))
                 query = query.Where(x => x.CompanyName.Contains(searchTerm));
 
+            skip = !string.IsNullOrWhiteSpace(searchTerm) ? 1 : Math.Max(1, skip);
+            var offset = (skip - 1) * take;
+
             var companies = await query
                 .Select(c => new CompanyDto
                 {
@@ -145,7 +152,7 @@ namespace JobCompany.Business.Services.CompanyServices
                     CompanyImage = c.CompanyLogo != null ? $"{_currentUser.BaseUrl}/{c.CompanyLogo}" : null,
                     CompanyVacancyCount = c.Vacancies != null ? c.Vacancies.Count(v => v.VacancyStatus == VacancyStatus.Active && v.EndDate > DateTime.Now) : 0,
                 })
-                .Skip(Math.Max(0, (skip - 1) * take))
+                .Skip(offset)
                 .Take(take)
                 .ToListAsync();
 
@@ -154,8 +161,7 @@ namespace JobCompany.Business.Services.CompanyServices
             return new DataListDto<CompanyDto>
             {
                 Datas = companies,
-                TotalCount = count,
-                //TotalPage = (int)Math.Ceiling((double)count / take)
+                TotalCount = count
             };
         }
 
@@ -182,7 +188,7 @@ namespace JobCompany.Business.Services.CompanyServices
                             Email = x.Email,
                         })
                         .FirstOrDefaultAsync()
-                    ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>(MessageHelper.GetMessage("NOT_FOUND"));
+                    ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>();
             return company;
         }
 
@@ -224,7 +230,7 @@ namespace JobCompany.Business.Services.CompanyServices
                         : new List<CompanyNumberDto>()
                 })
                 .FirstOrDefaultAsync()
-                    ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>(MessageHelper.GetMessage("NOT_FOUND"));
+                    ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>();
 
             return companyProfile;
         }
@@ -236,7 +242,7 @@ namespace JobCompany.Business.Services.CompanyServices
             return await _context.Companies.Where(x => x.Id == companyGuid)
                 .Select(x => x.CompanyName)
                 .FirstOrDefaultAsync()
-                ?? throw new NotFoundException<Company>("Şirkət mövcud deyil");
+                ?? throw new NotFoundException<Company>();
         }
     }
 }

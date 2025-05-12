@@ -57,13 +57,13 @@ namespace JobCompany.Business.Services.StatusServices
             var existStatus = await _context.Statuses
                 .Include(s => s.Applications)  
                 .FirstOrDefaultAsync(x => x.Id == Guid.Parse(statusId) && x.Company.UserId == _currentUser.UserGuid)
-                ?? throw new NotFoundException<Status>(MessageHelper.GetMessage("NOT_FOUND"));
+                ?? throw new NotFoundException<Status>();
 
             if (existStatus.StatusEnum == StatusEnum.Pending)
-                throw new CannotChangePendingStatusVisibilityException(MessageHelper.GetMessage("CANNOT_CHANGE_PENDING_STATUS"));
+                throw new CannotChangePendingStatusVisibilityException();
 
             if (existStatus.Applications.Any())
-                throw new CannotChangeStatusVisibilityException(MessageHelper.GetMessage("CANNOT_CHANGE_STATUS"));
+                throw new CannotChangeStatusVisibilityException();
 
             existStatus.IsVisible = !existStatus.IsVisible;
 
