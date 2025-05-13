@@ -216,7 +216,7 @@ namespace Job.Business.Services.Resume
         }
 
         //Sirket hissəsində resumelerin metodlari
-        public async Task<DataListDto<ResumeListDto>> GetAllResumesAsync(string? fullname, bool? isPublic, ProfessionDegree? professionDegree, Citizenship? citizenship, bool? isExperience, JobStatus? jobStatus, List<string>? skillIds, List<LanguageFilterDto>? languages, int skip, int take)
+        public async Task<DataListDto<ResumeListDto>> GetAllResumesAsync(string? fullname, bool? isPublic, ProfessionDegree? professionDegree, Citizenship? citizenship, Gender? gender, bool? isExperience, JobStatus? jobStatus, List<string>? skillIds, List<LanguageFilterDto>? languages, int skip, int take)
         {
             var query = _context.Resumes
                 .Where(r => !r.IsAnonym)
@@ -226,7 +226,7 @@ namespace Job.Business.Services.Resume
                 .Include(r => r.CompanyResumeAccesses)
                 .AsNoTracking();
 
-            query = ApplyFilters(query, fullname, isPublic, professionDegree, citizenship, isExperience, skillIds, languages, jobStatus);
+            query = ApplyFilters(query, fullname, isPublic, professionDegree, citizenship, gender, isExperience, skillIds, languages, jobStatus);
 
             var resumes = await query.Select(x => new ResumeListDto
             {
@@ -265,7 +265,7 @@ namespace Job.Business.Services.Resume
             };
         }
 
-        private IQueryable<Core.Entities.Resume> ApplyFilters(IQueryable<Core.Entities.Resume> query, string? fullname, bool? isPublic, ProfessionDegree? professionDegree, Citizenship? citizenship, bool? isExperience, List<string>? skillIds, List<LanguageFilterDto>? languages, JobStatus? jobStatus)
+        private IQueryable<Core.Entities.Resume> ApplyFilters(IQueryable<Core.Entities.Resume> query, string? fullname, bool? isPublic, ProfessionDegree? professionDegree, Citizenship? citizenship, Gender? gender, bool? isExperience, List<string>? skillIds, List<LanguageFilterDto>? languages, JobStatus? jobStatus)
         {
             if (isPublic != null)
             {
@@ -290,6 +290,11 @@ namespace Job.Business.Services.Resume
             if (citizenship != null)
             {
                 query = query.Where(x => x.IsCitizen == citizenship);
+            }
+
+            if (gender != null)
+            {
+                query = query.Where(x => x.Gender == gender);
             }
 
             if (isExperience.HasValue)
@@ -318,7 +323,7 @@ namespace Job.Business.Services.Resume
             return query;
         }
 
-        public async Task<DataListDto<ResumeListDto>> GetSavedResumesAsync(string? fullName, bool? isPublic, JobStatus? jobStatus, ProfessionDegree? professionDegree, Citizenship? citizenship, bool? isExperience, List<string>? skillIds, List<LanguageFilterDto>? languages, int skip, int take)
+        public async Task<DataListDto<ResumeListDto>> GetSavedResumesAsync(string? fullName, bool? isPublic, JobStatus? jobStatus, ProfessionDegree? professionDegree, Citizenship? citizenship, Gender? gender, bool? isExperience, List<string>? skillIds, List<LanguageFilterDto>? languages, int skip, int take)
         {
             var resumeQuery = _context.SavedResumes
                 .Where(sr => sr.CompanyUserId == _currentUser.UserGuid)
@@ -330,7 +335,7 @@ namespace Job.Business.Services.Resume
                 .Select(sr => sr.Resume)
                 .AsNoTracking();
 
-            resumeQuery = ApplyFilters(resumeQuery, fullName, isPublic, professionDegree, citizenship, isExperience, skillIds, languages, jobStatus);
+            resumeQuery = ApplyFilters(resumeQuery, fullName, isPublic, professionDegree, citizenship, gender, isExperience, skillIds, languages, jobStatus);
 
             var resumes = await resumeQuery
                .Select(x => new ResumeListDto

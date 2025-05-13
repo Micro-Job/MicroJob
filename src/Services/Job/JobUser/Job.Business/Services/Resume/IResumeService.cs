@@ -19,6 +19,7 @@ namespace Job.Business.Services.Resume
             bool? isPublic,
             ProfessionDegree? professionDegree,
             Citizenship? citizenship,
+            Gender? gender,
             bool? isExperience,
             JobStatus? jobStatus,
             List<string>? skillIds,
@@ -27,7 +28,7 @@ namespace Job.Business.Services.Resume
             int take);
 
         Task<DataListDto<ResumeListDto>> GetSavedResumesAsync(string? fullName, bool? isPublic, JobStatus? jobStatus, ProfessionDegree? professionDegree, Citizenship? citizenship,
-            bool? isExperience, List<string>? skillIds, List<LanguageFilterDto>? languages, int skip, int take);
+            Gender? gender, bool? isExperience, List<string>? skillIds, List<LanguageFilterDto>? languages, int skip, int take);
 
         Task<ResumeDetailItemDto> GetByIdResumeAysnc(string id);
         Task ToggleSaveResumeAsync(string resumeId);
