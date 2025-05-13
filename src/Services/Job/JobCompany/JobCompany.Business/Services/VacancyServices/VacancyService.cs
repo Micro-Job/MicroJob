@@ -9,6 +9,7 @@ using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using MassTransit;
 using MassTransit.Initializers;
+using MassTransit.NewIdProviders;
 using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.Enums;
@@ -144,7 +145,7 @@ namespace JobCompany.Business.Services.VacancyServices
         }
 
         /// <summary> Şirkətin profilində bütün vakansiyalarını gətirmək(Filterlerle birlikde) </summary>
-        public async Task<List<VacancyGetAllDto>> GetAllOwnVacanciesAsync(string? titleName, string? categoryId, string? countryId, string? cityId, VacancyStatus? IsActive, decimal? minSalary, decimal? maxSalary, byte? workStyle, byte? workType, int skip = 1, int take = 6)
+        public async Task<DataListDto<VacancyGetAllDto>> GetAllOwnVacanciesAsync(string? titleName, List<string>? categoryIds, List<string>? countryIds, List<string>? cityIds, VacancyStatus? IsActive, decimal? minSalary, decimal? maxSalary, List<byte>? workStyles, List<byte>? workTypes, List<Guid>? skillIds, int skip = 1, int take = 6)
         {
             var query = _context
                 .Vacancies.Where(x => x.Company.UserId == _currentUser.UserGuid)
@@ -154,15 +155,16 @@ namespace JobCompany.Business.Services.VacancyServices
             query = ApplyVacancyFilters(
                 query,
                 titleName,
-                categoryId,
-                countryId,
-                cityId,
+                categoryIds,
+                countryIds,
+                cityIds,
                 IsActive,
                 minSalary,
                 maxSalary,
                 null,
-                workStyle,
-                workType
+                workTypes,
+                workStyles,
+                skillIds
             );
 
             var vacancies = await query
@@ -185,7 +187,11 @@ namespace JobCompany.Business.Services.VacancyServices
                 .Take(take)
                 .ToListAsync();
 
-            return vacancies;
+            return new DataListDto<VacancyGetAllDto>
+            {
+                Datas = vacancies,
+                TotalCount = await query.CountAsync()
+            };
         }
 
         /// <summary> ??? </summary>
@@ -530,13 +536,13 @@ namespace JobCompany.Business.Services.VacancyServices
         }
 
         /// <summary> Şirkət profilində vakansiya axtarışı vakansiya filterlere görə </summary>
-        public async Task<DataListDto<VacancyGetAllDto>> GetAllVacanciesAsync(string? titleName, string? categoryId, string? countryId, string? cityId, decimal? minSalary, decimal? maxSalary, string? companyId, byte? workStyle, byte? workType, int skip = 1, int take = 9)
+        public async Task<DataListDto<VacancyGetAllDto>> GetAllVacanciesAsync(string? titleName, List<string>? categoryIds, List<string>? countryIds, List<string>? cityIds, decimal? minSalary, decimal? maxSalary, List<string>? companyIds, List<byte>? workStyles, List<byte>? workTypes, List<Guid>? skillIds, int skip = 1, int take = 9)
         {
             var query = _context.Vacancies.Where(x => x.VacancyStatus == VacancyStatus.Active && x.EndDate > DateTime.Now)
                 .OrderByDescending(x => x.CreatedDate)
                 .AsNoTracking();
 
-            query = ApplyVacancyFilters(query, titleName, categoryId, countryId, cityId, null, minSalary, maxSalary, companyId, workStyle, workType);
+            query = ApplyVacancyFilters(query, titleName, categoryIds, countryIds, cityIds, null, minSalary, maxSalary, companyIds, workTypes, workStyles, skillIds);
 
             var vacancies = await query
                 .Select(v => new VacancyGetAllDto
@@ -552,7 +558,7 @@ namespace JobCompany.Business.Services.VacancyServices
                     WorkStyle = v.WorkStyle,
                     MainSalary = v.MainSalary,
                     MaxSalary = v.MaxSalary,
-                    IsSaved = _currentUser.UserId != null ? v.SavedVacancies.Any(x => x.VacancyId == v.Id && x.UserId == _currentUser.UserGuid) : false
+                    IsSaved = _currentUser.UserId != null && v.SavedVacancies.Any(x => x.VacancyId == v.Id && x.UserId == _currentUser.UserGuid)
                 })
                 .Skip(Math.Max(0, (skip - 1) * take))
                 .Take(take)
@@ -561,7 +567,7 @@ namespace JobCompany.Business.Services.VacancyServices
             return new DataListDto<VacancyGetAllDto> { Datas = vacancies, TotalCount = await query.CountAsync() };
         }
 
-        private static IQueryable<Vacancy> ApplyVacancyFilters(IQueryable<Vacancy> query, string? titleName, string? categoryId, string? countryId, string? cityId, VacancyStatus? isActive, decimal? minSalary, decimal? maxSalary, string? companyId, byte? workStyle, byte? workType)
+        private static IQueryable<Vacancy> ApplyVacancyFilters(IQueryable<Vacancy> query, string? titleName, List<string>? categoryIds, List<string>? countryIds, List<string>? cityIds, VacancyStatus? isActive, decimal? minSalary, decimal? maxSalary, List<string>? companyIds, List<byte>? workTypes, List<byte>? workStyles, List<Guid>? skillIds)
         {
             if (titleName != null)
             {
@@ -572,37 +578,51 @@ namespace JobCompany.Business.Services.VacancyServices
             if (isActive != null)
                 query = query.Where(x => x.VacancyStatus == isActive);
 
-            if (minSalary != null && maxSalary != null)
-                query = query.Where(x => x.MainSalary >= minSalary && x.MaxSalary <= maxSalary);
-
-            if (workType != null)
-                query = query.Where(x => x.WorkType == (WorkType)workType);
-
-            if (workStyle != null)
-                query = query.Where(x => x.WorkStyle == (WorkStyle)workStyle);
-
-            if (companyId != null)
+            if (minSalary.HasValue)
             {
-                Guid companyGuid = Guid.Parse(companyId);
-                query = query.Where(x => x.CompanyId == companyGuid);
+                var minVal = minSalary.Value;
+                query = query.Where(x => x.MainSalary.HasValue && x.MainSalary.Value >= minVal);
             }
 
-            if (categoryId != null)
+            if (maxSalary.HasValue)
             {
-                var categoryGuid = Guid.Parse(categoryId);
-                query = query.Where(x => x.CategoryId == categoryGuid);
+                var maxVal = maxSalary.Value;
+                query = query.Where(x => x.MainSalary.HasValue && ((x.MaxSalary ?? x.MainSalary) <= maxVal));
             }
 
-            if (countryId != null)
+            if (workTypes != null && workTypes.Any())
+                query = query.Where(x => x.WorkType.HasValue && workTypes.Contains((byte)x.WorkType.Value));
+
+            if (workStyles != null && workStyles.Any())
+                query = query.Where(x => x.WorkStyle.HasValue && workStyles.Contains((byte)x.WorkStyle.Value));
+
+            if (companyIds != null && companyIds.Any())
             {
-                var countryGuid = Guid.Parse(countryId);
-                query = query.Where(x => x.CountryId == countryGuid);
+                var companies = companyIds.Select(Guid.Parse).ToList();
+                query = query.Where(x => x.CompanyId.HasValue && companies.Contains(x.CompanyId.Value));
             }
 
-            if (cityId != null)
+            if (categoryIds != null && categoryIds.Any())
             {
-                var cityGuid = Guid.Parse(cityId);
-                query = query.Where(x => x.CityId == cityGuid);
+                var categories = categoryIds.Select(Guid.Parse).ToList();
+                query = query.Where(x => x.CategoryId.HasValue && categories.Contains(x.CategoryId.Value));
+            }
+
+            if (countryIds != null && countryIds.Any())
+            {
+                var countries = countryIds.Select(Guid.Parse).ToList();
+                query = query.Where(x => x.CountryId.HasValue && countries.Contains(x.CountryId.Value));
+            }
+
+            if (cityIds != null && cityIds.Any())
+            {
+                var cities = cityIds.Select(Guid.Parse).ToList();
+                query = query.Where(x => x.CityId.HasValue && cities.Contains(x.CityId.Value));
+            }
+
+            if (skillIds != null && skillIds.Any())
+            {
+                query = query.Where(v => v.VacancySkills.Any(vs => skillIds.Contains(vs.SkillId)));
             }
 
             return query;
@@ -771,6 +791,40 @@ namespace JobCompany.Business.Services.VacancyServices
                                                         .SetProperty(a => a.IsActive, false));
             }
             await _context.SaveChangesAsync();
+        }
+
+        public async Task ActivateVacancyAsync(Guid vacancyId)
+        {
+            var vacancy = await _context.Vacancies.FirstOrDefaultAsync(x=> x.Id == vacancyId && x.Company.UserId == _currentUser.UserGuid)
+                ?? throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
+
+            var balance = await _checkBalanceRequest.GetResponse<CheckBalanceResponse>(new CheckBalanceRequest
+            {
+                InformationType = InformationType.Vacancy,
+                UserId = (Guid)_currentUser.UserGuid
+            });
+
+            if(vacancy.VacancyStatus == VacancyStatus.PendingActive && vacancy.EndDate > DateTime.Now && vacancy.PaymentDate == null)
+            {
+                if (balance.Message.HasEnoughBalance)
+                {
+                    await _publishEndpoint.Publish(new PayEvent
+                    {
+                        InformationId = vacancyId,
+                        InformationType = InformationType.Vacancy,
+                        UserId = (Guid)_currentUser.UserGuid
+                    });
+
+                    vacancy.PaymentDate = DateTime.Now.AddDays(1);
+                    vacancy.VacancyStatus = VacancyStatus.Active;
+                    await _context.SaveChangesAsync();
+                }
+                else
+                    throw new BadRequestException(MessageHelper.GetMessage("INSUFFICIENT_BALANCE"));
+            }
+            else
+                throw new BadRequestException();
+
         }
     }
 }

@@ -162,6 +162,9 @@
   <data name="GREATER_THAN_OR_EQUAL_TO_ZERO" xml:space="preserve">
     <value>Number must be greater than or equal to 0</value>
   </data>
+  <data name="INSUFFICIENT_BALANCE" xml:space="preserve">
+    <value>You do not have enough balance to complete the transaction.</value>
+  </data>
   <data name="INVALID_FORMAT" xml:space="preserve">
     <value>Invalid format</value>
   </data>

@@ -1,5 +1,6 @@
 ﻿using JobCompany.Business.Dtos.NumberDtos;
 using JobCompany.Business.Dtos.VacancyDtos;
+using JobCompany.Business.Exceptions.ExamExceptions;
 using JobCompany.Business.Services.VacancyServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -36,9 +37,9 @@ namespace JobCompany.API.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetAllOwnVacancies(string? titleName, string? categoryId, string? countryId, string? cityId, VacancyStatus? IsActive, decimal? minSalary, decimal? maxSalary, byte? workStyle, byte? workType, int skip = 1, int take = 6)
+        public async Task<IActionResult> GetAllOwnVacancies(string? titleName, [FromQuery] List<string>? categoryIds, [FromQuery] List<string>? countryIds, [FromQuery] List<string>? cityIds, VacancyStatus? IsActive, decimal? minSalary, decimal? maxSalary, [FromQuery] List<byte>? workStyles, [FromQuery] List<byte>? workTypes, [FromQuery] List<Guid>? skills, int skip = 1, int take = 6)
         {
-            var data = await _vacancyService.GetAllOwnVacanciesAsync(titleName, categoryId, countryId, cityId, IsActive, minSalary, maxSalary, workStyle, workType, skip, take);
+            var data = await _vacancyService.GetAllOwnVacanciesAsync(titleName, categoryIds, countryIds, cityIds, IsActive, minSalary, maxSalary, workStyles, workTypes, skills, skip, take);
             return Ok(data);
         }
 
@@ -73,16 +74,16 @@ namespace JobCompany.API.Controllers
 
         [AllowAnonymous]
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetVacanciesByCompanyId(string companyId, Guid? vacancyId , int skip = 1, int take = 9)
+        public async Task<IActionResult> GetVacanciesByCompanyId(string companyId, Guid? vacancyId, int skip = 1, int take = 9)
         {
-            return Ok(await _vacancyService.GetVacanciesByCompanyIdAsync(companyId , vacancyId , skip, take));
+            return Ok(await _vacancyService.GetVacanciesByCompanyIdAsync(companyId, vacancyId, skip, take));
         }
 
         [AllowAnonymous]
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetAllVacancies(string? titleName, string? categoryId, string? countryId, string? cityId, decimal? minSalary, decimal? maxSalary, string? companyId, byte? workStyle, byte? workType, int skip = 1, int take = 9)
+        public async Task<IActionResult> GetAllVacancies(string? titleName, [FromQuery] List<string>? categoryIds, [FromQuery] List<string>? countryIds, [FromQuery] List<string>? cityIds, decimal? minSalary, decimal? maxSalary, [FromQuery] List<string>? companyIds, [FromQuery] List<byte>? workStyles, [FromQuery(Name = "workTypes")] List<byte>? workTypes, [FromQuery] List<Guid> skills, int skip = 1, int take = 9)
         {
-            return Ok(await _vacancyService.GetAllVacanciesAsync(titleName, categoryId, countryId, cityId, minSalary, maxSalary, companyId, workStyle, workType, skip, take));
+            return Ok(await _vacancyService.GetAllVacanciesAsync(titleName, categoryIds, countryIds, cityIds, minSalary, maxSalary, companyIds, workStyles, workTypes, skills, skip, take));
         }
 
         [HttpPost("[action]")]
@@ -110,6 +111,13 @@ namespace JobCompany.API.Controllers
         public async Task<IActionResult> TogglePauseVacancy(Guid vacancyId)
         {
             await _vacancyService.TogglePauseVacancyAsync(vacancyId);
+            return Ok();
+        }
+
+        [HttpPost("[action]")]
+        public async Task<IActionResult> ActivateVacancy(Guid vacancyId)
+        {
+            await _vacancyService.ActivateVacancyAsync(vacancyId);
             return Ok();
         }
     }

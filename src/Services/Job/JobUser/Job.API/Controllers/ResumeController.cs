@@ -41,6 +41,7 @@ namespace Job.API.Controllers
             [FromQuery] bool? isPublic,
             [FromQuery] ProfessionDegree? professionDegree,
             [FromQuery] Citizenship? citizenship,
+            [FromQuery] Gender? gender,
             [FromQuery] bool? isExperience,
             [FromQuery] JobStatus? jobStatus,
             [FromQuery] List<string>? skillIds,
@@ -48,8 +49,8 @@ namespace Job.API.Controllers
             [FromQuery] int skip = 1, [FromQuery] int take = 9)
         {
             return Ok(await _resumeService.GetAllResumesAsync(fullname,
-                isPublic, professionDegree, citizenship,isExperience,jobStatus, skillIds,languages,
-                skip,take));
+                isPublic, professionDegree, citizenship, gender, isExperience, jobStatus, skillIds, languages,
+                skip, take));
         }
 
         [HttpGet("[action]")]
@@ -63,13 +64,14 @@ namespace Job.API.Controllers
             [FromQuery] bool? isPublic,
             [FromQuery] ProfessionDegree? professionDegree,
             [FromQuery] Citizenship? citizenship,
+            [FromQuery] Gender? gender,
             [FromQuery] bool? isExperience,
             [FromQuery] JobStatus? jobStatus,
             [FromQuery] List<string>? skillIds,
             [FromQuery] List<LanguageFilterDto>? languages,
             [FromQuery] int skip = 1, [FromQuery] int take = 9)
         {
-            return Ok(await _resumeService.GetSavedResumesAsync(fullname, isPublic, jobStatus, professionDegree,citizenship, isExperience, skillIds, languages, skip, take));
+            return Ok(await _resumeService.GetSavedResumesAsync(fullname, isPublic, jobStatus, professionDegree, citizenship, gender, isExperience, skillIds, languages, skip, take));
         }
 
         [HttpPost("[action]")]
