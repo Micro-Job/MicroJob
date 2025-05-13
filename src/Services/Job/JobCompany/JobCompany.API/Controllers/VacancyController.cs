@@ -36,9 +36,9 @@ namespace JobCompany.API.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetAllOwnVacancies(string? titleName, string? categoryId, string? countryId, string? cityId, VacancyStatus? IsActive, decimal? minSalary, decimal? maxSalary, byte? workStyle, byte? workType, [FromQuery] List<Guid>? skills, int skip = 1, int take = 6)
+        public async Task<IActionResult> GetAllOwnVacancies(string? titleName, [FromQuery] List<string>? categoryIds, [FromQuery] List<string>? countryIds, [FromQuery] List<string>? cityIds, VacancyStatus? IsActive, decimal? minSalary, decimal? maxSalary, [FromQuery] List<byte>? workStyles, [FromQuery] List<byte>? workTypes, [FromQuery] List<Guid>? skills, int skip = 1, int take = 6)
         {
-            var data = await _vacancyService.GetAllOwnVacanciesAsync(titleName, categoryId, countryId, cityId, IsActive, minSalary, maxSalary, workStyle, workType, skills, skip, take);
+            var data = await _vacancyService.GetAllOwnVacanciesAsync(titleName, categoryIds, countryIds, cityIds, IsActive, minSalary, maxSalary, workStyles, workTypes, skills, skip, take);
             return Ok(data);
         }
 
@@ -80,9 +80,9 @@ namespace JobCompany.API.Controllers
 
         [AllowAnonymous]
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetAllVacancies(string? titleName, string? categoryId, string? countryId, string? cityId, decimal? minSalary, decimal? maxSalary, string? companyId, byte? workStyle, byte? workType, [FromQuery] List<Guid> skills, int skip = 1, int take = 9)
+        public async Task<IActionResult> GetAllVacancies(string? titleName, [FromQuery] List<string>? categoryIds, [FromQuery] List<string>? countryIds, [FromQuery] List<string>? cityIds, decimal? minSalary, decimal? maxSalary, [FromQuery] List<string>? companyIds, [FromQuery] List<byte>? workStyles, [FromQuery(Name = "workTypes")] List<byte>? workTypes, [FromQuery] List<Guid> skills, int skip = 1, int take = 9)
         {
-            return Ok(await _vacancyService.GetAllVacanciesAsync(titleName, categoryId, countryId, cityId, minSalary, maxSalary, companyId, workStyle, workType, skills, skip, take));
+            return Ok(await _vacancyService.GetAllVacanciesAsync(titleName, categoryIds, countryIds, cityIds, minSalary, maxSalary, companyIds, workStyles, workTypes, skills, skip, take));
         }
 
         [HttpPost("[action]")]
