@@ -1,5 +1,6 @@
 ﻿using JobCompany.Business.Dtos.NumberDtos;
 using JobCompany.Business.Dtos.VacancyDtos;
+using JobCompany.Business.Exceptions.ExamExceptions;
 using JobCompany.Business.Services.VacancyServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -110,6 +111,13 @@ namespace JobCompany.API.Controllers
         public async Task<IActionResult> TogglePauseVacancy(Guid vacancyId)
         {
             await _vacancyService.TogglePauseVacancyAsync(vacancyId);
+            return Ok();
+        }
+
+        [HttpPost("[action]")]
+        public async Task<IActionResult> ActivateVacancy(Guid vacancyId)
+        {
+            await _vacancyService.ActivateVacancyAsync(vacancyId);
             return Ok();
         }
     }

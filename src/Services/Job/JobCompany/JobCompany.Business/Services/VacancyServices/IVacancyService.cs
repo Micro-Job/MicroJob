@@ -27,5 +27,7 @@ namespace JobCompany.Business.Services.VacancyServices
 
         Task TogglePauseVacancyAsync(Guid vacancyId);
 
+        Task ActivateVacancyAsync(Guid vacancyId);
+
     }
 }

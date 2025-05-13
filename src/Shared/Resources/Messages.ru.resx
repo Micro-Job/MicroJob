@@ -162,6 +162,9 @@
   <data name="GREATER_THAN_OR_EQUAL_TO_ZERO" xml:space="preserve">
     <value>Число должно быть больше или равно 0</value>
   </data>
+  <data name="INSUFFICIENT_BALANCE" xml:space="preserve">
+    <value>У вас недостаточно средств для завершения транзакции.</value>
+  </data>
   <data name="INVALID_FORMAT" xml:space="preserve">
     <value>Неверный формат</value>
   </data>
