@@ -9,6 +9,7 @@ using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using MassTransit;
 using MassTransit.Initializers;
+using MassTransit.NewIdProviders;
 using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.Enums;
@@ -186,7 +187,11 @@ namespace JobCompany.Business.Services.VacancyServices
                 .Take(take)
                 .ToListAsync();
 
-            return vacancies;
+            return new DataListDto<VacancyGetAllDto>
+            {
+                Datas = vacancies,
+                TotalCount = await query.CountAsync()
+            };
         }
 
         /// <summary> ??? </summary>
@@ -786,6 +791,40 @@ namespace JobCompany.Business.Services.VacancyServices
                                                         .SetProperty(a => a.IsActive, false));
             }
             await _context.SaveChangesAsync();
+        }
+
+        public async Task ActivateVacancyAsync(Guid vacancyId)
+        {
+            var vacancy = await _context.Vacancies.FirstOrDefaultAsync(x=> x.Id == vacancyId && x.Company.UserId == _currentUser.UserGuid)
+                ?? throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
+
+            var balance = await _checkBalanceRequest.GetResponse<CheckBalanceResponse>(new CheckBalanceRequest
+            {
+                InformationType = InformationType.Vacancy,
+                UserId = (Guid)_currentUser.UserGuid
+            });
+
+            if(vacancy.VacancyStatus == VacancyStatus.PendingActive && vacancy.EndDate > DateTime.Now && vacancy.PaymentDate == null)
+            {
+                if (balance.Message.HasEnoughBalance)
+                {
+                    await _publishEndpoint.Publish(new PayEvent
+                    {
+                        InformationId = vacancyId,
+                        InformationType = InformationType.Vacancy,
+                        UserId = (Guid)_currentUser.UserGuid
+                    });
+
+                    vacancy.PaymentDate = DateTime.Now.AddDays(1);
+                    vacancy.VacancyStatus = VacancyStatus.Active;
+                    await _context.SaveChangesAsync();
+                }
+                else
+                    throw new BadRequestException(MessageHelper.GetMessage("INSUFFICIENT_BALANCE"));
+            }
+            else
+                throw new BadRequestException();
+
         }
     }
 }

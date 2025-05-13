@@ -30,7 +30,10 @@ namespace JobCompany.Business.Consumers
                 UserId = vacancy.Company.UserId
             });
 
-            if ((vacancy.VacancyStatus == VacancyStatus.Pending || vacancy.VacancyStatus == VacancyStatus.Update) && vacancy.EndDate >= DateTime.Now)
+            if ((vacancy.VacancyStatus == VacancyStatus.Pending || 
+                vacancy.VacancyStatus == VacancyStatus.Update || 
+                vacancy.VacancyStatus == VacancyStatus.PendingActive) && 
+                vacancy.EndDate >= DateTime.Now)
             {
                 if (balanceResponse.Message.HasEnoughBalance)
                 {

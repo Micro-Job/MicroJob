@@ -162,6 +162,9 @@
   <data name="GREATER_THAN_OR_EQUAL_TO_ZERO" xml:space="preserve">
     <value>Say 0-dan böyük və ya 0-a bərabər olmalıdır</value>
   </data>
+  <data name="INSUFFICIENT_BALANCE" xml:space="preserve">
+    <value>Əməliyyatı icra etmək üçün yetəri qədər balansınız yoxdur</value>
+  </data>
   <data name="INVALID_FORMAT" xml:space="preserve">
     <value>Format düzgün deyil</value>
   </data>
