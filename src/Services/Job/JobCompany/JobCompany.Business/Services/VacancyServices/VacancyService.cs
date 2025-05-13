@@ -145,7 +145,7 @@ namespace JobCompany.Business.Services.VacancyServices
         }
 
         /// <summary> Şirkətin profilində bütün vakansiyalarını gətirmək(Filterlerle birlikde) </summary>
-        public async Task<List<VacancyGetAllDto>> GetAllOwnVacanciesAsync(string? titleName, List<string>? categoryIds, List<string>? countryIds, List<string>? cityIds, VacancyStatus? IsActive, decimal? minSalary, decimal? maxSalary, List<byte>? workStyles, List<byte>? workTypes, List<Guid>? skillIds, int skip = 1, int take = 6)
+        public async Task<DataListDto<VacancyGetAllDto>> GetAllOwnVacanciesAsync(string? titleName, List<string>? categoryIds, List<string>? countryIds, List<string>? cityIds, VacancyStatus? IsActive, decimal? minSalary, decimal? maxSalary, List<byte>? workStyles, List<byte>? workTypes, List<Guid>? skillIds, int skip = 1, int take = 6)
         {
             var query = _context
                 .Vacancies.Where(x => x.Company.UserId == _currentUser.UserGuid)
