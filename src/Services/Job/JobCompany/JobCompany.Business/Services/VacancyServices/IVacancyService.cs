@@ -10,7 +10,7 @@ namespace JobCompany.Business.Services.VacancyServices
         Task CreateVacancyAsync(CreateVacancyDto vacancyDto, ICollection<CreateNumberDto>? numberDtos);
         Task UpdateVacancyAsync(UpdateVacancyDto vacancyDto, ICollection<UpdateNumberDto>? numberDtos);
         Task DeleteAsync(List<string> ids);
-        Task<List<VacancyGetAllDto>> GetAllOwnVacanciesAsync(string? titleName, string? categoryId, string? countryId, string? cityId, VacancyStatus? IsActive, decimal? minSalary, decimal? maxSalary, byte? workStyle, byte? workType, List<Guid>? skillIds, int skip = 1, int take = 6);
+        Task<DataListDto<VacancyGetAllDto>> GetAllOwnVacanciesAsync(string? titleName, string? categoryId, string? countryId, string? cityId, VacancyStatus? IsActive, decimal? minSalary, decimal? maxSalary, byte? workStyle, byte? workType, List<Guid>? skillIds, int skip = 1, int take = 6);
         Task<List<VacancyListDtoForAppDto>> GetAllVacanciesForAppAsync();
         Task<VacancyGetByIdDto> GetByIdVacancyAsync(string id);
         Task<VacancyDetailsDto> GetVacancyDetailsAsync(Guid id);
