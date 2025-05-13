@@ -37,12 +37,12 @@ namespace JobCompany.Business.Consumers
             {
                 if (balanceResponse.Message.HasEnoughBalance)
                 {
-                    await _publishEndpoint.Publish(new PayEvent
-                    {
-                        InformationId = vacancyGuid,
-                        InformationType = InformationType.Vacancy,
-                        UserId = vacancy.Company.UserId
-                    });
+                    //await _publishEndpoint.Publish(new PayEvent
+                    //{
+                    //    InformationId = vacancyGuid,
+                    //    InformationType = InformationType.Vacancy,
+                    //    UserId = vacancy.Company.UserId
+                    //});
 
                     vacancy.PaymentDate = DateTime.Now.AddDays(1);
 
@@ -99,6 +99,12 @@ namespace JobCompany.Business.Consumers
                         ReceiverId = (Guid)vacancy.CompanyId
                     });
                 }
+                await _publishEndpoint.Publish(new PayEvent
+                {
+                    InformationId = vacancyGuid,
+                    InformationType = InformationType.Vacancy,
+                    UserId = vacancy.Company.UserId
+                });
             }
 
             await _context.SaveChangesAsync();
