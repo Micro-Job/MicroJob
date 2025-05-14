@@ -63,7 +63,7 @@ namespace JobCompany.Business.Services.StatusServices
                 existStatus.StatusEnum == StatusEnum.Accepted ||
                 existStatus.StatusEnum == StatusEnum.Rejected)
             {
-                throw new CannotChangePendingStatusVisibilityException();
+                throw new CannotChangeStatusVisibilityException();
             }
 
             if (existStatus.Applications.Any())
