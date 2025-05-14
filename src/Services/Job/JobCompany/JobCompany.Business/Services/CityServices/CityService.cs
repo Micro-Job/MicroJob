@@ -1,12 +1,11 @@
-using JobCompany.Business.Dtos.CategoryDtos;
-using JobCompany.Business.Dtos.CityDtos;
+﻿using JobCompany.Business.Dtos.CityDtos;
+using JobCompany.Business.Dtos.Common;
 using JobCompany.Business.Exceptions.Common;
 using JobCompany.Business.Extensions;
 using JobCompany.Business.Statistics;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
-using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;
 
 namespace JobCompany.Business.Services.CityServices;
@@ -78,6 +77,38 @@ public class CityService(JobCompanyDbContext _context, ICurrentUser _user) : ICi
             .ToListAsync();
 
         return cities;
+    }
+
+    /// <summary>
+    /// Vakansiyalar siyahısının yan panelindəki filtr bölməsində istifadə olunan şəhərlərin siyahısını gətirir.
+    /// Verilmiş ölkə ID-lərinə aid şəhərləri ad üzrə filtirləyərək və səhifələnmiş şəkildə qaytarır
+    /// </summary>
+    public async Task<DataListDto<CityNameDto>> GetAllCitiesByCountryIdsAsync(List<string> countryIds, string? name, int skip, int take)
+    {
+        var guidCountryIds = countryIds.Select(Guid.Parse);
+
+        var query = _context.Cities.AsNoTracking().Where(c => guidCountryIds.Contains(c.CountryId));
+
+        if (!string.IsNullOrWhiteSpace(name))
+        {
+            name = name.Trim();
+            query = query.Where(c => c.Translations.Any(t => t.Language == _user.LanguageCode && t.Name.ToLower().Contains(name)));
+        }
+
+        var totalCount = await query.CountAsync();
+
+        var items = await query
+            .Skip(skip)
+            .Take(take)
+            .Select(c => new CityNameDto
+            {
+                Id = c.Id,
+                CityName = c.Translations.Where(t => t.Language == _user.LanguageCode).Select(t => t.Name).FirstOrDefault()!,
+            })
+            .OrderBy(c => c.CityName)
+            .ToListAsync();
+
+        return new DataListDto<CityNameDto> { Datas = items, TotalCount = totalCount };
     }
 
     public async Task DeleteCityAsync(string cityId)

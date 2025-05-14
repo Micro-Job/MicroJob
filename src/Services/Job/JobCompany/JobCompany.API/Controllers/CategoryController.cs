@@ -41,6 +41,13 @@ namespace JobCompany.API.Controllers
             return Ok(data);
         }
 
+        [AllowAnonymous]
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetCategoriesPaged(string? name, int skip = 1, int take = 5)
+        {
+            return Ok(await service.GetCategoriesPagedAsync(skip, take, name));
+        }
+
         [HttpGet("[action]")]
         public async Task<IActionResult> CategoryGetById(Guid id)
         {

@@ -1,3 +1,4 @@
+﻿using JobCompany.Business.Dtos.Common;
 using JobCompany.Business.Dtos.CountryDtos;
 using JobCompany.Business.Exceptions.Common;
 using JobCompany.Core.Entites;
@@ -47,6 +48,35 @@ public class CountryService(JobCompanyDbContext _context, ICurrentUser _user) : 
         .ToListAsync();
 
         return countries;
+    }
+
+    /// <summary>
+    /// Vakansiyalar siyahısının yan panelindəki filtr bölməsində istifadə olunan ölkələrin siyahısını gətirir.
+    /// </summary>
+    public async Task<DataListDto<CountryListDto>> GetPagedCountriesAsync(string? name, int skip, int take)
+    {
+        var query = _context.Countries.AsNoTracking();
+
+        if (!string.IsNullOrEmpty(name))
+        {
+            name = name.Trim();
+            query = query.Where(c => c.Translations.Any(t => t.Name.ToLower().Contains(name)));
+        }
+
+        var totalCount = await query.CountAsync();
+
+        var countries = await query
+            .Skip((skip - 1) * take)
+            .Take(take)
+            .Select(c => new CountryListDto
+            {
+                Id = c.Id,
+                CountryName = c.Translations.Where(t => t.Language == _user.LanguageCode).Select(t => t.Name).FirstOrDefault()!,
+            })
+            .OrderBy(c => c.CountryName)
+            .ToListAsync();
+
+        return new DataListDto<CountryListDto> { Datas = countries, TotalCount = totalCount };
     }
 
     public async Task UpdateCountryAsync(List<CountryUpdateDto> countries)
