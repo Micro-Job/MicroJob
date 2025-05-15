@@ -13,6 +13,19 @@
       "UpstreamHttpMethod": [ "POST", "GET", "PUT", "DELETE" ]
     },
     {
+      "DownstreamPathTemplate": "/Files/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "job-auth-service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/auth/Files/{everything}",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+
+    {
       "DownstreamPathTemplate": "/api/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
@@ -25,6 +38,19 @@
       "UpstreamHttpMethod": [ "POST", "GET", "PUT", "DELETE" ]
     },
     {
+      "DownstreamPathTemplate": "/Files/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "jobuser-service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/job/Files/{everything}",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+
+    {
       "DownstreamPathTemplate": "/api/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
@@ -36,6 +62,19 @@
       "UpstreamPathTemplate": "/jobcompany/{everything}",
       "UpstreamHttpMethod": [ "POST", "GET", "PUT", "DELETE" ]
     },
+    {
+      "DownstreamPathTemplate": "/Files/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "jobcompany-service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/jobcompany/Files/{everything}",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+
     {
       "DownstreamPathTemplate": "/api/{everything}",
       "DownstreamScheme": "http",
