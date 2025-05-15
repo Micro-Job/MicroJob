@@ -216,7 +216,7 @@ namespace Job.Business.Services.Resume
         }
 
         //Sirket hissəsində resumelerin metodlari
-        public async Task<DataListDto<ResumeListDto>> GetAllResumesAsync(string? fullname, bool? isPublic, ProfessionDegree? professionDegree, Citizenship? citizenship, Gender? gender, bool? isExperience, JobStatus? jobStatus, List<string>? skillIds, List<LanguageFilterDto>? languages, int skip, int take)
+        public async Task<DataListDto<ResumeListDto>> GetAllResumesAsync(string? fullname, bool? isPublic, List<ProfessionDegree>? professionDegree, Citizenship? citizenship, Gender? gender, bool? isExperience, JobStatus? jobStatus, List<Guid>? skillIds, List<LanguageFilterDto>? languages, int skip, int take)
         {
             var query = _context.Resumes
                 .Where(r => !r.IsAnonym)
@@ -265,65 +265,7 @@ namespace Job.Business.Services.Resume
             };
         }
 
-        private IQueryable<Core.Entities.Resume> ApplyFilters(IQueryable<Core.Entities.Resume> query, string? fullname, bool? isPublic, ProfessionDegree? professionDegree, Citizenship? citizenship, Gender? gender, bool? isExperience, List<string>? skillIds, List<LanguageFilterDto>? languages, JobStatus? jobStatus)
-        {
-            if (isPublic != null)
-            {
-                query = query.Where(x => x.IsPublic == isPublic);
-            }
-
-            if (jobStatus != null)
-            {
-                query = query.Where(x => x.User.JobStatus == jobStatus);
-            }
-
-            if (!string.IsNullOrEmpty(fullname))
-            {
-                query = query.Where(x => (x.FirstName + " " + x.LastName).Contains(fullname));
-            }
-
-            if (professionDegree != null)
-            {
-                query = query.Where(x => x.Educations.Any(e => e.ProfessionDegree == professionDegree));
-            }
-
-            if (citizenship != null)
-            {
-                query = query.Where(x => x.IsCitizen == citizenship);
-            }
-
-            if (gender != null)
-            {
-                query = query.Where(x => x.Gender == gender);
-            }
-
-            if (isExperience.HasValue)
-            {
-                if (isExperience.Value)
-                    query = query.Where(x => x.Experiences.Any());
-                else
-                    query = query.Where(x => !x.Experiences.Any());
-            }
-
-            if (skillIds != null && skillIds.Any())
-            {
-                query = query.Where(x => x.ResumeSkills.Any(rs => skillIds.Contains(rs.SkillId.ToString())));
-            }
-
-            if (languages != null && languages.Any())
-            {
-                foreach (var lang in languages)
-                {
-                    query = query.Where(x => x.Languages.Any(rl =>
-                        rl.LanguageName == lang.Language &&
-                        rl.LanguageLevel == lang.LanguageLevel));
-                }
-            }
-
-            return query;
-        }
-
-        public async Task<DataListDto<ResumeListDto>> GetSavedResumesAsync(string? fullName, bool? isPublic, JobStatus? jobStatus, ProfessionDegree? professionDegree, Citizenship? citizenship, Gender? gender, bool? isExperience, List<string>? skillIds, List<LanguageFilterDto>? languages, int skip, int take)
+        public async Task<DataListDto<ResumeListDto>> GetSavedResumesAsync(string? fullName, bool? isPublic, JobStatus? jobStatus, List<ProfessionDegree>? professionDegree, Citizenship? citizenship, Gender? gender, bool? isExperience, List<Guid>? skillIds, List<LanguageFilterDto>? languages, int skip, int take)
         {
             var resumeQuery = _context.SavedResumes
                 .Where(sr => sr.CompanyUserId == _currentUser.UserGuid)
@@ -531,8 +473,6 @@ namespace Job.Business.Services.Resume
             };
         }
 
-
-
         public async Task TakeResumeAccessAsync(string resumeId)
         {
             var resumeGuid = Guid.Parse(resumeId);
@@ -581,6 +521,65 @@ namespace Job.Business.Services.Resume
         }
 
         #region Private Methods
+
+        private IQueryable<Core.Entities.Resume> ApplyFilters(IQueryable<Core.Entities.Resume> query, string? fullname, bool? isPublic, List<ProfessionDegree>? professionDegree, Citizenship? citizenship, Gender? gender, bool? isExperience, List<Guid>? skillIds, List<LanguageFilterDto>? languages, JobStatus? jobStatus)
+        {
+            if (isPublic != null)
+            {
+                query = query.Where(x => x.IsPublic == isPublic);
+            }
+
+            if (jobStatus != null)
+            {
+                query = query.Where(x => x.User.JobStatus == jobStatus);
+            }
+
+            if (!string.IsNullOrEmpty(fullname))
+            {
+                query = query.Where(x => (x.FirstName + " " + x.LastName).Contains(fullname));
+            }
+
+            if (professionDegree != null)
+            {
+                query = query.Where(x => x.Educations.Any(e => professionDegree.Contains(e.ProfessionDegree)));
+            }
+
+            if (citizenship != null)
+            {
+                query = query.Where(x => x.IsCitizen == citizenship);
+            }
+
+            if (gender != null)
+            {
+                query = query.Where(x => x.Gender == gender);
+            }
+
+            if (isExperience.HasValue)
+            {
+                if (isExperience.Value)
+                    query = query.Where(x => x.Experiences.Any());
+                else
+                    query = query.Where(x => !x.Experiences.Any());
+            }
+
+            if (skillIds != null && skillIds.Any())
+            {
+                query = query.Where(x => x.ResumeSkills.Any(rs => skillIds.Contains(rs.SkillId)));
+            }
+
+            if (languages != null && languages.Any())
+            {
+                foreach (var lang in languages)
+                {
+                    query = query.Where(x => x.Languages.Any(rl =>
+                        rl.LanguageName == lang.Language &&
+                        rl.LanguageLevel == lang.LanguageLevel));
+                }
+            }
+
+            return query;
+        }
+
         private async Task<Core.Entities.Resume> BuildResumeAsync(ResumeCreateDto dto, Guid positionId)
         {
             FileDto fileResult = dto.UserPhoto != null
