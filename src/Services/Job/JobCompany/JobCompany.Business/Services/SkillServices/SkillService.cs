@@ -1,4 +1,5 @@
-﻿using JobCompany.Business.Dtos.SkillDtos;
+﻿using JobCompany.Business.Dtos.Common;
+using JobCompany.Business.Dtos.SkillDtos;
 using JobCompany.Business.Extensions;
 using JobCompany.Business.Statistics;
 using JobCompany.Core.Entites;
@@ -38,6 +39,30 @@ public class SkillService(JobCompanyDbContext _context, ICurrentUser _user) : IS
         .ToListAsync();
 
         return skills;
+    }
+
+    public async Task<DataListDto<GetAllSkillDto>> GetSkillsForSelectAsync(string? skillName , int skip , int take = 5)
+    {
+        var query = _context.Skills.Include(x=> x.Translations).AsQueryable().AsNoTracking();
+
+        if (!string.IsNullOrEmpty(skillName))
+        {
+            query = query.Where(x=> x.Translations.Any(z=> z.Name.Contains(skillName)));
+        }
+
+        var datas = await query.Select(x=> new GetAllSkillDto
+        {
+            Id = x.Id,
+            Name = x.GetTranslation(_user.LanguageCode , GetTranslationPropertyName.Name)
+        })
+        .Skip(skip - 1)
+        .Take(take)
+        .ToListAsync();
+
+        return new DataListDto<GetAllSkillDto>
+        {
+            Datas = datas,
+        };
     }
 
     public async Task UpdateSkillAsync(List<SkillUpdateDto> dtos)
