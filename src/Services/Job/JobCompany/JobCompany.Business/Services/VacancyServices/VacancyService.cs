@@ -145,7 +145,7 @@ namespace JobCompany.Business.Services.VacancyServices
         }
 
         /// <summary> Şirkətin profilində bütün vakansiyalarını gətirmək(Filterlerle birlikde) </summary>
-        public async Task<DataListDto<VacancyGetAllDto>> GetAllOwnVacanciesAsync(string? titleName, List<string>? categoryIds, List<string>? countryIds, List<string>? cityIds, VacancyStatus? IsActive, decimal? minSalary, decimal? maxSalary, List<byte>? workStyles, List<byte>? workTypes, List<Guid>? skillIds, int skip = 1, int take = 6)
+        public async Task<DataListDto<VacancyGetAllDto>> GetAllOwnVacanciesAsync(string? titleName, List<Guid>? categoryIds, List<Guid>? countryIds, List<Guid>? cityIds, VacancyStatus? IsActive, decimal? minSalary, decimal? maxSalary, List<byte>? workStyles, List<byte>? workTypes, List<Guid>? skillIds, int skip = 1, int take = 6)
         {
             var query = _context
                 .Vacancies.Where(x => x.Company.UserId == _currentUser.UserGuid)
@@ -536,7 +536,7 @@ namespace JobCompany.Business.Services.VacancyServices
         }
 
         /// <summary> Şirkət profilində vakansiya axtarışı vakansiya filterlere görə </summary>
-        public async Task<DataListDto<VacancyGetAllDto>> GetAllVacanciesAsync(string? titleName, List<string>? categoryIds, List<string>? countryIds, List<string>? cityIds, decimal? minSalary, decimal? maxSalary, List<string>? companyIds, List<byte>? workStyles, List<byte>? workTypes, List<Guid>? skillIds, int skip = 1, int take = 9)
+        public async Task<DataListDto<VacancyGetAllDto>> GetAllVacanciesAsync(string? titleName, List<Guid>? categoryIds, List<Guid>? countryIds, List<Guid>? cityIds, decimal? minSalary, decimal? maxSalary, List<Guid>? companyIds, List<byte>? workStyles, List<byte>? workTypes, List<Guid>? skillIds, int skip = 1, int take = 9)
         {
             var query = _context.Vacancies.Where(x => x.VacancyStatus == VacancyStatus.Active && x.EndDate > DateTime.Now)
                 .OrderByDescending(x => x.CreatedDate)
@@ -567,7 +567,7 @@ namespace JobCompany.Business.Services.VacancyServices
             return new DataListDto<VacancyGetAllDto> { Datas = vacancies, TotalCount = await query.CountAsync() };
         }
 
-        private static IQueryable<Vacancy> ApplyVacancyFilters(IQueryable<Vacancy> query, string? titleName, List<string>? categoryIds, List<string>? countryIds, List<string>? cityIds, VacancyStatus? isActive, decimal? minSalary, decimal? maxSalary, List<string>? companyIds, List<byte>? workTypes, List<byte>? workStyles, List<Guid>? skillIds)
+        private static IQueryable<Vacancy> ApplyVacancyFilters(IQueryable<Vacancy> query, string? titleName, List<Guid>? categoryIds, List<Guid>? countryIds, List<Guid>? cityIds, VacancyStatus? isActive, decimal? minSalary, decimal? maxSalary, List<Guid>? companyIds, List<byte>? workTypes, List<byte>? workStyles, List<Guid>? skillIds)
         {
             if (titleName != null)
             {
@@ -598,26 +598,22 @@ namespace JobCompany.Business.Services.VacancyServices
 
             if (companyIds != null && companyIds.Any())
             {
-                var companies = companyIds.Select(Guid.Parse).ToList();
-                query = query.Where(x => x.CompanyId.HasValue && companies.Contains(x.CompanyId.Value));
+                query = query.Where(x => companyIds.Contains((Guid)x.CompanyId));
             }
 
             if (categoryIds != null && categoryIds.Any())
             {
-                var categories = categoryIds.Select(Guid.Parse).ToList();
-                query = query.Where(x => x.CategoryId.HasValue && categories.Contains(x.CategoryId.Value));
+                query = query.Where(x => categoryIds.Contains((Guid)x.CategoryId));
             }
 
             if (countryIds != null && countryIds.Any())
             {
-                var countries = countryIds.Select(Guid.Parse).ToList();
-                query = query.Where(x => x.CountryId.HasValue && countries.Contains(x.CountryId.Value));
+                query = query.Where(x => countryIds.Contains((Guid)x.CountryId));
             }
 
             if (cityIds != null && cityIds.Any())
             {
-                var cities = cityIds.Select(Guid.Parse).ToList();
-                query = query.Where(x => x.CityId.HasValue && cities.Contains(x.CityId.Value));
+                query = query.Where(x => cityIds.Contains((Guid)x.CityId));
             }
 
             if (skillIds != null && skillIds.Any())

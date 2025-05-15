@@ -1,4 +1,5 @@
-using JobCompany.Business.Dtos.CategoryDtos;
+﻿using JobCompany.Business.Dtos.CategoryDtos;
+using JobCompany.Business.Dtos.Common;
 using JobCompany.Business.Exceptions.Common;
 using JobCompany.Business.Extensions;
 using JobCompany.Business.Statistics;
@@ -45,11 +46,38 @@ public class CategoryService(JobCompanyDbContext _context, ICurrentUser _user) :
         .Select(b => new CategoryListDto
         {
             Id = b.Id,
-            CategoryName = b.GetTranslation(_user.LanguageCode,GetTranslationPropertyName.Name)
+            CategoryName = b.GetTranslation(_user.LanguageCode, GetTranslationPropertyName.Name)
         })
         .ToListAsync();
 
         return categories;
+    }
+
+    /// <summary>
+    /// Vakansiyalar siyahısının yan panelindəki filtr bölməsində istifadə olunan kateqoriyaların siyahısını gətirir.
+    /// </summary>
+    public async Task<DataListDto<CategoryListDto>> GetCategoriesPagedAsync(int skip, int take, string? name)
+    {
+        var query = _context.Categories.AsNoTracking();
+
+        if (!string.IsNullOrEmpty(name))
+        {
+            name = name.Trim();
+            query = query.Where(x => x.Translations.Any(t => t.Name.ToLower().Contains(name) && t.Language == _user.LanguageCode));
+        }
+        var totalCount = await query.CountAsync();
+
+        var categories = await query
+            .IncludeTranslations()
+            .Skip((skip - 1) * take)
+            .Take(take)
+            .Select(b => new CategoryListDto
+            {
+                Id = b.Id,
+                CategoryName = b.GetTranslation(_user.LanguageCode, GetTranslationPropertyName.Name)
+            }).ToListAsync();
+
+        return new DataListDto<CategoryListDto> { Datas = categories, TotalCount = totalCount };
     }
 
     public async Task<CategoryGetByIdDto> CategoryGetByIdAsync(Guid id)

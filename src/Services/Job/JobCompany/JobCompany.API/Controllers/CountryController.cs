@@ -33,6 +33,13 @@ namespace JobCompany.API.Controllers
             return Ok(await service.GetAllCountryAsync());
         }
 
+        [AllowAnonymous]
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetPagedCountries(string? name, int skip = 1, int take = 5)
+        {
+            return Ok(await service.GetPagedCountriesAsync(name, skip, take));
+        }
+
         [HttpDelete("[action]/{id}")]
         public async Task<IActionResult> DeleteCountry(string id)
         {

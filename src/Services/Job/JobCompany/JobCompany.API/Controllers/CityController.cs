@@ -40,6 +40,13 @@ namespace JobCompany.API.Controllers
             return Ok(await service.GetAllCitiesByCountryIdAsync(countryId));
         }
 
+        [AllowAnonymous]
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetAllCitiesByCountryIds([FromQuery] List<string> countryIds, string? name, int skip = 1, int take = 5)
+        {
+            return Ok(await service.GetAllCitiesByCountryIdsAsync(countryIds, name, skip, take));
+        }
+
         [HttpDelete("[action]/{id}")]
         public async Task<IActionResult> DeleteCity(string id)
         {

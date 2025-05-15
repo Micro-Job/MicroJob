@@ -55,12 +55,16 @@ namespace JobCompany.Business.Services.StatusServices
         public async Task ToggleChangeStatusVisibilityAsync(string statusId)
         {
             var existStatus = await _context.Statuses
-                .Include(s => s.Applications)  
+                .Include(s => s.Applications)
                 .FirstOrDefaultAsync(x => x.Id == Guid.Parse(statusId) && x.Company.UserId == _currentUser.UserGuid)
                 ?? throw new NotFoundException<Status>();
 
-            if (existStatus.StatusEnum == StatusEnum.Pending)
-                throw new CannotChangePendingStatusVisibilityException();
+            if (existStatus.StatusEnum == StatusEnum.Pending ||
+                existStatus.StatusEnum == StatusEnum.Accepted ||
+                existStatus.StatusEnum == StatusEnum.Rejected)
+            {
+                throw new CannotChangeStatusVisibilityException();
+            }
 
             if (existStatus.Applications.Any())
                 throw new CannotChangeStatusVisibilityException();

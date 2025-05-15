@@ -125,6 +125,11 @@ namespace JobCompany.Business.Services.CompanyServices
                 await _context.CompanyNumbers.AddRangeAsync(numbersToAdd);
                 _context.CompanyNumbers.RemoveRange(numbersToRemove);
             }
+            else
+            {
+                if (company.CompanyNumbers != null)
+                    _context.CompanyNumbers.RemoveRange(company.CompanyNumbers);
+            }
 
             await _context.SaveChangesAsync();
 
