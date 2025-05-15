@@ -17,18 +17,18 @@ namespace Job.Business.Services.Resume
         Task<DataListDto<ResumeListDto>> GetAllResumesAsync(
             string? fullname,
             bool? isPublic,
-            List<ProfessionDegree>? professionDegree,
+            ProfessionDegree? professionDegree,
             Citizenship? citizenship,
             Gender? gender,
             bool? isExperience,
             JobStatus? jobStatus,
-            List<Guid>? skillIds,
+            List<string>? skillIds,
             List<LanguageFilterDto>? languages,
             int skip,
             int take);
 
-        Task<DataListDto<ResumeListDto>> GetSavedResumesAsync(string? fullName, bool? isPublic, JobStatus? jobStatus, List<ProfessionDegree>? professionDegree, Citizenship? citizenship,
-            Gender? gender, bool? isExperience, List<Guid>? skillIds, List<LanguageFilterDto>? languages, int skip, int take);
+        Task<DataListDto<ResumeListDto>> GetSavedResumesAsync(string? fullName, bool? isPublic, JobStatus? jobStatus, ProfessionDegree? professionDegree, Citizenship? citizenship,
+            Gender? gender, bool? isExperience, List<string>? skillIds, List<LanguageFilterDto>? languages, int skip, int take);
 
         Task<ResumeDetailItemDto> GetByIdResumeAysnc(string id);
         Task ToggleSaveResumeAsync(string resumeId);
