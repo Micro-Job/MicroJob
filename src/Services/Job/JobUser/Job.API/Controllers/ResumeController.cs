@@ -39,12 +39,12 @@ namespace Job.API.Controllers
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllResumes([FromQuery] string? fullname,
             [FromQuery] bool? isPublic,
-            [FromQuery] List<ProfessionDegree>? professionDegree,
+            [FromQuery] ProfessionDegree? professionDegree,
             [FromQuery] Citizenship? citizenship,
             [FromQuery] Gender? gender,
             [FromQuery] bool? isExperience,
             [FromQuery] JobStatus? jobStatus,
-            [FromQuery] List<Guid>? skillIds,
+            [FromQuery] List<string>? skillIds,
             [FromQuery] List<LanguageFilterDto>? languages,
             [FromQuery] int skip = 1, [FromQuery] int take = 9)
         {
@@ -62,12 +62,12 @@ namespace Job.API.Controllers
         [HttpGet("[action]")]
         public async Task<IActionResult> GetSavedResumes([FromQuery] string? fullname,
             [FromQuery] bool? isPublic,
-            [FromQuery] List<ProfessionDegree>? professionDegree,
+            [FromQuery] ProfessionDegree? professionDegree,
             [FromQuery] Citizenship? citizenship,
             [FromQuery] Gender? gender,
             [FromQuery] bool? isExperience,
             [FromQuery] JobStatus? jobStatus,
-            [FromQuery] List<Guid>? skillIds,
+            [FromQuery] List<string>? skillIds,
             [FromQuery] List<LanguageFilterDto>? languages,
             [FromQuery] int skip = 1, [FromQuery] int take = 9)
         {

@@ -216,7 +216,7 @@ namespace Job.Business.Services.Resume
         }
 
         //Sirket hissəsində resumelerin metodlari
-        public async Task<DataListDto<ResumeListDto>> GetAllResumesAsync(string? fullname, bool? isPublic, List<ProfessionDegree>? professionDegree, Citizenship? citizenship, Gender? gender, bool? isExperience, JobStatus? jobStatus, List<Guid>? skillIds, List<LanguageFilterDto>? languages, int skip, int take)
+        public async Task<DataListDto<ResumeListDto>> GetAllResumesAsync(string? fullname, bool? isPublic, ProfessionDegree? professionDegree, Citizenship? citizenship, Gender? gender, bool? isExperience, JobStatus? jobStatus, List<string>? skillIds, List<LanguageFilterDto>? languages, int skip, int take)
         {
             var query = _context.Resumes
                 .Where(r => !r.IsAnonym)
@@ -265,7 +265,7 @@ namespace Job.Business.Services.Resume
             };
         }
 
-        public async Task<DataListDto<ResumeListDto>> GetSavedResumesAsync(string? fullName, bool? isPublic, JobStatus? jobStatus, List<ProfessionDegree>? professionDegree, Citizenship? citizenship, Gender? gender, bool? isExperience, List<Guid>? skillIds, List<LanguageFilterDto>? languages, int skip, int take)
+        public async Task<DataListDto<ResumeListDto>> GetSavedResumesAsync(string? fullName, bool? isPublic, JobStatus? jobStatus, ProfessionDegree? professionDegree, Citizenship? citizenship, Gender? gender, bool? isExperience, List<string>? skillIds, List<LanguageFilterDto>? languages, int skip, int take)
         {
             var resumeQuery = _context.SavedResumes
                 .Where(sr => sr.CompanyUserId == _currentUser.UserGuid)
@@ -522,7 +522,7 @@ namespace Job.Business.Services.Resume
 
         #region Private Methods
 
-        private IQueryable<Core.Entities.Resume> ApplyFilters(IQueryable<Core.Entities.Resume> query, string? fullname, bool? isPublic, List<ProfessionDegree>? professionDegree, Citizenship? citizenship, Gender? gender, bool? isExperience, List<Guid>? skillIds, List<LanguageFilterDto>? languages, JobStatus? jobStatus)
+        private IQueryable<Core.Entities.Resume> ApplyFilters(IQueryable<Core.Entities.Resume> query, string? fullname, bool? isPublic, ProfessionDegree? professionDegree, Citizenship? citizenship, Gender? gender, bool? isExperience, List<string>? skillIds, List<LanguageFilterDto>? languages, JobStatus? jobStatus)
         {
             if (isPublic != null)
             {
@@ -541,7 +541,7 @@ namespace Job.Business.Services.Resume
 
             if (professionDegree != null)
             {
-                query = query.Where(x => x.Educations.Any(e => professionDegree.Contains(e.ProfessionDegree)));
+                query = query.Where(x => x.Educations.Any(e => e.ProfessionDegree == professionDegree));
             }
 
             if (citizenship != null)
@@ -564,7 +564,7 @@ namespace Job.Business.Services.Resume
 
             if (skillIds != null && skillIds.Any())
             {
-                query = query.Where(x => x.ResumeSkills.Any(rs => skillIds.Contains(rs.SkillId)));
+                query = query.Where(x => x.ResumeSkills.Any(rs => skillIds.Contains(rs.SkillId.ToString())));
             }
 
             if (languages != null && languages.Any())
