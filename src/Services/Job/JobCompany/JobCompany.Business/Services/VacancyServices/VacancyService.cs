@@ -210,12 +210,10 @@ namespace JobCompany.Business.Services.VacancyServices
         }
 
         /// <summary> şirkət id'sinə görə vacanciyaların gətirilməsi </summary>
-        public async Task<DataListDto<VacancyGetByCompanyIdDto>> GetVacanciesByCompanyIdAsync(string companyId, Guid? vacancyId, int skip = 1, int take = 9)
+        public async Task<DataListDto<VacancyGetByCompanyIdDto>> GetVacanciesByCompanyIdAsync(Guid companyId, Guid? vacancyId, int skip = 1, int take = 9)
         {
-            var companyGuid = Guid.Parse(companyId);
-
             var query = _context.Vacancies
-                .Where(x => x.CompanyId == companyGuid &&
+                .Where(x => x.CompanyId == companyId &&
                             x.VacancyStatus == VacancyStatus.Active &&
                             x.EndDate >= DateTime.Now)
                 .OrderByDescending(x => x.CreatedDate)
@@ -252,14 +250,12 @@ namespace JobCompany.Business.Services.VacancyServices
         }
 
         /// <summary> vacanciya id'sinə görə vacancyın gətirilməsi </summary>
-        public async Task<VacancyGetByIdDto> GetByIdVacancyAsync(string id)
+        public async Task<VacancyGetByIdDto> GetByIdVacancyAsync(Guid vacancyId)
         {
-            var vacancyGuid = Guid.Parse(id);
-
             Guid? userGuid = _currentUser.UserGuid;
 
             var vacancyDto = await _context.Vacancies
-                .Where(x => x.Id == vacancyGuid)
+                .Where(x => x.Id == vacancyId)
                     .Include(x => x.Applications)
                     .Include(x => x.Category)
                         .ThenInclude(x => x.Translations)
@@ -289,7 +285,7 @@ namespace JobCompany.Business.Services.VacancyServices
                         Driver = x.Driver,
                         Citizenship = x.Citizenship,
                         ExamId = x.ExamId,
-                        IsSaved = userGuid != null ? x.SavedVacancies.Any(y => y.UserId == userGuid && y.VacancyId == vacancyGuid) : false,
+                        IsSaved = userGuid != null ? x.SavedVacancies.Any(y => y.UserId == userGuid && y.VacancyId == vacancyId) : false,
                         VacancyNumbers = x
                             .VacancyNumbers.Select(vn => new VacancyNumberDto
                             {
@@ -319,10 +315,10 @@ namespace JobCompany.Business.Services.VacancyServices
 
             if (vacancyDto.CompanyUserId != userGuid)
             {
-                if (vacancyDto.EndDate < DateTime.Now)
+                if (vacancyDto.EndDate < DateTime.Now && vacancyDto.VacancyStatus != VacancyStatus.Active)
                     throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
 
-                var existVacancy = await _context.Vacancies.FirstOrDefaultAsync(x => x.Id == vacancyGuid);
+                var existVacancy = await _context.Vacancies.FirstOrDefaultAsync(x => x.Id == vacancyId);
                 existVacancy.ViewCount++;
                 await _context.SaveChangesAsync();
             }

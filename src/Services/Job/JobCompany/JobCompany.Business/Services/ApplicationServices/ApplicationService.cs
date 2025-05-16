@@ -307,7 +307,7 @@ namespace JobCompany.Business.Services.ApplicationServices
                 throw new ApplicationIsAlreadyExistException();
 
             var vacancyInfo = await _context.Vacancies
-                .Where(v => v.Id == vacancyGuid)
+                .Where(v => v.Id == vacancyGuid && v.VacancyStatus == VacancyStatus.Active && v.EndDate > DateTime.Now)
                 .Select(v => new { v.Title, v.VacancyStatus, v.CompanyId, v.EndDate })
                 .FirstOrDefaultAsync() ?? throw new NotFoundException<Company>();
 
