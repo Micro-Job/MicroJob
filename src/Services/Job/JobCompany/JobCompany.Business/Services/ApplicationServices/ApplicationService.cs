@@ -32,10 +32,9 @@ public class ApplicationService : IApplicationService
     private readonly IConfiguration _configuration;
     readonly IPublishEndpoint _publishEndpoint;
     private readonly ICurrentUser _currentUser;
-    private readonly string? _authServiceBaseUrl;
+    private readonly string? _jobUserBaseUrl;
     private readonly IRequestClient<GetFilteredUserIdsRequest> _filteredUserIdsRequest;
     private readonly IRequestClient<GetResumeDataRequest> _resumeDataRequest;
-
 
     public ApplicationService(
         JobCompanyDbContext context,
@@ -52,7 +51,64 @@ public class ApplicationService : IApplicationService
         _filteredUserIdsRequest = filteredUserIdsRequest;
         _resumeDataRequest = resumeDataRequest;
         _configuration = configuration;
-        _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
+        _jobUserBaseUrl = configuration["JobUser:BaseUrl"];
+    }
+
+    /// <summary> Vakansiya üçün müraciət yaradılması </summary>
+    public async Task CreateUserApplicationAsync(string vacancyId)
+    {
+        var userGuid = _currentUser.UserGuid ?? throw new Exception(MessageHelper.GetMessage("NOT_FOUND"));
+
+        var vacancyGuid = Guid.Parse(vacancyId);
+
+        if (await _context.Applications.AnyAsync(x => x.VacancyId == vacancyGuid && x.IsActive == true && x.UserId == userGuid))
+            throw new ApplicationIsAlreadyExistException();
+
+        var vacancyInfo = await _context.Vacancies
+            .Where(v => v.Id == vacancyGuid && v.VacancyStatus == VacancyStatus.Active && v.EndDate > DateTime.Now)
+            .Select(v => new { v.Title, v.VacancyStatus, v.CompanyId, v.EndDate })
+            .FirstOrDefaultAsync() ?? throw new NotFoundException<Company>();
+
+        if (vacancyInfo.EndDate < DateTime.Now) throw new NotFoundException<Vacancy>();
+        if (vacancyInfo.VacancyStatus == VacancyStatus.Pause) throw new VacancyPausedException();
+
+        var companyStatus = await _context.Statuses.FirstOrDefaultAsync(x => x.StatusEnum == StatusEnum.Pending && x.CompanyId == vacancyInfo.CompanyId) ??
+            throw new NotFoundException<StatusEnum>();
+
+        var resumeData = await _resumeDataRequest.GetResponse<GetResumeDataResponse>(new GetResumeDataRequest { UserId = userGuid });
+
+        var newApplication = new Application
+        {
+            UserId = userGuid,
+            VacancyId = vacancyGuid,
+            StatusId = companyStatus.Id,
+            IsActive = true,
+            CreatedDate = DateTime.Now,
+            ResumeId = resumeData.Message.ResumeId,
+            ProfileImage = resumeData.Message.ProfileImage,
+            Email = resumeData.Message.Email,
+            FirstName = resumeData.Message.FirstName,
+            LastName = resumeData.Message.LastName,
+            PhoneNumber = resumeData.Message.PhoneNumber.FirstOrDefault()
+        };
+
+        await _context.Applications.AddAsync(newApplication);
+
+        var notification = new Notification
+        {
+            SenderId = userGuid,
+            SenderName = _currentUser.UserFullName,
+            SenderImage = $"{_configuration["JobUser:BaseUrl"]}{resumeData.Message.ProfileImage}",
+            NotificationType = NotificationType.Application,
+            CreatedDate = DateTime.Now,
+            InformationId = resumeData.Message.ResumeId,
+            InformationName = vacancyInfo.Title,
+            IsSeen = false,
+            ReceiverId = (Guid)vacancyInfo.CompanyId!,
+        };
+
+        await _context.Notifications.AddAsync(notification);
+        await _context.SaveChangesAsync();
     }
 
     /// <summary> Yaradılan müraciətin geri alınması </summary>
@@ -185,32 +241,20 @@ public class ApplicationService : IApplicationService
     /// <summary> Şirkətə daxil olan bütün müraciətlərin filterlə birlikdə detallı şəkildə gətirilməsi </summary>
     public async Task<DataListDto<AllApplicationListDto>> GetAllApplicationsListAsync(Guid? vacancyId, Gender? gender, StatusEnum? status, List<Guid>? skillIds, string? fullName, int skip = 1, int take = 10)
     {
-        var query = _context.Applications
-            .Where(a => a.Vacancy.Company.UserId == _currentUser.UserGuid);
-
-        if (vacancyId != null)  // Vakansiyaya görə filterlənmə
-            query = query.Where(a => a.VacancyId == vacancyId);
-
-        if (status != null) // Statusa görə filterlənmə
-            query = query.Where(a => a.Status.StatusEnum == status);
-
-        if (!string.IsNullOrEmpty(fullName)) // Fullname-a görə filterlənmə
-        {
-            fullName = fullName.Trim();
-            query = query.Where(a => (a.FirstName + ' ' + a.LastName).ToLower().Contains(fullName));
-        }
-
-        query = query.OrderByDescending(a => a.CreatedDate);
-
-        var userIds = query.Select(a => a.UserId).ToList();
+        var query = GetApplicationsQuery(vacancyId, status, fullName);
 
         if (gender != null || (skillIds != null && skillIds.Count != 0)) //Filterdə gender və ya skillids varsa sorğu atılır
         {
+            var userIds = query.Select(a => a.UserId).Distinct().ToList();
+
             var response = await _filteredUserIdsRequest.GetResponse<GetFilteredUserIdsResponse>(
                 new GetFilteredUserIdsRequest { UserIds = userIds, Gender = gender, SkillIds = skillIds }); //Parametrlərə uyğun user id-ləri filtrlənir
 
-            query = query.Where(a => response.Message.UserIds.Contains(a.UserId));
+            if (response.Message.UserIds.Count != 0)
+                query = query.Where(a => response.Message.UserIds.Contains(a.UserId));
         }
+
+        query = query.OrderByDescending(a => a.CreatedDate);
 
         var totalCount = await query.CountAsync();
 
@@ -223,7 +267,7 @@ public class ApplicationService : IApplicationService
                 FirstName = a.FirstName,
                 LastName = a.LastName,
                 Email = a.Email,
-                ProfileImage = a.ProfileImage,
+                ProfileImage = $"{_jobUserBaseUrl}/{a.ProfileImage}",
                 DateTime = a.CreatedDate,
                 ResumeId = a.ResumeId,
                 PhoneNumber = a.PhoneNumber,
@@ -238,91 +282,6 @@ public class ApplicationService : IApplicationService
             Datas = data,
             TotalCount = await query.CountAsync()
         };
-    }
-
-    private async Task<(List<Application>, int)> GetPaginatedApplicationsAsync(int skip, int take, Guid? vacancyId, StatusEnum? status, string? userFullName)
-    {
-        var query = _context.Applications
-            .Where(a => a.Vacancy.Company.UserId == _currentUser.UserGuid);
-
-        if (vacancyId != null)  // Vakansiyaya görə filterlənmə
-            query = query.Where(a => a.VacancyId == vacancyId);
-
-        if (status != null) // Statusa görə filterlənmə
-            query = query.Where(a => a.Status.StatusEnum == status);
-
-        if (!string.IsNullOrEmpty(userFullName)) // Fullname-a görə filterlənmə
-        {
-            var fullName = userFullName.Trim();
-            query = query.Where(a => (a.FirstName + ' ' + a.LastName).ToLower().Contains(fullName));
-        }
-
-        query = query.Include(a => a.Vacancy)
-                     .Include(a => a.Status)
-                     .OrderByDescending(a => a.CreatedDate);
-
-        var applications = await query
-            .Skip(Math.Max(0, (skip - 1) * take))
-            .Take(take)
-            .ToListAsync();
-
-        return (applications, await query.CountAsync());
-    }
-
-    public async Task CreateUserApplicationAsync(string vacancyId)
-    {
-        var userGuid = _currentUser.UserGuid ?? throw new Exception(MessageHelper.GetMessage("NOT_FOUND"));
-
-        var vacancyGuid = Guid.Parse(vacancyId);
-
-        if (await _context.Applications.AnyAsync(x => x.VacancyId == vacancyGuid && x.IsActive == true && x.UserId == userGuid))
-            throw new ApplicationIsAlreadyExistException();
-
-        var vacancyInfo = await _context.Vacancies
-            .Where(v => v.Id == vacancyGuid && v.VacancyStatus == VacancyStatus.Active && v.EndDate > DateTime.Now)
-            .Select(v => new { v.Title, v.VacancyStatus, v.CompanyId, v.EndDate })
-            .FirstOrDefaultAsync() ?? throw new NotFoundException<Company>();
-
-        if (vacancyInfo.EndDate < DateTime.Now) throw new NotFoundException<Vacancy>();
-        if (vacancyInfo.VacancyStatus == VacancyStatus.Pause) throw new VacancyPausedException();
-
-        var companyStatus = await _context.Statuses.FirstOrDefaultAsync(x => x.StatusEnum == StatusEnum.Pending && x.CompanyId == vacancyInfo.CompanyId) ??
-            throw new NotFoundException<StatusEnum>();
-
-        var resumeData = await _resumeDataRequest.GetResponse<GetResumeDataResponse>(new GetResumeDataRequest { UserId = userGuid });
-
-        var newApplication = new Application
-        {
-            UserId = userGuid,
-            VacancyId = vacancyGuid,
-            StatusId = companyStatus.Id,
-            IsActive = true,
-            CreatedDate = DateTime.Now,
-            ResumeId = resumeData.Message.ResumeId,
-            ProfileImage = resumeData.Message.ProfileImage,
-            Email = resumeData.Message.Email,
-            FirstName = resumeData.Message.FirstName,
-            LastName = resumeData.Message.LastName,
-            PhoneNumber = resumeData.Message.PhoneNumber.FirstOrDefault()
-        };
-
-        await _context.Applications.AddAsync(newApplication);
-
-        var notification = new Notification
-        {
-            SenderId = userGuid,
-            SenderName = _currentUser.UserFullName,
-            SenderImage = $"{_configuration["JobUser:BaseUrl"]}{resumeData.Message.ProfileImage}",
-            NotificationType = NotificationType.Application,
-            CreatedDate = DateTime.Now,
-            InformationId = resumeData.Message.ResumeId,
-            InformationName = vacancyInfo.Title,
-            IsSeen = false,
-            ReceiverId = (Guid)vacancyInfo.CompanyId!,
-        };
-
-        await _context.Notifications.AddAsync(notification);
-        await _context.SaveChangesAsync();
     }
 
     public async Task<PaginatedApplicationDto> GetUserApplicationsAsync(string? vacancyName, int skip, int take)
@@ -406,24 +365,49 @@ public class ApplicationService : IApplicationService
 
     public async Task<DataListDto<ApplicationWithStatusInfoListDto>> GetAllApplicationWithStatusAsync(int skip = 1, int take = 9)
     {
-        var applications = await GetPaginatedApplicationsAsync(skip, take, null, null, null);
+        var applications = GetApplicationsQuery(null, null, null);
 
-        var data = applications.Item1.Select(a => new ApplicationWithStatusInfoListDto
-        {
-            ApplicationId = a.Id,
-            ProfileImage = a.ProfileImage,
-            FirstName = a.FirstName,
-            LastName = a.LastName,
-            StatusId = a.StatusId,
-            StatusName = a.Status.StatusEnum,
-            Position = a.Vacancy.Title,
-            DateTime = a.CreatedDate
-        }).ToList();
+        var totalCount = await applications.CountAsync();
+
+        var data = applications
+            .Skip((skip - 1) * take)
+            .Take(take)
+            .Select(a => new ApplicationWithStatusInfoListDto
+            {
+                ApplicationId = a.Id,
+                ProfileImage = $"{_jobUserBaseUrl}/{a.ProfileImage}",
+                FirstName = a.FirstName,
+                LastName = a.LastName,
+                StatusId = a.StatusId,
+                StatusName = a.Status.StatusEnum,
+                Position = a.Vacancy.Title,
+                DateTime = a.CreatedDate
+            }).ToList();
 
         return new DataListDto<ApplicationWithStatusInfoListDto>
         {
             Datas = data,
-            TotalCount = applications.Item2
+            TotalCount = totalCount
         };
+    }
+
+    private IQueryable<Application> GetApplicationsQuery(Guid? vacancyId, StatusEnum? status, string? userFullName)
+    {
+        var query = _context.Applications.AsNoTracking()
+            .Where(a => a.Vacancy.Company.UserId == _currentUser.UserGuid);
+
+        if (vacancyId != null) // Vakansiyaya görə filterlənmə
+            query = query.Where(a => a.VacancyId == vacancyId);
+
+        if (status != null) // Statusa görə filterlənmə
+            query = query.Where(a => a.Status.StatusEnum == status);
+
+        if (!string.IsNullOrEmpty(userFullName)) // Fullname-a görə filterlənmə
+        {
+            string normalizedFullName = userFullName.Trim().ToLower();
+            query = query.Where(a => (a.FirstName + " " + a.LastName).ToLower().Contains(normalizedFullName));
+        }
+
+        return query;
     }
 }
