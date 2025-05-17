@@ -1,13 +1,14 @@
 ﻿using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using MassTransit;
+using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Enums;
 using SharedLibrary.Events;
 using SharedLibrary.Statics;
 
 namespace JobCompany.Business.Consumers
 {
-    public class CompanyRegisteredConsumer(JobCompanyDbContext _context) : IConsumer<CompanyRegisteredEvent>
+    public class CompanyRegisteredConsumer(JobCompanyDbContext _dbContext) : IConsumer<CompanyRegisteredEvent>
     {
         public async Task Consume(ConsumeContext<CompanyRegisteredEvent> context)
         {
@@ -22,47 +23,22 @@ namespace JobCompany.Business.Consumers
                 IsCompany = context.Message.IsCompany
             };
 
-            await _context.Companies.AddAsync(newCompany);
+            await _dbContext.Companies.AddAsync(newCompany);
 
-            var statuses = new List<Status>
+            var steps = _dbContext.ApplicationSteps.AsNoTracking();
+
+            var statuses = steps.Select(s => new Status
             {
-                new Status
-                {
-                    StatusColor = "#3183C8", // Yeşil
-                    IsVisible = true,
-                    Order = 1,
-                    StatusEnum = StatusEnum.Pending,
-                    CompanyId = companyId
-                },
-                new Status
-                {
-                    StatusColor = "#DEB85B", // Sarı
-                    IsVisible = true,
-                    Order = 2,
-                    StatusEnum = StatusEnum.Interview,
-                    CompanyId = companyId
-                },
-                new Status
-                {
-                    StatusColor = "#38C172", // Mavi
-                    IsVisible = true,
-                    Order = 3,
-                    StatusEnum = StatusEnum.Accepted,
-                    CompanyId = companyId
-                },
-                new Status
-                {
-                    StatusColor = "#F44336", // Kırmızı
-                    IsVisible = true,
-                    Order = 4,
-                    StatusEnum = StatusEnum.Rejected,
-                    CompanyId = companyId
-                },
-            };
+                CompanyId = companyId,
+                StatusEnum = s.StatusEnum,
+                StatusColor = s.StatusColor,
+                IsVisible = s.IsVisible,
+                Order = s.Order
+            });
 
-            await _context.Statuses.AddRangeAsync(statuses);
+            await _dbContext.Statuses.AddRangeAsync(statuses);
 
-            await _context.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync();
         }
     }
 }
