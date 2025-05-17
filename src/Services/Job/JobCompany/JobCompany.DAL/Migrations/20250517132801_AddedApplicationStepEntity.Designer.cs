@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JobCompany.DAL.Migrations
 {
     [DbContext(typeof(JobCompanyDbContext))]
-    [Migration("20250517130515_ApplicationStepEntityAdded")]
-    partial class ApplicationStepEntityAdded
+    [Migration("20250517132801_AddedApplicationStepEntity")]
+    partial class AddedApplicationStepEntity
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

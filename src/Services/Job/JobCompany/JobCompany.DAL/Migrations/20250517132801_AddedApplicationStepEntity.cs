@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace JobCompany.DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class ApplicationStepEntityAdded : Migration
+    public partial class AddedApplicationStepEntity : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
