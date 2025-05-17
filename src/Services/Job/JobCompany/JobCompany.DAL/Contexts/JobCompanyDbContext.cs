@@ -39,6 +39,7 @@ namespace JobCompany.DAL.Contexts
         public DbSet<Message> Messages { get; set; }
         public DbSet<VacancyMessage> VacancyMessages { get; set; }
         public DbSet<MessageTranslation> MessageTranslations { get; set; }
+        public DbSet<ApplicationStep> ApplicationSteps { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
