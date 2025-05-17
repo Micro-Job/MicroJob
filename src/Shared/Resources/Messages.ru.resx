@@ -159,6 +159,9 @@
   <data name="EXAM_ALREADY_TAKEN" xml:space="preserve">
     <value>Вы уже сдавали этот экзамен.</value>
   </data>
+  <data name="FILE_SIZE_MAX_20MB" xml:space="preserve">
+    <value>Размер файла не должен превышать 20 МБ.</value>
+  </data>
   <data name="GREATER_THAN_OR_EQUAL_TO_ZERO" xml:space="preserve">
     <value>Число должно быть больше или равно 0</value>
   </data>
