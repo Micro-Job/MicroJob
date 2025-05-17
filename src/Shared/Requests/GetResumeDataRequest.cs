@@ -1,7 +1,6 @@
-namespace Shared.Requests
+namespace SharedLibrary.Requests;
+
+public class GetResumeDataRequest
 {
-    public class GetResumeDataRequest
-    {
-        public List<Guid> UserIds { get; set; }
-    }
+    public Guid UserId { get; set; }
 }

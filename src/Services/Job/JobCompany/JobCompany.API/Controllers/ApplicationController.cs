@@ -17,11 +17,11 @@ namespace JobCompany.API.Controllers
             return Ok();
         }
 
-        [HttpGet("[action]")]
-        public async Task<IActionResult> GetAllApplication(int skip = 1, int take = 9)
-        {
-            return Ok(await service.GetAllApplicationAsync(skip, take));
-        }
+        //[HttpGet("[action]")]
+        //public async Task<IActionResult> GetAllApplication(int skip = 1, int take = 9)
+        //{
+        //    return Ok(await service.GetAllApplicationAsync(skip, take));
+        //}
 
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllApplicationsList(Guid? vacancyId, Gender? gender, StatusEnum? status, [FromQuery] List<Guid>? skillIds, string? fullName, int skip = 1, int take = 10)
