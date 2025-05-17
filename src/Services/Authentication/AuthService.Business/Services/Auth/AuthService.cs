@@ -7,6 +7,7 @@ using AuthService.DAL.Contexts;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using SharedLibrary.Dtos.EmailDtos;
 using SharedLibrary.Enums;
 using SharedLibrary.Events;
 using SharedLibrary.Exceptions;
@@ -14,6 +15,8 @@ using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;
 using SharedLibrary.Requests;
 using SharedLibrary.Responses;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace AuthService.Business.Services.Auth
 {
@@ -53,14 +56,14 @@ namespace AuthService.Business.Services.Auth
             });
             await CreateBalance(user.Id, user.FirstName, user.LastName);
 
-            //await _publisher.SendEmail(
-            //    new EmailMessage
-            //    {
-            //        Email = dto.Email,
-            //        Subject = MessageHelper.GetMessage("WELCOME"),
-            //        Content = MessageHelper.GetMessage("REGISTER_COMPLETED"),
-            //    }
-            //);
+            await _emailService.SendEmailAsync(dto.Email,
+                new EmailMessage
+                {
+                    Email = dto.Email,
+                    Subject = MessageHelper.GetMessage("WELCOME"),
+                    Content = MessageHelper.GetMessage("REGISTER_COMPLETED"),
+                }
+            );
 
             // sifre yaratmaq ucun mail gondermek
             //await _emailService.SendSetPassword(dto.Email, await GeneratePasswordResetTokenAsync(user));
@@ -111,14 +114,15 @@ namespace AuthService.Business.Services.Auth
                 LastName = user.LastName
             });
             await CreateBalance(user.Id, user.FirstName, user.LastName);
-            //await _publisher.SendEmail(
-            //    new EmailMessage
-            //    {
-            //        Email = dto.Email,
-            //        Subject = MessageHelper.GetMessage("WELCOME"),
-            //        Content = MessageHelper.GetMessage("REGISTER_COMPLETED"),
-            //    }
-            //);
+            
+            await _emailService.SendEmailAsync(dto.Email,
+                new EmailMessage
+                {
+                    Email = dto.Email,
+                    Subject = MessageHelper.GetMessage("WELCOME"),
+                    Content = MessageHelper.GetMessage("REGISTER_COMPLETED"),
+                }
+            );
         }
 
         public async Task<TokenResponseDto> LoginAsync(LoginDto dto)
@@ -241,10 +245,10 @@ namespace AuthService.Business.Services.Auth
                 UserId = user.Id,
                 ExpireTime = DateTime.Now.AddHours(1),
             };
-            await _emailService.SendResetPassword(user, token);
 
             await _context.PasswordTokens.AddAsync(passwordToken);
             await _context.SaveChangesAsync();
+            await _emailService.SendResetPassword(user, token);
 
         }
 
@@ -259,16 +263,18 @@ namespace AuthService.Business.Services.Auth
         /// <exception cref="BadRequestException"></exception>
         public async Task ConfirmPasswordResetAsync(PasswordResetDto dto)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
-            if (user == null)
-                throw new UserNotFoundException();
+            var handler = new JwtSecurityTokenHandler();
 
+            var jwtToken = handler.ReadJwtToken(dto.Token);
+
+            var email = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email) 
+                ?? throw new UserNotFoundException();
+            
             var passwordToken = await _context.PasswordTokens.FirstOrDefaultAsync(pt =>
                 pt.Token == dto.Token && pt.UserId == user.Id && pt.ExpireTime > DateTime.Now
-            );
-
-            if (passwordToken == null)
-                throw new BadRequestException();
+            ) ?? throw new BadRequestException();
 
             user.Password = _tokenHandler.GeneratePasswordHash(dto.NewPassword);
 

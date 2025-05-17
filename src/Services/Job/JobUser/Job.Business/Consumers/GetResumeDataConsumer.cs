@@ -1,35 +1,29 @@
 using Job.DAL.Contexts;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
-using Shared.Requests;
-using Shared.Responses;
+using SharedLibrary.Requests;
+using SharedLibrary.Responses;
 
-namespace Job.Business.Consumers
+namespace Job.Business.Consumers;
+
+public class GetResumeDataConsumer(JobDbContext _jobDbContext) : IConsumer<GetResumeDataRequest>
 {
-    public class GetResumeDataConsumer(JobDbContext _jobDbContext) : IConsumer<GetResumeDataRequest>
+    public async Task Consume(ConsumeContext<GetResumeDataRequest> context)
     {
-        public async Task Consume(ConsumeContext<GetResumeDataRequest> context)
-        {
-            var userIds = context.Message.UserIds;
+        var resumeData = await _jobDbContext.Resumes
+            .AsNoTracking()
+            .Where(r => r.UserId == context.Message.UserId)
+            .Select(r => new GetResumeDataResponse
+            {
+                ResumeId = r.Id,
+                Position = r.Position != null ? r.Position.Name : null,
+                FirstName = r.FirstName,
+                LastName = r.LastName,
+                ProfileImage = r.UserPhoto,
+                Email = r.ResumeEmail,
+                PhoneNumber = r.PhoneNumbers.Select(p => p.PhoneNumber).ToList()
+            }).FirstOrDefaultAsync() ?? new GetResumeDataResponse();
 
-            var resumes = await _jobDbContext.Resumes.Where(r => userIds.Contains(r.UserId))
-                .Select(r => new GetResumeDataResponse
-                {
-                    UserId = r.UserId,
-                    Position = r.Position != null ? r.Position.Name : null,
-                    FirstName = r.FirstName,
-                    LastName = r.LastName,
-                    ProfileImage = r.UserPhoto,
-                    BirthDay = r.BirthDay,
-                    Email = r.ResumeEmail,
-                    IsDriver = r.IsDriver,
-                    IsMarried = r.IsMarried,
-                    MilitarySituation = r.MilitarySituation,
-                    PhoneNumber = r.PhoneNumbers.Select(p => p.PhoneNumber).ToList()
-                })
-                .ToListAsync();
-
-            await context.RespondAsync(new GetResumesDataResponse { Users = resumes });
-        }
+        await context.RespondAsync(resumeData);
     }
 }

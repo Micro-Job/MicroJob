@@ -2,6 +2,7 @@
 using JobPayment.Business.Services.PriceServices;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using SharedLibrary.Enums;
 
 namespace JobPayment.API.Controllers
 {
@@ -20,6 +21,12 @@ namespace JobPayment.API.Controllers
         {
             await _priceService.UpdatePriceAsync(dto);
             return Ok();
+        }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetPrice(InformationType serviceType)
+        {
+            return Ok(await _priceService.GetPriceByInformationTypeAsync(serviceType));
         }
     }
 }

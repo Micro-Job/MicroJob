@@ -52,7 +52,7 @@ namespace JobCompany.API.Controllers
 
         [AllowAnonymous]
         [HttpGet("[action]/{id}")]
-        public async Task<IActionResult> GetByIdVacancy(string id)
+        public async Task<IActionResult> GetByIdVacancy(Guid id)
         {
             var data = await _vacancyService.GetByIdVacancyAsync(id);
             return Ok(data);
@@ -74,7 +74,7 @@ namespace JobCompany.API.Controllers
 
         [AllowAnonymous]
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetVacanciesByCompanyId(string companyId, Guid? vacancyId, int skip = 1, int take = 9)
+        public async Task<IActionResult> GetVacanciesByCompanyId(Guid companyId, Guid? vacancyId, int skip = 1, int take = 9)
         {
             return Ok(await _vacancyService.GetVacanciesByCompanyIdAsync(companyId, vacancyId, skip, take));
         }

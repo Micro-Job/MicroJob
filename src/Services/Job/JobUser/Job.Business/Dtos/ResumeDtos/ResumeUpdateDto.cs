@@ -14,6 +14,8 @@ namespace Job.Business.Dtos.ResumeDtos
     public record ResumeUpdateDto
     {
         public string FatherName { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
         public string? Position { get; set; } //Əgər position yoxdursa bu adda olan bir position yaradılır db-də
         public Guid? PositionId { get; set; } //Əgər position varsa db-də onun id-si yazılmalıdır
         public Guid? ParentPositionId { get; set; } 

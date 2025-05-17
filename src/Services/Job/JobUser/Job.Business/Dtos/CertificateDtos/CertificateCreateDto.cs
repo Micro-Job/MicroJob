@@ -13,6 +13,8 @@ namespace Job.Business.Dtos.CertificateDtos
 
     public class CertificateCreateDtoValidator : AbstractValidator<CertificateCreateDto>
     {
+        private const long _maxFileSizeBytes = 20 * 1024 * 1024; 
+
         public CertificateCreateDtoValidator()
         {
             RuleFor(x => x.CertificateName)
@@ -24,7 +26,9 @@ namespace Job.Business.Dtos.CertificateDtos
                 .Length(1, 100).WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_100"));
 
             RuleFor(x => x.CertificateFile)
-                .NotNull().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"));
+                .NotNull().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
+                .Must(f => f.Length <= _maxFileSizeBytes)
+                .WithMessage(MessageHelper.GetMessage("FILE_SIZE_MAX_20MB"));
         }
     }
 }
