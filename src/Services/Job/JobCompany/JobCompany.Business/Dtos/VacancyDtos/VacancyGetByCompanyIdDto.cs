@@ -1,3 +1,4 @@
+using JobCompany.Core.Enums;
 using SharedLibrary.Enums;
 
 namespace JobCompany.Business.Dtos.VacancyDtos
@@ -17,5 +18,6 @@ namespace JobCompany.Business.Dtos.VacancyDtos
         public decimal? MaxSalary { get; set; }
         public VacancyStatus Status { get; set; }
         public bool IsSaved { get; set; }
+        public SalaryCurrencyType? SalaryCurrency { get; set; }
     }
 }

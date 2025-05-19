@@ -403,8 +403,7 @@ public class ApplicationService : IApplicationService
 
         if (!string.IsNullOrEmpty(userFullName)) // Fullname-a görə filterlənmə
         {
-            string normalizedFullName = userFullName;
-            query = query.Where(a => (a.FirstName + a.LastName).Contains(normalizedFullName));
+            query = query.Where(a => (a.FirstName + a.LastName).Contains(userFullName));
         }
 
         return query;

@@ -119,10 +119,6 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
     public async Task<DataListDto<VacancyGetAllDto>> GetAllVacanciesAsync(string? vacancyName, string? startMinDate, string? startMaxDate, string? endMinDate, string? endMaxDate, string? companyName, byte? vacancyStatus, int skip = 1, int take = 10)
     {
         var query = _context.Vacancies
-            //.Where(x => x.VacancyStatus == VacancyStatus.Pending ||
-            //            x.VacancyStatus == VacancyStatus.Active ||
-            //            x.VacancyStatus == VacancyStatus.Reject ||
-            //            x.VacancyStatus == VacancyStatus.Update)
             .OrderBy(x => x.VacancyStatus).ThenBy(x => x.CreatedDate)
             .AsQueryable()
             .AsNoTracking();
@@ -174,6 +170,7 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
             ViewCount = x.ViewCount,
             MainSalary = x.MainSalary,
             MaxSalary = x.MaxSalary,
+            SalaryCurrency = x.SalaryCurrency,
             WorkStyle = x.WorkStyle,
             WorkType = x.WorkType,
             //bu yaradilma tarixidir(normalda baslama tarixi olur)
@@ -214,6 +211,7 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
                     WorkStyle = x.WorkStyle,
                     MainSalary = x.MainSalary,
                     MaxSalary = x.MaxSalary,
+                    SalaryCurrency = x.SalaryCurrency,
                     Requirement = x.Requirement,
                     Description = x.Description,
                     Email = x.Email,

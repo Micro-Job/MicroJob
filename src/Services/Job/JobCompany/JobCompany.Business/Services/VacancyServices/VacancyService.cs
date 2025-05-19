@@ -77,7 +77,8 @@ namespace JobCompany.Business.Services.VacancyServices
                 CategoryId = vacancyDto.CategoryId,
                 ExamId = vacancyDto.ExamId,
                 VacancyStatus = VacancyStatus.Pending,
-                ViewCount = 0
+                ViewCount = 0,
+                SalaryCurrency = vacancyDto.SalaryCurrency
             };
 
             var numbers = new List<VacancyNumber>();
@@ -181,7 +182,8 @@ namespace JobCompany.Business.Services.VacancyServices
                     WorkStyle = x.WorkStyle,
                     MainSalary = x.MainSalary,
                     MaxSalary = x.MaxSalary,
-                    VacancyStatus = x.VacancyStatus
+                    VacancyStatus = x.VacancyStatus,
+                    SalaryCurrency = x.SalaryCurrency
                 })
                 .Skip((skip - 1) * take)
                 .Take(take)
@@ -237,6 +239,7 @@ namespace JobCompany.Business.Services.VacancyServices
                     MainSalary = x.MainSalary,
                     MaxSalary = x.MaxSalary,
                     IsSaved = x.SavedVacancies.Any(sv => sv.UserId == _currentUser.UserGuid && sv.VacancyId == x.Id),
+                    SalaryCurrency = x.SalaryCurrency
                 })
                 .Skip((skip - 1) * take)
                 .Take(take)
@@ -276,6 +279,7 @@ namespace JobCompany.Business.Services.VacancyServices
                         WorkStyle = x.WorkStyle,
                         MainSalary = x.MainSalary,
                         MaxSalary = x.MaxSalary,
+                        SalaryCurrency = x.SalaryCurrency,
                         Requirement = x.Requirement,
                         Description = x.Description,
                         Email = x.Email,
@@ -353,6 +357,7 @@ namespace JobCompany.Business.Services.VacancyServices
                     WorkStyle = v.WorkStyle,
                     MainSalary = v.MainSalary,
                     MaxSalary = v.MaxSalary,
+                    SalaryCurrency = v.SalaryCurrency,
                     Requirement = v.Requirement,
                     Description = v.Description,
                     Email = v.Email,
@@ -421,6 +426,7 @@ namespace JobCompany.Business.Services.VacancyServices
             existingVacancy.WorkStyle = vacancyDto.WorkStyle;
             existingVacancy.MainSalary = vacancyDto.MainSalary;
             existingVacancy.MaxSalary = vacancyDto.MaxSalary;
+            existingVacancy.SalaryCurrency = vacancyDto.SalaryCurrency;
             existingVacancy.Requirement = vacancyDto.Requirement;
             existingVacancy.Description = vacancyDto.Description;
             existingVacancy.Gender = vacancyDto.Gender;
@@ -554,7 +560,8 @@ namespace JobCompany.Business.Services.VacancyServices
                     WorkStyle = v.WorkStyle,
                     MainSalary = v.MainSalary,
                     MaxSalary = v.MaxSalary,
-                    IsSaved = _currentUser.UserId != null && v.SavedVacancies.Any(x => x.VacancyId == v.Id && x.UserId == _currentUser.UserGuid)
+                    IsSaved = _currentUser.UserId != null && v.SavedVacancies.Any(x => x.VacancyId == v.Id && x.UserId == _currentUser.UserGuid),
+                    SalaryCurrency = v.SalaryCurrency
                 })
                 .Skip(Math.Max(0, (skip - 1) * take))
                 .Take(take)
@@ -715,7 +722,8 @@ namespace JobCompany.Business.Services.VacancyServices
                 WorkStyle = x.WorkStyle,
                 MainSalary = x.MainSalary,
                 MaxSalary = x.MaxSalary,
-                IsSaved = x.SavedVacancies.Any(y => y.VacancyId == x.Id && y.UserId == _currentUser.UserGuid)
+                IsSaved = x.SavedVacancies.Any(y => y.VacancyId == x.Id && y.UserId == _currentUser.UserGuid),
+                SalaryCurrency = x.SalaryCurrency
             })
             .Take(take)
             .ToListAsync();
@@ -749,7 +757,8 @@ namespace JobCompany.Business.Services.VacancyServices
                     WorkStyle = x.Vacancy.WorkStyle,
                     MainSalary = x.Vacancy.MainSalary,
                     MaxSalary = x.Vacancy.MaxSalary,
-                    IsSaved = true
+                    IsSaved = true,
+                    SalaryCurrency = x.Vacancy.SalaryCurrency
                 })
                 .Skip(Math.Max(0, (skip - 1) * take))
                 .Take(take)

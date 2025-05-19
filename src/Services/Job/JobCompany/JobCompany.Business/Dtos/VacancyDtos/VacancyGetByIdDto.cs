@@ -4,6 +4,7 @@ using JobCompany.Business.Dtos.MessageDtos;
 using JobCompany.Business.Dtos.NumberDtos;
 using JobCompany.Business.Dtos.SkillDtos;
 using JobCompany.Core.Entites;
+using JobCompany.Core.Enums;
 using Shared.Enums;
 using SharedLibrary.Enums;
 
@@ -28,6 +29,7 @@ namespace JobCompany.Business.Dtos.VacancyDtos
         public WorkStyle? WorkStyle { get; set; }
         public decimal? MainSalary { get; set; }
         public decimal? MaxSalary { get; set; }
+        public SalaryCurrencyType? SalaryCurrency { get; set; }
         public string Requirement { get; set; }
         public string Description { get; set; }
         public Gender Gender { get; set; }
