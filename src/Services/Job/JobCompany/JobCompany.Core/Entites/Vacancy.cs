@@ -1,4 +1,5 @@
 ﻿using JobCompany.Core.Entites.Base;
+using JobCompany.Core.Enums;
 using Shared.Enums;
 using SharedLibrary.Enums;
 
@@ -25,6 +26,7 @@ namespace JobCompany.Core.Entites
         public WorkStyle? WorkStyle { get; set; }
         public decimal? MainSalary { get; set; }
         public decimal? MaxSalary { get; set; }
+        public SalaryCurrencyType? SalaryCurrency { get; set; }
         public string Requirement { get; set; }
         public string? Description { get; set; }
         public Gender Gender { get; set; }

@@ -120,8 +120,10 @@ public class ApplicationService : IApplicationService
             await _context.Applications.FirstOrDefaultAsync(x =>
                 x.Id == applicationGuid && x.UserId == _currentUser.UserGuid)
             ?? throw new NotFoundException<Application>();
+
         if (existApplication.IsActive == false)
             throw new ApplicationStatusIsDeactiveException();
+
         existApplication.IsActive = false;
         await _context.SaveChangesAsync();
     }
@@ -245,7 +247,7 @@ public class ApplicationService : IApplicationService
 
         if (gender != null || (skillIds != null && skillIds.Count != 0)) //Filterdə gender və ya skillids varsa sorğu atılır
         {
-            var userIds = query.Select(a => a.UserId).Distinct().ToList();
+            var userIds = await query.Select(a => a.UserId).Distinct().ToListAsync();
 
             var response = await _filteredUserIdsRequest.GetResponse<GetFilteredUserIdsResponse>(
                 new GetFilteredUserIdsRequest { UserIds = userIds, Gender = gender, SkillIds = skillIds }); //Parametrlərə uyğun user id-ləri filtrlənir
@@ -254,13 +256,10 @@ public class ApplicationService : IApplicationService
                 query = query.Where(a => response.Message.UserIds.Contains(a.UserId));
         }
 
-        query = query.OrderByDescending(a => a.CreatedDate);
-
-        var totalCount = await query.CountAsync();
-
         var data = await query
             .Skip((skip - 1) * take)
             .Take(take)
+            .OrderByDescending(a => a.CreatedDate)
             .Select(a => new AllApplicationListDto
             {
                 ApplicationId = a.Id,
@@ -394,7 +393,7 @@ public class ApplicationService : IApplicationService
     private IQueryable<Application> GetApplicationsQuery(Guid? vacancyId, StatusEnum? status, string? userFullName)
     {
         var query = _context.Applications.AsNoTracking()
-            .Where(a => a.Vacancy.Company.UserId == _currentUser.UserGuid);
+            .Where(a => a.Vacancy.Company.UserId == _currentUser.UserGuid && a.IsActive && !a.IsDeleted);
 
         if (vacancyId != null) // Vakansiyaya görə filterlənmə
             query = query.Where(a => a.VacancyId == vacancyId);
@@ -404,8 +403,7 @@ public class ApplicationService : IApplicationService
 
         if (!string.IsNullOrEmpty(userFullName)) // Fullname-a görə filterlənmə
         {
-            string normalizedFullName = userFullName.Trim().ToLower();
-            query = query.Where(a => (a.FirstName + " " + a.LastName).ToLower().Contains(normalizedFullName));
+            query = query.Where(a => (a.FirstName + a.LastName).Contains(userFullName));
         }
 
         return query;
