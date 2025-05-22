@@ -58,7 +58,8 @@
         }
       ],
       "UpstreamPathTemplate": "/auth/Files/Images/{filename}",
-      "UpstreamHttpMethod": [ "GET" ]
+      "UpstreamHttpMethod": [ "GET" ],
+      "DangerousAcceptAnyServerCertificateValidator": true
     },
     {
       "DownstreamPathTemplate": "/Files/Images/{filename}",
@@ -70,7 +71,8 @@
         }
       ],
       "UpstreamPathTemplate": "/job/Files/Images/{filename}",
-      "UpstreamHttpMethod": [ "GET" ]
+      "UpstreamHttpMethod": [ "GET" ],
+      "DangerousAcceptAnyServerCertificateValidator": true
     },
     {
       "DownstreamPathTemplate": "/Files/Images/{filename}",
@@ -82,7 +84,8 @@
         }
       ],
       "UpstreamPathTemplate": "/jobcompany/Files/Images/{filename}",
-      "UpstreamHttpMethod": [ "GET" ]
+      "UpstreamHttpMethod": [ "GET" ],
+      "DangerousAcceptAnyServerCertificateValidator": true
     },
     {
       "DownstreamPathTemplate": "/Files/Images/{filename}",
@@ -94,7 +97,8 @@
         }
       ],
       "UpstreamPathTemplate": "/jobpayment/Files/Images/{filename}",
-      "UpstreamHttpMethod": [ "GET" ]
+      "UpstreamHttpMethod": [ "GET" ],
+      "DangerousAcceptAnyServerCertificateValidator": true
     }
   ],
   "GlobalConfiguration": {
