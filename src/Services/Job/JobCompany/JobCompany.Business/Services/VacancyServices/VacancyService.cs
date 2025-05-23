@@ -22,6 +22,7 @@ using SharedLibrary.Requests;
 using SharedLibrary.Responses;
 using SharedLibrary.Statics;
 using System.Data;
+using static System.Net.WebRequestMethods;
 
 namespace JobCompany.Business.Services.VacancyServices
 {
@@ -551,7 +552,7 @@ namespace JobCompany.Business.Services.VacancyServices
                 {
                     Id = v.Id,
                     Title = v.Title,
-                    CompanyLogo = v.Company.CompanyLogo != null ? $"{_currentUser.BaseUrl}/{v.Company.CompanyLogo}" : null,
+                    CompanyLogo = v.Company.CompanyLogo != null ? $"https://job-api.siesco.studio/{v.Company.CompanyLogo}" : null,
                     CompanyName = v.Company.IsCompany ? v.Company.CompanyName : v.CompanyName,
                     StartDate = v.StartDate,
                     Location = v.Location,
