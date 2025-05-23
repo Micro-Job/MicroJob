@@ -47,6 +47,18 @@
       ],
       "UpstreamPathTemplate": "/jobpayment/{everything}",
       "UpstreamHttpMethod": [ "POST", "GET", "PUT", "DELETE" ]
+    },
+    {
+      "DownstreamPathTemplate": "/Files/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "jobcompany-service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/files/{everything}",
+      "UpstreamHttpMethod": [ "GET" ]
     }
   ],
   "GlobalConfiguration": {
