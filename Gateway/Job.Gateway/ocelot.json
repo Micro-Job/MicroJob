@@ -49,33 +49,7 @@
       "UpstreamHttpMethod": [ "POST", "GET", "PUT", "DELETE" ]
     },
     {
-      "DownstreamPathTemplate": "/Files/Images/{filename}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "job-auth-service",
-          "Port": 8080
-        }
-      ],
-      "UpstreamPathTemplate": "/auth/Files/Images/{filename}",
-      "UpstreamHttpMethod": [ "GET" ],
-      "DangerousAcceptAnyServerCertificateValidator": true
-    },
-    {
-      "DownstreamPathTemplate": "/Files/Images/{filename}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "jobuser-service",
-          "Port": 8080
-        }
-      ],
-      "UpstreamPathTemplate": "/job/Files/Images/{filename}",
-      "UpstreamHttpMethod": [ "GET" ],
-      "DangerousAcceptAnyServerCertificateValidator": true
-    },
-    {
-      "DownstreamPathTemplate": "/Files/Images/{filename}",
+      "DownstreamPathTemplate": "/Files/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -83,22 +57,8 @@
           "Port": 8080
         }
       ],
-      "UpstreamPathTemplate": "/jobcompany/Files/Images/{filename}",
-      "UpstreamHttpMethod": [ "GET" ],
-      "DangerousAcceptAnyServerCertificateValidator": true
-    },
-    {
-      "DownstreamPathTemplate": "/Files/Images/{filename}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "jobpayment-service",
-          "Port": 8080
-        }
-      ],
-      "UpstreamPathTemplate": "/jobpayment/Files/Images/{filename}",
-      "UpstreamHttpMethod": [ "GET" ],
-      "DangerousAcceptAnyServerCertificateValidator": true
+      "UpstreamPathTemplate": "/files/{everything}",
+      "UpstreamHttpMethod": [ "GET" ]
     }
   ],
   "GlobalConfiguration": {
