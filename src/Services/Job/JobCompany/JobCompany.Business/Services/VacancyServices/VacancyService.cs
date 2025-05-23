@@ -9,8 +9,8 @@ using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using MassTransit;
 using MassTransit.Initializers;
-using MassTransit.NewIdProviders;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.Enums;
 using SharedLibrary.Events;
@@ -22,11 +22,10 @@ using SharedLibrary.Requests;
 using SharedLibrary.Responses;
 using SharedLibrary.Statics;
 using System.Data;
-using static System.Net.WebRequestMethods;
 
 namespace JobCompany.Business.Services.VacancyServices
 {
-    public class VacancyService(JobCompanyDbContext _context, IFileService _fileService, IPublishEndpoint _publishEndpoint, ICurrentUser _currentUser, IRequestClient<CheckBalanceRequest> _checkBalanceRequest) : IVacancyService
+    public class VacancyService(JobCompanyDbContext _context, IFileService _fileService, IPublishEndpoint _publishEndpoint, ICurrentUser _currentUser, IRequestClient<CheckBalanceRequest> _checkBalanceRequest, IConfiguration _configuration) : IVacancyService
     {
         /// <summary> vacancy yaradılması </summary>
         /// vacancy yaradilan zaman exam yaradılması
@@ -552,7 +551,7 @@ namespace JobCompany.Business.Services.VacancyServices
                 {
                     Id = v.Id,
                     Title = v.Title,
-                    CompanyLogo = v.Company.CompanyLogo != null ? $"https://job-api.siesco.studio/{v.Company.CompanyLogo}" : null,
+                    CompanyLogo = v.Company.CompanyLogo != null ? $"{_configuration["ApiGateway:BaseUrl"]}/{v.Company.CompanyLogo}" : null,
                     CompanyName = v.Company.IsCompany ? v.Company.CompanyName : v.CompanyName,
                     StartDate = v.StartDate,
                     Location = v.Location,
