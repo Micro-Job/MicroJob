@@ -1,6 +1,19 @@
 {
   "Routes": [
     {
+      "DownstreamPathTemplate": "/Files/Images/{filename}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "jobcompany-service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/Files/Images/{filename}",
+      "UpstreamHttpMethod": [ "GET" ],
+      "Priority": 100
+    },
+    {
       "DownstreamPathTemplate": "/api/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
@@ -45,7 +58,7 @@
           "Port": 8080
         }
       ],
-      "UpstreamPathTemplate": "/jobpayment/{everything}",
+      "UpstreamPathTemplate": "/payment/{everything}",
       "UpstreamHttpMethod": [ "POST", "GET", "PUT", "DELETE" ]
     },
     {
