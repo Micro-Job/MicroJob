@@ -58,7 +58,7 @@
           "Port": 8080
         }
       ],
-      "UpstreamPathTemplate": "/payment/{everything}",
+      "UpstreamPathTemplate": "/jobpayment/{everything}",
       "UpstreamHttpMethod": [ "POST", "GET", "PUT", "DELETE" ]
     },
     {
