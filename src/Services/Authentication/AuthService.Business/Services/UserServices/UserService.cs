@@ -9,6 +9,7 @@ using MassTransit;
 using MassTransit.Initializers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
+using Microsoft.Extensions.Configuration;
 using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.Enums;
 using SharedLibrary.Exceptions;
@@ -28,14 +29,16 @@ namespace AuthService.Business.Services.UserServices
         private readonly ICurrentUser _currentUser;
         private readonly IAuthService _authService;
         private readonly IRequestClient<GetCompaniesDataByUserIdsRequest> _companyDataRequest;
+        private readonly IConfiguration _configuration;
 
-        public UserService(AppDbContext context, IFileService fileService, ICurrentUser currentUser, IAuthService authService, IRequestClient<GetCompaniesDataByUserIdsRequest> companyDataRequest)
+        public UserService(AppDbContext context, IFileService fileService, ICurrentUser currentUser, IAuthService authService, IRequestClient<GetCompaniesDataByUserIdsRequest> companyDataRequest, IConfiguration configuration)
         {
             _context = context;
             _fileService = fileService;
             _currentUser = currentUser;
             _authService = authService;
             _companyDataRequest = companyDataRequest;
+            _configuration = configuration;
         }
 
         /// <summary> Loginde olan User informasiyası </summary>
@@ -51,7 +54,7 @@ namespace AuthService.Business.Services.UserServices
                         LastName = x.LastName,
                         Email = x.Email,
                         MainPhoneNumber = x.MainPhoneNumber,
-                        Image = x.Image != null ? $"{_currentUser.BaseUrl}/{x.Image}" : null,
+                        Image = x.Image != null ? $"{_configuration["ApiGateway:BaseUrl"]}/{x.Image}" : null,
                         UserRole = x.UserRole,
                         JobStatus = x.JobStatus,
                     }) ?? throw new UserNotFoundException();
@@ -124,7 +127,7 @@ namespace AuthService.Business.Services.UserServices
             return new UserProfileImageUpdateResponseDto
             {
                 UserId = user.Id,
-                ImageUrl = $"{_currentUser.BaseUrl}/{user.Image}",
+                ImageUrl = $"{_configuration["ApiGateway:BaseUrl"]}/{user.Image}",
             };
         }
 
