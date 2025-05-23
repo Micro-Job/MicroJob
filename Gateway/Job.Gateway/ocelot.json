@@ -59,30 +59,6 @@
       ],
       "UpstreamPathTemplate": "/auth/Files/Images/{filename}",
       "UpstreamHttpMethod": [ "GET" ]
-    },
-    {
-      "DownstreamPathTemplate": "/Files/Images/{filename}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "jobuser-service",
-          "Port": 8080
-        }
-      ],
-      "UpstreamPathTemplate": "/jobuser/Files/Images/{filename}",
-      "UpstreamHttpMethod": [ "GET" ]
-    },
-    {
-      "DownstreamPathTemplate": "/Files/Images/{filename}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "jobcompany-service",
-          "Port": 8080
-        }
-      ],
-      "UpstreamPathTemplate": "/jobcompany/Files/Images/{filename}",
-      "UpstreamHttpMethod": [ "GET" ]
     }
   ],
   "GlobalConfiguration": {
