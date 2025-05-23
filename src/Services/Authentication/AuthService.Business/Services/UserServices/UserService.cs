@@ -54,7 +54,7 @@ namespace AuthService.Business.Services.UserServices
                         LastName = x.LastName,
                         Email = x.Email,
                         MainPhoneNumber = x.MainPhoneNumber,
-                        Image = x.Image != null ? $"{_configuration["ApiGateway:BaseUrl"]}/{x.Image}" : null,
+                        Image = x.Image != null ? $"{_configuration["ApiGateway:BaseUrl"]}/jobuser/{x.Image}" : null,
                         UserRole = x.UserRole,
                         JobStatus = x.JobStatus,
                     }) ?? throw new UserNotFoundException();
