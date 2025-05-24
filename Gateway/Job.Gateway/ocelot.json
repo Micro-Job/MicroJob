@@ -58,8 +58,7 @@
         }
       ],
       "UpstreamPathTemplate": "/auth/Files/Images/{filename}",
-      "UpstreamHttpMethod": [ "GET" ],
-      "Priority": 1
+      "UpstreamHttpMethod": [ "GET" ]
     },
     {
       "DownstreamPathTemplate": "/Files/Images/{filename}",

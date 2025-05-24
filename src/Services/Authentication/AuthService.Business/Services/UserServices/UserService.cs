@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using Microsoft.Extensions.Configuration;
 using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.Enums;
+using SharedLibrary.Events;
 using SharedLibrary.Exceptions;
 using SharedLibrary.ExternalServices.FileService;
 using SharedLibrary.Helpers;
@@ -28,17 +29,19 @@ namespace AuthService.Business.Services.UserServices
         private readonly IFileService _fileService;
         private readonly ICurrentUser _currentUser;
         private readonly IAuthService _authService;
-        private readonly IRequestClient<GetCompaniesDataByUserIdsRequest> _companyDataRequest;
         private readonly IConfiguration _configuration;
+        private readonly IPublishEndpoint _publishEndpoint;
+        private readonly IRequestClient<GetCompaniesDataByUserIdsRequest> _companyDataRequest;
 
-        public UserService(AppDbContext context, IFileService fileService, ICurrentUser currentUser, IAuthService authService, IRequestClient<GetCompaniesDataByUserIdsRequest> companyDataRequest, IConfiguration configuration)
+        public UserService(AppDbContext context, IFileService fileService, ICurrentUser currentUser, IAuthService authService, IRequestClient<GetCompaniesDataByUserIdsRequest> companyDataRequest, IConfiguration configuration, IPublishEndpoint publishEndpoint)
         {
             _context = context;
             _fileService = fileService;
             _currentUser = currentUser;
             _authService = authService;
-            _companyDataRequest = companyDataRequest;
             _configuration = configuration;
+            _publishEndpoint = publishEndpoint;
+            _companyDataRequest = companyDataRequest;
         }
 
         /// <summary> Loginde olan User informasiyası </summary>
@@ -93,6 +96,15 @@ namespace AuthService.Business.Services.UserServices
             user.MainPhoneNumber = dto.MainPhoneNumber.Trim();
             await _context.SaveChangesAsync();
 
+            var updateUserInfoEvent = new UpdateUserInfoEvent
+            {
+                UserId = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName
+            };
+
+            await _publishEndpoint.Publish(updateUserInfoEvent);
+
             return new UserUpdateResponseDto
             {
                 Id = user.Id,
@@ -113,21 +125,53 @@ namespace AuthService.Business.Services.UserServices
             if (!string.IsNullOrEmpty(user.Image))
             {
                 _fileService.DeleteFile(user.Image);
+                user.Image = null;
             }
 
-            FileDto fileResult =
-                dto.Image != null
+            if (dto.Image is not null)
+            {
+
+                FileDto fileResult = dto.Image != null
                     ? await _fileService.UploadAsync(FilePaths.image, dto.Image)
                     : new FileDto();
 
-            user.Image = $"{fileResult.FilePath}/{fileResult.FileName}";
+                user.Image = $"{fileResult.FilePath}/{fileResult.FileName}";
+            }
 
             await _context.SaveChangesAsync();
+
+            UpdateUserProfileImageEvent profileImageUpdateEvent;
+            
+            if (dto.Image is null)
+            {
+                // Əgər istifadəçi profil şəklini silmək istəyirsə
+                profileImageUpdateEvent = new UpdateUserProfileImageEvent
+                {
+                    UserId = user.Id,
+                    FileName = null,
+                    Base64Image = null
+                };
+            }
+            else
+            {
+                using var ms = new MemoryStream();
+                await dto.Image.CopyToAsync(ms);
+                var bytes = ms.ToArray();
+
+                profileImageUpdateEvent = new UpdateUserProfileImageEvent
+                {
+                    UserId = user.Id,
+                    FileName = dto.Image.FileName,
+                    Base64Image = Convert.ToBase64String(bytes)
+                };
+            }
+
+            await _publishEndpoint.Publish(profileImageUpdateEvent);
 
             return new UserProfileImageUpdateResponseDto
             {
                 UserId = user.Id,
-                ImageUrl = $"{_configuration["ApiGateway:BaseUrl"]}/user/{user.Image}",
+                ImageUrl = $"{_configuration["ApiGateway:BaseUrl"]}/auth/{user.Image}",
             };
         }
 
@@ -277,7 +321,7 @@ namespace AuthService.Business.Services.UserServices
                 Datas = users,
                 TotalCount = totalCount
             };
-         }
+        }
 
         public async Task<OperatorInfoDto> GetOperatorByIdAsync(string id)
         {

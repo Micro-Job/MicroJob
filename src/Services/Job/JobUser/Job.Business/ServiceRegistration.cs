@@ -54,6 +54,8 @@ namespace Job.Business
                 x.AddConsumer<GetFilteredUserIdsConsumer>();
                 x.AddConsumer<NotificationEventConsumer>();
                 x.AddConsumer<GetUserResumePhotoConsumer>();
+                x.AddConsumer<UpdateUserInfoEventConsumer>();
+                x.AddConsumer<UpdateUserProfileImageEventConsumer>();
 
                 x.SetKebabCaseEndpointNameFormatter();
 
