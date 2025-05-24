@@ -11,10 +11,6 @@ using MassTransit;
 using MassTransit.Initializers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.OpenApi.Extensions;
-using Shared.Events;
-using Shared.Requests;
-using Shared.Responses;
 using SharedLibrary.Dtos.ApplicationDtos;
 using SharedLibrary.Enums;
 using SharedLibrary.Events;
@@ -162,7 +158,7 @@ public class ApplicationService : IApplicationService
                 InformationId = applicationGuid,
                 InformationName = existAppVacancy.VacancyTitle,
                 NotificationType = NotificationType.ApplicationStatusUpdate,
-                SenderImage = $"{_currentUser.BaseUrl}/{existAppVacancy.CompanyLogo}",
+                SenderImage = $"{_currentUser.BaseUrl}/company/{existAppVacancy.CompanyLogo}",
                 SenderName = existAppVacancy.CompanyName,
             }
         );
@@ -266,7 +262,7 @@ public class ApplicationService : IApplicationService
                 FirstName = a.FirstName,
                 LastName = a.LastName,
                 Email = a.Email,
-                ProfileImage = $"{_jobUserBaseUrl}/{a.ProfileImage}",
+                ProfileImage = $"{_currentUser.BaseUrl}/user/{a.ProfileImage}",
                 DateTime = a.CreatedDate,
                 ResumeId = a.ResumeId,
                 PhoneNumber = a.PhoneNumber,
@@ -305,7 +301,7 @@ public class ApplicationService : IApplicationService
                 VacancyId = a.VacancyId,
                 Title = a.Vacancy.Title,
                 CompanyId = a.Vacancy.CompanyId,
-                CompanyLogo = a.Vacancy.Company.CompanyLogo != null ? $"{_currentUser.BaseUrl}/{a.Vacancy.Company.CompanyLogo}" : null,
+                CompanyLogo = a.Vacancy.Company.CompanyLogo != null ? $"{_currentUser.BaseUrl}/company/{a.Vacancy.Company.CompanyLogo}" : null,
                 CompanyName = a.Vacancy.Company.CompanyName,
                 WorkType = a.Vacancy.WorkType,
                 VacancyStatus = a.Vacancy.VacancyStatus,
@@ -341,7 +337,7 @@ public class ApplicationService : IApplicationService
                 IsSavedVacancy = application.Vacancy.SavedVacancies.Any(x => x.UserId == _currentUser.UserGuid),
                 CompanyId = application.Vacancy.CompanyId,
                 CompanyName = application.Vacancy.Company.CompanyName,
-                CompanyLogo = $"{_currentUser.BaseUrl}/{application.Vacancy.Company.CompanyLogo}",
+                CompanyLogo = $"{_currentUser.BaseUrl}/company/{application.Vacancy.Company.CompanyLogo}",
                 Location = application.Vacancy.Company.CompanyLocation,
                 WorkType = application.Vacancy.WorkType,
                 WorkStyle = application.Vacancy.WorkStyle,
@@ -374,7 +370,7 @@ public class ApplicationService : IApplicationService
             .Select(a => new ApplicationWithStatusInfoListDto
             {
                 ApplicationId = a.Id,
-                ProfileImage = $"{_jobUserBaseUrl}/{a.ProfileImage}",
+                ProfileImage = $"{_currentUser.BaseUrl}/user/{a.ProfileImage}",
                 FirstName = a.FirstName,
                 LastName = a.LastName,
                 StatusId = a.StatusId,

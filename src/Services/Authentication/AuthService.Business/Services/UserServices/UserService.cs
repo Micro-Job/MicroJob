@@ -127,7 +127,7 @@ namespace AuthService.Business.Services.UserServices
             return new UserProfileImageUpdateResponseDto
             {
                 UserId = user.Id,
-                ImageUrl = $"{_configuration["ApiGateway:BaseUrl"]}/{user.Image}",
+                ImageUrl = $"{_configuration["ApiGateway:BaseUrl"]}/user/{user.Image}",
             };
         }
 

@@ -63,7 +63,7 @@ public class NotificationService(JobDbContext _context, ICurrentUser _currentUse
             CreatedDate = n.CreatedDate,
             NotificationType = n.NotificationType,
             SenderName = n.SenderId.HasValue ? companyDataResponse.Message.Companies[n.SenderId.Value].CompanyName : null,
-            SenderImage = n.SenderId.HasValue ? $"{_configuration["JobCompany:BaseUrl"]}/{companyDataResponse.Message.Companies[n.SenderId.Value].CompanyLogo}" : null,
+            SenderImage = n.SenderId.HasValue ? $"{_currentUser.BaseUrl}/company/{companyDataResponse.Message.Companies[n.SenderId.Value].CompanyLogo}" : null,
             IsSeen = n.IsSeen,
         }).ToListAsync();
 
