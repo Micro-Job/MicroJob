@@ -49,7 +49,7 @@ namespace JobCompany.Business.Services.NotificationServices
                     InformationName = n.Notification.InformationName,
                     NotificationType = n.Notification.NotificationType,
                     CreatedDate = n.Notification.CreatedDate,
-                    SenderImage = $"{_configuration["AuthService:BaseUrl"]}{n.User?.ProfileImage}",
+                    SenderImage = $"{_currentUser.BaseUrl}/user/{n.User?.ProfileImage}",
                     SenderName = n.User != null ? $"{n.User.FirstName} {n.User.LastName}" : null,
                     IsSeen = n.Notification.IsSeen,
                 })

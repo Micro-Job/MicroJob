@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using JobCompany.Business.Dtos.Common;
 using JobCompany.Business.Dtos.CompanyDtos;
 using JobCompany.Business.Dtos.NumberDtos;
@@ -13,13 +12,8 @@ using MassTransit.Initializers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Shared.Exceptions;
-using Shared.Requests;
-using Shared.Responses;
-using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.Enums;
 using SharedLibrary.ExternalServices.FileService;
-using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;
 using SharedLibrary.Statics;
 
@@ -135,7 +129,7 @@ namespace JobCompany.Business.Services.CompanyServices
 
             return new CompanyUpdateResponseDto
             {
-                CompanyLogo = $"{_currentUser.BaseUrl}/{company.CompanyLogo}"
+                CompanyLogo = $"{_currentUser.BaseUrl}/company/{company.CompanyLogo}"
             };
         }
 
@@ -154,7 +148,7 @@ namespace JobCompany.Business.Services.CompanyServices
                 {
                     CompanyId = c.Id,
                     CompanyName = c.CompanyName,
-                    CompanyImage = c.CompanyLogo != null ? $"{_currentUser.BaseUrl}/{c.CompanyLogo}" : null,
+                    CompanyImage = c.CompanyLogo != null ? $"{_currentUser.BaseUrl}/company/{c.CompanyLogo}" : null,
                     CompanyVacancyCount = c.Vacancies != null ? c.Vacancies.Count(v => v.VacancyStatus == VacancyStatus.Active && v.EndDate > DateTime.Now) : 0,
                 })
                 .Skip(offset)
@@ -180,7 +174,7 @@ namespace JobCompany.Business.Services.CompanyServices
                             CompanyInformation = x.CompanyInformation,
                             CompanyLocation = x.CompanyLocation,
                             CompanyName = x.CompanyName,
-                            CompanyLogo = $"{_currentUser.BaseUrl}/{x.CompanyLogo}",
+                            CompanyLogo = $"{_currentUser.BaseUrl}/company/{x.CompanyLogo}",
                             WebLink = x.WebLink,
                             UserId = x.UserId,
                             CompanyNumbers = x.CompanyNumbers
@@ -218,7 +212,7 @@ namespace JobCompany.Business.Services.CompanyServices
                     WebLink = x.WebLink,
                     CreatedDate = x.CreatedDate,
                     EmployeeCount = x.EmployeeCount.HasValue ? x.EmployeeCount.Value : null,
-                    CompanyLogo = $"{_currentUser.BaseUrl}/{x.CompanyLogo}",
+                    CompanyLogo = $"{_currentUser.BaseUrl}/company/{x.CompanyLogo}",
                     Category = x.Category.GetTranslation(currentLanguage, GetTranslationPropertyName.Name),
                     City = x.City != null ? x.City.GetTranslation(currentLanguage, GetTranslationPropertyName.Name) : null,
                     Country = x.Country != null ? x.Country.GetTranslation(currentLanguage, GetTranslationPropertyName.Name) : null,

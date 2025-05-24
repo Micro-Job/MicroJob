@@ -63,7 +63,6 @@ namespace Job.Business.Services.Resume
             if (positionId != Guid.Empty)
                 resume.PositionId = positionId;
 
-
             await _context.Resumes.AddAsync(resume);
             await _context.SaveChangesAsync();
 
@@ -120,7 +119,7 @@ namespace Job.Business.Services.Resume
                                             IsMainNumber = resume.PhoneNumbers.Any(p => p.PhoneNumber == userMainPhoneNumber),
                                             PositionId = resume.PositionId,
                                             ParentPositionId = resume.Position != null ? resume.Position.ParentPositionId : null,
-                                            UserPhoto = resume.UserPhoto != null ? $"{_currentUser.BaseUrl}/{resume.UserPhoto}" : null,
+                                            UserPhoto = resume.UserPhoto != null ? $"{_currentUser.BaseUrl}/user/{resume.UserPhoto}" : null,
                                             IsPublic = resume.IsPublic,
                                             IsAnonym = resume.IsAnonym,
                                             Skills = resume.ResumeSkills.Select(s => new SkillGetByIdDto
@@ -232,7 +231,7 @@ namespace Job.Business.Services.Resume
             {
                 Id = x.Id,
                 FullName = x.IsPublic ? $"{x.FirstName} {x.LastName}" : x.CompanyResumeAccesses.Any(cra => cra.CompanyUserId == _currentUser.UserGuid && cra.ResumeId == x.Id) ? $"{x.FirstName} {x.LastName}" : null,
-                ProfileImage = x.UserPhoto != null ? x.IsPublic ? $"{_currentUser.BaseUrl}/{x.UserPhoto}" : x.CompanyResumeAccesses.Any(cra => cra.CompanyUserId == _currentUser.UserGuid && cra.ResumeId == x.Id) ? $"{_currentUser.BaseUrl}/{x.UserPhoto}" : null : null,
+                ProfileImage = x.UserPhoto != null ? x.IsPublic ? $"{_currentUser.BaseUrl}/user/{x.UserPhoto}" : x.CompanyResumeAccesses.Any(cra => cra.CompanyUserId == _currentUser.UserGuid && cra.ResumeId == x.Id) ? $"{_currentUser.BaseUrl}/{x.UserPhoto}" : null : null,
                 IsSaved = x.SavedResumes.Any(sr => sr.ResumeId == x.Id && sr.CompanyUserId == _currentUser.UserGuid),
                 IsPublic = x.IsPublic,
                 JobStatus = x.User.JobStatus,
@@ -286,7 +285,7 @@ namespace Job.Business.Services.Resume
                    FullName = x.IsPublic ? $"{x.FirstName} {x.LastName}" : x.CompanyResumeAccesses.Any(cra => cra.CompanyUserId == _currentUser.UserGuid) ? $"{x.FirstName} {x.LastName}" : null,
                    ProfileImage = x.UserPhoto != null
                        ? x.IsPublic || x.CompanyResumeAccesses.Any(cra => cra.CompanyUserId == _currentUser.UserGuid)
-                           ? $"{_currentUser.BaseUrl}/{x.UserPhoto}"
+                           ? $"{_currentUser.BaseUrl}/user/{x.UserPhoto}"
                            : null
                        : null,
                    IsSaved = true,
@@ -416,7 +415,7 @@ namespace Job.Business.Services.Resume
                     : [],
 
                 UserPhoto = hasFullAccess && resume.UserPhoto != null
-                    ? $"{_currentUser.BaseUrl}/{resume.UserPhoto}"
+                    ? $"{_currentUser.BaseUrl}/user/{resume.UserPhoto}"
                     : null,
 
                 BirthDay = resume.BirthDay,
@@ -687,7 +686,7 @@ namespace Job.Business.Services.Resume
                 _fileService.DeleteFile(resume.UserPhoto);
             }
 
-            var fileResult = await _fileService.UploadAsync(FilePaths.document, userPhoto);
+            var fileResult = await _fileService.UploadAsync(FilePaths.image, userPhoto);
             resume.UserPhoto = $"{fileResult.FilePath}/{fileResult.FileName}";
         }
 

@@ -130,7 +130,7 @@ public class ExamService(JobCompanyDbContext _context, IQuestionService _questio
                     {
                         Id = eq.Question.Id,
                         Title = eq.Question.Title,
-                        Image = eq.Question.Image != null ? $"{_currentUser.BaseUrl}/{eq.Question.Image}" : null,
+                        Image = eq.Question.Image != null ? $"{_currentUser.BaseUrl}/company/{eq.Question.Image}" : null,
                         QuestionType = eq.Question.QuestionType,
                         IsRequired = eq.Question.IsRequired,
                         Order = eq.Question.Order,
@@ -232,7 +232,7 @@ public class ExamService(JobCompanyDbContext _context, IQuestionService _questio
                 {
                     Id = eq.Question.Id,
                     Title = eq.Question.Title,
-                    Image = eq.Question.Image != null ? $"{_currentUser.BaseUrl}/{eq.Question.Image}" : null,
+                    Image = eq.Question.Image != null ? $"{_currentUser.BaseUrl}/company/{eq.Question.Image}" : null,
                     QuestionType = eq.Question.QuestionType,
                     IsRequired = eq.Question.IsRequired,
                     Order = eq.Question.Order,
@@ -264,7 +264,7 @@ public class ExamService(JobCompanyDbContext _context, IQuestionService _questio
                 {
                     Id = eq.Question.Id,
                     Title = eq.Question.Title,
-                    Image = eq.Question.Image != null ? $"{_currentUser.BaseUrl}/{eq.Question.Image}" : null,
+                    Image = eq.Question.Image != null ? $"{_currentUser.BaseUrl}/company/{eq.Question.Image}" : null,
                     QuestionType = eq.Question.QuestionType,
                     IsRequired = eq.Question.IsRequired,
                     Order = eq.Question.Order,
