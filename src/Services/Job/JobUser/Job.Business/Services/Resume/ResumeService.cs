@@ -231,7 +231,7 @@ namespace Job.Business.Services.Resume
             {
                 Id = x.Id,
                 FullName = x.IsPublic ? $"{x.FirstName} {x.LastName}" : x.CompanyResumeAccesses.Any(cra => cra.CompanyUserId == _currentUser.UserGuid && cra.ResumeId == x.Id) ? $"{x.FirstName} {x.LastName}" : null,
-                ProfileImage = x.UserPhoto != null ? x.IsPublic ? $"{_currentUser.BaseUrl}/user/{x.UserPhoto}" : x.CompanyResumeAccesses.Any(cra => cra.CompanyUserId == _currentUser.UserGuid && cra.ResumeId == x.Id) ? $"{_currentUser.BaseUrl}/{x.UserPhoto}" : null : null,
+                ProfileImage = x.UserPhoto != null ? x.IsPublic ? $"{_currentUser.BaseUrl}/user/{x.UserPhoto}" : x.CompanyResumeAccesses.Any(cra => cra.CompanyUserId == _currentUser.UserGuid && cra.ResumeId == x.Id) ? $"{_currentUser.BaseUrl}/user/{x.UserPhoto}" : null : null,
                 IsSaved = x.SavedResumes.Any(sr => sr.ResumeId == x.Id && sr.CompanyUserId == _currentUser.UserGuid),
                 IsPublic = x.IsPublic,
                 JobStatus = x.User.JobStatus,
