@@ -36,7 +36,7 @@ namespace AuthService.Business.Consumers
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 Email = user.Email,
-                ProfileImage = user.Image != null ? $"{_currentUser.BaseUrl}/{user.Image}" : null,
+                ProfileImage = user.Image != null ? $"{_currentUser.BaseUrl}/auth/{user.Image}" : null,
                 MainPhoneNumber = user.MainPhoneNumber
             });
         }

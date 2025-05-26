@@ -57,6 +57,7 @@ namespace SharedLibrary.ExternalServices.FileService
             }
             return filesList;
         }
+
         public async Task<FileDto> UploadAsync(string path, IFormFile file)
         {
             if (string.IsNullOrEmpty(path))
@@ -78,7 +79,6 @@ namespace SharedLibrary.ExternalServices.FileService
 
             return dto;
         }
-
 
         public async Task CopyAsync(string path, IFormFile file)
         {
@@ -118,6 +118,24 @@ namespace SharedLibrary.ExternalServices.FileService
             dto = new FileDto { FileName = RenameFile(file.FileName), FilePath = oldPath };
 
             await CopyAsync(Path.Combine(path, dto.FileName), file);
+        }
+
+        /// <summary>
+        /// Bayt arrayini wwwroot/<paramref name="subFolder"/>-nə fayl kimi yükləyir
+        /// </summary>
+        public async Task<FileDto> UploadAsync(string subFolder, string fileName, byte[] fileContents)
+        {
+            var uploadFolder = Path.Combine(_env.WebRootPath, subFolder);
+
+            Directory.CreateDirectory(uploadFolder);
+
+            var newFileName = RenameFile(fileName);
+
+            var fullPath = Path.Combine(uploadFolder, newFileName);
+
+            await File.WriteAllBytesAsync(fullPath, fileContents);
+
+            return new FileDto { FilePath = subFolder, FileName = newFileName };
         }
     }
 }

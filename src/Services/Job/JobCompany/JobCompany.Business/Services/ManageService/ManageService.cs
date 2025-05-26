@@ -120,7 +120,6 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
     {
         var query = _context.Vacancies
             .OrderBy(x => x.VacancyStatus).ThenBy(x => x.CreatedDate)
-            .AsQueryable()
             .AsNoTracking();
 
         if (vacancyStatus != null)
@@ -175,7 +174,8 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
             WorkType = x.WorkType,
             //bu yaradilma tarixidir(normalda baslama tarixi olur)
             StartDate = x.CreatedDate,
-            EndDate = x.EndDate
+            EndDate = x.EndDate, 
+            CompanyLogo = x.CompanyLogo != null ? $"{_currentUser.BaseUrl}/company/{x.CompanyLogo}" : null
         })
         .Skip((skip - 1) * take)
         .Take(take)

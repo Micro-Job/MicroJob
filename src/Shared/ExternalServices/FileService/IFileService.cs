@@ -20,5 +20,6 @@ namespace SharedLibrary.ExternalServices.FileService
         bool HasFile(string pathOrContainerName);
         Task CopyAsync(string path, IFormFile file);
         void DeleteFilesInPath(string path);
+        Task<FileDto> UploadAsync(string subFolder, string fileName, byte[] fileContents);
     }
 }
