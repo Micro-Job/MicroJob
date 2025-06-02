@@ -114,7 +114,7 @@ namespace AuthService.Business.Services.Auth
                 LastName = user.LastName
             });
             await CreateBalance(user.Id, user.FirstName, user.LastName);
-            
+
             await _emailService.SendEmailAsync(dto.Email,
                 new EmailMessage
                 {
@@ -234,8 +234,17 @@ namespace AuthService.Business.Services.Auth
         /// <exception cref="UserNotFoundException"></exception>
         public async Task ResetPasswordAsync(string email)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(x => x.Email == email)
-                ?? throw new UserNotFoundException();
+            var user = await _context.Users.FirstOrDefaultAsync(x => x.Email == email);
+
+            if (user == null) return;
+
+            var existedPasswordToken = await _context.PasswordTokens.FirstOrDefaultAsync(x => x.UserId == user.Id);
+
+            if (existedPasswordToken != null)
+            {
+                _context.PasswordTokens.Remove(existedPasswordToken);
+                await _context.SaveChangesAsync();
+            }
 
             var token = _tokenHandler.CreatePasswordResetToken(user);
 
@@ -269,9 +278,9 @@ namespace AuthService.Business.Services.Auth
 
             var email = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
 
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email) 
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email)
                 ?? throw new UserNotFoundException();
-            
+
             var passwordToken = await _context.PasswordTokens.FirstOrDefaultAsync(pt =>
                 pt.Token == dto.Token && pt.UserId == user.Id && pt.ExpireTime > DateTime.Now
             ) ?? throw new BadRequestException();

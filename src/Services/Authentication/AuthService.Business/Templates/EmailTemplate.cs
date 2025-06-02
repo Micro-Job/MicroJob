@@ -65,7 +65,7 @@ namespace AuthService.Business.Templates
                                         <p style='color:#455056; font-size:15px;line-height:24px; margin:0; font-family: Montserrat;'>
                                             Şifrəni yenilə düyməsinə sıxmaqla özünüzə yeni şifrə təyin edin və unutmayın.
                                         </p>
-                                        <a href='{ip}/reset-password/{token}'
+                                        <a href='{ip}/{token}'
                                             style='background:#6fccff;text-decoration:none !important; font-weight:500; margin-top:35px; color:#fff;text-transform:uppercase; font-family: Montserrat; font-size:14px;padding:10px 24px;display:inline-block;border-radius:50px;'>ŞİFRƏNİ YENİLƏ</a>
                                     </td>
                                 </tr>
