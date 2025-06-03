@@ -66,7 +66,7 @@ namespace Job.Business.Services.Resume
             await _context.Resumes.AddAsync(resume);
             await _context.SaveChangesAsync();
 
-            var phoneNumbers = await GetPhoneNumbersAsync(resumeCreateDto, resume.Id, resumeCreateDto);
+            var phoneNumbers = await GetPhoneNumbersAsync(resumeCreateDto, resume.Id);
             var educations = resumeCreateDto.Educations != null
                 ? await _educationService.CreateBulkEducationAsync(resumeCreateDto.Educations, resume.Id)
                 : [];
@@ -163,7 +163,7 @@ namespace Job.Business.Services.Resume
                                                 CertificateId = c.Id,
                                                 CertificateName = c.CertificateName,
                                                 GivenOrganization = c.GivenOrganization,
-                                                CertificateFile = $"{_currentUser.BaseUrl}/{c.CertificateFile}"
+                                                CertificateFile = $"{_currentUser.BaseUrl}/user/{c.CertificateFile}"
                                             }).ToList()
                                         })
                                         .FirstOrDefaultAsync();
@@ -615,21 +615,14 @@ namespace Job.Business.Services.Resume
             };
         }
 
-        private async Task<List<Core.Entities.Number>> GetPhoneNumbersAsync(ResumeCreateDto dto, Guid resumeId, ResumeCreateDto listsDto)
+        private async Task<List<Core.Entities.Number>> GetPhoneNumbersAsync(ResumeCreateDto dto, Guid resumeId)
         {
-            if (!dto.IsMainNumber)
-                return await _numberService.CreateBulkNumberAsync(listsDto.PhoneNumbers, resumeId);
+            string? mainNumber = null;
 
-            var mainNumber = (await _userInformationService.GetUserDataAsync((Guid)_currentUser.UserGuid)).MainPhoneNumber;
+            if (dto.IsMainNumber)
+                mainNumber = (await _userInformationService.GetUserDataAsync((Guid)_currentUser.UserGuid)).MainPhoneNumber;
 
-            return
-            [
-                new()
-                {
-                    PhoneNumber = mainNumber,
-                    ResumeId = resumeId
-                }
-            ];
+            return _numberService.CreateBulkNumber(dto.PhoneNumbers ?? [], resumeId, mainNumber);
         }
 
         private async Task<ICollection<Core.Entities.Certificate>> GetCertificatesAsync(ResumeCreateDto dto)
@@ -699,22 +692,15 @@ namespace Job.Business.Services.Resume
 
         private async Task UpdatePhoneNumbersAsync(Core.Entities.Resume resume, ICollection<NumberUpdateDto> phoneNumbers, bool isMainNumber)
         {
+            string? mainNumber = null;
+
             if (isMainNumber)
             {
-                var mainNumber = new List<Core.Entities.Number>
-                {
-                    new() {
-                        PhoneNumber = _userInformationService.GetUserDataAsync((Guid)_currentUser.UserGuid).Result.MainPhoneNumber,
-                        ResumeId = resume.Id
-                    }
-                };
+                var userInfo = await _userInformationService.GetUserDataAsync((Guid)_currentUser.UserGuid);
+                mainNumber = userInfo.MainPhoneNumber;
+            }
 
-                resume.PhoneNumbers = mainNumber;
-            }
-            else
-            {
-                resume.PhoneNumbers = await _numberService.UpdateBulkNumberAsync(phoneNumbers, resume.PhoneNumbers, resume.Id);
-            }
+            resume.PhoneNumbers = await _numberService.UpdateBulkNumberAsync(phoneNumbers, resume.PhoneNumbers, resume.Id, mainNumber);
         }
 
         private static void UpdateResumeSkills(Core.Entities.Resume resume, IEnumerable<Guid>? skillIds)

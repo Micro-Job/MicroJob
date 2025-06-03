@@ -20,72 +20,113 @@ namespace Job.Business.Services.Number
             return number;
         }
 
-        public async Task<List<Core.Entities.Number>> CreateBulkNumberAsync(ICollection<NumberCreateDto> numberCreateDtos, Guid resumeId)
+        public List<Core.Entities.Number> CreateBulkNumber(ICollection<NumberCreateDto> numbersDto, Guid resumeId, string? mainNumber = null)
         {
-            var numbersToAdd = new List<Core.Entities.Number>();
+            var normalizedSet = new HashSet<string>();
+            var result = new List<Core.Entities.Number>();
 
-            foreach (var numberCreate in numberCreateDtos)
+            if (!string.IsNullOrWhiteSpace(mainNumber))
             {
-                var number = await CreateNumberAsync(numberCreate, resumeId);
-
-                numbersToAdd.Add(number);
+                var normalizedMain = NormalizePhoneNumber(mainNumber);
+                if (normalizedSet.Add(normalizedMain))
+                {
+                    result.Add(new Core.Entities.Number
+                    {
+                        PhoneNumber = mainNumber,
+                        ResumeId = resumeId
+                    });
+                }
             }
 
-            return numbersToAdd;
+            foreach (var dto in numbersDto)
+            {
+                var normalized = NormalizePhoneNumber(dto.PhoneNumber);
+
+                if (normalizedSet.Add(normalized))
+                {
+                    result.Add(new Core.Entities.Number
+                    {
+                        PhoneNumber = dto.PhoneNumber.Trim(),
+                        ResumeId = resumeId
+                    });
+                }
+            }
+
+            return result;
         }
 
-        public async Task<List<Core.Entities.Number>> UpdateBulkNumberAsync(ICollection<NumberUpdateDto> numberUpdateDtos, ICollection<Core.Entities.Number> existingNumbers, Guid resumeId)
+        public async Task<List<Core.Entities.Number>> UpdateBulkNumberAsync(ICollection<NumberUpdateDto> numberUpdateDtos, ICollection<Core.Entities.Number> existingNumbers, Guid resumeId, string? mainNumber = null)
         {
-            var resultList = new List<Core.Entities.Number>();
-            var numbersToAdd = new List<Core.Entities.Number>();
+            var resultList = new List<Core.Entities.Number>(); // Yenilənmiş və əlavə olunmuş nömrələrin siyahısı
+            var numbersToAdd = new List<Core.Entities.Number>(); // Yalnız əlavə olunacaq yeni nömrələrin siyahısı
 
+            // Artıq mövcud olan nömrələrin normallaşdırılmış formatlarını qeyd edirik ki, təkrar yazılmasın
+            var processedPhoneNumbers = existingNumbers
+                .Select(n => NormalizePhoneNumber(n.PhoneNumber))
+                .ToHashSet();
+
+            //Dto-da hansı Id-li nömrələrin mövcud olduğunu saxlayırıq (silinənləri müəyyən eləmək üçün)
             var inputIds = numberUpdateDtos
                 .Where(dto => !string.IsNullOrWhiteSpace(dto.Id))
                 .Select(dto => Guid.Parse(dto.Id))
                 .ToHashSet();
 
-            // Əlavə edilən nömrələrin təkrarlanmaması üçün izlənən siyahı
-            var processedPhoneNumbers = existingNumbers.Select(n => n.PhoneNumber.Trim()).ToHashSet(); 
+            // Əgər əsas nömrə qeyd olunbsa və artıq mövcud deyilsə əlavə edirik
+            if (!string.IsNullOrWhiteSpace(mainNumber))
+            {
+                var normalizedMain = NormalizePhoneNumber(mainNumber);
+                if (!processedPhoneNumbers.Contains(normalizedMain))
+                {
+                    var number = new Core.Entities.Number
+                    {
+                        PhoneNumber = mainNumber.Trim(),
+                        ResumeId = resumeId
+                    };
+                    numbersToAdd.Add(number);
+                    processedPhoneNumbers.Add(normalizedMain); //Burda artıq istifadə edilmiş nömrələr siyahısına əlavə edirik
+                }
+            }
 
+            // Dto-dan gələn nömrələri normallaşdırırıq (çünki istifadəçi eyni nömrəni həm boşluqla həm də boşluq olmadan əlavə eliyə bilər)
             foreach (var dto in numberUpdateDtos)
             {
-                var normalizedPhoneNumber = dto.PhoneNumber.Trim();
+                var trimmed = dto.PhoneNumber.Trim();
+                var normalized = NormalizePhoneNumber(trimmed);
 
-                // Əgər nömrə artıq mövcud nömrələrdə varsa, onu güncəlləyir
+                // İd varsa deməli bu mövcud nömrədir və onu yeniləyirik
                 if (!string.IsNullOrWhiteSpace(dto.Id))
                 {
-                    var existing = existingNumbers.FirstOrDefault(n => n.Id == Guid.Parse(dto.Id));
+                    var id = Guid.Parse(dto.Id);
+                    var existing = existingNumbers.FirstOrDefault(n => n.Id == id);
                     if (existing != null)
                     {
-                        existing.PhoneNumber = normalizedPhoneNumber;
+                        existing.PhoneNumber = trimmed;
                         resultList.Add(existing);
+                        processedPhoneNumbers.Add(normalized);
                     }
                 }
                 else
                 {
-                    //Əgər bu nömrə artıq əlavə edilənlərdə və ya mövcudlarda yoxdursa, əlavə edir
-                    if (!processedPhoneNumbers.Contains(normalizedPhoneNumber))
+                    // Əgər bu yeni nömrədirsə və təkrar deyilsə əlavə edirik
+                    if (!processedPhoneNumbers.Contains(normalized))
                     {
-                        var newNumber = new Core.Entities.Number
+                        numbersToAdd.Add(new Core.Entities.Number
                         {
-                            PhoneNumber = normalizedPhoneNumber,
+                            PhoneNumber = trimmed,
                             ResumeId = resumeId
-                        };
-
-                        numbersToAdd.Add(newNumber);
-                        processedPhoneNumbers.Add(normalizedPhoneNumber); // Təkrar əlavə olunmasın deyə izlənən siyahıya salırıq
+                        });
+                        processedPhoneNumbers.Add(normalized);
                     }
                 }
             }
 
-            var numbersToRemove = existingNumbers
-                .Where(n => !inputIds.Contains(n.Id))
-                .ToList();
+            // Artıq istifadə olunmayan mövcud nömrələri silmək üçün seçirik
+            var numbersToRemove = existingNumbers.Where(n => !inputIds.Contains(n.Id)).ToList();
 
-            if (numbersToRemove.Count > 0)
+            if (numbersToRemove.Any())
                 context.Numbers.RemoveRange(numbersToRemove);
 
-            if (numbersToAdd.Count > 0)
+            if (numbersToAdd.Any())
                 await context.Numbers.AddRangeAsync(numbersToAdd);
 
             resultList.AddRange(numbersToAdd);
@@ -102,6 +143,11 @@ namespace Job.Business.Services.Number
 
             number.PhoneNumber = numberUpdateDto.PhoneNumber;
             await context.SaveChangesAsync();
+        }
+
+        private static string NormalizePhoneNumber(string number)
+        {
+            return new string(number.Where(char.IsDigit).ToArray());
         }
     }
 }
