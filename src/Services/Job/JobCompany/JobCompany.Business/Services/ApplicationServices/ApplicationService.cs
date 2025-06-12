@@ -170,6 +170,7 @@ public class ApplicationService : IApplicationService
         var applicationGuid = Guid.Parse(applicationId);
 
         var application = await _context.Applications
+                .AsNoTracking()
                 .Where(a => a.Id == applicationGuid && a.IsActive)
                 .Select(a => new ApplicationGetByIdDto
                 {
@@ -179,7 +180,6 @@ public class ApplicationService : IApplicationService
                     CompanyName = a.Vacancy.CompanyName,
                     CreatedDate = a.CreatedDate,
                     Description = a.Vacancy.Description,
-
                     Status = a.Status.StatusEnum,
                     StatusColor = a.Status.StatusColor,
                     Steps = _context
