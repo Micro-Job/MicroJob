@@ -63,6 +63,15 @@ namespace Job.Business.Dtos.ResumeDtos
 
             RuleFor(x => x.Gender)
                 .IsInEnum().WithMessage(MessageHelper.GetMessage("INVALID_FORMAT"));
+
+            RuleForEach(x => x.Certificates)
+                .SetValidator(new CertificateCreateDtoValidator());
+
+            RuleForEach(x => x.Experiences)
+                .SetValidator(new ExperienceCreateDtoValidator());
+
+            RuleForEach(x => x.Educations)
+                .SetValidator(new EducationCreateDtoValidator());
         }
     }
 }

@@ -14,10 +14,9 @@ public class UpdateUserProfileImageEventConsumer(JobDbContext _jobDbContext, IFi
     public async Task Consume(ConsumeContext<UpdateUserProfileImageEvent> context)
     {
         var user = await _jobDbContext.Users.FindAsync(context.Message.UserId) ?? throw new NotFoundException<User>();
-        Console.WriteLine(user.Image);
+
         if (user.Image is not null)
         {
-            Console.WriteLine("user image not nullllllllll");
             _fileService.DeleteFile(user.Image);
             user.Image = null;
         }

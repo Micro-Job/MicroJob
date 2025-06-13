@@ -28,9 +28,6 @@ namespace AuthService.Business.Services.Auth
             dto.Email = dto.Email.Trim();
             await CheckUserExistAsync(dto.Email, dto.MainPhoneNumber);
 
-            if (dto.Password != dto.ConfirmPassword)
-                throw new WrongPasswordException();
-
             var user = new User
             {
                 Id = Guid.NewGuid(),
@@ -78,9 +75,6 @@ namespace AuthService.Business.Services.Auth
             dto.MainPhoneNumber = dto.MainPhoneNumber.Trim();
             dto.Email = dto.Email.Trim();
             await CheckUserExistAsync(dto.Email, dto.MainPhoneNumber);
-
-            if (dto.Password != dto.ConfirmPassword)
-                throw new WrongPasswordException();
 
             var user = new User
             {

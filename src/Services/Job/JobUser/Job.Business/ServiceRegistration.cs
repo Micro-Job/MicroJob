@@ -45,15 +45,10 @@ namespace Job.Business
             services.AddMassTransit(x =>
             {
                 x.AddConsumer<UserRegisteredConsumer>();
-                x.AddConsumer<GetResumeDataConsumer>();
-                x.AddConsumer<UpdateUserApplicationStatusConsumer>();
-                x.AddConsumer<VacancyCreatedConsumer>();
-                x.AddConsumer<VacancyUpdatedConsumer>();
-                x.AddConsumer<VacancyDeletedConsumer>();
-                x.AddConsumer<GetResumeIdsByUserIdsConsumer>();
+                x.AddConsumer<GetResumeDataConsumer>();             
+                x.AddConsumer<VacancyCreatedConsumer>();                
                 x.AddConsumer<GetFilteredUserIdsConsumer>();
                 x.AddConsumer<NotificationEventConsumer>();
-                x.AddConsumer<GetUserResumePhotoConsumer>();
                 x.AddConsumer<UpdateUserInfoEventConsumer>();
                 x.AddConsumer<UpdateUserProfileImageEventConsumer>();
 

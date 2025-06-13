@@ -33,10 +33,8 @@ namespace Job.Business.Dtos.EducationDtos
                 .WithMessage(MessageHelper.GetMessage("NOT_EMPTY"));
 
             RuleFor(dto => dto.EndDate)
-                .Must((dto, endDate) => dto.IsCurrentEducation && endDate.HasValue)
-                .WithMessage(MessageHelper.GetMessage("END_DATE_MUST_BE"))
-                .When(dto => dto.EndDate.HasValue)
-                .WithMessage(MessageHelper.GetMessage("STARTDATE_MUST_BE_EARLIER_ENDATE"));
+                .GreaterThan(dto => dto.StartDate).WithMessage(MessageHelper.GetMessage("STARTDATE_MUST_BE_EARLIER_ENDATE"))
+                .When(dto => dto.EndDate.HasValue);
 
             RuleFor(dto => dto.ProfessionDegree)
                 .IsInEnum()

@@ -1,39 +1,34 @@
 ﻿using Job.Business.Dtos.UserDtos;
-using Job.Business.Exceptions.Common;
 using Job.Business.Exceptions.UserExceptions;
 using Job.DAL.Contexts;
 using MassTransit;
-using MassTransit.Transports;
 using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Enums;
 using SharedLibrary.Events;
-using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;
 using SharedLibrary.Requests;
 using SharedLibrary.Responses;
 
-namespace Job.Business.Services.User
+namespace Job.Business.Services.User;
+
+public class UserInformationService(IRequestClient<GetUserDataRequest> _client, JobDbContext _context, ICurrentUser _user, IPublishEndpoint _endPoint) : IUserInformationService
 {
-    public class UserInformationService(IRequestClient<GetUserDataRequest> _client, JobDbContext _context, ICurrentUser _user , IPublishEndpoint _endPoint) : IUserInformationService
+    public async Task<GetUserDataResponse> GetUserDataAsync(Guid userId)
     {
-        public async Task<GetUserDataResponse> GetUserDataAsync(Guid userId)
-        {
-            var response = await _client.GetResponse<GetUserDataResponse>(new GetUserDataRequest { UserId = userId });
-            return response.Message;
-        }
+        var response = await _client.GetResponse<GetUserDataResponse>(new GetUserDataRequest { UserId = userId });
+        return response.Message;
+    }
 
-        public async Task<JobStatus> UpdateUserJobStatusAsync(UserJobStatusUpdateDto dto)
-        {
-            var user =
-                await _context.Users.FirstOrDefaultAsync(u => u.Id == _user.UserGuid)
-                ?? throw new NotFoundUserException();
+    public async Task<JobStatus> UpdateUserJobStatusAsync(UserJobStatusUpdateDto dto)
+    {
+        var affectedRows = await _context.Users
+            .Where(u => u.Id == _user.UserGuid)
+            .ExecuteUpdateAsync(builder => builder
+            .SetProperty(u => u.JobStatus, _ => dto.JobStatus));
 
-            user.JobStatus = dto.JobStatus;
+        if (affectedRows == 0) throw new NotFoundUserException();
 
-            await _context.SaveChangesAsync();
-
-            await _endPoint.Publish(new UpdateUserJobStatusEvent {  UserId = user.Id, JobStatus = user.JobStatus });
-            return user.JobStatus;
-        }
+        await _endPoint.Publish(new UpdateUserJobStatusEvent { UserId = _user.UserGuid!.Value, JobStatus = dto.JobStatus });
+        return dto.JobStatus;
     }
 }

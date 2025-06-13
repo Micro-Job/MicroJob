@@ -467,7 +467,7 @@ namespace Job.Business.Services.Resume
                     CertificateId = c.Id,
                     CertificateName = c.CertificateName,
                     GivenOrganization = c.GivenOrganization,
-                    CertificateFile = $"{_currentUser.BaseUrl}/{c.CertificateFile}"
+                    CertificateFile = $"{_currentUser.BaseUrl}/user/{c.CertificateFile}"
                 }).ToList()
             };
         }
