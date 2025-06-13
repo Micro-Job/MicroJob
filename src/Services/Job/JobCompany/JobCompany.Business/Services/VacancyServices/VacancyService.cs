@@ -699,34 +699,36 @@ namespace JobCompany.Business.Services.VacancyServices
 
         public async Task<List<VacancyGetAllDto>> SimilarVacanciesAsync(string vacancyId, int take = 8)
         {
-            var mainVacancy = await _context.Vacancies.Where(x => x.Id == Guid.Parse(vacancyId) && x.EndDate > DateTime.Now)
-            .Select(x => new
-            {
-                x.Id,
-                x.CategoryId
-            }).FirstOrDefaultAsync();
+            var mainVacancy = await _context.Vacancies
+                .AsNoTracking()
+                .Where(x => x.Id == Guid.Parse(vacancyId) && x.EndDate > DateTime.Now)
+                .Select(x => new
+                {
+                    x.Id,
+                    x.CategoryId
+                }).FirstOrDefaultAsync();
 
-            var vacancies = await _context.Vacancies
-            .Where(x => x.CategoryId == mainVacancy.CategoryId && x.Id != mainVacancy.Id && x.VacancyStatus == VacancyStatus.Active && x.EndDate > DateTime.Now)
-            .OrderByDescending(x => x.CreatedDate)
-            .Select(x => new VacancyGetAllDto
-            {
-                Id = x.Id,
-                Title = x.Title,
-                CompanyLogo = x.CompanyLogo != null ? $"{_currentUser.BaseUrl}/company/{x.Company.CompanyLogo}" : null,
-                CompanyName = x.Company.IsCompany ? x.Company.CompanyName : x.CompanyName,
-                StartDate = x.StartDate,
-                Location = x.Location,
-                ViewCount = x.ViewCount,
-                WorkType = x.WorkType,
-                WorkStyle = x.WorkStyle,
-                MainSalary = x.MainSalary,
-                MaxSalary = x.MaxSalary,
-                IsSaved = x.SavedVacancies.Any(y => y.VacancyId == x.Id && y.UserId == _currentUser.UserGuid),
-                SalaryCurrency = x.SalaryCurrency
-            })
-            .Take(take)
-            .ToListAsync();
+            var vacancies = await _context.Vacancies.AsNoTracking()
+                .Where(x => x.CategoryId == mainVacancy.CategoryId && x.Id != mainVacancy.Id && x.VacancyStatus == VacancyStatus.Active && x.EndDate > DateTime.Now)
+                .OrderByDescending(x => x.CreatedDate)
+                .Select(x => new VacancyGetAllDto
+                {
+                    Id = x.Id,
+                    Title = x.Title,
+                    CompanyLogo = x.CompanyLogo != null ? $"{_currentUser.BaseUrl}/company/{x.Company.CompanyLogo}" : null,
+                    CompanyName = x.Company.IsCompany ? x.Company.CompanyName : x.CompanyName,
+                    StartDate = x.StartDate,
+                    Location = x.Location,
+                    ViewCount = x.ViewCount,
+                    WorkType = x.WorkType,
+                    WorkStyle = x.WorkStyle,
+                    MainSalary = x.MainSalary,
+                    MaxSalary = x.MaxSalary,
+                    IsSaved = x.SavedVacancies.Any(y => y.VacancyId == x.Id && y.UserId == _currentUser.UserGuid),
+                    SalaryCurrency = x.SalaryCurrency
+                })
+                .Take(take)
+                .ToListAsync();
 
             return vacancies;
         }

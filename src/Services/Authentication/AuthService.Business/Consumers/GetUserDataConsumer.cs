@@ -5,40 +5,40 @@ using SharedLibrary.HelperServices.Current;
 using SharedLibrary.Requests;
 using SharedLibrary.Responses;
 
-namespace AuthService.Business.Consumers
+namespace AuthService.Business.Consumers;
+
+public class GetUserDataConsumer(AppDbContext _context, ICurrentUser _currentUser) : IConsumer<GetUserDataRequest>
 {
-    public class GetUserDataConsumer(AppDbContext _context, ICurrentUser _currentUser) : IConsumer<GetUserDataRequest>
+    public async Task Consume(ConsumeContext<GetUserDataRequest> context)
     {
-        public async Task Consume(ConsumeContext<GetUserDataRequest> context)
+        var user = await _context.Users
+            .AsNoTracking()
+            .Where(x => x.Id == context.Message.UserId)
+            .Select(x => new
+            {
+                x.Id,
+                x.FirstName,
+                x.LastName,
+                x.Email,
+                x.Image,
+                x.MainPhoneNumber
+            })
+            .FirstOrDefaultAsync();
+
+        if (user is null)
         {
-            var user = await _context.Users
-                .Where(x => x.Id == context.Message.UserId)
-                .Select(x => new
-                {
-                    x.Id,
-                    x.FirstName,
-                    x.LastName,
-                    x.Email,
-                    x.Image,
-                    x.MainPhoneNumber
-                })
-                .FirstOrDefaultAsync();
-
-            if (user is null)
-            {
-                await context.RespondAsync<GetUserDataResponse>(null);
-                return;
-            }
-
-            await context.RespondAsync(new GetUserDataResponse
-            {
-                UserId = user.Id,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Email = user.Email,
-                ProfileImage = user.Image != null ? $"{_currentUser.BaseUrl}/auth/{user.Image}" : null,
-                MainPhoneNumber = user.MainPhoneNumber
-            });
+            await context.RespondAsync<GetUserDataResponse>(null);
+            return;
         }
+
+        await context.RespondAsync(new GetUserDataResponse
+        {
+            UserId = user.Id,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Email = user.Email,
+            ProfileImage = user.Image != null ? $"{_currentUser.BaseUrl}/auth/{user.Image}" : null,
+            MainPhoneNumber = user.MainPhoneNumber
+        });
     }
 }

@@ -168,7 +168,7 @@ namespace JobCompany.Business.Services.CompanyServices
         public async Task<CompanyDetailItemDto> GetCompanyDetailAsync(string id)
         {
             var companyGuid = Guid.Parse(id);
-            var company = await _context.Companies.Where(c => c.Id == companyGuid)
+            var company = await _context.Companies.AsNoTracking().Where(c => c.Id == companyGuid)
                         .Select(x => new CompanyDetailItemDto
                         {
                             CompanyInformation = x.CompanyInformation,

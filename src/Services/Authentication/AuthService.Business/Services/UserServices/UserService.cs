@@ -1,19 +1,15 @@
 ﻿using AuthService.Business.Dtos;
 using AuthService.Business.Exceptions.UserException;
-using AuthService.Business.HelperServices.Email;
-using AuthService.Business.HelperServices.TokenHandler;
 using AuthService.Business.Services.Auth;
 using AuthService.Core.Entities;
 using AuthService.DAL.Contexts;
 using MassTransit;
 using MassTransit.Initializers;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using Microsoft.Extensions.Configuration;
 using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.Enums;
 using SharedLibrary.Events;
-using SharedLibrary.Exceptions;
 using SharedLibrary.ExternalServices.FileService;
 using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;
@@ -47,20 +43,20 @@ namespace AuthService.Business.Services.UserServices
         /// <summary> Loginde olan User informasiyası </summary>
         public async Task<UserInformationDto> GetUserInformationAsync()
         {
-            var user =
-                await _context
-                    .Users.FirstOrDefaultAsync(u => u.Id == _currentUser.UserGuid)
-                    .Select(x => new UserInformationDto
-                    {
-                        Id = x.Id,
-                        FirstName = x.FirstName,
-                        LastName = x.LastName,
-                        Email = x.Email,
-                        MainPhoneNumber = x.MainPhoneNumber,
-                        Image = x.Image != null ? $"{_configuration["ApiGateway:BaseUrl"]}/auth/{x.Image}" : null,
-                        UserRole = x.UserRole,
-                        JobStatus = x.JobStatus,
-                    }) ?? throw new UserNotFoundException();
+            var user = await _context.Users
+                .AsNoTracking()
+                .Where(u => u.Id == _currentUser.UserGuid)
+                .Select(x => new UserInformationDto
+                {
+                    Id = x.Id,
+                    FirstName = x.FirstName,
+                    LastName = x.LastName,
+                    Email = x.Email,
+                    MainPhoneNumber = x.MainPhoneNumber,
+                    Image = x.Image != null ? $"{_configuration["ApiGateway:BaseUrl"]}/auth/{x.Image}" : null,
+                    UserRole = x.UserRole,
+                    JobStatus = x.JobStatus,
+                }).FirstOrDefaultAsync() ?? throw new UserNotFoundException();
 
             return user;
         }
@@ -68,32 +64,25 @@ namespace AuthService.Business.Services.UserServices
         /// <summary> Logində olan userin informasiyasının update'si </summary>
         public async Task<UserUpdateResponseDto> UpdateUserInformationAsync(UserUpdateDto dto)
         {
-            var userQuery = _context.Users.AsQueryable();
-            var user =
-                await userQuery.FirstOrDefaultAsync(u => u.Id == _currentUser.UserGuid)
+            var email = dto.Email.Trim();
+            var phoneNumber = dto.MainPhoneNumber.Trim();
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == _currentUser.UserGuid)
                 ?? throw new UserNotFoundException();
-            var isEmailTaken = await userQuery.FirstOrDefaultAsync(u =>
-                u.Id != user.Id && u.Email == dto.Email.Trim()
-            );
 
-            if (isEmailTaken is not null)
-            {
-                throw new UserExistException();
-            }
+            var existingUser = await _context.Users
+                .AsNoTracking()
+                .Where(u => u.Id != user.Id)
+                .Where(u => u.Email == email || u.MainPhoneNumber == phoneNumber)
+                .Select(u => new { u.Email, u.MainPhoneNumber })
+                .FirstOrDefaultAsync();
 
-            var isPhoneTaken = await userQuery.FirstOrDefaultAsync(u =>
-                u.Id != user.Id && u.MainPhoneNumber == dto.MainPhoneNumber.Trim()
-            );
-
-            if (isPhoneTaken is not null)
-            {
-                throw new UserExistException();
-            }
+            if (existingUser != null) throw new UserExistException();
 
             user.FirstName = dto.FirstName.Trim();
             user.LastName = dto.LastName.Trim();
-            user.Email = dto.Email.Trim();
-            user.MainPhoneNumber = dto.MainPhoneNumber.Trim();
+            user.Email = email;
+            user.MainPhoneNumber = phoneNumber;
             await _context.SaveChangesAsync();
 
             var updateUserInfoEvent = new UpdateUserInfoEvent
@@ -141,7 +130,7 @@ namespace AuthService.Business.Services.UserServices
             await _context.SaveChangesAsync();
 
             UpdateUserProfileImageEvent profileImageUpdateEvent;
-            
+
             if (dto.Image is null)
             {
                 // Əgər istifadəçi profil şəklini silmək istəyirsə
@@ -328,6 +317,7 @@ namespace AuthService.Business.Services.UserServices
             var userId = Guid.Parse(id);
 
             var operatorInfo = await _context.Users
+                .AsNoTracking()
                 .Where(u => (u.UserRole == UserRole.Operator || u.UserRole == UserRole.ChiefOperator) && u.Id == userId)
                 .Select(u => new OperatorInfoDto
                 {

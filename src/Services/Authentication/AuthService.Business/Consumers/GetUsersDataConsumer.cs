@@ -12,7 +12,7 @@ public class GetUsersDataConsumer(AppDbContext _appDbContext) : IConsumer<GetUse
     {
         var userIds = context.Message.UserIds;
 
-        var query = _appDbContext.Users.AsQueryable();
+        var query = _appDbContext.Users.AsNoTracking();
 
         if (!string.IsNullOrEmpty(context.Message.FullName))
         {

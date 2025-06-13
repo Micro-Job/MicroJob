@@ -4,16 +4,18 @@ using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Events;
 using SharedLibrary.Exceptions;
-using SharedLibrary.Helpers;
 
 namespace AuthService.Business.Consumers;
 
-public class UpdateUserJobStatusEventConsumer(AppDbContext _context) : IConsumer<UpdateUserJobStatusEvent>
+public class UpdateUserJobStatusEventConsumer(AppDbContext _dbContext) : IConsumer<UpdateUserJobStatusEvent>
 {
     public async Task Consume(ConsumeContext<UpdateUserJobStatusEvent> context)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == context.Message.UserId) ?? throw new NotFoundException<User>();
-        user.JobStatus = context.Message.JobStatus;
-        await _context.SaveChangesAsync();
+        var updated = await _dbContext.Users
+            .Where(u => u.Id == context.Message.UserId)
+            .ExecuteUpdateAsync(b => b.SetProperty(u => u.JobStatus, _ => context.Message.JobStatus));
+
+        if (updated == 0)
+            throw new NotFoundException<User>();
     }
 }

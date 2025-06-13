@@ -41,7 +41,6 @@ namespace AuthService.Business
                 x.AddConsumer<GetUserDataConsumer>();
                 x.AddConsumer<GetUserMiniDataConsumer>();
                 x.AddConsumer<GetUsersDataConsumer>();
-                x.AddConsumer<GetUserEmailConsumer>(); 
                 x.AddConsumer<UpdateUserJobStatusEventConsumer>();              
 
                 x.SetKebabCaseEndpointNameFormatter();

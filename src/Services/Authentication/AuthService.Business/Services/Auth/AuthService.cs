@@ -28,9 +28,6 @@ namespace AuthService.Business.Services.Auth
             dto.Email = dto.Email.Trim();
             await CheckUserExistAsync(dto.Email, dto.MainPhoneNumber);
 
-            if (dto.Password != dto.ConfirmPassword)
-                throw new WrongPasswordException();
-
             var user = new User
             {
                 Id = Guid.NewGuid(),
@@ -79,9 +76,6 @@ namespace AuthService.Business.Services.Auth
             dto.Email = dto.Email.Trim();
             await CheckUserExistAsync(dto.Email, dto.MainPhoneNumber);
 
-            if (dto.Password != dto.ConfirmPassword)
-                throw new WrongPasswordException();
-
             var user = new User
             {
                 Id = Guid.NewGuid(),
@@ -128,9 +122,8 @@ namespace AuthService.Business.Services.Auth
         public async Task<TokenResponseDto> LoginAsync(LoginDto dto)
         {
             // useri email ve ya userName ile tapmaq
-            var user = await _context.Users.FirstOrDefaultAsync(x => x.Email == dto.UserNameOrEmail);
-            if (user == null)
-                throw new LoginFailedException();
+            var user = await _context.Users.FirstOrDefaultAsync(x => x.Email == dto.UserNameOrEmail)
+                ?? throw new LoginFailedException();
 
             var hashedPassword = _tokenHandler.GeneratePasswordHash(dto.Password);
             if (user.Password != hashedPassword)
@@ -148,7 +141,7 @@ namespace AuthService.Business.Services.Auth
             var responseDto = new TokenResponseDto
             {
                 UserId = user.Id.ToString(),
-                FullName = user.FirstName + " " + user.LastName,
+                FullName = $"{user.FirstName} {user.LastName}",
                 UserStatusId = (byte)user.UserRole,
                 AccessToken = accessToken,
                 RefreshToken = refreshToken.Token,
@@ -180,12 +173,8 @@ namespace AuthService.Business.Services.Auth
             if (string.IsNullOrEmpty(refreshToken))
                 throw new BadRequestException(MessageHelper.GetMessage("SESSION_EXPIRED"));
 
-            var user = await _context.Users.FirstOrDefaultAsync(x =>
-                x.RefreshToken == refreshToken
-            );
-
-            if (user == null)
-                throw new LoginFailedException();
+            var user = await _context.Users.FirstOrDefaultAsync(x => x.RefreshToken == refreshToken) 
+                ?? throw new LoginFailedException();
 
             if (user.RefreshTokenExpireDate < DateTime.Now)
                 throw new RefreshTokenExpiredException();
@@ -195,13 +184,13 @@ namespace AuthService.Business.Services.Auth
 
             user.RefreshToken = newRefreshToken.Token;
             user.RefreshTokenExpireDate = newRefreshToken.Expires;
-            _context.Users.Update(user);
+            
             await _context.SaveChangesAsync();
 
             var responseDto = new TokenResponseDto
             {
                 UserId = user.Id.ToString(),
-                FullName = user.FirstName + " " + user.LastName,
+                FullName = $"{user.FirstName} {user.LastName}",
                 AccessToken = newToken,
                 RefreshToken = newRefreshToken.Token,
                 UserStatusId = (byte)user.UserRole,
@@ -291,16 +280,6 @@ namespace AuthService.Business.Services.Auth
             await _context.SaveChangesAsync();
         }
 
-
-        private async Task CreateBalance(Guid userId, string firstName, string lastName)
-        {
-            await _publishEndpoint.Publish(new CreateBalanceEvent
-            {
-                UserId = userId,
-                FirstName = firstName,
-                LastName = lastName
-            });
-        }
         /// <summary>
         /// User-in şifrəsini yeniləyir
         /// </summary>
@@ -336,6 +315,16 @@ namespace AuthService.Business.Services.Auth
                 else if (user.MainPhoneNumber == phoneNumber)
                     throw new ExistPhoneNumberException();
             }
+        }
+
+        private async Task CreateBalance(Guid userId, string firstName, string lastName)
+        {
+            await _publishEndpoint.Publish(new CreateBalanceEvent
+            {
+                UserId = userId,
+                FirstName = firstName,
+                LastName = lastName
+            });
         }
     }
 }

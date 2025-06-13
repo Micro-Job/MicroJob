@@ -6,30 +6,27 @@ using Shared.Responses;
 
 namespace AuthService.Business.Consumers
 {
-    public class GetUserMiniDataConsumer(AppDbContext _context) : IConsumer<GetAllCompaniesDataRequest>
+    public class GetUserMiniDataConsumer(AppDbContext _dbContext) : IConsumer<GetAllCompaniesDataRequest>
     {
         public async Task Consume(ConsumeContext<GetAllCompaniesDataRequest> context)
         {
-            var user = await _context.Users
+            var response = await _dbContext.Users
+                .AsNoTracking()
                 .Where(x => x.Id == context.Message.UserId)
-                .Select(x => new
+                .Select(x => new GetAllCompaniesDataResponse
                 {
-                    x.Email,
-                    x.MainPhoneNumber
+                    Email = x.Email,
+                    PhoneNumber = x.MainPhoneNumber
                 })
                 .FirstOrDefaultAsync();
 
-            if (user is null)
+            if (response is null)
             {
                 await context.RespondAsync<GetAllCompaniesDataResponse>(null);
                 return;
             }
 
-            await context.RespondAsync(new GetAllCompaniesDataResponse
-            {
-                Email = user.Email,
-                PhoneNumber = user.MainPhoneNumber
-            });
+            await context.RespondAsync(response);
         }
     }
 }

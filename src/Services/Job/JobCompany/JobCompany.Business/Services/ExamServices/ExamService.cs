@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Exceptions;
 using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;
+using System.Threading;
 
 namespace JobCompany.Business.Services.ExamServices;
 
@@ -117,33 +118,30 @@ public class ExamService(JobCompanyDbContext _context, IQuestionService _questio
     {
         var examGuid = Guid.Parse(examId);
 
-        var question =
-            await _context
-                .Exams.Where(e => e.Id == examGuid)
-                .SelectMany(e => e.ExamQuestions)
-                .Skip(step - 1)
-                .Select(eq => new GetQuestionByStepDto
+        var question = await _context.Exams
+            .AsNoTracking()
+            .Where(e => e.Id == examGuid)
+            .SelectMany(e => e.ExamQuestions)
+            .Skip(step - 1)
+            .Select(eq => new GetQuestionByStepDto
+            {
+                CurrentStep = step,
+                TotalSteps = eq.Exam.ExamQuestions.Count,
+                Question = new QuestionDetailDto
                 {
-                    CurrentStep = step,
-                    TotalSteps = eq.Exam.ExamQuestions.Count,
-                    Question = new QuestionDetailDto
+                    Id = eq.Question.Id,
+                    Title = eq.Question.Title,
+                    Image = eq.Question.Image != null ? $"{_currentUser.BaseUrl}/company/{eq.Question.Image}" : null,
+                    QuestionType = eq.Question.QuestionType,
+                    IsRequired = eq.Question.IsRequired,
+                    Order = eq.Question.Order,
+                    Answers = eq.Question.Answers.Select(a => new AnswerDetailDto
                     {
-                        Id = eq.Question.Id,
-                        Title = eq.Question.Title,
-                        Image = eq.Question.Image != null ? $"{_currentUser.BaseUrl}/company/{eq.Question.Image}" : null,
-                        QuestionType = eq.Question.QuestionType,
-                        IsRequired = eq.Question.IsRequired,
-                        Order = eq.Question.Order,
-                        Answers = eq
-                            .Question.Answers.Select(a => new AnswerDetailDto
-                            {
-                                Id = a.Id,
-                                Text = a.Text,
-                            })
-                            .ToList(),
-                    },
-                })
-                .FirstOrDefaultAsync()
+                        Id = a.Id,
+                        Text = a.Text,
+                    }).ToList(),
+                }
+            }).FirstOrDefaultAsync()
             ?? throw new NotFoundException<Question>();
 
         return question;
@@ -153,15 +151,12 @@ public class ExamService(JobCompanyDbContext _context, IQuestionService _questio
     {
         var examGuid = Guid.Parse(examId);
 
-        var exam =
-            await _context.Exams.FirstOrDefaultAsync(e =>
-                e.Id == examGuid && e.Company.UserId == _currentUser.UserGuid
-            ) ?? throw new NotFoundException<Exam>();
+        var affectedRows = await _context.Exams
+            .Where(e =>e.Id == examGuid && e.Company.UserId == _currentUser.UserGuid)
+            .ExecuteDeleteAsync();
 
-
-        _context.Exams.Remove(exam);
-
-        await _context.SaveChangesAsync();
+        if (affectedRows == 0)
+            throw new NotFoundException<Exam>();
     }
 
     public async Task<DataListDto<ExamListDto>> GetExamsAsync(string? examName, int skip, int take)
@@ -203,6 +198,7 @@ public class ExamService(JobCompanyDbContext _context, IQuestionService _questio
             return new GetExamIntroDto { IsTaken = true };
 
         var data = await _context.Exams.Where(x => x.Id == examGuid)
+            .AsNoTracking()
             .Select(x => new GetExamIntroDto
             {
                 CompanyName = x.Company.CompanyName,
@@ -260,7 +256,7 @@ public class ExamService(JobCompanyDbContext _context, IQuestionService _questio
                 TotalQuestions = exam.ExamQuestions.Count,
                 LimitRate = exam.LimitRate,
                 Duration = exam.Duration,
-                Questions = exam.ExamQuestions.OrderBy(x=> x.Question.Order).Select(eq => new QuestionPublicDto
+                Questions = exam.ExamQuestions.OrderBy(x => x.Question.Order).Select(eq => new QuestionPublicDto
                 {
                     Id = eq.Question.Id,
                     Title = eq.Question.Title,

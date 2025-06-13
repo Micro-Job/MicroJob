@@ -6,7 +6,6 @@ using JobCompany.Business.Statistics;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
-using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;
 
 namespace JobCompany.Business.Services.CategoryServices;

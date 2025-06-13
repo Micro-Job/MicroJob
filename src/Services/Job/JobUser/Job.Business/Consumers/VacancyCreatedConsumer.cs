@@ -2,63 +2,45 @@
 using Job.DAL.Contexts;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using SharedLibrary.Enums;
 using SharedLibrary.Events;
 
-namespace Job.Business.Consumers
+namespace Job.Business.Consumers;
+
+/// <summary>
+/// Yeni vakansiya yaradıldıqda tələb olunan bacarıqların ən azı 50%-nə uyğun gələn istifadəçiləri tapır
+/// və onlara vakansiyanın yaradılması ilə bağlı bildiriş göndərir.
+/// </summary>
+public class VacancyCreatedConsumer(JobDbContext _dbContext) : IConsumer<VacancyCreatedEvent>
 {
-    public class VacancyCreatedConsumer : IConsumer<VacancyCreatedEvent>
+    public async Task Consume(ConsumeContext<VacancyCreatedEvent> context)
     {
-        private readonly JobDbContext _context;
+        var requiredMatchCount = Math.Ceiling(context.Message.SkillIds.Count * 0.5);
 
-        public VacancyCreatedConsumer(JobDbContext context)
+        var matchedUserIds = await _dbContext.ResumeSkills
+            .AsNoTracking()
+            .Where(rs => context.Message.SkillIds.Contains(rs.SkillId))
+            .GroupBy(rs => rs.Resume.UserId)
+            .Where(g => g.Count() >= requiredMatchCount)
+            .Select(g => g.Key)
+            .ToListAsync();
+
+        if (matchedUserIds.Count == 0) return;
+
+        var notifications = matchedUserIds.Select(userId => new Notification
         {
-            _context = context;
-        }
+            ReceiverId = userId,
+            SenderId = context.Message.SenderId,
+            NotificationType = NotificationType.Vacancy,
+            InformationId = context.Message.InformationId,
+            InformationName = context.Message.InformatioName,
+            IsSeen = false
+        }).ToList();
 
-        public async Task Consume(ConsumeContext<VacancyCreatedEvent> context)
+        if (notifications.Count > 0)
         {
-            var eventMessage = context.Message;
-
-            //TODO : burada skill sayina ve resunedaki skill sayina nisbetde 50 faiz olarsa , o zaman getsin hemin adamlara notification
-
-            var resumes = await _context
-                    .Resumes.Include(r => r.ResumeSkills)
-                    .Select(x=> new
-                    {
-                        UserId = x.UserId,
-                        ResumeSkillIds = x.ResumeSkills.Select(x=> x.SkillId).ToList()
-                    })
-                    .AsSplitQuery()
-                    .AsNoTracking()
-                    .ToListAsync();
-
-            var notifications = new List<Notification>();
-
-            foreach (var resume in resumes)
-            {
-                var matchingSkillsCount = resume.ResumeSkillIds.Intersect(eventMessage.SkillIds).Count();
-
-                if (matchingSkillsCount >= (eventMessage.SkillIds.Count / 2.0))
-                {
-                    var newNotification = new Notification
-                    {
-                        ReceiverId = resume.UserId,
-                        SenderId = eventMessage.SenderId,
-                        NotificationType = SharedLibrary.Enums.NotificationType.Vacancy,
-                        InformationId = eventMessage.InformationId,
-                        InformationName = eventMessage.InformatioName,
-                        IsSeen = false,
-                    };
-
-                    notifications.Add(newNotification);
-                }
-            }
-
-            if (notifications.Any())
-            {
-                await _context.Notifications.AddRangeAsync(notifications);
-                await _context.SaveChangesAsync();
-            }
+            await _dbContext.Notifications.AddRangeAsync(notifications);
+            await _dbContext.SaveChangesAsync();
         }
     }
 }
