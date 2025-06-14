@@ -1,49 +1,27 @@
 ﻿using Job.Business.Dtos.ExperienceDtos;
-using Job.Business.Exceptions.Common;
 using Job.DAL.Contexts;
-using Microsoft.EntityFrameworkCore;
-using SharedLibrary.Helpers;
 
 namespace Job.Business.Services.Experience;
 
 public class ExperienceService(JobDbContext context) : IExperienceService
 {
-    public async Task<ICollection<Core.Entities.Experience>> CreateBulkExperienceAsync(
-        ICollection<ExperienceCreateDto> dtos,
-        Guid resumeId
-    )
+    public async Task<ICollection<Core.Entities.Experience>> CreateBulkExperienceAsync(ICollection<ExperienceCreateDto> dtos, Guid resumeId)
     {
-        var experiencesToAdd = dtos.Select(dto => MapExperienceDtoToEntityForCreate(dto, resumeId))
-            .ToList();
+        var experiencesToAdd = dtos.Select(dto => MapExperienceDtoToEntityForCreate(dto, resumeId)).ToList();
 
         await context.Experiences.AddRangeAsync(experiencesToAdd);
-        //await context.SaveChangesAsync();
 
         return experiencesToAdd;
-    }
-
-    public async Task CreateExperienceAsync(
-        ExperienceCreateDto dto,
-        Guid resumeId,
-        bool saveChanges = true
-    )
-    {
-        var experience = MapExperienceDtoToEntityForCreate(dto, resumeId);
-
-        await context.Experiences.AddAsync(experience);
-
-        if (saveChanges)
-            await context.SaveChangesAsync();
     }
 
     public async Task<ICollection<Core.Entities.Experience>> UpdateBulkExperienceAsync(ICollection<ExperienceUpdateDto> updateDtos, ICollection<Core.Entities.Experience> existingExperiences, Guid resumeId)
     {
         var resultList = new List<Core.Entities.Experience>();
-        var createDtos = new List<ExperienceCreateDto>();
+        List<ExperienceCreateDto>? createDtos = null;
 
         var dtoIds = updateDtos
             .Where(x => !string.IsNullOrWhiteSpace(x.Id))
-            .Select(x => Guid.Parse(x.Id))
+            .Select(x => Guid.Parse(x.Id!))
             .ToHashSet();
 
         foreach (var dto in updateDtos)
@@ -68,7 +46,7 @@ public class ExperienceService(JobDbContext context) : IExperienceService
                     EndDate = dto.EndDate,
                     IsCurrentOrganization = dto.IsCurrentOrganization
                 };
-
+                createDtos ??= [];
                 createDtos.Add(createDto);
             }
         }
@@ -78,7 +56,7 @@ public class ExperienceService(JobDbContext context) : IExperienceService
         if (experiencesToRemove.Count != 0)
             context.Experiences.RemoveRange(experiencesToRemove);
 
-        if (createDtos.Count > 0)
+        if (createDtos?.Count > 0)
         {
             var newExperiences = await CreateBulkExperienceAsync(createDtos, resumeId);
             resultList.AddRange(newExperiences);
@@ -88,30 +66,7 @@ public class ExperienceService(JobDbContext context) : IExperienceService
     }
 
 
-
-    public async Task<Core.Entities.Experience> UpdateExperienceAsync(
-        ExperienceUpdateDto dto,
-        Guid resumeId,
-        bool saveChanges = true
-    )
-    {
-        var experience =
-            await context.Experiences.FirstOrDefaultAsync(e =>
-                e.ResumeId == resumeId && e.OrganizationName == dto.OrganizationName
-            ) ?? throw new NotFoundException<Core.Entities.Experience>();
-
-        MapExperienceDtoToEntityForUpdate(experience, dto);
-
-        if (saveChanges)
-            await context.SaveChangesAsync();
-
-        return experience;
-    }
-
-    private static Core.Entities.Experience MapExperienceDtoToEntityForCreate(
-        ExperienceCreateDto dto,
-        Guid resumeId
-    )
+    private static Core.Entities.Experience MapExperienceDtoToEntityForCreate(ExperienceCreateDto dto, Guid resumeId)
     {
         return new Core.Entities.Experience
         {
@@ -125,10 +80,7 @@ public class ExperienceService(JobDbContext context) : IExperienceService
         };
     }
 
-    private static void MapExperienceDtoToEntityForUpdate(
-        Core.Entities.Experience experience,
-        ExperienceUpdateDto dto
-    )
+    private static void MapExperienceDtoToEntityForUpdate(Core.Entities.Experience experience, ExperienceUpdateDto dto)
     {
         experience.OrganizationName = dto.OrganizationName;
         experience.PositionName = dto.PositionName;

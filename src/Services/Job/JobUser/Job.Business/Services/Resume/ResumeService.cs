@@ -207,7 +207,7 @@ namespace Job.Business.Services.Resume
 
             resume.Certificates = updateDto.Certificates != null
                 ? await _certificateService.UpdateBulkCertificateAsync(updateDto.Certificates, resume.Certificates)
-                : [];
+                : _certificateService.DeleteAllCertificates(resume.Certificates);
 
             UpdateResumeSkills(resume, updateDto.SkillIds);
 

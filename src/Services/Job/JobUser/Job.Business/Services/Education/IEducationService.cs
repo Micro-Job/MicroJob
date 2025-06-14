@@ -1,12 +1,9 @@
 using Job.Business.Dtos.EducationDtos;
 
-namespace Job.Business.Services.Education
+namespace Job.Business.Services.Education;
+
+public interface IEducationService
 {
-    public interface IEducationService
-    {
-        Task CreateEducationAsync(EducationCreateDto dto, Guid resumeId);
-        Task<ICollection<Core.Entities.Education>> CreateBulkEducationAsync(ICollection<EducationCreateDto> dtos,Guid resumeId);
-        Task UpdateEducationAsync(EducationUpdateDto dto);
-        Task<ICollection<Core.Entities.Education>> UpdateBulkEducationAsync(ICollection<EducationUpdateDto> dtos, ICollection<Core.Entities.Education> existEducations, Guid resumeId);
-    }
+    Task<ICollection<Core.Entities.Education>> CreateBulkEducationAsync(ICollection<EducationCreateDto> dtos,Guid resumeId);
+    Task<ICollection<Core.Entities.Education>> UpdateBulkEducationAsync(ICollection<EducationUpdateDto> dtos, ICollection<Core.Entities.Education> existEducations, Guid resumeId);
 }
