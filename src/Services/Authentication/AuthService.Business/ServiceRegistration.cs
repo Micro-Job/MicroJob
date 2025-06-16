@@ -23,9 +23,9 @@ namespace AuthService.Business
             services.AddHttpContextAccessor();
             services.AddScoped<ITokenHandler, TokenHandler>();
             services.AddScoped<IEmailService, EmailService>();
-            services.AddScoped<IAuthService, Services.Auth.AuthService>();
+            services.AddScoped<AuthenticationService>();
             services.AddScoped<EmailPublisher>();
-            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<UserService>();
             services.AddScoped<IFileService, FileService>();
             services.AddScoped<ICurrentUser, CurrentUser>();
             services.AddSingleton<EmailTemplate>();
