@@ -219,23 +219,8 @@
   <data name="PASSWORDS_DO_NOT_MATCH" xml:space="preserve">
     <value>Şifrələr uyğunlaşmır</value>
   </data>
-  <data name="PASSWORD_LENGTH_RANGE" xml:space="preserve">
-    <value>Uzunluq 8-100 arasında olmalıdır</value>
-  </data>
-  <data name="PASSWORD_MIN_LENGTH" xml:space="preserve">
-    <value>Şifrə ən az 8 simvol uzunluğunda olmalıdır</value>
-  </data>
-  <data name="PASSWORD_MUST_CONTAIN_LOWERCASE" xml:space="preserve">
-    <value>Şifrədə ən az bir kiçik hərf olmalıdır</value>
-  </data>
-  <data name="PASSWORD_MUST_CONTAIN_NUMBER" xml:space="preserve">
-    <value>Şifrədə ən az bir rəqəm olmalıdır</value>
-  </data>
-  <data name="PASSWORD_MUST_CONTAIN_SPECIAL_CHAR" xml:space="preserve">
-    <value>Şifrədə ən az bir xüsusi simvol olmalıdır</value>
-  </data>
-  <data name="PASSWORD_MUST_CONTAIN_UPPERCASE" xml:space="preserve">
-    <value>Şifrədə ən az bir böyük hərf olmalıdır</value>
+  <data name="PASSWORD_IS_NOT_VALID" xml:space="preserve">
+    <value>Ən az 8 xarakter, 1 böyük hərf, 1 rəqəm və simvol</value>
   </data>
   <data name="REGISTER_COMPLETED" xml:space="preserve">
     <value>Qeydiyyat uğurla başa çatdı</value>

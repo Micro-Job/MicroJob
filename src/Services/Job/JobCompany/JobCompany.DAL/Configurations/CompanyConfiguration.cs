@@ -16,6 +16,9 @@ namespace JobCompany.DAL.Configurations
             builder.Property(c => c.CompanyInformation)
                 .HasMaxLength(500);
 
+            builder.Property(x => x.VOEN)
+                .HasMaxLength(16);
+
             builder.Property(c => c.CompanyLocation)
                 .HasMaxLength(128);
 

@@ -4,6 +4,8 @@ using AuthService.Business.HelperServices.Email;
 using AuthService.Business.HelperServices.TokenHandler;
 using AuthService.Core.Entities;
 using AuthService.DAL.Contexts;
+using Azure;
+using HtmlAgilityPack;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -20,13 +22,15 @@ using System.Security.Claims;
 
 namespace AuthService.Business.Services.Auth
 {
-    public class AuthService(AppDbContext _context, ITokenHandler _tokenHandler, IPublishEndpoint _publishEndpoint, IConfiguration _configuration, IEmailService _emailService, ICurrentUser _currentUser, IRequestClient<GetCompaniesDataByUserIdsRequest> _companyDataClient) : IAuthService
+    public class AuthService(AppDbContext _context, ITokenHandler _tokenHandler, IPublishEndpoint _publishEndpoint, IConfiguration _configuration, IEmailService _emailService, ICurrentUser _currentUser, IRequestClient<GetCompaniesDataByUserIdsRequest> _companyDataClient , IRequestClient<CheckVoenRequest> _voenCheckRequest) : IAuthService
     {
         public async Task RegisterAsync(RegisterDto dto)
         {
             dto.MainPhoneNumber = dto.MainPhoneNumber.Trim();
             dto.Email = dto.Email.Trim();
             await CheckUserExistAsync(dto.Email, dto.MainPhoneNumber);
+
+            CheckPasswordAndThrowException(dto.Password);
 
             var user = new User
             {
@@ -51,6 +55,7 @@ namespace AuthService.Business.Services.Auth
                 FirstName = user.FirstName,
                 LastName = user.LastName,
             });
+
             await CreateBalance(user.Id, user.FirstName, user.LastName);
 
             await _emailService.SendRegister(user.Email, $"{user.FirstName} {user.LastName}");
@@ -61,10 +66,27 @@ namespace AuthService.Business.Services.Auth
             if (!dto.Policy)
                 throw new PolicyException();
 
+            CheckPasswordAndThrowException(dto.Password);
+            
             // email veya istifadeci adı tekrarlanmasını yoxla
             dto.MainPhoneNumber = dto.MainPhoneNumber.Trim();
             dto.Email = dto.Email.Trim();
             await CheckUserExistAsync(dto.Email, dto.MainPhoneNumber);
+
+            //TODO : exceptionlar deyismelidir
+            if (dto.IsCompany && dto.VOEN != null)
+            {
+                if(!await CheckVOEN(dto.VOEN))
+                    throw new NotFoundException<User>("VÖEN tapılmadı.");
+
+                var voenResponse = await _voenCheckRequest.GetResponse<CheckVoenResponse>(new CheckVoenRequest
+                {
+                    VOEN = dto.VOEN
+                });
+
+                if (voenResponse.Message.IsExist)
+                    throw new UserExistException("VÖEN istifadə edilib.");
+            }
 
             var user = new User
             {
@@ -88,25 +110,20 @@ namespace AuthService.Business.Services.Auth
                     UserId = user.Id,
                     CompanyName = dto.IsCompany ? dto.CompanyName.Trim() : null,
                     IsCompany = dto.IsCompany,
+                    VOEN = dto.VOEN
                 }
             );
 
-            await _publishEndpoint.Publish(new UserRegisteredEvent
-            {
-                UserId = user.Id,
-                FirstName = user.FirstName,
-                LastName = user.LastName
-            });
+            //await _publishEndpoint.Publish(new UserRegisteredEvent
+            //{
+            //    UserId = user.Id,
+            //    FirstName = user.FirstName,
+            //    LastName = user.LastName
+            //});
+
             await CreateBalance(user.Id, user.FirstName, user.LastName);
 
-            await _emailService.SendEmailAsync(dto.Email,
-                new EmailMessage
-                {
-                    Email = dto.Email,
-                    Subject = MessageHelper.GetMessage("WELCOME"),
-                    Content = MessageHelper.GetMessage("REGISTER_COMPLETED"),
-                }
-            );
+            await _emailService.SendRegister(dto.Email, $"{user.FirstName} {user.LastName}");
         }
 
         public async Task<TokenResponseDto> LoginAsync(LoginDto dto)
@@ -251,6 +268,8 @@ namespace AuthService.Business.Services.Auth
         /// <exception cref="BadRequestException"></exception>
         public async Task ConfirmPasswordResetAsync(PasswordResetDto dto)
         {
+            CheckPasswordAndThrowException(dto.NewPassword);
+
             var handler = new JwtSecurityTokenHandler();
 
             var jwtToken = handler.ReadJwtToken(dto.Token);
@@ -275,6 +294,8 @@ namespace AuthService.Business.Services.Auth
         /// </summary>
         public async Task UpdatePasswordAsync(string oldPassword, string newPassword)
         {
+            CheckPasswordAndThrowException(newPassword);
+
             var hashOldPassword = _tokenHandler.GeneratePasswordHash(oldPassword);
 
             var user = await _context.Users.Where(ap => ap.Id == _currentUser.UserGuid).FirstOrDefaultAsync()
@@ -288,6 +309,7 @@ namespace AuthService.Business.Services.Auth
             await _context.SaveChangesAsync();
         }
 
+        //TODO : burada yeni auth proyektinde user tableinda voen tutulmalidir mi 
         public async Task CheckUserExistAsync(string email, string phoneNumber)
         {
             var user = await _context.Users.Where(x => x.Email == email || x.MainPhoneNumber == phoneNumber)
@@ -315,6 +337,42 @@ namespace AuthService.Business.Services.Auth
                 FirstName = firstName,
                 LastName = lastName
             });
+        }
+
+        private async Task<bool> CheckVOEN(string voen)
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                byte checkCount = 0;
+                client.Timeout = TimeSpan.FromSeconds(0.7);
+                while (checkCount < 5)
+                {
+                    try
+                    {
+                        string htmlContent = await client.GetStringAsync("https://www.e-taxes.gov.az/ebyn/checkCerts.jsp?name=" + voen + "&submit");
+                        HtmlDocument htmlDocument = new HtmlDocument();
+                        htmlDocument.LoadHtml(htmlContent);
+                        string titleContent = htmlDocument.DocumentNode.SelectSingleNode("//td[contains(@width, '69')]")?.InnerHtml;
+                        if (string.IsNullOrEmpty(titleContent)) return false;
+                        return true;
+                    }
+                    catch (Exception)
+                    {
+                        checkCount++;
+                    }
+                }
+            }
+            return false;
+        }
+
+        private void CheckPasswordAndThrowException(string password)
+        {
+            if (!(password.Length >= 8 &&
+                password.Length <= 64 &&
+                password.Any(char.IsUpper) &&
+                password.Any(char.IsNumber) &&
+                password.Any(char.IsPunctuation)))
+                throw new BadRequestException(MessageHelper.GetMessage("PASSWORD_IS_NOT_VALID"));
         }
     }
 }

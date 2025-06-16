@@ -13,6 +13,7 @@
         public string? CompanyLogo { get; set; }
         public string? Email { get; set; }
         public bool IsCompany { get; set; }
+        public string? VOEN { get; set; }
 
         public Guid? CategoryId { get; set; }
         public Category Category { get; set; }

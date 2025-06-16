@@ -219,23 +219,8 @@
   <data name="PASSWORDS_DO_NOT_MATCH" xml:space="preserve">
     <value>Passwords do not match</value>
   </data>
-  <data name="PASSWORD_LENGTH_RANGE" xml:space="preserve">
-    <value>Length must be between 8 and 100 characters</value>
-  </data>
-  <data name="PASSWORD_MIN_LENGTH" xml:space="preserve">
-    <value>Password must be at least 8 characters long</value>
-  </data>
-  <data name="PASSWORD_MUST_CONTAIN_LOWERCASE" xml:space="preserve">
-    <value>Password must contain at least one lowercase letter</value>
-  </data>
-  <data name="PASSWORD_MUST_CONTAIN_NUMBER" xml:space="preserve">
-    <value>Password must contain at least one number</value>
-  </data>
-  <data name="PASSWORD_MUST_CONTAIN_SPECIAL_CHAR" xml:space="preserve">
-    <value>Password must contain at least one special character</value>
-  </data>
-  <data name="PASSWORD_MUST_CONTAIN_UPPERCASE" xml:space="preserve">
-    <value>Password must contain at least one uppercase letter</value>
+  <data name="PASSWORD_IS_NOT_VALID" xml:space="preserve">
+    <value>At least 8 characters, 1 uppercase letter, 1 number and a symbol</value>
   </data>
   <data name="REGISTER_COMPLETED" xml:space="preserve">
     <value>Registration completed successfully</value>
