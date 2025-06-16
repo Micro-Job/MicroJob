@@ -2,6 +2,7 @@
 using AuthService.Core.Entities;
 using Microsoft.Extensions.Options;
 using SharedLibrary.Dtos.EmailDtos;
+using SharedLibrary.Helpers;
 using System.Net;
 using System.Net.Mail;
 
@@ -74,7 +75,7 @@ public class EmailService(IOptions<SmtpSettings> smtpSettings, EmailTemplate _em
     {
         await SendEmailAsync(toEmail, new EmailMessage
         {
-            Subject = "Xoş gəldiniz...",
+            Subject = MessageHelper.GetMessage("WELCOME"),
             Content = _emailTemplate.RegisterCompleted(fullName)
         });
     }

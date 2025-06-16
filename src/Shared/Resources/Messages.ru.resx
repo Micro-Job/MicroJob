@@ -219,23 +219,8 @@
   <data name="PASSWORDS_DO_NOT_MATCH" xml:space="preserve">
     <value>Пароли не совпадают</value>
   </data>
-  <data name="PASSWORD_LENGTH_RANGE" xml:space="preserve">
-    <value>Длина должна быть от 8 до 100 символов</value>
-  </data>
-  <data name="PASSWORD_MIN_LENGTH" xml:space="preserve">
-    <value>Пароль должен содержать минимум 8 символов</value>
-  </data>
-  <data name="PASSWORD_MUST_CONTAIN_LOWERCASE" xml:space="preserve">
-    <value>Пароль должен содержать хотя бы одну строчную букву</value>
-  </data>
-  <data name="PASSWORD_MUST_CONTAIN_NUMBER" xml:space="preserve">
-    <value>Пароль должен содержать хотя бы одну цифру</value>
-  </data>
-  <data name="PASSWORD_MUST_CONTAIN_SPECIAL_CHAR" xml:space="preserve">
-    <value>Пароль должен содержать хотя бы один специальный символ</value>
-  </data>
-  <data name="PASSWORD_MUST_CONTAIN_UPPERCASE" xml:space="preserve">
-    <value>Пароль должен содержать хотя бы одну заглавную букву</value>
+  <data name="PASSWORD_IS_NOT_VALID" xml:space="preserve">
+    <value>Не менее 8 символов, 1 заглавная буква, 1 цифра и символ</value>
   </data>
   <data name="REGISTER_COMPLETED" xml:space="preserve">
     <value>Регистрация успешно завершена</value>

@@ -64,6 +64,7 @@ namespace JobCompany.Business
                 x.AddConsumer<VacancyAcceptConsumer>();
                 x.AddConsumer<CheckApplicationConsumer>();
                 x.AddConsumer<PeriodicVacancyPayConsumer>();
+                x.AddConsumer<CheckVOENConsumer>();
 
                 x.SetKebabCaseEndpointNameFormatter();
 
