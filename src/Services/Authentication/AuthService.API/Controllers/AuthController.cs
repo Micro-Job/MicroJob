@@ -1,13 +1,13 @@
 ﻿using AuthService.Business.Dtos;
-using AuthService.Business.Services.Auth;
 using Microsoft.AspNetCore.Mvc;
+using AuthService.Business.Services.Auth;
 using SharedLibrary.Helpers;
 
 namespace AuthService.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthController(IAuthService _authService) : ControllerBase
+    public class AuthController(AuthenticationService _authService) : ControllerBase
     {
         [HttpPost("[action]")]
         public async Task<IActionResult> Register(RegisterDto dto)
@@ -67,6 +67,12 @@ namespace AuthService.API.Controllers
         {
             await _authService.CheckUserExistAsync(email.Trim(), phoneNumber.Trim());
             return Ok();
+        }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetCompanyNameByVOEN(string voen)
+        {
+            return Ok(await _authService.GetCompanyNameByVOENAsync(voen));
         }
     }
 }
