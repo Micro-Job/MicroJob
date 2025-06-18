@@ -1,127 +1,108 @@
 ﻿using Job.Business.Dtos.CertificateDtos;
-using Job.Business.Exceptions.Common;
 using Job.DAL.Contexts;
-using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.ExternalServices.FileService;
 using SharedLibrary.Statics;
 
-namespace Job.Business.Services.Certificate
+namespace Job.Business.Services.Certificate;
+
+public class CertificateService(JobDbContext context, IFileService fileService) : ICertificateService
 {
-    public class CertificateService(JobDbContext context, IFileService fileService)
-        : ICertificateService
+    public async Task<ICollection<Core.Entities.Certificate>> CreateBulkCertificateAsync(ICollection<CertificateCreateDto> dtos)
     {
-        public async Task<ICollection<Core.Entities.Certificate>> CreateBulkCertificateAsync(ICollection<CertificateCreateDto> dtos)
+        var certificatesToAdd = new List<Core.Entities.Certificate>();
+
+        foreach (var dto in dtos)
         {
-            var certificatesToAdd = new List<Core.Entities.Certificate>();
-
-            foreach (var dto in dtos)
-            {
-                var certificate = await CreateCertificateAsync(dto);
-                certificatesToAdd.Add(certificate);
-            }
-
-            return certificatesToAdd;
+            var certificate = await CreateCertificateFromDto(dto);
+            certificatesToAdd.Add(certificate);
         }
 
-        public async Task<Core.Entities.Certificate> CreateCertificateAsync(CertificateCreateDto dto)
+        await context.Certificates.AddRangeAsync(certificatesToAdd);
+        return certificatesToAdd;
+    }
+
+    public async Task<ICollection<Core.Entities.Certificate>> UpdateBulkCertificateAsync(ICollection<CertificateUpdateDto> dtos, ICollection<Core.Entities.Certificate> existingCertificates)
+    {
+        var incomingIds = dtos
+            .Select(dto => Guid.TryParse(dto.Id, out var id) ? id : Guid.Empty)
+            .Where(id => id != Guid.Empty)
+            .ToHashSet();
+
+        var certificatesToUpdate = existingCertificates
+            .Where(c => incomingIds.Contains(c.Id))
+            .ToList();
+
+        foreach (var cert in certificatesToUpdate) // Mövcud sertifikatları yeniləyir
         {
-            FileDto fileResult = await fileService.UploadAsync(
-                FilePaths.document,
-                dto.CertificateFile
-            );
-
-            var certificate = new Core.Entities.Certificate
-            {
-                CertificateName = dto.CertificateName,
-                CertificateFile = $"{fileResult.FilePath}/{fileResult.FileName}",
-                GivenOrganization = dto.GivenOrganization,
-            };
-
-            await context.Certificates.AddAsync(certificate);
-            return certificate;
+            var dto = dtos.FirstOrDefault(d => Guid.TryParse(d.Id, out var id) && id == cert.Id);
+            if (dto == null) continue;
+            await UpdateCertificateFromDto(cert, dto);
         }
 
-        public async Task<ICollection<Core.Entities.Certificate>> UpdateBulkCertificateAsync(ICollection<CertificateUpdateDto> updateCertificateDtos, ICollection<Core.Entities.Certificate> existingCertificates)
+        var toRemove = existingCertificates      // Mövcud sertifikatlardan silinməsi lazım olanları tapır
+            .Where(c => !incomingIds.Contains(c.Id))
+            .ToList();
+
+        if (toRemove.Count != 0)
         {
-            var allCertificates = new List<Core.Entities.Certificate>(); // Nəticə olaraq qaytarılacaq sertifikat siyahısı
-            var newCertificateDtos = new List<CertificateCreateDto>(); // Yeni əlavə olunacaq sertifikatlar üçün yaradılacaq DTO siyahısı
+            foreach (var cert in toRemove)
+                fileService.DeleteFile(cert.CertificateFile);
 
-            var incomingIds = updateCertificateDtos
-                .Where(dto => Guid.TryParse(dto.Id, out var id) && id != Guid.Empty)
-                .Select(dto => Guid.Parse(dto.Id)).ToHashSet();
-
-            foreach (var dto in updateCertificateDtos)
-            {
-                if (Guid.TryParse(dto.Id, out var parsedId) && parsedId != Guid.Empty) // Sertifikat ID-si varsa və düzgün formatda parse edilirsə
-                {
-                    var certificate = await context.Certificates.FirstOrDefaultAsync(x => x.Id == parsedId)
-                        ?? throw new NotFoundException<Core.Entities.Certificate>();
-
-                    fileService.DeleteFile(certificate.CertificateFile); // Mövcud sertifikatın faylını silirik
-
-                    var fileResult = await fileService.UploadAsync(FilePaths.document, dto.CertificateFile); // Yeni faylı yükləyirik
-
-                    // Sertifikatın məlumatlarını güncəlləyirik
-                    certificate.CertificateName = dto.CertificateName; 
-                    certificate.GivenOrganization = dto.GivenOrganization;
-                    certificate.CertificateFile = $"{fileResult.FilePath}/{fileResult.FileName}";
-
-                    allCertificates.Add(certificate);  // Yenilənmiş sertifikatı siyahıya əlavə edirik
-                }
-                else // Əgər sertifikat ID-si yoxdursa, yeni sertifikat yaradırıq
-                {
-                    newCertificateDtos.Add(new CertificateCreateDto
-                    {
-                        CertificateName = dto.CertificateName,
-                        GivenOrganization = dto.GivenOrganization,
-                        CertificateFile = dto.CertificateFile
-                    });
-                }
-            }
-
-            // Mövcud sertifikatlar ilə request-də gələn sertifikatların ID-lərini müqayisə edib silinməli olanları tapırıq
-            var certificatesToRemove = existingCertificates.Where(x => !incomingIds.Contains(x.Id)).ToList();
-
-            if (certificatesToRemove.Count != 0)
-            {
-                foreach (var certificate in certificatesToRemove)
-                {
-                    fileService.DeleteFile(certificate.CertificateFile);
-                }
-
-                context.Certificates.RemoveRange(certificatesToRemove);
-            }
-
-            if (newCertificateDtos.Count > 0)  // Əgər yeni sertifikatlar varsa, onları əlavə edirik
-            {
-                var newlyCreated = await CreateBulkCertificateAsync(newCertificateDtos);
-                allCertificates.AddRange(newlyCreated);
-            }
-
-            return allCertificates; // Sertifikatları qaytarırıq
+            context.Certificates.RemoveRange(toRemove);
         }
 
-        public async Task UpdateCertificateAsync(CertificateUpdateDto dto)
+        var createDtos = dtos                   // Yeni sertifikatları əlavə edir
+            .Where(d => !Guid.TryParse(d.Id, out var id) || id == Guid.Empty)
+            .Select(d => new CertificateCreateDto
+            {
+                CertificateName = d.CertificateName,
+                GivenOrganization = d.GivenOrganization,
+                CertificateFile = d.CertificateFile
+            }).ToList();
+
+        if (createDtos.Count != 0)
+            certificatesToUpdate.AddRange(await CreateBulkCertificateAsync(createDtos));
+
+        return certificatesToUpdate;
+    }
+
+    public ICollection<Core.Entities.Certificate> DeleteAllCertificates(ICollection<Core.Entities.Certificate> existingCertificates)
+    {
+        if (existingCertificates.Count > 0)
         {
-            var parsedId = Guid.Parse(dto.Id);
-
-            var certificate =
-                await context.Certificates.FirstOrDefaultAsync(x => x.Id == parsedId)
-                ?? throw new NotFoundException<Core.Entities.Certificate>();
-
-            fileService.DeleteFile(certificate.CertificateFile);
-
-            FileDto fileResult = await fileService.UploadAsync(
-                FilePaths.document,
-                dto.CertificateFile
-            );
-
-            certificate.CertificateName = dto.CertificateName;
-            certificate.GivenOrganization = dto.GivenOrganization;
-            certificate.CertificateFile = $"{fileResult.FilePath}/{fileResult.FileName}";
-
-            await context.SaveChangesAsync();
+            foreach (var cert in existingCertificates)
+            {
+                fileService.DeleteFile(cert.CertificateFile);
+            }
+            context.Certificates.RemoveRange(existingCertificates);
         }
+
+        return [];
+    }
+
+
+    private async Task<Core.Entities.Certificate> CreateCertificateFromDto(CertificateCreateDto dto)
+    {
+        FileDto fileResult = await fileService.UploadAsync(FilePaths.document, dto.CertificateFile);
+
+        var certificate = new Core.Entities.Certificate
+        {
+            CertificateName = dto.CertificateName,
+            CertificateFile = $"{fileResult.FilePath}/{fileResult.FileName}",
+            GivenOrganization = dto.GivenOrganization,
+        };
+
+        return certificate;
+    }
+
+    private async Task UpdateCertificateFromDto(Core.Entities.Certificate certificate, CertificateUpdateDto dto)
+    {
+        fileService.DeleteFile(certificate.CertificateFile);
+        var upload = await fileService.UploadAsync(FilePaths.document, dto.CertificateFile);
+
+        certificate.CertificateName = dto.CertificateName;
+        certificate.GivenOrganization = dto.GivenOrganization;
+        certificate.CertificateFile = $"{upload.FilePath}/{upload.FileName}";
     }
 }

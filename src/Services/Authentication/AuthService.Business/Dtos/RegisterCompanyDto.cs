@@ -14,6 +14,7 @@ public class RegisterCompanyDto
     public string ConfirmPassword { get; set; } 
     public bool Policy { get; set; }
     public bool IsCompany { get; set; }
+    public string? VOEN { get; set; }
 }
 
 public class RegisterCompanyValidator : AbstractValidator<RegisterCompanyDto>
@@ -46,27 +47,30 @@ public class RegisterCompanyValidator : AbstractValidator<RegisterCompanyDto>
             .EmailAddress()
             .WithMessage(MessageHelper.GetMessage("INVALID_FORMAT"));
         RuleFor(x => x.Password)
-            .NotNull()
             .NotEmpty()
-            .WithMessage(MessageHelper.GetMessage("CANNOT_BE_EMPTY"))
-            .MinimumLength(8)
-            .WithMessage(MessageHelper.GetMessage("PASSWORD_MIN_LENGTH"))
-            .Matches(@"[A-Z]")
-            .WithMessage(MessageHelper.GetMessage("PASSWORD_MUST_CONTAIN_UPPERCASE"))
-            .Matches(@"[a-z]")
-            .WithMessage(MessageHelper.GetMessage("PASSWORD_MUST_CONTAIN_LOWERCASE"))
-            .Matches(@"[0-9]")
-            .WithMessage(MessageHelper.GetMessage("PASSWORD_MUST_CONTAIN_NUMBER"))
-            .Matches(@"[\W_]")
-            .WithMessage(MessageHelper.GetMessage("PASSWORD_MUST_CONTAIN_SPECIAL_CHAR"))
-            .Length(8, 100)
-            .WithMessage(MessageHelper.GetMessage("PASSWORD_LENGTH_RANGE"));
+            .WithMessage(MessageHelper.GetMessage("CANNOT_BE_EMPTY"));
+            //.MinimumLength(8)
+            //.WithMessage(MessageHelper.GetMessage("PASSWORD_MIN_LENGTH"))
+            //.Matches(@"[A-Z]")
+            //.WithMessage(MessageHelper.GetMessage("PASSWORD_MUST_CONTAIN_UPPERCASE"))
+            //.Matches(@"[a-z]")
+            //.WithMessage(MessageHelper.GetMessage("PASSWORD_MUST_CONTAIN_LOWERCASE"))
+            //.Matches(@"[0-9]")
+            //.WithMessage(MessageHelper.GetMessage("PASSWORD_MUST_CONTAIN_NUMBER"))
+            //.Matches(@"[\W_]")
+            //.WithMessage(MessageHelper.GetMessage("PASSWORD_MUST_CONTAIN_SPECIAL_CHAR"))
+            //.Length(8, 100)
+            //.WithMessage(MessageHelper.GetMessage("PASSWORD_LENGTH_RANGE"));
         //write a rule that password and confirm password must be equal
         RuleFor(x => x.ConfirmPassword)
-            .NotNull()
             .NotEmpty()
             .WithMessage(MessageHelper.GetMessage("CANNOT_BE_EMPTY"))
             .Equal(x => x.Password)
             .WithMessage(MessageHelper.GetMessage("PASSWORDS_DO_NOT_MATCH"));
+
+        //RuleFor(x => x.VOEN)
+        //    .NotEmpty()
+        //    .When(x => x.IsCompany)
+        //    .WithMessage("CANNOT_BE_EMPTY");
     }
 }

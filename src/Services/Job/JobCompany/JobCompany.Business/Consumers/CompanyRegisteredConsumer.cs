@@ -19,12 +19,13 @@ public class CompanyRegisteredConsumer(JobCompanyDbContext _dbContext) : IConsum
             UserId = context.Message.UserId,
             CompanyName = context.Message.CompanyName,
             CompanyLogo = Path.Combine(FilePaths.image, "defaultlogo.jpg"),
-            IsCompany = context.Message.IsCompany
+            IsCompany = context.Message.IsCompany,
+            VOEN = context.Message.VOEN
         };
 
         await _dbContext.Companies.AddAsync(newCompany);
 
-        var steps = _dbContext.ApplicationSteps.AsNoTracking();
+        var steps = await _dbContext.ApplicationSteps.ToListAsync();
 
         var statuses = steps.Select(s => new Status
         {

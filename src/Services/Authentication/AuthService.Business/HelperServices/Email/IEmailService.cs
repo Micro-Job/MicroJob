@@ -1,12 +1,12 @@
 ﻿using AuthService.Core.Entities;
 using SharedLibrary.Dtos.EmailDtos;
 
-namespace AuthService.Business.HelperServices.Email
+namespace AuthService.Business.HelperServices.Email;
+
+public interface IEmailService
 {
-    public interface IEmailService
-    {
-        Task SendSetPassword(string toEmail, string token);
-        Task SendResetPassword(User user, string token);
-        Task SendEmailAsync(string toEmail, EmailMessage emailMessage);
-    }
+    Task SendSetPassword(string toEmail, string token);
+    Task SendResetPassword(User user, string token);
+    Task SendEmailAsync(string toEmail, EmailMessage emailMessage);
+    Task SendRegister(string toEmail, string fullName);
 }

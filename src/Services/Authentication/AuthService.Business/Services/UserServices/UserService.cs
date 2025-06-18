@@ -19,17 +19,17 @@ using SharedLibrary.Statics;
 
 namespace AuthService.Business.Services.UserServices
 {
-    public class UserService : IUserService
+    public class UserService 
     {
         private readonly AppDbContext _context;
         private readonly IFileService _fileService;
         private readonly ICurrentUser _currentUser;
-        private readonly IAuthService _authService;
+        private readonly AuthenticationService _authService;
         private readonly IConfiguration _configuration;
         private readonly IPublishEndpoint _publishEndpoint;
         private readonly IRequestClient<GetCompaniesDataByUserIdsRequest> _companyDataRequest;
 
-        public UserService(AppDbContext context, IFileService fileService, ICurrentUser currentUser, IAuthService authService, IRequestClient<GetCompaniesDataByUserIdsRequest> companyDataRequest, IConfiguration configuration, IPublishEndpoint publishEndpoint)
+        public UserService(AppDbContext context, IFileService fileService, ICurrentUser currentUser, AuthenticationService authService, IRequestClient<GetCompaniesDataByUserIdsRequest> companyDataRequest, IConfiguration configuration, IPublishEndpoint publishEndpoint)
         {
             _context = context;
             _fileService = fileService;
