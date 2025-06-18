@@ -53,7 +53,7 @@ namespace AuthService.Business.Services.UserServices
                     LastName = x.LastName,
                     Email = x.Email,
                     MainPhoneNumber = x.MainPhoneNumber,
-                    Image = x.Image != null ? $"{_configuration["ApiGateway:BaseUrl"]}/auth/{x.Image}" : null,
+                    Image = x.Image != null ? $"{_configuration["ApiGateway:BaseUrl"]}/authImages/{x.Image}" : null,
                     UserRole = x.UserRole,
                     JobStatus = x.JobStatus,
                 }).FirstOrDefaultAsync() ?? throw new UserNotFoundException();
@@ -160,7 +160,7 @@ namespace AuthService.Business.Services.UserServices
             return new UserProfileImageUpdateResponseDto
             {
                 UserId = user.Id,
-                ImageUrl = $"{_configuration["ApiGateway:BaseUrl"]}/auth/{user.Image}",
+                ImageUrl = $"{_configuration["ApiGateway:BaseUrl"]}/authImages/{user.Image}",
             };
         }
 

@@ -57,7 +57,7 @@
           "Port": 8080
         }
       ],
-      "UpstreamPathTemplate": "/auth/Files/Images/{filename}",
+      "UpstreamPathTemplate": "/authImages/Files/Images/{filename}",
       "UpstreamHttpMethod": [ "GET" ]
     },
     {
@@ -106,6 +106,18 @@
         }
       ],
       "UpstreamPathTemplate": "/user/Files/Documents/{filename}",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/Files/Images/EmailImages/{fileName}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "job-auth-service",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/authEmailImages/Files/Images/EmailImages/{fileName}",
       "UpstreamHttpMethod": [ "GET" ]
     }
   ],

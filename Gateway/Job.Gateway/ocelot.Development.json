@@ -13,6 +13,18 @@
       "UpstreamHttpMethod": [ "POST", "GET", "PUT", "DELETE" ]
     },
     {
+      "DownstreamPathTemplate": "/Files/Images/{filename}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5001
+        }
+      ],
+      "UpstreamPathTemplate": "/authImages/Files/Images/{filename}",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
       "DownstreamPathTemplate": "/api/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
@@ -47,6 +59,18 @@
       ],
       "UpstreamPathTemplate": "/jobpayment/{everything}",
       "UpstreamHttpMethod": [ "POST", "GET", "PUT", "DELETE" ]
+    },
+    {
+      "DownstreamPathTemplate": "/Files/Images/EmailImages/{fileName}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5001
+        }
+      ],
+      "UpstreamPathTemplate": "/authEmailImages/Files/Images/EmailImages/{fileName}",
+      "UpstreamHttpMethod": [ "GET" ]
     }
   ],
   "GlobalConfiguration": {
