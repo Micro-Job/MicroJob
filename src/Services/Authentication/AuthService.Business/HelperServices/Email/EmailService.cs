@@ -75,7 +75,7 @@ public class EmailService(IOptions<SmtpSettings> smtpSettings, EmailTemplate _em
     {
         await SendEmailAsync(toEmail, new EmailMessage
         {
-            Subject = MessageHelper.GetMessage("WELCOME"),
+            Subject = MessageHelper.GetMessage("Xoş gəlmişsiniz..."),
             Content = _emailTemplate.RegisterCompleted(fullName)
         });
     }
