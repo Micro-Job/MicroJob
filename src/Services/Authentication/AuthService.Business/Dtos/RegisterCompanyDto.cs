@@ -68,9 +68,9 @@ public class RegisterCompanyValidator : AbstractValidator<RegisterCompanyDto>
             .Equal(x => x.Password)
             .WithMessage(MessageHelper.GetMessage("PASSWORDS_DO_NOT_MATCH"));
 
-        RuleFor(x => x.VOEN)
-            .NotEmpty()
-            .When(x => x.IsCompany)
-            .WithMessage("CANNOT_BE_EMPTY");
+        //RuleFor(x => x.VOEN)
+        //    .NotEmpty()
+        //    .When(x => x.IsCompany)
+        //    .WithMessage("CANNOT_BE_EMPTY");
     }
 }

@@ -74,19 +74,19 @@ namespace AuthService.Business.Services.Auth
             await CheckUserExistAsync(dto.Email, dto.MainPhoneNumber);
 
             //TODO : exceptionlar deyismelidir
-            if (dto.IsCompany && dto.VOEN != null)
-            {
-                if(!await CheckVOEN(dto.VOEN))
-                    throw new NotFoundException<User>("VÖEN tapılmadı.");
+            //if (dto.IsCompany && dto.VOEN != null)
+            //{
+            //    if(!await CheckVOEN(dto.VOEN))
+            //        throw new NotFoundException<User>("VÖEN tapılmadı.");
 
-                var voenResponse = await _voenCheckRequest.GetResponse<CheckVoenResponse>(new CheckVoenRequest
-                {
-                    VOEN = dto.VOEN
-                });
+            //    var voenResponse = await _voenCheckRequest.GetResponse<CheckVoenResponse>(new CheckVoenRequest
+            //    {
+            //        VOEN = dto.VOEN
+            //    });
 
-                if (voenResponse.Message.IsExist)
-                    throw new UserExistException("VÖEN istifadə edilib.");
-            }
+            //    if (voenResponse.Message.IsExist)
+            //        throw new UserExistException("VÖEN istifadə edilib.");
+            //}
 
             var user = new User
             {

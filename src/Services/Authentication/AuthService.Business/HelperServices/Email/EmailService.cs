@@ -24,7 +24,7 @@ public class EmailService(IOptions<SmtpSettings> smtpSettings, EmailTemplate _em
 
     public async Task SendEmailAsync(string toEmail, EmailMessage emailMessage)
     {
-        var fromAddress = new MailAddress(_smtpSettings.Username, "Siesco");
+        var fromAddress = new MailAddress(_smtpSettings.Username, "HIRI");
         var toAddress = new MailAddress(toEmail);
         string fromPassword = _smtpSettings.Password;
         string subject = emailMessage.Subject;

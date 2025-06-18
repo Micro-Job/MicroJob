@@ -34,7 +34,7 @@ public class EmailTemplate(IConfiguration _configuration)
                         <!-- Logo -->
                         <tr>
                           <td style=""font-size:20px; color:#3D4C5E; font-weight:600; line-height: 1.5; text-align: center; box-sizing: border-box;"">
-                            Auth
+                            HIRI
                           </td>
                         </tr>
                         <!-- Title -->
