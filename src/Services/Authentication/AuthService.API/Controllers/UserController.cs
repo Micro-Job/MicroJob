@@ -10,7 +10,7 @@ namespace AuthService.API.Controllers
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
-    public class UserController(IUserService userService) : ControllerBase
+    public class UserController(UserService userService) : ControllerBase
     {
         [HttpGet("[action]")]
         public async Task<IActionResult> GetUserInformationAsync()

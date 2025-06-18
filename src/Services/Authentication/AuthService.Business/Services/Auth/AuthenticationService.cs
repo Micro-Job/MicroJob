@@ -8,6 +8,7 @@ using Azure;
 using HtmlAgilityPack;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.SqlServer.Query.Internal;
 using Microsoft.Extensions.Configuration;
 using SharedLibrary.Dtos.EmailDtos;
 using SharedLibrary.Enums;
@@ -22,7 +23,7 @@ using System.Security.Claims;
 
 namespace AuthService.Business.Services.Auth
 {
-    public class AuthService(AppDbContext _context, ITokenHandler _tokenHandler, IPublishEndpoint _publishEndpoint, IConfiguration _configuration, IEmailService _emailService, ICurrentUser _currentUser, IRequestClient<GetCompaniesDataByUserIdsRequest> _companyDataClient , IRequestClient<CheckVoenRequest> _voenCheckRequest) : IAuthService
+    public class AuthenticationService(AppDbContext _context, ITokenHandler _tokenHandler, IPublishEndpoint _publishEndpoint, IConfiguration _configuration, IEmailService _emailService, ICurrentUser _currentUser, IRequestClient<GetCompaniesDataByUserIdsRequest> _companyDataClient , IRequestClient<CheckVoenRequest> _voenCheckRequest) 
     {
         public async Task RegisterAsync(RegisterDto dto)
         {
@@ -339,12 +340,12 @@ namespace AuthService.Business.Services.Auth
             });
         }
 
-        private async Task<bool> CheckVOEN(string voen)
+        public async Task<string?> GetCompanyNameByVOENAsync(string voen)
         {
             using (HttpClient client = new HttpClient())
             {
                 byte checkCount = 0;
-                client.Timeout = TimeSpan.FromSeconds(0.7);
+                client.Timeout = TimeSpan.FromSeconds(0.6);
                 while (checkCount < 5)
                 {
                     try
@@ -353,8 +354,8 @@ namespace AuthService.Business.Services.Auth
                         HtmlDocument htmlDocument = new HtmlDocument();
                         htmlDocument.LoadHtml(htmlContent);
                         string titleContent = htmlDocument.DocumentNode.SelectSingleNode("//td[contains(@width, '69')]")?.InnerHtml;
-                        if (string.IsNullOrEmpty(titleContent)) return false;
-                        return true;
+                        if (!string.IsNullOrEmpty(titleContent)) return titleContent;
+                        return null;
                     }
                     catch (Exception)
                     {
@@ -362,7 +363,7 @@ namespace AuthService.Business.Services.Auth
                     }
                 }
             }
-            return false;
+            return null;
         }
 
         private void CheckPasswordAndThrowException(string password)
