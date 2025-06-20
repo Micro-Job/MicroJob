@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc.RazorPages;
+﻿using JobPayment.Core.Enums;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,5 +14,6 @@ namespace JobPayment.Business.Dtos.PacketDtos
         public string Title { get; set; }
         public double Coin { get; set; }
         public decimal Value { get; set; }
+        public PacketType PacketType { get; set; }
     }
 }

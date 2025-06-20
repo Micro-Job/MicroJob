@@ -62,7 +62,8 @@ namespace JobPayment.Business.Services.PacketServices
                 Id = x.Id,
                 Title = x.Title,
                 Coin = x.Coin,
-                Value = x.Value
+                Value = x.Value,
+                PacketType = x.PacketType
             })
             .AsNoTracking()
             .ToListAsync();
