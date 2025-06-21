@@ -129,7 +129,7 @@ namespace JobCompany.Business.Services.CompanyServices
 
             return new CompanyUpdateResponseDto
             {
-                CompanyLogo = $"{_currentUser.BaseUrl}/company/{company.CompanyLogo}"
+                CompanyLogo = $"{_currentUser.BaseUrl}/companyFiles/{company.CompanyLogo}"
             };
         }
 
@@ -148,7 +148,7 @@ namespace JobCompany.Business.Services.CompanyServices
                 {
                     CompanyId = c.Id,
                     CompanyName = c.CompanyName,
-                    CompanyImage = c.CompanyLogo != null ? $"{_currentUser.BaseUrl}/company/{c.CompanyLogo}" : null,
+                    CompanyImage = c.CompanyLogo != null ? $"{_currentUser.BaseUrl}/companyFiles/{c.CompanyLogo}" : null,
                     CompanyVacancyCount = c.Vacancies != null ? c.Vacancies.Count(v => v.VacancyStatus == VacancyStatus.Active && v.EndDate > DateTime.Now) : 0,
                 })
                 .Skip(offset)
@@ -174,7 +174,7 @@ namespace JobCompany.Business.Services.CompanyServices
                             CompanyInformation = x.CompanyInformation,
                             CompanyLocation = x.CompanyLocation,
                             CompanyName = x.CompanyName,
-                            CompanyLogo = $"{_currentUser.BaseUrl}/company/{x.CompanyLogo}",
+                            CompanyLogo = $"{_currentUser.BaseUrl}/companyFiles/{x.CompanyLogo}",
                             WebLink = x.WebLink,
                             UserId = x.UserId,
                             CompanyNumbers = x.CompanyNumbers
@@ -212,7 +212,7 @@ namespace JobCompany.Business.Services.CompanyServices
                     WebLink = x.WebLink,
                     CreatedDate = x.CreatedDate,
                     EmployeeCount = x.EmployeeCount.HasValue ? x.EmployeeCount.Value : null,
-                    CompanyLogo = $"{_currentUser.BaseUrl}/company/{x.CompanyLogo}",
+                    CompanyLogo = $"{_currentUser.BaseUrl}/companyFiles/{x.CompanyLogo}",
                     Category = x.Category.GetTranslation(currentLanguage, GetTranslationPropertyName.Name),
                     City = x.City != null ? x.City.GetTranslation(currentLanguage, GetTranslationPropertyName.Name) : null,
                     Country = x.Country != null ? x.Country.GetTranslation(currentLanguage, GetTranslationPropertyName.Name) : null,

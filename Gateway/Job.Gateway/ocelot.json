@@ -21,7 +21,7 @@
           "Port": 8080
         }
       ],
-      "UpstreamPathTemplate": "/job/{everything}",
+      "UpstreamPathTemplate": "/job/{everything}",  
       "UpstreamHttpMethod": [ "POST", "GET", "PUT", "DELETE" ]
     },
     {
@@ -48,20 +48,11 @@
       "UpstreamPathTemplate": "/jobpayment/{everything}",
       "UpstreamHttpMethod": [ "POST", "GET", "PUT", "DELETE" ]
     },
+
+    //File Routes
+
     {
-      "DownstreamPathTemplate": "/Files/Images/{filename}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "job-auth-service",
-          "Port": 8080
-        }
-      ],
-      "UpstreamPathTemplate": "/authImages/Files/Images/{filename}",
-      "UpstreamHttpMethod": [ "GET" ]
-    },
-    {
-      "DownstreamPathTemplate": "/Files/Images/{filename}",
+      "DownstreamPathTemplate": "/{filename}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -69,23 +60,11 @@
           "Port": 8080
         }
       ],
-      "UpstreamPathTemplate": "/company/Files/Images/{filename}",
+      "UpstreamPathTemplate": "/companyFiles/{filename}",
       "UpstreamHttpMethod": [ "GET" ]
     },
     {
-      "DownstreamPathTemplate": "/Files/Documents/{filename}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "jobcompany-service",
-          "Port": 8080
-        }
-      ],
-      "UpstreamPathTemplate": "/company/Files/Documents/{filename}",
-      "UpstreamHttpMethod": [ "GET" ]
-    },
-    {
-      "DownstreamPathTemplate": "/Files/Images/{filename}",
+      "DownstreamPathTemplate": "/{filename}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -93,23 +72,11 @@
           "Port": 8080
         }
       ],
-      "UpstreamPathTemplate": "/user/Files/Images/{filename}",
+      "UpstreamPathTemplate": "/userFiles/{filename}",
       "UpstreamHttpMethod": [ "GET" ]
     },
     {
-      "DownstreamPathTemplate": "/Files/Documents/{filename}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "jobuser-service",
-          "Port": 8080
-        }
-      ],
-      "UpstreamPathTemplate": "/user/Files/Documents/{filename}",
-      "UpstreamHttpMethod": [ "GET" ]
-    },
-    {
-      "DownstreamPathTemplate": "/Files/Images/EmailImages/{fileName}",
+      "DownstreamPathTemplate": "/{fileName}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -117,7 +84,7 @@
           "Port": 8080
         }
       ],
-      "UpstreamPathTemplate": "/authEmailImages/Files/Images/EmailImages/{fileName}",
+      "UpstreamPathTemplate": "/authFiles/{fileName}",
       "UpstreamHttpMethod": [ "GET" ]
     }
   ],

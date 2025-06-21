@@ -94,7 +94,7 @@ public class ApplicationService : IApplicationService
         {
             SenderId = userGuid,
             SenderName = _currentUser.UserFullName,
-            SenderImage = $"{_configuration["JobUser:BaseUrl"]}{resumeData.Message.ProfileImage}",
+            SenderImage = $"{_currentUser.BaseUrl}/userFiles/{resumeData.Message.ProfileImage}",
             NotificationType = NotificationType.Application,
             CreatedDate = DateTime.Now,
             InformationId = resumeData.Message.ResumeId,
@@ -158,7 +158,8 @@ public class ApplicationService : IApplicationService
                 InformationId = applicationGuid,
                 InformationName = existAppVacancy.VacancyTitle,
                 NotificationType = NotificationType.ApplicationStatusUpdate,
-                SenderImage = $"{_currentUser.BaseUrl}/company/{existAppVacancy.CompanyLogo}",
+                //TODO burada BaseUrl event vasitesile gonderilmeli deyil
+                SenderImage = $"{_currentUser.BaseUrl}/companyFiles/{existAppVacancy.CompanyLogo}",
                 SenderName = existAppVacancy.CompanyName,
             }
         );
@@ -262,7 +263,7 @@ public class ApplicationService : IApplicationService
                 FirstName = a.FirstName,
                 LastName = a.LastName,
                 Email = a.Email,
-                ProfileImage = $"{_currentUser.BaseUrl}/user/{a.ProfileImage}",
+                ProfileImage = $"{_currentUser.BaseUrl}/userFiles/{a.ProfileImage}",
                 DateTime = a.CreatedDate,
                 ResumeId = a.ResumeId,
                 PhoneNumber = a.PhoneNumber,
@@ -301,7 +302,7 @@ public class ApplicationService : IApplicationService
                 VacancyId = a.VacancyId,
                 Title = a.Vacancy.Title,
                 CompanyId = a.Vacancy.CompanyId,
-                CompanyLogo = a.Vacancy.Company.CompanyLogo != null ? $"{_currentUser.BaseUrl}/company/{a.Vacancy.Company.CompanyLogo}" : null,
+                CompanyLogo = a.Vacancy.Company.CompanyLogo != null ? $"{_currentUser.BaseUrl}/companyFiles/{a.Vacancy.Company.CompanyLogo}" : null,
                 CompanyName = a.Vacancy.Company.CompanyName,
                 WorkType = a.Vacancy.WorkType,
                 VacancyStatus = a.Vacancy.VacancyStatus,
@@ -337,7 +338,7 @@ public class ApplicationService : IApplicationService
                 IsSavedVacancy = application.Vacancy.SavedVacancies.Any(x => x.UserId == _currentUser.UserGuid),
                 CompanyId = application.Vacancy.CompanyId,
                 CompanyName = application.Vacancy.Company.CompanyName,
-                CompanyLogo = $"{_currentUser.BaseUrl}/company/{application.Vacancy.Company.CompanyLogo}",
+                CompanyLogo = $"{_currentUser.BaseUrl}/companyFiles/{application.Vacancy.Company.CompanyLogo}",
                 Location = application.Vacancy.Company.CompanyLocation,
                 WorkType = application.Vacancy.WorkType,
                 WorkStyle = application.Vacancy.WorkStyle,
@@ -370,7 +371,7 @@ public class ApplicationService : IApplicationService
             .Select(a => new ApplicationWithStatusInfoListDto
             {
                 ApplicationId = a.Id,
-                ProfileImage = $"{_currentUser.BaseUrl}/user/{a.ProfileImage}",
+                ProfileImage = $"{_currentUser.BaseUrl}/userFiles/{a.ProfileImage}",
                 FirstName = a.FirstName,
                 LastName = a.LastName,
                 StatusId = a.StatusId,

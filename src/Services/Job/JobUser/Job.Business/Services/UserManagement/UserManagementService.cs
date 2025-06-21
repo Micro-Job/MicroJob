@@ -22,6 +22,7 @@ namespace Job.Business.Services.UserManagement;
 public class UserManagementService(JobDbContext _context, IRequestClient<GetUserDataRequest> _userDataRequest, 
     IConfiguration _configuration, ICurrentUser _currentUser) : IUserManagementService
 {
+    //TODO : burada neye gore request
     public async Task<UserPersonalInfoDto> GetPersonalInfoAsync(string userId)
     {
         var userGuid = Guid.Parse(userId);
@@ -90,7 +91,7 @@ public class UserManagementService(JobDbContext _context, IRequestClient<GetUser
                 Position = r.Position != null ? r.Position.Name : null,
                 BirthDay = r.BirthDay,
                 ResumeEmail = r.ResumeEmail,
-                UserPhoto = r.UserPhoto != null ? $"{_currentUser.BaseUrl}/{r.UserPhoto}" : null,
+                UserPhoto = r.UserPhoto != null ? $"{_currentUser.BaseUrl}/userFiles/{r.UserPhoto}" : null,
                 Skills = r.ResumeSkills.Select(s => new SkillGetByIdDto
                 {
                     Id = s.SkillId,
@@ -133,7 +134,7 @@ public class UserManagementService(JobDbContext _context, IRequestClient<GetUser
                     CertificateId = c.Id,
                     CertificateName = c.CertificateName,
                     GivenOrganization = c.GivenOrganization,
-                    CertificateFile = $"{_currentUser.BaseUrl}/{c.CertificateFile}"
+                    CertificateFile = $"{_currentUser.BaseUrl}/userFiles/{c.CertificateFile}"
                 }).ToList()
             }).FirstOrDefaultAsync() ?? throw new NotFoundException<Core.Entities.Resume>();
 

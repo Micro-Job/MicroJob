@@ -175,7 +175,7 @@ namespace JobCompany.Business.Services.VacancyServices
                     Title = x.Title,
                     StartDate = x.StartDate,
                     Location = x.Location,
-                    CompanyLogo = $"{_currentUser.BaseUrl}/company/{x.Company.CompanyLogo}",
+                    CompanyLogo = $"{_currentUser.BaseUrl}/companyFiles/{x.Company.CompanyLogo}",
                     CompanyName = x.Company.IsCompany ? x.Company.CompanyName : x.CompanyName,
                     ViewCount = x.ViewCount,
                     WorkType = x.WorkType,
@@ -231,7 +231,7 @@ namespace JobCompany.Business.Services.VacancyServices
                     CompanyName = x.Company.IsCompany ? x.Company.CompanyName : x.CompanyName,
                     Title = x.Title,
                     Location = x.Location,
-                    CompanyLogo = $"{_currentUser.BaseUrl}/company/{x.Company.CompanyLogo}",
+                    CompanyLogo = $"{_currentUser.BaseUrl}/companyFiles/{x.Company.CompanyLogo}",
                     WorkStyle = x.WorkStyle,
                     WorkType = x.WorkType,
                     StartDate = x.StartDate,
@@ -270,7 +270,7 @@ namespace JobCompany.Business.Services.VacancyServices
                         Id = x.Id,
                         Title = x.Title,
                         CompanyId = x.CompanyId,
-                        CompanyLogo = $"{_currentUser.BaseUrl}/company/{x.Company.CompanyLogo}",
+                        CompanyLogo = $"{_currentUser.BaseUrl}/companyFiles/{x.Company.CompanyLogo}",
                         StartDate = x.StartDate,
                         EndDate = x.EndDate,
                         Location = x.Location,
@@ -348,7 +348,7 @@ namespace JobCompany.Business.Services.VacancyServices
                     CompanyId = v.CompanyId,
                     CompanyName = v.Company.IsCompany ? v.Company.CompanyName : v.CompanyName,
                     CompanyUserId = v.Company.UserId,
-                    CompanyLogo = $"{_currentUser.BaseUrl}/company/{v.Company.CompanyLogo}",
+                    CompanyLogo = $"{_currentUser.BaseUrl}/companyFiles/{v.Company.CompanyLogo}",
                     StartDate = v.StartDate,
                     EndDate = v.EndDate,
                     Location = v.Location,
@@ -532,6 +532,7 @@ namespace JobCompany.Business.Services.VacancyServices
                     InformationName = existingVacancy.Title,
                     NotificationType = NotificationType.VacancyUpdate,
                     SenderName = existingVacancy.CompanyName,
+                    //TODO : burada baseUrl gonderilmeli deyil 
                     SenderImage = $"{_currentUser.BaseUrl}/{existingVacancy.CompanyLogo}",
                 }
             );
@@ -551,7 +552,7 @@ namespace JobCompany.Business.Services.VacancyServices
                 {
                     Id = v.Id,
                     Title = v.Title,
-                    CompanyLogo = v.Company.CompanyLogo != null ? $"{_currentUser.BaseUrl}/company/{v.Company.CompanyLogo}" : null,
+                    CompanyLogo = v.Company.CompanyLogo != null ? $"{_currentUser.BaseUrl}/companyFiles/{v.Company.CompanyLogo}" : null,
                     CompanyName = v.Company.IsCompany ? v.Company.CompanyName : v.CompanyName,
                     StartDate = v.StartDate,
                     Location = v.Location,
@@ -715,7 +716,7 @@ namespace JobCompany.Business.Services.VacancyServices
                 {
                     Id = x.Id,
                     Title = x.Title,
-                    CompanyLogo = x.CompanyLogo != null ? $"{_currentUser.BaseUrl}/company/{x.Company.CompanyLogo}" : null,
+                    CompanyLogo = x.CompanyLogo != null ? $"{_currentUser.BaseUrl}/companyFiles/{x.Company.CompanyLogo}" : null,
                     CompanyName = x.Company.IsCompany ? x.Company.CompanyName : x.CompanyName,
                     StartDate = x.StartDate,
                     Location = x.Location,
@@ -733,6 +734,7 @@ namespace JobCompany.Business.Services.VacancyServices
             return vacancies;
         }
 
+        //TODO : burada iseduzelden eger vakansiya yaradarsa bu zaman vakansiyaya sekil qoyur ona gore de sekil hissesinde companyLogo olmali deyil
         public async Task<DataListDto<VacancyGetAllDto>> GetAllSavedVacancyAsync(int skip, int take, string? vacancyName)
         {
             var query = _context.SavedVacancies.Where(x => x.UserId == _currentUser.UserGuid)
@@ -750,7 +752,7 @@ namespace JobCompany.Business.Services.VacancyServices
                 {
                     Id = x.Vacancy.Id,
                     Title = x.Vacancy.Title,
-                    CompanyLogo = x.Vacancy.Company.CompanyLogo != null ? $"{_currentUser.BaseUrl}/company/{x.Vacancy.Company.CompanyLogo}" : null,
+                    CompanyLogo = x.Vacancy.Company.CompanyLogo != null ? $"{_currentUser.BaseUrl}/companyFiles/{x.Vacancy.Company.CompanyLogo}" : null,
                     CompanyName = x.Vacancy.Company.IsCompany ? x.Vacancy.Company.CompanyName : x.Vacancy.CompanyName,
                     StartDate = x.Vacancy.StartDate,
                     Location = x.Vacancy.Location,

@@ -13,18 +13,6 @@
       "UpstreamHttpMethod": [ "POST", "GET", "PUT", "DELETE" ]
     },
     {
-      "DownstreamPathTemplate": "/Files/Images/{filename}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 5001
-        }
-      ],
-      "UpstreamPathTemplate": "/authImages/Files/Images/{filename}",
-      "UpstreamHttpMethod": [ "GET" ]
-    },
-    {
       "DownstreamPathTemplate": "/api/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
@@ -60,8 +48,35 @@
       "UpstreamPathTemplate": "/jobpayment/{everything}",
       "UpstreamHttpMethod": [ "POST", "GET", "PUT", "DELETE" ]
     },
+
+    //File Routes
+
     {
-      "DownstreamPathTemplate": "/Files/Images/EmailImages/{fileName}",
+      "DownstreamPathTemplate": "/{filename}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5082
+        }
+      ],
+      "UpstreamPathTemplate": "/companyFiles/{filename}",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/{filename}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5002
+        }
+      ],
+      "UpstreamPathTemplate": "/userFiles/{filename}",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/{fileName}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -69,7 +84,7 @@
           "Port": 5001
         }
       ],
-      "UpstreamPathTemplate": "/authEmailImages/Files/Images/EmailImages/{fileName}",
+      "UpstreamPathTemplate": "/authFiles/{fileName}",
       "UpstreamHttpMethod": [ "GET" ]
     }
   ],

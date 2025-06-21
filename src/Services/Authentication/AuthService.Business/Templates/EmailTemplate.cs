@@ -4,13 +4,13 @@ namespace AuthService.Business.Templates;
 
 public class EmailTemplate(IConfiguration _configuration)
 {
-    private readonly string Facebook = $"{_configuration["ApiGateway:BaseUrl"]}/authEmailImages/Files/Images/EmailImages/facebook.png";
-    private readonly string X = $"{_configuration["ApiGateway:BaseUrl"]}/authEmailImages/Files/Images/EmailImages/X.png";
-    private readonly string Instagram = $"{_configuration["ApiGateway:BaseUrl"]}/authEmailImages/Files/Images/EmailImages/instagram.png";
-    private readonly string Linkedin = $"{_configuration["ApiGateway:BaseUrl"]}/authEmailImages/Files/Images/EmailImages/linkedin.png";
-    private readonly string Secure = $"{_configuration["ApiGateway:BaseUrl"]}/authEmailImages/Files/Images/EmailImages/secure.png";
-    private readonly string UserCheck = $"{_configuration["ApiGateway:BaseUrl"]}/authEmailImages/Files/Images/EmailImages/userCheck.png";
-    private readonly string Youtube = $"{_configuration["ApiGateway:BaseUrl"]}/authEmailImages/Files/Images/EmailImages/youtube.png";
+    private readonly string Facebook = $"{_configuration["ApiGateway:BaseUrl"]}/authFiles/Files/Images/EmailImages/facebook.png";
+    private readonly string X = $"{_configuration["ApiGateway:BaseUrl"]}/authFiles/Files/Images/EmailImages/X.png";
+    private readonly string Instagram = $"{_configuration["ApiGateway:BaseUrl"]}/authFiles/Files/Images/EmailImages/instagram.png";
+    private readonly string Linkedin = $"{_configuration["ApiGateway:BaseUrl"]}/authFiles/Files/Images/EmailImages/linkedin.png";
+    private readonly string Secure = $"{_configuration["ApiGateway:BaseUrl"]}/authFiles/Files/Images/EmailImages/secure.png";
+    private readonly string UserCheck = $"{_configuration["ApiGateway:BaseUrl"]}/authFiles/Files/Images/EmailImages/userCheck.png";
+    private readonly string Youtube = $"{_configuration["ApiGateway:BaseUrl"]}/authFiles/Files/Images/EmailImages/youtube.png";
 
     public string ResetPassword(string token, string username)
     {
