@@ -9,12 +9,13 @@ namespace AuthService.Business.Consumers;
 
 public class UpdateUserJobStatusEventConsumer(AppDbContext _dbContext) : IConsumer<UpdateUserJobStatusEvent>
 {
+    //TODO : bu silinmelidir
     public async Task Consume(ConsumeContext<UpdateUserJobStatusEvent> context)
     {
-        var updated = await _dbContext.Users
-            .Where(u => u.Id == context.Message.UserId)
-            .ExecuteUpdateAsync(b => b.SetProperty(u => u.JobStatus, _ => context.Message.JobStatus));
+        //var updated = await _dbContext.Users
+        //    .Where(u => u.Id == context.Message.UserId)
+        //    .ExecuteUpdateAsync(b => b.SetProperty(u => u.JobStatus, _ => context.Message.JobStatus));
 
-        await context.ConsumeCompleted;
+        //await context.ConsumeCompleted;
     }
 }

@@ -20,58 +20,40 @@ using SharedLibrary.Responses;
 namespace Job.Business.Services.UserManagement;
 
 public class UserManagementService(JobDbContext _context, IRequestClient<GetUserDataRequest> _userDataRequest, 
-    IConfiguration _configuration, ICurrentUser _currentUser) : IUserManagementService
+    IConfiguration _configuration, ICurrentUser _currentUser) 
 {
-    //TODO : burada neye gore request
-    public async Task<UserPersonalInfoDto> GetPersonalInfoAsync(string userId)
+    public async Task<UserPersonalInfoDto> GetPersonalInfoAsync(Guid userId)
     {
-        var userGuid = Guid.Parse(userId);
-
         var data = await _userDataRequest.GetResponse<GetUserDataResponse>(new GetUserDataRequest
         {
-            UserId = userGuid
+            UserId = userId
         });
 
-        var resumeData = await _context.Resumes
+        var personalInfo = await _context.Users
             .AsNoTracking()
-            .Where(x => x.UserId == userGuid)
-            .Select(x => new
+            .Where(x => x.Id == userId)
+            .Select(x => new UserPersonalInfoDto
             {
-                x.BirthDay,
-                x.IsDriver,
-                x.IsMarried,
-                x.MilitarySituation,
-                PositionName = x.Position != null ? x.Position.Name : string.Empty
-            }).FirstOrDefaultAsync();
-
-        var personalInfo = new UserPersonalInfoDto
-        {
-            UserId = data.Message.UserId,
-            FullName = $"{data.Message.FirstName} {data.Message.LastName}",
-            Email = data.Message.Email,
-            ImageUrl = $"{_configuration["AuthService:BaseUrl"]}{data.Message.ProfileImage}",
-            MainPhoneNumber = data.Message.MainPhoneNumber,
-        };
-
-        if (resumeData != null)
-        {
-            personalInfo.BirthDay = resumeData.BirthDay;
-            personalInfo.Position = resumeData.PositionName;
-            personalInfo.MilitarySituation = resumeData.MilitarySituation;
-            personalInfo.IsDriver = resumeData.IsDriver;
-            personalInfo.FamilySituation = resumeData.IsMarried;
-        }
+                UserId = x.Id,
+                BirthDay = x.Resume.BirthDay,
+                IsDriver = x.Resume.IsDriver,
+                FamilySituation = x.Resume.IsMarried,
+                MilitarySituation = x.Resume.MilitarySituation,
+                Position = x.Resume.Position != null ? x.Resume.Position.Name : string.Empty,
+                FullName = $"{x.FirstName} {x.LastName}",
+                Email = x.Email,
+                MainPhoneNumber = x.MainPhoneNumber,
+                ImageUrl = $"{_configuration["AuthService:BaseUrl"]}/userFiles/{data.Message.ProfileImage}",
+            }).FirstOrDefaultAsync() ?? throw new NotFoundException();
 
         return personalInfo;
     }
 
-    public async Task<ResumeDetailItemDto> GetResumeDetailAsync(string userId)
+    public async Task<ResumeDetailItemDto> GetResumeDetailAsync(Guid userId)
     {
-        var userGuid = Guid.Parse(userId);
-
         var resume = await _context.Resumes
             .AsNoTracking()
-            .Where(r => r.UserId == userGuid)
+            .Where(r => r.UserId == userId)
             .Include(x => x.ResumeSkills)
                 .ThenInclude(x => x.Skill)
                     .ThenInclude(x => x.Translations)

@@ -21,7 +21,7 @@ using SharedLibrary.HelperServices.Current;
 
 namespace JobCompany.Business.Services.ManageService;
 
-public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUser, IPublishEndpoint _publishEndpoint) : IManageService
+public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUser, IPublishEndpoint _publishEndpoint)
 {
     #region Vacancy
     public async Task VacancyAcceptAsync(string vacancyId)
@@ -415,8 +415,7 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
                     }).ToList()
                     : new List<CompanyNumberDto>()
             })
-            .FirstOrDefaultAsync()
-                ?? throw new SharedLibrary.Exceptions.NotFoundException();
+            .FirstOrDefaultAsync() ?? throw new NotFoundException();
 
         return companyProfile;
     }

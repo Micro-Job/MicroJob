@@ -112,7 +112,7 @@ namespace AuthService.Business.Services.Auth
                     UserId = user.Id,
                     CompanyName = dto.IsCompany ? dto.CompanyName.Trim() : null,
                     IsCompany = dto.IsCompany,
-                    VOEN = dto.VOEN
+                    VOEN = dto.IsCompany ? dto.VOEN : null
                 }
             );
 

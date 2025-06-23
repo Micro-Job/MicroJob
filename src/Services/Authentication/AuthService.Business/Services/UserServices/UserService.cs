@@ -62,11 +62,14 @@ namespace AuthService.Business.Services.UserServices
             return user;
         }
 
+        //
         /// <summary> Logində olan userin informasiyasının update'si </summary>
         public async Task<UserUpdateResponseDto> UpdateUserInformationAsync(UserUpdateDto dto)
         {
             var email = dto.Email.Trim();
             var phoneNumber = dto.MainPhoneNumber.Trim();
+
+            //await CheckUserExistAsync(email, phoneNumber);
 
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == _currentUser.UserGuid)
                 ?? throw new UserNotFoundException();
@@ -102,7 +105,7 @@ namespace AuthService.Business.Services.UserServices
                 LastName = user.LastName,
                 Email = user.Email,
                 MainPhoneNumber = user.MainPhoneNumber,
-                JobStatus = user.JobStatus,
+                //JobStatus = user.JobStatus,
             };
         }
 
@@ -393,6 +396,24 @@ namespace AuthService.Business.Services.UserServices
             await _context.SaveChangesAsync();
         }
 
+        public async Task CheckUserExistAsync(string email, string phoneNumber)
+        {
+            var user = await _context.Users.Where(x => (x.Email == email || x.MainPhoneNumber == phoneNumber) && x.Id != _currentUser.UserGuid)
+                .Select(x => new
+                {
+                    x.Email,
+                    x.MainPhoneNumber
+                })
+                .FirstOrDefaultAsync();
+
+            if (user != null)
+            {
+                if (user.Email == email)
+                    throw new ExistEmailException();
+                else if (user.MainPhoneNumber == phoneNumber)
+                    throw new ExistPhoneNumberException();
+            }
+        }
         #endregion
     }
 }

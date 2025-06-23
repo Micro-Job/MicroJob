@@ -8,17 +8,17 @@ namespace Job.API.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 [AuthorizeRole(UserRole.Admin, UserRole.Operator)]
-public class UserManagementController(IUserManagementService _service) : ControllerBase
+public class UserManagementController(UserManagementService _service) : ControllerBase
 {
     [HttpGet("[action]/{userId}")]
-    public async Task<IActionResult> GetPersonalInfo(string userId)
+    public async Task<IActionResult> GetPersonalInfo(Guid userId)
     {
         var result = await _service.GetPersonalInfoAsync(userId);
         return Ok(result);
     }
 
     [HttpGet("[action]/{userId}")]
-    public async Task<IActionResult> GetResumeDetail(string userId)
+    public async Task<IActionResult> GetResumeDetail(Guid userId)
     {
         var result = await _service.GetResumeDetailAsync(userId);
         return Ok(result);
