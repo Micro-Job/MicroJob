@@ -33,7 +33,7 @@ namespace JobPayment.Business.Services.TransactionServices
                 Coin = dto.Coin,
                 UserId = dto.UserId,
                 BalanceId = dto.BalanceId,
-                CreatedDate = DateTime.Now,
+                CreatedDate = DateTime.Now.AddHours(4),
                 BeforeBalanceCoin = dto.BeforeBalanceCoin,
                 TransactionStatus = dto.TransactionStatus,
                 InformationId = dto.InformationId,
@@ -123,7 +123,7 @@ namespace JobPayment.Business.Services.TransactionServices
                 TransactionType = x.TranzactionType,
                 TransactionStatus = x.TransactionStatus,
                 TransactionDate = x.CreatedDate
-            }).FirstOrDefaultAsync() ?? throw new NotFoundException<Transaction>(MessageHelper.GetMessage("NOT_FOUND"));
+            }).FirstOrDefaultAsync() ?? throw new NotFoundException();
 
             return transaction;
         }

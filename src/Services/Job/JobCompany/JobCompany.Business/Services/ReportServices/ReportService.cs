@@ -140,7 +140,7 @@ namespace JobCompany.Business.Services.ReportServices
         {
             var company =
                 await _context.Companies.FirstOrDefaultAsync(c => c.UserId == _userGuid)
-                ?? throw new NotFoundException<Company>();
+                ?? throw new NotFoundException();
             var applications = await _context
                 .Applications.Include(a => a.Vacancy)
                 .Where(a => a.Vacancy.CompanyId == company.Id)

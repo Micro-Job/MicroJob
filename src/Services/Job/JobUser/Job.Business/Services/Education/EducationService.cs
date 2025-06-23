@@ -1,6 +1,6 @@
 ﻿using Job.Business.Dtos.EducationDtos;
-using Job.Business.Exceptions.Common;
 using Job.DAL.Contexts;
+using SharedLibrary.Exceptions;
 
 namespace Job.Business.Services.Education;
 
@@ -34,7 +34,7 @@ public class EducationService(JobDbContext context) : IEducationService
                 if (existingEducation is not null)
                     MapEducationDtoToEntityForUpdate(existingEducation, updatedEducation);
                 else
-                    throw new NotFoundException<Core.Entities.Education>();
+                    throw new NotFoundException();
 
                 allEducations.Add(existingEducation);
             }

@@ -14,6 +14,7 @@ using MassTransit.SagaStateMachine;
 using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Enums;
 using SharedLibrary.Events;
+using SharedLibrary.Exceptions;
 using SharedLibrary.Extensions;
 using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;
@@ -37,14 +38,14 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
         var vacancyMessageGuid = Guid.Parse(dto.VacancyMessageId);
 
         if (!await _context.Messages.AnyAsync(x => x.Id == vacancyMessageGuid))
-            throw new NotFoundException<Message>();
+            throw new NotFoundException();
 
         var vacancy = await _context.Vacancies
             .Include(v => v.Applications)
             .Include(v => v.Company)
             .Include(v => v.VacancyMessages)
             .FirstOrDefaultAsync(v => v.Id == vacancyGuid)
-            ?? throw new NotFoundException<Vacancy>();
+            ?? throw new NotFoundException();
 
         var appliedUserIds = vacancy.Applications
              .Where(a => !a.IsDeleted)
@@ -104,7 +105,7 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
     public async Task ToggleBlockVacancyStatusAsync(VacancyStatusUpdateDto dto)
     {
         var vacancy = await _context.Vacancies.FirstOrDefaultAsync(v => v.Id == Guid.Parse(dto.VacancyId))
-            ?? throw new NotFoundException<Vacancy>();
+            ?? throw new NotFoundException();
 
         vacancy.VacancyStatus = VacancyStatus.Block;
         vacancy.VacancyMessages?.Add(new VacancyMessage
@@ -236,7 +237,7 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
                     //    : null,
                     VacancyStatus = x.VacancyStatus
                 })
-                .FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>();
+                .FirstOrDefaultAsync() ?? throw new NotFoundException();
 
         return vacancyDto;
     }
@@ -296,7 +297,7 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
         var message = await _context.Messages
             .Include(m => m.Translations)
             .FirstOrDefaultAsync(m => m.Id == messageGuid)
-            ?? throw new NotFoundException<Message>();
+            ?? throw new NotFoundException();
 
         return new MessageDto
         {
@@ -340,7 +341,7 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
         var message = await _context.Messages
             .Include(m => m.Translations)
             .FirstOrDefaultAsync(m => m.Id == messageGuid)
-            ?? throw new NotFoundException<Message>();
+            ?? throw new NotFoundException();
 
         foreach (var dtoTranslation in dto.Translations)
         {
@@ -371,7 +372,7 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
         var message = await _context.Messages
             .Include(m => m.Translations)
             .FirstOrDefaultAsync(m => m.Id == messageGuid)
-            ?? throw new NotFoundException<Message>();
+            ?? throw new NotFoundException();
 
         _context.Messages.Remove(message);
         await _context.SaveChangesAsync();
@@ -415,7 +416,7 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
                     : new List<CompanyNumberDto>()
             })
             .FirstOrDefaultAsync()
-                ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>();
+                ?? throw new SharedLibrary.Exceptions.NotFoundException();
 
         return companyProfile;
     }
@@ -491,7 +492,7 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
         var category = await _context.Categories
             .Include(m => m.Translations)
             .FirstOrDefaultAsync(m => m.Id == categoryGuid)
-            ?? throw new NotFoundException<Message>();
+            ?? throw new NotFoundException();
 
         return new CategoryDto
         {
@@ -522,7 +523,7 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
         var category = await _context.Categories
             .Include(m => m.Translations)
             .FirstOrDefaultAsync(m => m.Id == categoryGuid)
-            ?? throw new NotFoundException<Category>();
+            ?? throw new NotFoundException();
         foreach (var dtoTranslation in categories)
         {
             var existingTranslation = category.Translations
@@ -550,7 +551,7 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
         var category = await _context.Categories
             .Include(m => m.Translations)
             .FirstOrDefaultAsync(m => m.Id == categoryGuid)
-            ?? throw new NotFoundException<Category>();
+            ?? throw new NotFoundException();
 
         _context.Categories.Remove(category);
         await _context.SaveChangesAsync();

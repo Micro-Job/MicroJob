@@ -32,5 +32,7 @@ namespace AuthService.Core.Entities
         public UserRole UserRole { get; set; }
         //TODO : JobStatus neye gore authdadir
         public JobStatus JobStatus { get; set; }
+
+        public bool IsVerified { get; set; }
     }
 }

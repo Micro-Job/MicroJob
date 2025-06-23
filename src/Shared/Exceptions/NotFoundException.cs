@@ -4,7 +4,7 @@ using SharedLibrary.Helpers;
 
 namespace SharedLibrary.Exceptions
 {
-    public class NotFoundException<T> : Exception, IBaseException
+    public class NotFoundException : Exception, IBaseException
     {
         public int StatusCode => StatusCodes.Status404NotFound;
 

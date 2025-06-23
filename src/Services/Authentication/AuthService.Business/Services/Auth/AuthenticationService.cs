@@ -7,6 +7,7 @@ using AuthService.DAL.Contexts;
 using Azure;
 using HtmlAgilityPack;
 using MassTransit;
+using Microsoft.AspNetCore.DataProtection.XmlEncryption;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.SqlServer.Query.Internal;
 using Microsoft.Extensions.Configuration;
@@ -23,7 +24,7 @@ using System.Security.Claims;
 
 namespace AuthService.Business.Services.Auth
 {
-    public class AuthenticationService(AppDbContext _context, ITokenHandler _tokenHandler, IPublishEndpoint _publishEndpoint, IConfiguration _configuration, IEmailService _emailService, ICurrentUser _currentUser, IRequestClient<GetCompaniesDataByUserIdsRequest> _companyDataClient , IRequestClient<CheckVoenRequest> _voenCheckRequest) 
+    public class AuthenticationService(AppDbContext _context, ITokenHandler _tokenHandler, IPublishEndpoint _publishEndpoint, IConfiguration _configuration, EmailService _emailService, ICurrentUser _currentUser, IRequestClient<GetCompaniesDataByUserIdsRequest> _companyDataClient , IRequestClient<CheckVoenRequest> _voenCheckRequest) 
     {
         public async Task RegisterAsync(RegisterDto dto)
         {
@@ -41,7 +42,7 @@ namespace AuthService.Business.Services.Auth
                 LastName = dto.LastName.Trim(),
                 MainPhoneNumber = dto.MainPhoneNumber,
                 RegistrationDate = DateTime.Now,
-                JobStatus = JobStatus.ActivelySeekingJob,
+                //JobStatus = JobStatus.ActivelySeekingJob,
                 Password = _tokenHandler.GeneratePasswordHash(dto.Password),
                 UserRole = UserRole.SimpleUser
             };
@@ -52,14 +53,14 @@ namespace AuthService.Business.Services.Auth
             await _publishEndpoint.Publish(new UserRegisteredEvent
             {
                 UserId = user.Id,
-                JobStatus = user.JobStatus,
+                //JobStatus = user.JobStatus,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
             });
 
             await CreateBalance(user.Id, user.FirstName, user.LastName);
 
-            await _emailService.SendRegister(user.Email, $"{user.FirstName} {user.LastName}");
+            await _emailService.SendVerifyEmail(user.Email, $"{user.FirstName} {user.LastName}");
         }
 
         public async Task CompanyRegisterAsync(RegisterCompanyDto dto)
@@ -300,7 +301,7 @@ namespace AuthService.Business.Services.Auth
             var hashOldPassword = _tokenHandler.GeneratePasswordHash(oldPassword);
 
             var user = await _context.Users.Where(ap => ap.Id == _currentUser.UserGuid).FirstOrDefaultAsync()
-                ?? throw new NotFoundException<User>();
+                ?? throw new NotFoundException();
 
             if (user.Password != hashOldPassword)
                 throw new OldPasswordWrongException();
@@ -364,6 +365,15 @@ namespace AuthService.Business.Services.Auth
                 }
             }
             return null;
+        }
+
+        public async Task VerifyAccountAsync(string email)
+        {
+            User user = await _context.Users.FirstOrDefaultAsync(x=> x.Email == email) ?? 
+                throw new NotFoundException();
+
+            user.IsVerified = true;
+            await _context.SaveChangesAsync();
         }
 
         private void CheckPasswordAndThrowException(string password)

@@ -15,7 +15,6 @@ public class UpdateUserJobStatusEventConsumer(AppDbContext _dbContext) : IConsum
             .Where(u => u.Id == context.Message.UserId)
             .ExecuteUpdateAsync(b => b.SetProperty(u => u.JobStatus, _ => context.Message.JobStatus));
 
-        if (updated == 0)
-            throw new NotFoundException<User>();
+        await context.ConsumeCompleted;
     }
 }

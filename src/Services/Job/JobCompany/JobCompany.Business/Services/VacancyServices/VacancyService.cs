@@ -142,7 +142,7 @@ namespace JobCompany.Business.Services.VacancyServices
                 .ExecuteUpdateAsync(x => x.SetProperty(v => v.VacancyStatus, VacancyStatus.Deactive));
 
             if (deletedCount == 0)
-                throw new NotFoundException<Vacancy>();
+                throw new NotFoundException();
         }
 
         /// <summary> Şirkətin profilində bütün vakansiyalarını gətirmək(Filterlerle birlikde) </summary>
@@ -314,13 +314,13 @@ namespace JobCompany.Business.Services.VacancyServices
                         IsApplied = userGuid.HasValue && x.Applications.Any(a => a.UserId == userGuid && a.IsActive == true),
                         //ApplicationId = userGuid.HasValue ? x.Applications.Where(a=> a.UserId == userGuid && a.VacancyId == x.Id && a.).Select(a=> a.Id).FirstOrDefault(): null
                     })
-                    .FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>();
+                    .FirstOrDefaultAsync() ?? throw new NotFoundException();
 
 
             if (vacancyDto.CompanyUserId != userGuid)
             {
                 if (vacancyDto.EndDate < DateTime.Now && vacancyDto.VacancyStatus != VacancyStatus.Active)
-                    throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
+                    throw new NotFoundException();
 
                 var existVacancy = await _context.Vacancies.FirstOrDefaultAsync(x => x.Id == vacancyId);
                 existVacancy.ViewCount++;
@@ -390,7 +390,7 @@ namespace JobCompany.Business.Services.VacancyServices
                                     Id = vc.Skill.Id,
                                     Name = vc.Skill.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name)
                                 }).ToList()
-                }).FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>();
+                }).FirstOrDefaultAsync() ?? throw new NotFoundException();
 
             return vacancy;
         }
@@ -405,7 +405,7 @@ namespace JobCompany.Business.Services.VacancyServices
                     .Vacancies.Where(v => v.Id == vacancyGuid && v.Company.UserId == _currentUser.UserGuid)
                     .Include(v => v.VacancySkills)
                     .Include(v => v.VacancyNumbers)
-                    .FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>();
+                    .FirstOrDefaultAsync() ?? throw new NotFoundException();
 
             if (existingVacancy.VacancyStatus == VacancyStatus.Block)
                 throw new VacancyUpdateException();
@@ -417,9 +417,9 @@ namespace JobCompany.Business.Services.VacancyServices
             existingVacancy.EndDate = vacancyDto.EndDate;
             existingVacancy.Location = vacancyDto.Location;
             existingVacancy.CountryId = Guid.Parse(
-                vacancyDto.CountryId ?? throw new NotFoundException<Country>()
+                vacancyDto.CountryId ?? throw new NotFoundException()
             );
-            existingVacancy.CityId = Guid.Parse(vacancyDto.CityId ?? throw new NotFoundException<City>());
+            existingVacancy.CityId = Guid.Parse(vacancyDto.CityId ?? throw new NotFoundException());
             existingVacancy.Email = vacancyDto.Email;
             existingVacancy.ExamId = vacancyDto.ExamId;
             existingVacancy.WorkType = vacancyDto.WorkType;
@@ -436,7 +436,7 @@ namespace JobCompany.Business.Services.VacancyServices
             existingVacancy.Citizenship = vacancyDto.Citizenship;
             existingVacancy.VacancyStatus = existingVacancy.VacancyStatus == VacancyStatus.Pending ? VacancyStatus.Pending : VacancyStatus.Update;
             existingVacancy.CategoryId = Guid.Parse(
-                vacancyDto.CategoryId ?? throw new NotFoundException<Category>()
+                vacancyDto.CategoryId ?? throw new NotFoundException()
             );
 
             if (numberDtos is not null)
@@ -633,7 +633,7 @@ namespace JobCompany.Business.Services.VacancyServices
             Guid vacancyGuid = Guid.Parse(vacancyId);
 
             if (!await _context.Vacancies.AnyAsync(x => x.Id == vacancyGuid))
-                throw new NotFoundException<Vacancy>();
+                throw new NotFoundException();
 
             var vacancyCheck = await _context.SavedVacancies.FirstOrDefaultAsync(x => x.VacancyId == vacancyGuid);
 
@@ -660,7 +660,7 @@ namespace JobCompany.Business.Services.VacancyServices
         public async Task TogglePauseVacancyAsync(Guid vacancyId)
         {
             var vacancy = await _context.Vacancies.FirstOrDefaultAsync(x => x.Id == vacancyId && x.Company.UserId == _currentUser.UserGuid)
-                ?? throw new NotFoundException<Vacancy>();
+                ?? throw new NotFoundException();
 
             if (vacancy.VacancyStatus == VacancyStatus.Active)
             {
@@ -783,7 +783,7 @@ namespace JobCompany.Business.Services.VacancyServices
         public async Task DeleteVacancyAsync(Guid vacancyId)
         {
             var vacancy = await _context.Vacancies.Include(x => x.Applications).FirstOrDefaultAsync(x => x.Id == vacancyId)
-                ?? throw new NotFoundException<Vacancy>();
+                ?? throw new NotFoundException();
 
             vacancy.PaymentDate = null;
             vacancy.VacancyStatus = VacancyStatus.Deleted;
@@ -801,7 +801,7 @@ namespace JobCompany.Business.Services.VacancyServices
         public async Task ActivateVacancyAsync(Guid vacancyId)
         {
             var vacancy = await _context.Vacancies.FirstOrDefaultAsync(x=> x.Id == vacancyId && x.Company.UserId == _currentUser.UserGuid)
-                ?? throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
+                ?? throw new NotFoundException();
 
             var balance = await _checkBalanceRequest.GetResponse<CheckBalanceResponse>(new CheckBalanceRequest
             {

@@ -6,13 +6,13 @@ using Job.Business.Dtos.NumberDtos;
 using Job.Business.Dtos.ResumeDtos;
 using Job.Business.Dtos.SkillDtos;
 using Job.Business.Dtos.UserDtos;
-using Job.Business.Exceptions.Common;
 using Job.Business.Extensions;
 using Job.Business.Statistics;
 using Job.DAL.Contexts;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using SharedLibrary.Exceptions;
 using SharedLibrary.HelperServices.Current;
 using SharedLibrary.Requests;
 using SharedLibrary.Responses;
@@ -136,7 +136,7 @@ public class UserManagementService(JobDbContext _context, IRequestClient<GetUser
                     GivenOrganization = c.GivenOrganization,
                     CertificateFile = $"{_currentUser.BaseUrl}/userFiles/{c.CertificateFile}"
                 }).ToList()
-            }).FirstOrDefaultAsync() ?? throw new NotFoundException<Core.Entities.Resume>();
+            }).FirstOrDefaultAsync() ?? throw new NotFoundException();
 
         return resume;
     }

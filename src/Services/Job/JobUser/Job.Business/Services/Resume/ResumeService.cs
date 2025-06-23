@@ -28,6 +28,7 @@ using Shared.Enums;
 using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.Enums;
 using SharedLibrary.Events;
+using SharedLibrary.Exceptions;
 using SharedLibrary.ExternalServices.FileService;
 using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;
@@ -323,7 +324,7 @@ namespace Job.Business.Services.Resume
             var resumeGuid = Guid.Parse(resumeId);
 
             if (!await _context.Resumes.AnyAsync(x => x.Id == resumeGuid))
-                throw new NotFoundException<Core.Entities.Resume>();
+                throw new NotFoundException();
 
             var existSaveResume = await _context.SavedResumes.FirstOrDefaultAsync(x => x.ResumeId == resumeGuid && x.CompanyUserId == _currentUser.UserGuid);
 
@@ -371,7 +372,7 @@ namespace Job.Business.Services.Resume
                     HasAccessByCompany = r.CompanyResumeAccesses.Any(x => x.CompanyUserId == userId),
                     r.IsPublic
                 })
-                .FirstOrDefaultAsync() ?? throw new NotFoundException<Core.Entities.Resume>();
+                .FirstOrDefaultAsync() ?? throw new NotFoundException();
 
             bool hasApplied = false;
 
@@ -486,7 +487,7 @@ namespace Job.Business.Services.Resume
                 }).FirstOrDefaultAsync();
 
             if (resume == null)
-                throw new NotFoundException<Core.Entities.Resume>();
+                throw new NotFoundException();
 
             if (resume.IsPublic) throw new ResumeIsPublicException();
 
@@ -507,7 +508,7 @@ namespace Job.Business.Services.Resume
                 });
             }
             //TODO : Burada exception qaytarmaq prinsip olaraq dogru deyil
-            else throw new NotFoundException<Core.Entities.Resume>("Yeterli balans yoxdur");
+            else throw new NotFoundException("Yeterli balans yoxdur");
 
             await _context.CompanyResumeAccesses.AddAsync(new CompanyResumeAccess
             {
@@ -653,7 +654,7 @@ namespace Job.Business.Services.Resume
                 .Include(r => r.Languages)
                 .Include(r => r.ResumeSkills)
                 .FirstOrDefaultAsync(r => r.UserId == userGuid)
-                ?? throw new NotFoundException<Core.Entities.Resume>();
+                ?? throw new NotFoundException();
         }
 
         private static void UpdateResumePersonalInfo(Core.Entities.Resume resume, ResumeUpdateDto updateDto)

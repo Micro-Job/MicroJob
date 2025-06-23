@@ -1,11 +1,11 @@
 ﻿using JobCompany.Business.Dtos.CityDtos;
 using JobCompany.Business.Dtos.Common;
-using JobCompany.Business.Exceptions.Common;
 using JobCompany.Business.Extensions;
 using JobCompany.Business.Statistics;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
+using SharedLibrary.Exceptions;
 using SharedLibrary.HelperServices.Current;
 
 namespace JobCompany.Business.Services.CityServices;
@@ -115,7 +115,7 @@ public class CityService(JobCompanyDbContext _context, ICurrentUser _user) : ICi
     {
         var cityGuid = Guid.Parse(cityId);
 
-        var city = await _context.Cities.FindAsync(cityGuid) ?? throw new NotFoundException<City>();
+        var city = await _context.Cities.FindAsync(cityGuid) ?? throw new NotFoundException();
 
         _context.Cities.Remove(city);
 

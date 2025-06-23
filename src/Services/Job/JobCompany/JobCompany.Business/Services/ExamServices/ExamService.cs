@@ -71,7 +71,7 @@ public class ExamService(JobCompanyDbContext _context, IQuestionService _questio
             .ThenInclude(eq => eq.Question)
             .ThenInclude(q => q.Answers)
             .FirstOrDefaultAsync(e => e.Id == dto.Id && e.Company.UserId == _currentUser.UserGuid)
-            ?? throw new NotFoundException<Exam>();
+            ?? throw new NotFoundException();
 
         using var transaction = await _context.Database.BeginTransactionAsync();
 
@@ -111,7 +111,7 @@ public class ExamService(JobCompanyDbContext _context, IQuestionService _questio
                     IsTemplate = e.IsTemplate
                 })
                 .FirstOrDefaultAsync(e => e.Id == examGuid)
-            ?? throw new NotFoundException<Exam>();
+            ?? throw new NotFoundException();
     }
 
     public async Task<GetQuestionByStepDto> GetExamQuestionByStepAsync(string examId, int step)
@@ -142,7 +142,7 @@ public class ExamService(JobCompanyDbContext _context, IQuestionService _questio
                     }).ToList(),
                 }
             }).FirstOrDefaultAsync()
-            ?? throw new NotFoundException<Question>();
+            ?? throw new NotFoundException();
 
         return question;
     }
@@ -156,7 +156,7 @@ public class ExamService(JobCompanyDbContext _context, IQuestionService _questio
             .ExecuteDeleteAsync();
 
         if (affectedRows == 0)
-            throw new NotFoundException<Exam>();
+            throw new NotFoundException();
     }
 
     public async Task<DataListDto<ExamListDto>> GetExamsAsync(string? examName, int skip, int take)
@@ -207,7 +207,7 @@ public class ExamService(JobCompanyDbContext _context, IQuestionService _questio
                 QuestionCount = x.ExamQuestions.Count,
                 LimitRate = x.LimitRate,
             })
-            .FirstOrDefaultAsync() ?? throw new NotFoundException<Exam>();
+            .FirstOrDefaultAsync() ?? throw new NotFoundException();
 
         return data;
     }
@@ -239,7 +239,7 @@ public class ExamService(JobCompanyDbContext _context, IQuestionService _questio
                         IsCorrect = a.IsCorrect
                     }).ToList()
                 }).ToList()
-            }).FirstOrDefaultAsync() ?? throw new NotFoundException<Exam>();
+            }).FirstOrDefaultAsync() ?? throw new NotFoundException();
 
         return examQuestions;
     }
@@ -270,7 +270,7 @@ public class ExamService(JobCompanyDbContext _context, IQuestionService _questio
                         Text = a.Text,
                     }).ToList()
                 }).ToList()
-            }).FirstOrDefaultAsync() ?? throw new NotFoundException<Exam>();
+            }).FirstOrDefaultAsync() ?? throw new NotFoundException();
 
         return examQuestions;
     }
@@ -283,7 +283,7 @@ public class ExamService(JobCompanyDbContext _context, IQuestionService _questio
             .ThenInclude(eq => eq.Question)
             .ThenInclude(q => q.Answers)
             .FirstOrDefaultAsync(x => x.Id == dto.ExamId)
-            ?? throw new NotFoundException<Exam>();
+            ?? throw new NotFoundException();
 
         var answerResults = exam.ExamQuestions
             .Select(eq =>

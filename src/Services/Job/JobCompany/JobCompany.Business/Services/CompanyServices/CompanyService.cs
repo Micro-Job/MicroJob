@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using SharedLibrary.Enums;
+using SharedLibrary.Exceptions;
 using SharedLibrary.ExternalServices.FileService;
 using SharedLibrary.HelperServices.Current;
 using SharedLibrary.Statics;
@@ -46,7 +47,7 @@ namespace JobCompany.Business.Services.CompanyServices
         public async Task<CompanyUpdateResponseDto> UpdateCompanyAsync(CompanyUpdateDto dto, ICollection<UpdateNumberDto>? numbersDto)
         {
             var company = await _context.Companies.Include(c => c.CompanyNumbers).FirstOrDefaultAsync(x => x.UserId == _currentUser.UserGuid)
-                ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>();
+                ?? throw new SharedLibrary.Exceptions.NotFoundException();
 
             if (dto.Email != null && await _context.Companies.AnyAsync(x => x.Email == dto.Email && x.Id != company.Id))
                 throw new EmailAlreadyUsedException();
@@ -187,7 +188,7 @@ namespace JobCompany.Business.Services.CompanyServices
                             Email = x.Email,
                         })
                         .FirstOrDefaultAsync()
-                    ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>();
+                    ?? throw new SharedLibrary.Exceptions.NotFoundException();
             return company;
         }
 
@@ -229,7 +230,7 @@ namespace JobCompany.Business.Services.CompanyServices
                         : new List<CompanyNumberDto>()
                 })
                 .FirstOrDefaultAsync()
-                    ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>();
+                    ?? throw new SharedLibrary.Exceptions.NotFoundException();
 
             return companyProfile;
         }
@@ -241,7 +242,7 @@ namespace JobCompany.Business.Services.CompanyServices
             return await _context.Companies.Where(x => x.Id == companyGuid)
                 .Select(x => x.CompanyName)
                 .FirstOrDefaultAsync()
-                ?? throw new NotFoundException<Company>();
+                ?? throw new NotFoundException();
         }
     }
 }

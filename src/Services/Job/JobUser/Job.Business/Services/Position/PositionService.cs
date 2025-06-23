@@ -1,9 +1,8 @@
 ﻿using Job.Business.Dtos.Position;
 using Job.Business.Dtos.PositionDtos;
-using Job.Business.Exceptions.Common;
 using Job.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
-using SharedLibrary.Helpers;
+using SharedLibrary.Exceptions;
 
 namespace Job.Business.Services.Position;
 
@@ -76,7 +75,7 @@ public class PositionService(JobDbContext _context) : IPositionService
             if (isPositionExist)
                 return selectedPositionId.Value;
             else
-                throw new NotFoundException<Core.Entities.Position>();
+                throw new NotFoundException();
         }
 
         else

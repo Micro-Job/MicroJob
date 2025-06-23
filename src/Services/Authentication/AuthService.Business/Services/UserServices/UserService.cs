@@ -40,6 +40,7 @@ namespace AuthService.Business.Services.UserServices
             _companyDataRequest = companyDataRequest;
         }
 
+        //TODO : bu metot ve endpoint burada olmali deyil (ve bu user ve company ucun ayrica yazilmalidi daha sonra front ferqli yere sorgu atmalidi)
         /// <summary> Loginde olan User informasiyası </summary>
         public async Task<UserInformationDto> GetUserInformationAsync()
         {
@@ -55,7 +56,7 @@ namespace AuthService.Business.Services.UserServices
                     MainPhoneNumber = x.MainPhoneNumber,
                     Image = x.Image != null ? $"{_configuration["ApiGateway:BaseUrl"]}/authFiles/{x.Image}" : null,
                     UserRole = x.UserRole,
-                    JobStatus = x.JobStatus,
+                    //JobStatus = x.JobStatus,
                 }).FirstOrDefaultAsync() ?? throw new UserNotFoundException();
 
             return user;

@@ -63,13 +63,13 @@ public class ApplicationService : IApplicationService
         var vacancyInfo = await _context.Vacancies
             .Where(v => v.Id == vacancyGuid && v.VacancyStatus == VacancyStatus.Active && v.EndDate > DateTime.Now)
             .Select(v => new { v.Title, v.VacancyStatus, v.CompanyId, v.EndDate })
-            .FirstOrDefaultAsync() ?? throw new NotFoundException<Company>();
+            .FirstOrDefaultAsync() ?? throw new NotFoundException();
 
-        if (vacancyInfo.EndDate < DateTime.Now) throw new NotFoundException<Vacancy>();
+        if (vacancyInfo.EndDate < DateTime.Now) throw new NotFoundException();
         if (vacancyInfo.VacancyStatus == VacancyStatus.Pause) throw new VacancyPausedException();
 
         var companyStatus = await _context.Statuses.FirstOrDefaultAsync(x => x.StatusEnum == StatusEnum.Pending && x.CompanyId == vacancyInfo.CompanyId) ??
-            throw new NotFoundException<StatusEnum>();
+            throw new NotFoundException();
 
         var resumeData = await _resumeDataRequest.GetResponse<GetResumeDataResponse>(new GetResumeDataRequest { UserId = userGuid });
 
@@ -115,7 +115,7 @@ public class ApplicationService : IApplicationService
         var existApplication =
             await _context.Applications.FirstOrDefaultAsync(x =>
                 x.Id == applicationGuid && x.UserId == _currentUser.UserGuid)
-            ?? throw new NotFoundException<Application>();
+            ?? throw new NotFoundException();
 
         if (existApplication.IsActive == false)
             throw new ApplicationStatusIsDeactiveException();
@@ -142,7 +142,7 @@ public class ApplicationService : IApplicationService
                 CompanyLogo = x.Vacancy.Company.CompanyLogo,
                 VacancyTitle = x.Vacancy.Title
             })
-            .FirstOrDefaultAsync() ?? throw new NotFoundException<Application>();
+            .FirstOrDefaultAsync() ?? throw new NotFoundException();
 
         var application = existAppVacancy.Application;
 
@@ -188,7 +188,7 @@ public class ApplicationService : IApplicationService
                         .Select(s => s.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name))
                         .ToList(),
                 })
-                .FirstOrDefaultAsync() ?? throw new NotFoundException<Application>();
+                .FirstOrDefaultAsync() ?? throw new NotFoundException();
 
         return application;
     }
@@ -354,7 +354,7 @@ public class ApplicationService : IApplicationService
                 .ToList()
             })
             .FirstOrDefaultAsync()
-            ?? throw new NotFoundException<Application>();
+            ?? throw new NotFoundException();
 
         return application;
     }

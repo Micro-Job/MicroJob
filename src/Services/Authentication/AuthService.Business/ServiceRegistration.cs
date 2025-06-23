@@ -22,7 +22,7 @@ namespace AuthService.Business
 
             services.AddHttpContextAccessor();
             services.AddScoped<ITokenHandler, TokenHandler>();
-            services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<EmailService>();
             services.AddScoped<AuthenticationService>();
             services.AddScoped<EmailPublisher>();
             services.AddScoped<UserService>();

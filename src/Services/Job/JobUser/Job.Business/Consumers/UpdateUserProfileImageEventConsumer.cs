@@ -1,6 +1,7 @@
 ﻿using Job.Core.Entities;
 using Job.DAL.Contexts;
 using MassTransit;
+using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.Events;
 using SharedLibrary.Exceptions;
@@ -13,7 +14,7 @@ public class UpdateUserProfileImageEventConsumer(JobDbContext _jobDbContext, IFi
 {
     public async Task Consume(ConsumeContext<UpdateUserProfileImageEvent> context)
     {
-        var user = await _jobDbContext.Users.FindAsync(context.Message.UserId) ?? throw new NotFoundException<User>();
+        var user = await _jobDbContext.Users.FirstOrDefaultAsync(x=> x.Id == context.Message.UserId) ?? throw new NotFoundException();
 
         if (user.Image is not null)
         {

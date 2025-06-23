@@ -2,6 +2,7 @@
 using Job.Business.Exceptions.Common;
 using Job.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
+using SharedLibrary.Exceptions;
 
 namespace Job.Business.Services.Language;
 
@@ -29,7 +30,7 @@ public class LanguageService(JobDbContext context) : ILanguageService
             if (Guid.TryParse(dto.Id, out var parsedId) && parsedId != Guid.Empty) // Əgər id düzgün parse olunursa
             {
                 var language = existingLanguages.FirstOrDefault(x => x.Id == parsedId)
-                    ?? throw new NotFoundException<Core.Entities.Language>();
+                    ?? throw new NotFoundException();
 
                 MapLanguageDtoToEntityForUpdate(language, dto); // dil datasını güncəlləyirik
 
