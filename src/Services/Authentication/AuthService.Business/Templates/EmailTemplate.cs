@@ -220,9 +220,9 @@ public class EmailTemplate(IConfiguration _configuration)
             </html>";
     }
 
-    public string VerifyEmail(string fullName)
+    public string VerifyEmail(string fullName, string email)
     {
-        string host = _configuration["VerifyEmail"]!;
+        string host = _configuration["VerifyAccount"]!;
 
         return $@"
             <!DOCTYPE html>
@@ -277,7 +277,7 @@ public class EmailTemplate(IConfiguration _configuration)
                         <!-- Button -->
                         <tr>
                           <td style=""text-align: center; box-sizing: border-box;"">
-                            <a href=""{host}"" style=""background-color:#0068F7; color:#fff; padding:7.5px 75px; text-decoration:none; border-radius:12px; border: 1px solid #8ABAFB; font-size:14px; line-height: 1.5; font-weight: 500; display:inline-block; box-sizing: border-box;"">
+                            <a href=""{host}?{email}"" style=""background-color:#0068F7; color:#fff; padding:7.5px 75px; text-decoration:none; border-radius:12px; border: 1px solid #8ABAFB; font-size:14px; line-height: 1.5; font-weight: 500; display:inline-block; box-sizing: border-box;"">
                               Hesabı təsdiq et
                             </a>
                           </td>

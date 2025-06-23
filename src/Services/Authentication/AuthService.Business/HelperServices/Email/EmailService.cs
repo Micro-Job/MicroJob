@@ -59,7 +59,7 @@ public class EmailService(IOptions<SmtpSettings> smtpSettings, EmailTemplate _em
         await SendEmailAsync(toEmail, new EmailMessage
         {
             Subject = "Hesabınızı təsdiqləyin...",
-            Content = _emailTemplate.VerifyEmail(fullName)
+            Content = _emailTemplate.VerifyEmail(fullName, toEmail)
         });
     }
 
