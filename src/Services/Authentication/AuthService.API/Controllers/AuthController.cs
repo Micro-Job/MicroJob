@@ -1,8 +1,6 @@
 ﻿using AuthService.Business.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using AuthService.Business.Services.Auth;
-using SharedLibrary.Helpers;
-using AuthService.DAL.Migrations;
 
 namespace AuthService.API.Controllers
 {
@@ -77,9 +75,9 @@ namespace AuthService.API.Controllers
         }
 
         [HttpPut("[action]")]
-        public async Task<IActionResult> VerifyAccount(string email)
+        public async Task<IActionResult> VerifyAccount(string userId)
         {
-            await _authService.VerifyAccountAsync(email);
+            await _authService.VerifyAccountAsync(userId);
             return Ok();
         }
     }
