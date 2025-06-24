@@ -63,7 +63,7 @@ public class NotificationService(JobDbContext _context, ICurrentUser _currentUse
             CreatedDate = n.CreatedDate,
             NotificationType = n.NotificationType,
             SenderName = n.SenderId.HasValue ? companyDataResponse.Message.Companies[n.SenderId.Value].CompanyName : null,
-            SenderImage = n.SenderId.HasValue ? $"{_currentUser.BaseUrl}/company/{companyDataResponse.Message.Companies[n.SenderId.Value].CompanyLogo}" : null,
+            SenderImage = n.SenderId.HasValue ? $"{_currentUser.BaseUrl}/companyFiles/{companyDataResponse.Message.Companies[n.SenderId.Value].CompanyLogo}" : null,
             IsSeen = n.IsSeen,
         }).ToListAsync();
 
@@ -78,7 +78,7 @@ public class NotificationService(JobDbContext _context, ICurrentUser _currentUse
     {
         var notification =
             await _context.Notifications.FirstOrDefaultAsync(x => x.Id == notificationId)
-            ?? throw new NotFoundException<Core.Entities.Notification>();
+            ?? throw new NotFoundException();
 
         notification.IsSeen = true;
 

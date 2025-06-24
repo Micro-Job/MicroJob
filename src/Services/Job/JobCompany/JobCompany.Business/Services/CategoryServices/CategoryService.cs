@@ -6,6 +6,7 @@ using JobCompany.Business.Statistics;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
+using SharedLibrary.Exceptions;
 using SharedLibrary.HelperServices.Current;
 
 namespace JobCompany.Business.Services.CategoryServices;
@@ -31,7 +32,7 @@ public class CategoryService(JobCompanyDbContext _context, ICurrentUser _user) :
     {
         var categoryId = Guid.Parse(id);
         var category = await _context.Categories.FindAsync(categoryId) ??
-            throw new NotFoundException<Category>();
+            throw new NotFoundException();
 
         _context.Categories.Remove(category);
         await _context.SaveChangesAsync();

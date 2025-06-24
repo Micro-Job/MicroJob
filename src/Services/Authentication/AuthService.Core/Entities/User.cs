@@ -30,7 +30,7 @@ namespace AuthService.Core.Entities
         public PasswordToken? PasswordToken { get; set; }
 
         public UserRole UserRole { get; set; }
-        //TODO : JobStatus neye gore authdadir
-        public JobStatus JobStatus { get; set; }
+
+        public bool IsVerified { get; set; }
     }
 }

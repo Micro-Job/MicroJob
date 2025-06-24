@@ -20,7 +20,7 @@ public class CompanyRegisteredConsumer(JobCompanyDbContext _dbContext) : IConsum
             CompanyName = context.Message.CompanyName,
             CompanyLogo = Path.Combine(FilePaths.image, "defaultlogo.jpg"),
             IsCompany = context.Message.IsCompany,
-            VOEN = context.Message.VOEN
+            VOEN = context.Message.IsCompany ? context.Message.VOEN : null
         };
 
         await _dbContext.Companies.AddAsync(newCompany);

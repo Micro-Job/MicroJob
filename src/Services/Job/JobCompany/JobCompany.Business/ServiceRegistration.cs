@@ -47,7 +47,7 @@ namespace JobCompany.Business
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<ICurrentUser, CurrentUser>();
             services.AddScoped<IVacancyCommentService, VacancyCommentService>();
-            services.AddScoped<IManageService, ManageService>();
+            services.AddScoped<ManageService>();
             services.AddScoped<DashboardService>();
 
         }

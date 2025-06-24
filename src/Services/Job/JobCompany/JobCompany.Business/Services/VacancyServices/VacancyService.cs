@@ -142,7 +142,7 @@ namespace JobCompany.Business.Services.VacancyServices
                 .ExecuteUpdateAsync(x => x.SetProperty(v => v.VacancyStatus, VacancyStatus.Deactive));
 
             if (deletedCount == 0)
-                throw new NotFoundException<Vacancy>();
+                throw new NotFoundException();
         }
 
         /// <summary> Şirkətin profilində bütün vakansiyalarını gətirmək(Filterlerle birlikde) </summary>
@@ -175,7 +175,7 @@ namespace JobCompany.Business.Services.VacancyServices
                     Title = x.Title,
                     StartDate = x.StartDate,
                     Location = x.Location,
-                    CompanyLogo = $"{_currentUser.BaseUrl}/company/{x.Company.CompanyLogo}",
+                    CompanyLogo = $"{_currentUser.BaseUrl}/companyFiles/{x.Company.CompanyLogo}",
                     CompanyName = x.Company.IsCompany ? x.Company.CompanyName : x.CompanyName,
                     ViewCount = x.ViewCount,
                     WorkType = x.WorkType,
@@ -231,7 +231,7 @@ namespace JobCompany.Business.Services.VacancyServices
                     CompanyName = x.Company.IsCompany ? x.Company.CompanyName : x.CompanyName,
                     Title = x.Title,
                     Location = x.Location,
-                    CompanyLogo = $"{_currentUser.BaseUrl}/company/{x.Company.CompanyLogo}",
+                    CompanyLogo = $"{_currentUser.BaseUrl}/companyFiles/{x.Company.CompanyLogo}",
                     WorkStyle = x.WorkStyle,
                     WorkType = x.WorkType,
                     StartDate = x.StartDate,
@@ -270,7 +270,7 @@ namespace JobCompany.Business.Services.VacancyServices
                         Id = x.Id,
                         Title = x.Title,
                         CompanyId = x.CompanyId,
-                        CompanyLogo = $"{_currentUser.BaseUrl}/company/{x.Company.CompanyLogo}",
+                        CompanyLogo = $"{_currentUser.BaseUrl}/companyFiles/{x.Company.CompanyLogo}",
                         StartDate = x.StartDate,
                         EndDate = x.EndDate,
                         Location = x.Location,
@@ -314,13 +314,13 @@ namespace JobCompany.Business.Services.VacancyServices
                         IsApplied = userGuid.HasValue && x.Applications.Any(a => a.UserId == userGuid && a.IsActive == true),
                         //ApplicationId = userGuid.HasValue ? x.Applications.Where(a=> a.UserId == userGuid && a.VacancyId == x.Id && a.).Select(a=> a.Id).FirstOrDefault(): null
                     })
-                    .FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>();
+                    .FirstOrDefaultAsync() ?? throw new NotFoundException();
 
 
             if (vacancyDto.CompanyUserId != userGuid)
             {
                 if (vacancyDto.EndDate < DateTime.Now && vacancyDto.VacancyStatus != VacancyStatus.Active)
-                    throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
+                    throw new NotFoundException();
 
                 var existVacancy = await _context.Vacancies.FirstOrDefaultAsync(x => x.Id == vacancyId);
                 existVacancy.ViewCount++;
@@ -348,7 +348,7 @@ namespace JobCompany.Business.Services.VacancyServices
                     CompanyId = v.CompanyId,
                     CompanyName = v.Company.IsCompany ? v.Company.CompanyName : v.CompanyName,
                     CompanyUserId = v.Company.UserId,
-                    CompanyLogo = $"{_currentUser.BaseUrl}/company/{v.Company.CompanyLogo}",
+                    CompanyLogo = $"{_currentUser.BaseUrl}/companyFiles/{v.Company.CompanyLogo}",
                     StartDate = v.StartDate,
                     EndDate = v.EndDate,
                     Location = v.Location,
@@ -390,7 +390,7 @@ namespace JobCompany.Business.Services.VacancyServices
                                     Id = vc.Skill.Id,
                                     Name = vc.Skill.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name)
                                 }).ToList()
-                }).FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>();
+                }).FirstOrDefaultAsync() ?? throw new NotFoundException();
 
             return vacancy;
         }
@@ -405,7 +405,7 @@ namespace JobCompany.Business.Services.VacancyServices
                     .Vacancies.Where(v => v.Id == vacancyGuid && v.Company.UserId == _currentUser.UserGuid)
                     .Include(v => v.VacancySkills)
                     .Include(v => v.VacancyNumbers)
-                    .FirstOrDefaultAsync() ?? throw new NotFoundException<Vacancy>();
+                    .FirstOrDefaultAsync() ?? throw new NotFoundException();
 
             if (existingVacancy.VacancyStatus == VacancyStatus.Block)
                 throw new VacancyUpdateException();
@@ -417,9 +417,9 @@ namespace JobCompany.Business.Services.VacancyServices
             existingVacancy.EndDate = vacancyDto.EndDate;
             existingVacancy.Location = vacancyDto.Location;
             existingVacancy.CountryId = Guid.Parse(
-                vacancyDto.CountryId ?? throw new NotFoundException<Country>()
+                vacancyDto.CountryId ?? throw new NotFoundException()
             );
-            existingVacancy.CityId = Guid.Parse(vacancyDto.CityId ?? throw new NotFoundException<City>());
+            existingVacancy.CityId = Guid.Parse(vacancyDto.CityId ?? throw new NotFoundException());
             existingVacancy.Email = vacancyDto.Email;
             existingVacancy.ExamId = vacancyDto.ExamId;
             existingVacancy.WorkType = vacancyDto.WorkType;
@@ -436,7 +436,7 @@ namespace JobCompany.Business.Services.VacancyServices
             existingVacancy.Citizenship = vacancyDto.Citizenship;
             existingVacancy.VacancyStatus = existingVacancy.VacancyStatus == VacancyStatus.Pending ? VacancyStatus.Pending : VacancyStatus.Update;
             existingVacancy.CategoryId = Guid.Parse(
-                vacancyDto.CategoryId ?? throw new NotFoundException<Category>()
+                vacancyDto.CategoryId ?? throw new NotFoundException()
             );
 
             if (numberDtos is not null)
@@ -532,6 +532,7 @@ namespace JobCompany.Business.Services.VacancyServices
                     InformationName = existingVacancy.Title,
                     NotificationType = NotificationType.VacancyUpdate,
                     SenderName = existingVacancy.CompanyName,
+                    //TODO : burada baseUrl gonderilmeli deyil 
                     SenderImage = $"{_currentUser.BaseUrl}/{existingVacancy.CompanyLogo}",
                 }
             );
@@ -551,7 +552,7 @@ namespace JobCompany.Business.Services.VacancyServices
                 {
                     Id = v.Id,
                     Title = v.Title,
-                    CompanyLogo = v.Company.CompanyLogo != null ? $"{_currentUser.BaseUrl}/company/{v.Company.CompanyLogo}" : null,
+                    CompanyLogo = v.Company.CompanyLogo != null ? $"{_currentUser.BaseUrl}/companyFiles/{v.Company.CompanyLogo}" : null,
                     CompanyName = v.Company.IsCompany ? v.Company.CompanyName : v.CompanyName,
                     StartDate = v.StartDate,
                     Location = v.Location,
@@ -632,7 +633,7 @@ namespace JobCompany.Business.Services.VacancyServices
             Guid vacancyGuid = Guid.Parse(vacancyId);
 
             if (!await _context.Vacancies.AnyAsync(x => x.Id == vacancyGuid))
-                throw new NotFoundException<Vacancy>();
+                throw new NotFoundException();
 
             var vacancyCheck = await _context.SavedVacancies.FirstOrDefaultAsync(x => x.VacancyId == vacancyGuid);
 
@@ -659,7 +660,7 @@ namespace JobCompany.Business.Services.VacancyServices
         public async Task TogglePauseVacancyAsync(Guid vacancyId)
         {
             var vacancy = await _context.Vacancies.FirstOrDefaultAsync(x => x.Id == vacancyId && x.Company.UserId == _currentUser.UserGuid)
-                ?? throw new NotFoundException<Vacancy>();
+                ?? throw new NotFoundException();
 
             if (vacancy.VacancyStatus == VacancyStatus.Active)
             {
@@ -715,7 +716,7 @@ namespace JobCompany.Business.Services.VacancyServices
                 {
                     Id = x.Id,
                     Title = x.Title,
-                    CompanyLogo = x.CompanyLogo != null ? $"{_currentUser.BaseUrl}/company/{x.Company.CompanyLogo}" : null,
+                    CompanyLogo = x.CompanyLogo != null ? $"{_currentUser.BaseUrl}/companyFiles/{x.Company.CompanyLogo}" : null,
                     CompanyName = x.Company.IsCompany ? x.Company.CompanyName : x.CompanyName,
                     StartDate = x.StartDate,
                     Location = x.Location,
@@ -733,6 +734,7 @@ namespace JobCompany.Business.Services.VacancyServices
             return vacancies;
         }
 
+        //TODO : burada iseduzelden eger vakansiya yaradarsa bu zaman vakansiyaya sekil qoyur ona gore de sekil hissesinde companyLogo olmali deyil
         public async Task<DataListDto<VacancyGetAllDto>> GetAllSavedVacancyAsync(int skip, int take, string? vacancyName)
         {
             var query = _context.SavedVacancies.Where(x => x.UserId == _currentUser.UserGuid)
@@ -750,7 +752,7 @@ namespace JobCompany.Business.Services.VacancyServices
                 {
                     Id = x.Vacancy.Id,
                     Title = x.Vacancy.Title,
-                    CompanyLogo = x.Vacancy.Company.CompanyLogo != null ? $"{_currentUser.BaseUrl}/company/{x.Vacancy.Company.CompanyLogo}" : null,
+                    CompanyLogo = x.Vacancy.Company.CompanyLogo != null ? $"{_currentUser.BaseUrl}/companyFiles/{x.Vacancy.Company.CompanyLogo}" : null,
                     CompanyName = x.Vacancy.Company.IsCompany ? x.Vacancy.Company.CompanyName : x.Vacancy.CompanyName,
                     StartDate = x.Vacancy.StartDate,
                     Location = x.Vacancy.Location,
@@ -781,7 +783,7 @@ namespace JobCompany.Business.Services.VacancyServices
         public async Task DeleteVacancyAsync(Guid vacancyId)
         {
             var vacancy = await _context.Vacancies.Include(x => x.Applications).FirstOrDefaultAsync(x => x.Id == vacancyId)
-                ?? throw new NotFoundException<Vacancy>();
+                ?? throw new NotFoundException();
 
             vacancy.PaymentDate = null;
             vacancy.VacancyStatus = VacancyStatus.Deleted;
@@ -799,7 +801,7 @@ namespace JobCompany.Business.Services.VacancyServices
         public async Task ActivateVacancyAsync(Guid vacancyId)
         {
             var vacancy = await _context.Vacancies.FirstOrDefaultAsync(x=> x.Id == vacancyId && x.Company.UserId == _currentUser.UserGuid)
-                ?? throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
+                ?? throw new NotFoundException();
 
             var balance = await _checkBalanceRequest.GetResponse<CheckBalanceResponse>(new CheckBalanceRequest
             {

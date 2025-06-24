@@ -1,7 +1,6 @@
 ﻿using AuthService.Business.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using AuthService.Business.Services.Auth;
-using SharedLibrary.Helpers;
 
 namespace AuthService.API.Controllers
 {
@@ -56,11 +55,11 @@ namespace AuthService.API.Controllers
             return Ok();
         }
 
-        [HttpGet("[action]")]
-        public async Task<IActionResult> TryLanguage()
-        {
-            return Ok(MessageHelper.GetMessage("WELCOME"));
-        }
+        //[HttpGet("[action]")]
+        //public async Task<IActionResult> TryLanguage()
+        //{
+        //    return Ok(MessageHelper.GetMessage("WELCOME"));
+        //}
 
         [HttpGet("[action]")]
         public async Task<IActionResult> CheckUserExist(string email , string phoneNumber)
@@ -73,6 +72,13 @@ namespace AuthService.API.Controllers
         public async Task<IActionResult> GetCompanyNameByVOEN(string voen)
         {
             return Ok(await _authService.GetCompanyNameByVOENAsync(voen));
+        }
+
+        [HttpPut("[action]")]
+        public async Task<IActionResult> VerifyAccount(string userId)
+        {
+            await _authService.VerifyAccountAsync(userId);
+            return Ok();
         }
     }
 }

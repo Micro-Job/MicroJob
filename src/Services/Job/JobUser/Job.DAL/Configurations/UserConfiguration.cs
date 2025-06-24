@@ -19,6 +19,13 @@ namespace Job.DAL.Configurations
                 .IsRequired()
                 .HasMaxLength(50);
 
+            builder.Property(u => u.MainPhoneNumber)
+               .HasMaxLength(32)
+               .IsRequired();
+
+            builder.Property(u => u.Email)
+              .HasMaxLength(100);
+
             builder.HasMany(u => u.Notifications)
                 .WithOne(sv => sv.Receiver)
                 .HasForeignKey(sv => sv.ReceiverId)

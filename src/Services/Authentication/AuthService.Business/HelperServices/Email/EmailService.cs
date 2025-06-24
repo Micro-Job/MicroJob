@@ -8,7 +8,7 @@ using System.Net.Mail;
 
 namespace AuthService.Business.HelperServices.Email;
 
-public class EmailService(IOptions<SmtpSettings> smtpSettings, EmailTemplate _emailTemplate) : IEmailService
+public class EmailService(IOptions<SmtpSettings> smtpSettings, EmailTemplate _emailTemplate) 
 
 {
     private readonly SmtpSettings _smtpSettings = smtpSettings.Value;
@@ -20,32 +20,6 @@ public class EmailService(IOptions<SmtpSettings> smtpSettings, EmailTemplate _em
             Subject = "Şifrənizi müəyyən edin...",
             Content = _emailTemplate.ResetPassword(toEmail, token)
         });
-    }
-
-    public async Task SendEmailAsync(string toEmail, EmailMessage emailMessage)
-    {
-        var fromAddress = new MailAddress(_smtpSettings.Username, "HIRI");
-        var toAddress = new MailAddress(toEmail);
-        string fromPassword = _smtpSettings.Password;
-        string subject = emailMessage.Subject;
-        string body = emailMessage.Content;
-
-        var smtp = new SmtpClient
-        {
-            Host = _smtpSettings.Server,
-            Port = _smtpSettings.Port,
-            EnableSsl = true,
-            UseDefaultCredentials = false,
-            Credentials = new NetworkCredential(fromAddress.Address, fromPassword)
-        };
-
-        using (var message = new MailMessage(fromAddress, toAddress)
-        {
-            Subject = subject,
-            IsBodyHtml = true,
-            Body = body,
-        })
-            smtp.Send(message);
     }
 
     public async Task SendResetPassword(User user, string token)
@@ -75,8 +49,45 @@ public class EmailService(IOptions<SmtpSettings> smtpSettings, EmailTemplate _em
     {
         await SendEmailAsync(toEmail, new EmailMessage
         {
-            Subject = MessageHelper.GetMessage("WELCOME"),
+            Subject = "Xoş gəlmişsiniz...",
             Content = _emailTemplate.RegisterCompleted(fullName)
         });
     }
+
+    public async Task SendVerifyEmail(string toEmail, string fullName, string userId)
+    {
+        await SendEmailAsync(toEmail, new EmailMessage
+        {
+            Subject = "Hesabınızı təsdiqləyin...",
+            Content = _emailTemplate.VerifyEmail(fullName, userId)
+        });
+    }
+
+    public async Task SendEmailAsync(string toEmail, EmailMessage emailMessage)
+    {
+        var fromAddress = new MailAddress(_smtpSettings.Username, "HIRI");
+        var toAddress = new MailAddress(toEmail);
+        string fromPassword = _smtpSettings.Password;
+        string subject = emailMessage.Subject;
+        string body = emailMessage.Content;
+
+        var smtp = new SmtpClient
+        {
+            Host = _smtpSettings.Server,
+            Port = _smtpSettings.Port,
+            EnableSsl = true,
+            UseDefaultCredentials = false,
+            Credentials = new NetworkCredential(fromAddress.Address, fromPassword)
+        };
+
+        using (var message = new MailMessage(fromAddress, toAddress)
+        {
+            Subject = subject,
+            IsBodyHtml = true,
+            Body = body,
+        })
+            smtp.Send(message);
+    }
+
+
 }

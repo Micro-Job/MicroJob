@@ -11,7 +11,7 @@ namespace JobCompany.API.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [AuthorizeRole(UserRole.Admin, UserRole.Operator)]
-    public class ManageController(IManageService _manageService) : ControllerBase
+    public class ManageController(ManageService _manageService) : ControllerBase
     {
         [HttpPost("[action]")]
         public async Task<IActionResult> VacancyAccept(string vacancyId)

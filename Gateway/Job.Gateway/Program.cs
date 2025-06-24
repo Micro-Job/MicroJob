@@ -12,11 +12,24 @@ namespace Job.Gateway
             var builder = WebApplication.CreateBuilder(args);
 
             var environment = builder.Environment.EnvironmentName;
-            builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange: true)
-                                  .AddJsonFile($"ocelot.{environment}.json", optional: true, reloadOnChange: true);
+
+            if(environment == "Development")
+            {
+                builder.Configuration
+                                 .AddJsonFile($"ocelot.Development.json", optional: true, reloadOnChange: true);
+            }
+            else if(environment == "Test")
+            {
+                builder.Configuration
+                                 .AddJsonFile($"ocelot.Test.json", optional: true, reloadOnChange: true);
+            }
+            else
+            {
+                builder.Configuration.AddJsonFile("ocelot.json", optional: true, reloadOnChange: true);
+            }
+
             builder.Services.AddOcelot();
             builder.Services.AddSwaggerForOcelot(builder.Configuration);
-            //builder.Configuration.AddJsonFile("ocelot.json");
 
             builder.Services.AddControllers();
 
@@ -52,7 +65,7 @@ namespace Job.Gateway
                     c.SwaggerEndpoint("http://localhost:5002/swagger/v1/swagger.json", "User Service");
                     c.SwaggerEndpoint("http://localhost:5082/swagger/v1/swagger.json", "Company Service");
                     c.SwaggerEndpoint("http://localhost:5003/swagger/v1/swagger.json", "Payment Service");
-                    c.RoutePrefix = "swagger"; // This is the path for your gateway's Swagger UI
+                    c.RoutePrefix = "swagger";
                     c.ConfigObject.AdditionalItems.Add("persistAuthorization", "true");
                 });
             }

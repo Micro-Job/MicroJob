@@ -1,4 +1,5 @@
 ﻿using AuthService.Business.Dtos;
+using AuthService.Business.Dtos.VOEN;
 using AuthService.Business.Exceptions.UserException;
 using AuthService.Business.HelperServices.Email;
 using AuthService.Business.HelperServices.TokenHandler;
@@ -7,6 +8,8 @@ using AuthService.DAL.Contexts;
 using Azure;
 using HtmlAgilityPack;
 using MassTransit;
+using MassTransit.Middleware;
+using Microsoft.AspNetCore.DataProtection.XmlEncryption;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.SqlServer.Query.Internal;
 using Microsoft.Extensions.Configuration;
@@ -20,10 +23,12 @@ using SharedLibrary.Requests;
 using SharedLibrary.Responses;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Text.Json;
+using System.Text;
 
 namespace AuthService.Business.Services.Auth
 {
-    public class AuthenticationService(AppDbContext _context, ITokenHandler _tokenHandler, IPublishEndpoint _publishEndpoint, IConfiguration _configuration, IEmailService _emailService, ICurrentUser _currentUser, IRequestClient<GetCompaniesDataByUserIdsRequest> _companyDataClient , IRequestClient<CheckVoenRequest> _voenCheckRequest) 
+    public class AuthenticationService(AppDbContext _context, ITokenHandler _tokenHandler, IPublishEndpoint _publishEndpoint, IConfiguration _configuration, EmailService _emailService, ICurrentUser _currentUser, IRequestClient<GetCompaniesDataByUserIdsRequest> _companyDataClient , IRequestClient<CheckVoenRequest> _voenCheckRequest) 
     {
         public async Task RegisterAsync(RegisterDto dto)
         {
@@ -41,9 +46,9 @@ namespace AuthService.Business.Services.Auth
                 LastName = dto.LastName.Trim(),
                 MainPhoneNumber = dto.MainPhoneNumber,
                 RegistrationDate = DateTime.Now,
-                JobStatus = JobStatus.ActivelySeekingJob,
                 Password = _tokenHandler.GeneratePasswordHash(dto.Password),
-                UserRole = UserRole.SimpleUser
+                UserRole = UserRole.SimpleUser,
+                IsVerified = false
             };
 
             await _context.Users.AddAsync(user);
@@ -52,14 +57,15 @@ namespace AuthService.Business.Services.Auth
             await _publishEndpoint.Publish(new UserRegisteredEvent
             {
                 UserId = user.Id,
-                JobStatus = user.JobStatus,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
+                Email = user.Email,
+                MainPhoneNumber = user.MainPhoneNumber
             });
 
             await CreateBalance(user.Id, user.FirstName, user.LastName);
 
-            await _emailService.SendRegister(user.Email, $"{user.FirstName} {user.LastName}");
+            await _emailService.SendVerifyEmail(user.Email, $"{user.FirstName} {user.LastName}", user.Id.ToString());
         }
 
         public async Task CompanyRegisterAsync(RegisterCompanyDto dto)
@@ -75,19 +81,19 @@ namespace AuthService.Business.Services.Auth
             await CheckUserExistAsync(dto.Email, dto.MainPhoneNumber);
 
             //TODO : exceptionlar deyismelidir
-            //if (dto.IsCompany && dto.VOEN != null)
-            //{
-            //    if(!await CheckVOEN(dto.VOEN))
-            //        throw new NotFoundException<User>("VÖEN tapılmadı.");
+            if (dto.IsCompany && dto.VOEN != null)
+            {
+                if (await GetCompanyNameByVOENAsync(dto.VOEN) != null)
+                {
+                    var voenResponse = await _voenCheckRequest.GetResponse<CheckVoenResponse>(new CheckVoenRequest
+                    {
+                        VOEN = dto.VOEN
+                    });
 
-            //    var voenResponse = await _voenCheckRequest.GetResponse<CheckVoenResponse>(new CheckVoenRequest
-            //    {
-            //        VOEN = dto.VOEN
-            //    });
-
-            //    if (voenResponse.Message.IsExist)
-            //        throw new UserExistException("VÖEN istifadə edilib.");
-            //}
+                    if (voenResponse.Message.IsExist)
+                        throw new UserExistException("VÖEN istifadə edilib.");
+                }
+            }
 
             var user = new User
             {
@@ -111,16 +117,9 @@ namespace AuthService.Business.Services.Auth
                     UserId = user.Id,
                     CompanyName = dto.IsCompany ? dto.CompanyName.Trim() : null,
                     IsCompany = dto.IsCompany,
-                    VOEN = dto.VOEN
+                    VOEN = dto.IsCompany ? dto.VOEN : null
                 }
             );
-
-            //await _publishEndpoint.Publish(new UserRegisteredEvent
-            //{
-            //    UserId = user.Id,
-            //    FirstName = user.FirstName,
-            //    LastName = user.LastName
-            //});
 
             await CreateBalance(user.Id, user.FirstName, user.LastName);
 
@@ -132,6 +131,8 @@ namespace AuthService.Business.Services.Auth
             // useri email ve ya userName ile tapmaq
             var user = await _context.Users.FirstOrDefaultAsync(x => x.Email == dto.UserNameOrEmail)
                 ?? throw new LoginFailedException();
+
+            if (!user.IsVerified) throw new BadRequestException();
 
             var hashedPassword = _tokenHandler.GeneratePasswordHash(dto.Password);
             if (user.Password != hashedPassword)
@@ -154,7 +155,7 @@ namespace AuthService.Business.Services.Auth
                 AccessToken = accessToken,
                 RefreshToken = refreshToken.Token,
                 Expires = refreshToken.Expires,
-                UserImage = user.Image != null ? $"{_currentUser.BaseUrl}/{user.Image}" : null
+                UserImage = user.Image != null ? $"{_currentUser.BaseUrl}/userFiles/{user.Image}" : null
             };
 
             if (user.UserRole == UserRole.CompanyUser || user.UserRole == UserRole.EmployeeUser)
@@ -170,7 +171,7 @@ namespace AuthService.Business.Services.Auth
                 if (user.UserRole == UserRole.CompanyUser)
                     responseDto.FullName = companyData.CompanyName;
 
-                responseDto.UserImage = $"{_configuration["JobCompany:BaseUrl"]}/{companyData.CompanyLogo}" ?? null;
+                responseDto.UserImage = $"{_currentUser.BaseUrl}/companyFiles/{companyData.CompanyLogo}" ?? null;
             }
 
             return responseDto;
@@ -203,7 +204,7 @@ namespace AuthService.Business.Services.Auth
                 RefreshToken = newRefreshToken.Token,
                 UserStatusId = (byte)user.UserRole,
                 Expires = newRefreshToken.Expires,
-                UserImage = user.Image != null ? $"{_currentUser.BaseUrl}/{user.Image}" : null
+                UserImage = user.Image != null ? $"{_currentUser.BaseUrl}/userFiles/{user.Image}" : null
             };
 
             if (user.UserRole == UserRole.CompanyUser || user.UserRole == UserRole.EmployeeUser)
@@ -217,7 +218,7 @@ namespace AuthService.Business.Services.Auth
                 var companyData = companyResponse.Message.Companies[user.Id];
 
                 responseDto.FullName = companyData.CompanyName;
-                responseDto.UserImage = $"{_configuration["JobCompany:BaseUrl"]}/{companyData.CompanyLogo}" ?? null;
+                responseDto.UserImage = $"{_currentUser.BaseUrl}/companyFiles/{companyData.CompanyLogo}" ?? null;
             }
 
             return responseDto;
@@ -292,7 +293,7 @@ namespace AuthService.Business.Services.Auth
 
         /// <summary>
         /// User-in şifrəsini yeniləyir
-        /// </summary>
+        /// </summary>q 
         public async Task UpdatePasswordAsync(string oldPassword, string newPassword)
         {
             CheckPasswordAndThrowException(newPassword);
@@ -300,7 +301,7 @@ namespace AuthService.Business.Services.Auth
             var hashOldPassword = _tokenHandler.GeneratePasswordHash(oldPassword);
 
             var user = await _context.Users.Where(ap => ap.Id == _currentUser.UserGuid).FirstOrDefaultAsync()
-                ?? throw new NotFoundException<User>();
+                ?? throw new NotFoundException();
 
             if (user.Password != hashOldPassword)
                 throw new OldPasswordWrongException();
@@ -342,28 +343,48 @@ namespace AuthService.Business.Services.Auth
 
         public async Task<string?> GetCompanyNameByVOENAsync(string voen)
         {
-            using (HttpClient client = new HttpClient())
+            try
             {
-                byte checkCount = 0;
-                client.Timeout = TimeSpan.FromSeconds(0.6);
-                while (checkCount < 5)
+                string apiUrl = "https://new.e-taxes.gov.az/api/po/authless/public/v1/authless/findTaxpayer";
+                using (HttpClient httpClient = new HttpClient())
                 {
-                    try
+                    var requestData = new VoenRequest
                     {
-                        string htmlContent = await client.GetStringAsync("https://www.e-taxes.gov.az/ebyn/checkCerts.jsp?name=" + voen + "&submit");
-                        HtmlDocument htmlDocument = new HtmlDocument();
-                        htmlDocument.LoadHtml(htmlContent);
-                        string titleContent = htmlDocument.DocumentNode.SelectSingleNode("//td[contains(@width, '69')]")?.InnerHtml;
-                        if (!string.IsNullOrEmpty(titleContent)) return titleContent;
-                        return null;
-                    }
-                    catch (Exception)
+                        middleName = null,
+                        tin = voen,
+                        type = "legalEntity"
+                    };
+
+                    string jsonContent = JsonSerializer.Serialize(requestData);
+                    var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+                    HttpResponseMessage response = await httpClient.PostAsync(apiUrl, content);
+                    string responseBody = await response.Content.ReadAsStringAsync();
+
+
+                    TaxpayerInfoRoot taxpayerInfo = JsonSerializer.Deserialize<TaxpayerInfoRoot>(responseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                    if (taxpayerInfo?.taxpayers != null && taxpayerInfo.taxpayers.Any())
                     {
-                        checkCount++;
+                        string companyName = taxpayerInfo.taxpayers.FirstOrDefault()?.name;
+                        return companyName;
                     }
+                    else throw new NotFoundException();
                 }
             }
-            return null;
+            catch (Exception)
+            {
+                throw new BadRequestException();
+            }
+        }
+
+        public async Task VerifyAccountAsync(string userId)
+        {
+            User user = await _context.Users.FirstOrDefaultAsync(x=> x.Id == Guid.Parse(userId)) ?? 
+                throw new NotFoundException();
+
+            user.IsVerified = true;
+            await _context.SaveChangesAsync();
         }
 
         private void CheckPasswordAndThrowException(string password)

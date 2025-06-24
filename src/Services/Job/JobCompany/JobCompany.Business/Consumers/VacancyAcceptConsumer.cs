@@ -21,7 +21,7 @@ namespace JobCompany.Business.Consumers
             var vacancyGuid = Guid.Parse(context.Message.vacancyId);
 
             var vacancy = await _context.Vacancies.Include(x => x.VacancySkills).Include(x => x.Company).FirstOrDefaultAsync(v => v.Id == vacancyGuid)
-                ?? throw new NotFoundException<Vacancy>(MessageHelper.GetMessage("NOT_FOUND"));
+                ?? throw new NotFoundException();
 
             if ((vacancy.VacancyStatus == VacancyStatus.Pending ||
                 vacancy.VacancyStatus == VacancyStatus.Update ||

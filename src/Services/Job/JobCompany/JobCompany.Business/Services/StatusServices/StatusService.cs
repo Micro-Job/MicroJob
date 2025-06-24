@@ -57,7 +57,7 @@ namespace JobCompany.Business.Services.StatusServices
             var existStatus = await _context.Statuses
                 .Include(s => s.Applications)
                 .FirstOrDefaultAsync(x => x.Id == Guid.Parse(statusId) && x.Company.UserId == _currentUser.UserGuid)
-                ?? throw new NotFoundException<Status>();
+                ?? throw new NotFoundException();
 
             if (existStatus.StatusEnum == StatusEnum.Pending ||
                 existStatus.StatusEnum == StatusEnum.Accepted ||

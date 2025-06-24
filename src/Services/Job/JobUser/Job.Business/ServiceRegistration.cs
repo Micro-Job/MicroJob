@@ -33,7 +33,7 @@ namespace Job.Business
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<ICurrentUser, CurrentUser>();
             services.AddScoped<IPositionService, PositionService>();
-            services.AddScoped<IUserManagementService, UserManagementService>();
+            services.AddScoped<UserManagementService>();
         }
 
         public static IServiceCollection AddMassTransit(this IServiceCollection services, string username, string password, string hostname, string port)

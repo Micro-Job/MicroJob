@@ -31,7 +31,7 @@ namespace JobPayment.Business.Services.PacketServices
         public async Task UpdatePacketAsync(UpdatePacketDto dto)
         {
             var existPacket = await _context.Packets.FirstOrDefaultAsync(x => x.Id == dto.PacketId)
-                                    ?? throw new NotFoundException<Packet>();
+                                    ?? throw new NotFoundException();
 
             if(existPacket.Coin != dto.Coin || existPacket.Value != dto.Value)
             {
@@ -62,7 +62,8 @@ namespace JobPayment.Business.Services.PacketServices
                 Id = x.Id,
                 Title = x.Title,
                 Coin = x.Coin,
-                Value = x.Value
+                Value = x.Value,
+                PacketType = x.PacketType
             })
             .AsNoTracking()
             .ToListAsync();
@@ -73,7 +74,7 @@ namespace JobPayment.Business.Services.PacketServices
         public async Task<Packet> GetPacketByIdAsync(string packetId)
         {
             var packet = await _context.Packets.FirstOrDefaultAsync(x=> x.Id == Guid.Parse(packetId) && !x.IsDeleted)
-                ?? throw new NotFoundException<Packet>();
+                ?? throw new NotFoundException();
 
             return packet;  
         }

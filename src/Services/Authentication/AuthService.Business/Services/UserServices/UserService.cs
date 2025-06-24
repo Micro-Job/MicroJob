@@ -40,6 +40,7 @@ namespace AuthService.Business.Services.UserServices
             _companyDataRequest = companyDataRequest;
         }
 
+        //TODO : bu metot ve endpoint burada olmali deyil (ve bu user ve company ucun ayrica yazilmalidi daha sonra front ferqli yere sorgu atmalidi)
         /// <summary> Loginde olan User informasiyası </summary>
         public async Task<UserInformationDto> GetUserInformationAsync()
         {
@@ -53,19 +54,22 @@ namespace AuthService.Business.Services.UserServices
                     LastName = x.LastName,
                     Email = x.Email,
                     MainPhoneNumber = x.MainPhoneNumber,
-                    Image = x.Image != null ? $"{_configuration["ApiGateway:BaseUrl"]}/authImages/{x.Image}" : null,
+                    Image = x.Image != null ? $"{_configuration["ApiGateway:BaseUrl"]}/authFiles/{x.Image}" : null,
                     UserRole = x.UserRole,
-                    JobStatus = x.JobStatus,
+                    //JobStatus = x.JobStatus,
                 }).FirstOrDefaultAsync() ?? throw new UserNotFoundException();
 
             return user;
         }
 
+        //
         /// <summary> Logində olan userin informasiyasının update'si </summary>
         public async Task<UserUpdateResponseDto> UpdateUserInformationAsync(UserUpdateDto dto)
         {
             var email = dto.Email.Trim();
             var phoneNumber = dto.MainPhoneNumber.Trim();
+
+            //await CheckUserExistAsync(email, phoneNumber);
 
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == _currentUser.UserGuid)
                 ?? throw new UserNotFoundException();
@@ -101,7 +105,7 @@ namespace AuthService.Business.Services.UserServices
                 LastName = user.LastName,
                 Email = user.Email,
                 MainPhoneNumber = user.MainPhoneNumber,
-                JobStatus = user.JobStatus,
+                //JobStatus = user.JobStatus,
             };
         }
 
@@ -160,7 +164,7 @@ namespace AuthService.Business.Services.UserServices
             return new UserProfileImageUpdateResponseDto
             {
                 UserId = user.Id,
-                ImageUrl = $"{_configuration["ApiGateway:BaseUrl"]}/authImages/{user.Image}",
+                ImageUrl = $"{_configuration["ApiGateway:BaseUrl"]}/authFiles/{user.Image}",
             };
         }
 
@@ -392,6 +396,24 @@ namespace AuthService.Business.Services.UserServices
             await _context.SaveChangesAsync();
         }
 
+        public async Task CheckUserExistAsync(string email, string phoneNumber)
+        {
+            var user = await _context.Users.Where(x => (x.Email == email || x.MainPhoneNumber == phoneNumber) && x.Id != _currentUser.UserGuid)
+                .Select(x => new
+                {
+                    x.Email,
+                    x.MainPhoneNumber
+                })
+                .FirstOrDefaultAsync();
+
+            if (user != null)
+            {
+                if (user.Email == email)
+                    throw new ExistEmailException();
+                else if (user.MainPhoneNumber == phoneNumber)
+                    throw new ExistPhoneNumberException();
+            }
+        }
         #endregion
     }
 }

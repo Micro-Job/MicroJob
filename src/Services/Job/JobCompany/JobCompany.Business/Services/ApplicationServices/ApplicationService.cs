@@ -63,13 +63,13 @@ public class ApplicationService : IApplicationService
         var vacancyInfo = await _context.Vacancies
             .Where(v => v.Id == vacancyGuid && v.VacancyStatus == VacancyStatus.Active && v.EndDate > DateTime.Now)
             .Select(v => new { v.Title, v.VacancyStatus, v.CompanyId, v.EndDate })
-            .FirstOrDefaultAsync() ?? throw new NotFoundException<Company>();
+            .FirstOrDefaultAsync() ?? throw new NotFoundException();
 
-        if (vacancyInfo.EndDate < DateTime.Now) throw new NotFoundException<Vacancy>();
+        if (vacancyInfo.EndDate < DateTime.Now) throw new NotFoundException();
         if (vacancyInfo.VacancyStatus == VacancyStatus.Pause) throw new VacancyPausedException();
 
         var companyStatus = await _context.Statuses.FirstOrDefaultAsync(x => x.StatusEnum == StatusEnum.Pending && x.CompanyId == vacancyInfo.CompanyId) ??
-            throw new NotFoundException<StatusEnum>();
+            throw new NotFoundException();
 
         var resumeData = await _resumeDataRequest.GetResponse<GetResumeDataResponse>(new GetResumeDataRequest { UserId = userGuid });
 
@@ -94,7 +94,7 @@ public class ApplicationService : IApplicationService
         {
             SenderId = userGuid,
             SenderName = _currentUser.UserFullName,
-            SenderImage = $"{_configuration["JobUser:BaseUrl"]}{resumeData.Message.ProfileImage}",
+            SenderImage = $"{_currentUser.BaseUrl}/userFiles/{resumeData.Message.ProfileImage}",
             NotificationType = NotificationType.Application,
             CreatedDate = DateTime.Now,
             InformationId = resumeData.Message.ResumeId,
@@ -115,7 +115,7 @@ public class ApplicationService : IApplicationService
         var existApplication =
             await _context.Applications.FirstOrDefaultAsync(x =>
                 x.Id == applicationGuid && x.UserId == _currentUser.UserGuid)
-            ?? throw new NotFoundException<Application>();
+            ?? throw new NotFoundException();
 
         if (existApplication.IsActive == false)
             throw new ApplicationStatusIsDeactiveException();
@@ -142,7 +142,7 @@ public class ApplicationService : IApplicationService
                 CompanyLogo = x.Vacancy.Company.CompanyLogo,
                 VacancyTitle = x.Vacancy.Title
             })
-            .FirstOrDefaultAsync() ?? throw new NotFoundException<Application>();
+            .FirstOrDefaultAsync() ?? throw new NotFoundException();
 
         var application = existAppVacancy.Application;
 
@@ -158,7 +158,8 @@ public class ApplicationService : IApplicationService
                 InformationId = applicationGuid,
                 InformationName = existAppVacancy.VacancyTitle,
                 NotificationType = NotificationType.ApplicationStatusUpdate,
-                SenderImage = $"{_currentUser.BaseUrl}/company/{existAppVacancy.CompanyLogo}",
+                //TODO burada BaseUrl event vasitesile gonderilmeli deyil
+                SenderImage = $"{_currentUser.BaseUrl}/companyFiles/{existAppVacancy.CompanyLogo}",
                 SenderName = existAppVacancy.CompanyName,
             }
         );
@@ -187,7 +188,7 @@ public class ApplicationService : IApplicationService
                         .Select(s => s.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name))
                         .ToList(),
                 })
-                .FirstOrDefaultAsync() ?? throw new NotFoundException<Application>();
+                .FirstOrDefaultAsync() ?? throw new NotFoundException();
 
         return application;
     }
@@ -262,7 +263,7 @@ public class ApplicationService : IApplicationService
                 FirstName = a.FirstName,
                 LastName = a.LastName,
                 Email = a.Email,
-                ProfileImage = $"{_currentUser.BaseUrl}/user/{a.ProfileImage}",
+                ProfileImage = $"{_currentUser.BaseUrl}/userFiles/{a.ProfileImage}",
                 DateTime = a.CreatedDate,
                 ResumeId = a.ResumeId,
                 PhoneNumber = a.PhoneNumber,
@@ -301,7 +302,7 @@ public class ApplicationService : IApplicationService
                 VacancyId = a.VacancyId,
                 Title = a.Vacancy.Title,
                 CompanyId = a.Vacancy.CompanyId,
-                CompanyLogo = a.Vacancy.Company.CompanyLogo != null ? $"{_currentUser.BaseUrl}/company/{a.Vacancy.Company.CompanyLogo}" : null,
+                CompanyLogo = a.Vacancy.Company.CompanyLogo != null ? $"{_currentUser.BaseUrl}/companyFiles/{a.Vacancy.Company.CompanyLogo}" : null,
                 CompanyName = a.Vacancy.Company.CompanyName,
                 WorkType = a.Vacancy.WorkType,
                 VacancyStatus = a.Vacancy.VacancyStatus,
@@ -337,7 +338,7 @@ public class ApplicationService : IApplicationService
                 IsSavedVacancy = application.Vacancy.SavedVacancies.Any(x => x.UserId == _currentUser.UserGuid),
                 CompanyId = application.Vacancy.CompanyId,
                 CompanyName = application.Vacancy.Company.CompanyName,
-                CompanyLogo = $"{_currentUser.BaseUrl}/company/{application.Vacancy.Company.CompanyLogo}",
+                CompanyLogo = $"{_currentUser.BaseUrl}/companyFiles/{application.Vacancy.Company.CompanyLogo}",
                 Location = application.Vacancy.Company.CompanyLocation,
                 WorkType = application.Vacancy.WorkType,
                 WorkStyle = application.Vacancy.WorkStyle,
@@ -353,7 +354,7 @@ public class ApplicationService : IApplicationService
                 .ToList()
             })
             .FirstOrDefaultAsync()
-            ?? throw new NotFoundException<Application>();
+            ?? throw new NotFoundException();
 
         return application;
     }
@@ -370,7 +371,7 @@ public class ApplicationService : IApplicationService
             .Select(a => new ApplicationWithStatusInfoListDto
             {
                 ApplicationId = a.Id,
-                ProfileImage = $"{_currentUser.BaseUrl}/user/{a.ProfileImage}",
+                ProfileImage = $"{_currentUser.BaseUrl}/userFiles/{a.ProfileImage}",
                 FirstName = a.FirstName,
                 LastName = a.LastName,
                 StatusId = a.StatusId,

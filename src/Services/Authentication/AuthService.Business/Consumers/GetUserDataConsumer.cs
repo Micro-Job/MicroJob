@@ -37,7 +37,7 @@ public class GetUserDataConsumer(AppDbContext _context, ICurrentUser _currentUse
             FirstName = user.FirstName,
             LastName = user.LastName,
             Email = user.Email,
-            ProfileImage = user.Image != null ? $"{_currentUser.BaseUrl}/auth/{user.Image}" : null,
+            ProfileImage = user.Image != null ? $"{_currentUser.BaseUrl}/authFiles/{user.Image}" : null,
             MainPhoneNumber = user.MainPhoneNumber
         });
     }

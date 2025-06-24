@@ -1,10 +1,9 @@
 ﻿using JobCompany.Business.Dtos.Common;
 using JobCompany.Business.Dtos.CountryDtos;
-using JobCompany.Business.Exceptions.Common;
 using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
-using SharedLibrary.Helpers;
+using SharedLibrary.Exceptions;
 using SharedLibrary.HelperServices.Current;
 
 namespace JobCompany.Business.Services.CountryServices;
@@ -29,7 +28,7 @@ public class CountryService(JobCompanyDbContext _context, ICurrentUser _user) : 
     public async Task DeleteCountryAsync(string id)
     {
         var countryId = Guid.Parse(id);
-        var country = await _context.Countries.FindAsync(countryId) ?? throw new NotFoundException<Country>();
+        var country = await _context.Countries.FindAsync(countryId) ?? throw new NotFoundException();
 
         _context.Countries.Remove(country);
         await _context.SaveChangesAsync();

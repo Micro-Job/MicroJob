@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using SharedLibrary.Enums;
+using SharedLibrary.Exceptions;
 using SharedLibrary.ExternalServices.FileService;
 using SharedLibrary.HelperServices.Current;
 using SharedLibrary.Statics;
@@ -46,7 +47,7 @@ namespace JobCompany.Business.Services.CompanyServices
         public async Task<CompanyUpdateResponseDto> UpdateCompanyAsync(CompanyUpdateDto dto, ICollection<UpdateNumberDto>? numbersDto)
         {
             var company = await _context.Companies.Include(c => c.CompanyNumbers).FirstOrDefaultAsync(x => x.UserId == _currentUser.UserGuid)
-                ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>();
+                ?? throw new SharedLibrary.Exceptions.NotFoundException();
 
             if (dto.Email != null && await _context.Companies.AnyAsync(x => x.Email == dto.Email && x.Id != company.Id))
                 throw new EmailAlreadyUsedException();
@@ -129,7 +130,7 @@ namespace JobCompany.Business.Services.CompanyServices
 
             return new CompanyUpdateResponseDto
             {
-                CompanyLogo = $"{_currentUser.BaseUrl}/company/{company.CompanyLogo}"
+                CompanyLogo = $"{_currentUser.BaseUrl}/companyFiles/{company.CompanyLogo}"
             };
         }
 
@@ -148,7 +149,7 @@ namespace JobCompany.Business.Services.CompanyServices
                 {
                     CompanyId = c.Id,
                     CompanyName = c.CompanyName,
-                    CompanyImage = c.CompanyLogo != null ? $"{_currentUser.BaseUrl}/company/{c.CompanyLogo}" : null,
+                    CompanyImage = c.CompanyLogo != null ? $"{_currentUser.BaseUrl}/companyFiles/{c.CompanyLogo}" : null,
                     CompanyVacancyCount = c.Vacancies != null ? c.Vacancies.Count(v => v.VacancyStatus == VacancyStatus.Active && v.EndDate > DateTime.Now) : 0,
                 })
                 .Skip(offset)
@@ -174,7 +175,7 @@ namespace JobCompany.Business.Services.CompanyServices
                             CompanyInformation = x.CompanyInformation,
                             CompanyLocation = x.CompanyLocation,
                             CompanyName = x.CompanyName,
-                            CompanyLogo = $"{_currentUser.BaseUrl}/company/{x.CompanyLogo}",
+                            CompanyLogo = $"{_currentUser.BaseUrl}/companyFiles/{x.CompanyLogo}",
                             WebLink = x.WebLink,
                             UserId = x.UserId,
                             CompanyNumbers = x.CompanyNumbers
@@ -187,7 +188,7 @@ namespace JobCompany.Business.Services.CompanyServices
                             Email = x.Email,
                         })
                         .FirstOrDefaultAsync()
-                    ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>();
+                    ?? throw new SharedLibrary.Exceptions.NotFoundException();
             return company;
         }
 
@@ -212,7 +213,7 @@ namespace JobCompany.Business.Services.CompanyServices
                     WebLink = x.WebLink,
                     CreatedDate = x.CreatedDate,
                     EmployeeCount = x.EmployeeCount.HasValue ? x.EmployeeCount.Value : null,
-                    CompanyLogo = $"{_currentUser.BaseUrl}/company/{x.CompanyLogo}",
+                    CompanyLogo = $"{_currentUser.BaseUrl}/companyFiles/{x.CompanyLogo}",
                     Category = x.Category.GetTranslation(currentLanguage, GetTranslationPropertyName.Name),
                     City = x.City != null ? x.City.GetTranslation(currentLanguage, GetTranslationPropertyName.Name) : null,
                     Country = x.Country != null ? x.Country.GetTranslation(currentLanguage, GetTranslationPropertyName.Name) : null,
@@ -229,7 +230,7 @@ namespace JobCompany.Business.Services.CompanyServices
                         : new List<CompanyNumberDto>()
                 })
                 .FirstOrDefaultAsync()
-                    ?? throw new SharedLibrary.Exceptions.NotFoundException<Company>();
+                    ?? throw new SharedLibrary.Exceptions.NotFoundException();
 
             return companyProfile;
         }
@@ -241,7 +242,7 @@ namespace JobCompany.Business.Services.CompanyServices
             return await _context.Companies.Where(x => x.Id == companyGuid)
                 .Select(x => x.CompanyName)
                 .FirstOrDefaultAsync()
-                ?? throw new NotFoundException<Company>();
+                ?? throw new NotFoundException();
         }
     }
 }

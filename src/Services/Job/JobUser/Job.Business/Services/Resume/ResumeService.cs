@@ -28,6 +28,7 @@ using Shared.Enums;
 using SharedLibrary.Dtos.FileDtos;
 using SharedLibrary.Enums;
 using SharedLibrary.Events;
+using SharedLibrary.Exceptions;
 using SharedLibrary.ExternalServices.FileService;
 using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;
@@ -119,7 +120,7 @@ namespace Job.Business.Services.Resume
                                             IsMainNumber = resume.PhoneNumbers.Any(p => p.PhoneNumber == userMainPhoneNumber),
                                             PositionId = resume.PositionId,
                                             ParentPositionId = resume.Position != null ? resume.Position.ParentPositionId : null,
-                                            UserPhoto = resume.UserPhoto != null ? $"{_currentUser.BaseUrl}/user/{resume.UserPhoto}" : null,
+                                            UserPhoto = resume.UserPhoto != null ? $"{_currentUser.BaseUrl}/userFiles/{resume.UserPhoto}" : null,
                                             IsPublic = resume.IsPublic,
                                             IsAnonym = resume.IsAnonym,
                                             Skills = resume.ResumeSkills.Select(s => new SkillGetByIdDto
@@ -163,7 +164,7 @@ namespace Job.Business.Services.Resume
                                                 CertificateId = c.Id,
                                                 CertificateName = c.CertificateName,
                                                 GivenOrganization = c.GivenOrganization,
-                                                CertificateFile = $"{_currentUser.BaseUrl}/user/{c.CertificateFile}"
+                                                CertificateFile = $"{_currentUser.BaseUrl}/userFiles/{c.CertificateFile}"
                                             }).ToList()
                                         })
                                         .FirstOrDefaultAsync();
@@ -231,7 +232,7 @@ namespace Job.Business.Services.Resume
             {
                 Id = x.Id,
                 FullName = x.IsPublic ? $"{x.FirstName} {x.LastName}" : x.CompanyResumeAccesses.Any(cra => cra.CompanyUserId == _currentUser.UserGuid && cra.ResumeId == x.Id) ? $"{x.FirstName} {x.LastName}" : null,
-                ProfileImage = x.UserPhoto != null ? x.IsPublic ? $"{_currentUser.BaseUrl}/user/{x.UserPhoto}" : x.CompanyResumeAccesses.Any(cra => cra.CompanyUserId == _currentUser.UserGuid && cra.ResumeId == x.Id) ? $"{_currentUser.BaseUrl}/user/{x.UserPhoto}" : null : null,
+                ProfileImage = x.UserPhoto != null ? x.IsPublic ? $"{_currentUser.BaseUrl}/userFiles/{x.UserPhoto}" : x.CompanyResumeAccesses.Any(cra => cra.CompanyUserId == _currentUser.UserGuid && cra.ResumeId == x.Id) ? $"{_currentUser.BaseUrl}/userFiles/{x.UserPhoto}" : null : null,
                 IsSaved = x.SavedResumes.Any(sr => sr.ResumeId == x.Id && sr.CompanyUserId == _currentUser.UserGuid),
                 IsPublic = x.IsPublic,
                 JobStatus = x.User.JobStatus,
@@ -285,7 +286,7 @@ namespace Job.Business.Services.Resume
                    FullName = x.IsPublic ? $"{x.FirstName} {x.LastName}" : x.CompanyResumeAccesses.Any(cra => cra.CompanyUserId == _currentUser.UserGuid) ? $"{x.FirstName} {x.LastName}" : null,
                    ProfileImage = x.UserPhoto != null
                        ? x.IsPublic || x.CompanyResumeAccesses.Any(cra => cra.CompanyUserId == _currentUser.UserGuid)
-                           ? $"{_currentUser.BaseUrl}/user/{x.UserPhoto}"
+                           ? $"{_currentUser.BaseUrl}/userFiles/{x.UserPhoto}"
                            : null
                        : null,
                    IsSaved = true,
@@ -323,7 +324,7 @@ namespace Job.Business.Services.Resume
             var resumeGuid = Guid.Parse(resumeId);
 
             if (!await _context.Resumes.AnyAsync(x => x.Id == resumeGuid))
-                throw new NotFoundException<Core.Entities.Resume>();
+                throw new NotFoundException();
 
             var existSaveResume = await _context.SavedResumes.FirstOrDefaultAsync(x => x.ResumeId == resumeGuid && x.CompanyUserId == _currentUser.UserGuid);
 
@@ -371,7 +372,7 @@ namespace Job.Business.Services.Resume
                     HasAccessByCompany = r.CompanyResumeAccesses.Any(x => x.CompanyUserId == userId),
                     r.IsPublic
                 })
-                .FirstOrDefaultAsync() ?? throw new NotFoundException<Core.Entities.Resume>();
+                .FirstOrDefaultAsync() ?? throw new NotFoundException();
 
             bool hasApplied = false;
 
@@ -415,7 +416,7 @@ namespace Job.Business.Services.Resume
                     : [],
 
                 UserPhoto = hasFullAccess && resume.UserPhoto != null
-                    ? $"{_currentUser.BaseUrl}/user/{resume.UserPhoto}"
+                    ? $"{_currentUser.BaseUrl}/userFiles/{resume.UserPhoto}"
                     : null,
 
                 BirthDay = resume.BirthDay,
@@ -467,7 +468,7 @@ namespace Job.Business.Services.Resume
                     CertificateId = c.Id,
                     CertificateName = c.CertificateName,
                     GivenOrganization = c.GivenOrganization,
-                    CertificateFile = $"{_currentUser.BaseUrl}/user/{c.CertificateFile}"
+                    CertificateFile = $"{_currentUser.BaseUrl}/userFiles/{c.CertificateFile}"
                 }).ToList()
             };
         }
@@ -486,7 +487,7 @@ namespace Job.Business.Services.Resume
                 }).FirstOrDefaultAsync();
 
             if (resume == null)
-                throw new NotFoundException<Core.Entities.Resume>();
+                throw new NotFoundException();
 
             if (resume.IsPublic) throw new ResumeIsPublicException();
 
@@ -507,7 +508,7 @@ namespace Job.Business.Services.Resume
                 });
             }
             //TODO : Burada exception qaytarmaq prinsip olaraq dogru deyil
-            else throw new NotFoundException<Core.Entities.Resume>("Yeterli balans yoxdur");
+            else throw new NotFoundException("Yeterli balans yoxdur");
 
             await _context.CompanyResumeAccesses.AddAsync(new CompanyResumeAccess
             {
@@ -653,7 +654,7 @@ namespace Job.Business.Services.Resume
                 .Include(r => r.Languages)
                 .Include(r => r.ResumeSkills)
                 .FirstOrDefaultAsync(r => r.UserId == userGuid)
-                ?? throw new NotFoundException<Core.Entities.Resume>();
+                ?? throw new NotFoundException();
         }
 
         private static void UpdateResumePersonalInfo(Core.Entities.Resume resume, ResumeUpdateDto updateDto)

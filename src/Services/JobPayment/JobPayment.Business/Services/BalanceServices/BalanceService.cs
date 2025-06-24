@@ -42,7 +42,7 @@ namespace JobPayment.Business.Services.BalanceServices
         public async Task<Balance> GetOwnBalanceAsync()
         {
             var myBalance = await _context.Balances.FirstOrDefaultAsync(x => x.UserId == _currentUser.UserGuid)
-                            ?? throw new NotFoundException<Balance>();
+                            ?? throw new NotFoundException();
 
             return myBalance;
         }
@@ -50,7 +50,7 @@ namespace JobPayment.Business.Services.BalanceServices
         public async Task<Balance> GetUserBalanceByIdAsync(Guid userId)
         {
             var userBalance = await _context.Balances.FirstOrDefaultAsync(x => x.UserId == userId)
-                                    ?? throw new NotFoundException<Balance>();
+                                    ?? throw new NotFoundException();
 
             return userBalance;
         }

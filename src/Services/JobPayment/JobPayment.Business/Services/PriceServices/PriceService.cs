@@ -37,7 +37,7 @@ namespace JobPayment.Business.Services.PriceServices
         public async Task<Service> GetPriceByInformationTypeAsync(InformationType type)
         {
             var price = await _context.Services.FirstOrDefaultAsync(x=> x.InformationType == type) 
-                                        ?? throw new NotFoundException<Service>();
+                                        ?? throw new NotFoundException();
 
             return price;
         }
@@ -45,7 +45,7 @@ namespace JobPayment.Business.Services.PriceServices
         public async Task UpdatePriceAsync(UpdatePriceDto dto)
         {
             var price = await _context.Services.FirstOrDefaultAsync(x=> x.Id == Guid.Parse(dto.Id))
-                                                ?? throw new NotFoundException<Service>();
+                                                ?? throw new NotFoundException();
 
             var oldPrice = new OldService
             {
