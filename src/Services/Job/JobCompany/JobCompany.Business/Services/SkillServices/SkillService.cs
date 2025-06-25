@@ -28,13 +28,12 @@ public class SkillService(JobCompanyDbContext _context, ICurrentUser _user) : IS
 
     public async Task<List<GetAllSkillDto>> GetAllSkillsAsync()
     {
-        var skills = await _context.Skills
+        var skills = await _context.Skills.Include(x=> x.Translations)
         .AsNoTracking()
-        .IncludeTranslations()
         .Select(b => new GetAllSkillDto
         {
             Id = b.Id,
-            Name = b.GetTranslation(_user.LanguageCode, GetTranslationPropertyName.Name),
+            Name = b.Translations.GetTranslation(_user.LanguageCode, GetTranslationPropertyName.Name),
         })
         .ToListAsync();
 
@@ -53,7 +52,7 @@ public class SkillService(JobCompanyDbContext _context, ICurrentUser _user) : IS
         var datas = await query.Select(x=> new GetAllSkillDto
         {
             Id = x.Id,
-            Name = x.GetTranslation(_user.LanguageCode , GetTranslationPropertyName.Name)
+            Name = x.Translations.GetTranslation(_user.LanguageCode , GetTranslationPropertyName.Name)
         })
         .Skip(skip - 1)
         .Take(take)

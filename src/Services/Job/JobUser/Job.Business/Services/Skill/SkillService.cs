@@ -8,7 +8,7 @@ using SharedLibrary.HelperServices.Current;
 
 namespace Job.Business.Services.Skill;
 
-public class SkillService(JobDbContext _context, ICurrentUser _user) : ISkillService
+public class SkillService(JobDbContext _context, ICurrentUser _user) 
 {
     public async Task CreateSkillAsync(SkillCreateDto dto)
     {
@@ -26,13 +26,12 @@ public class SkillService(JobDbContext _context, ICurrentUser _user) : ISkillSer
 
     public async Task<List<GetAllSkillDto>> GetAllSkillsAsync()
     {
-        var skills = await _context.Skills
+        var skills = await _context.Skills.Include(x=> x.Translations)
             .AsNoTracking()
-            .IncludeTranslations()
             .Select(b => new GetAllSkillDto
             {
                 Id = b.Id,
-                Name = b.GetTranslation(_user.LanguageCode, GetTranslationPropertyName.Name),
+                Name = b.Translations.GetTranslation(_user.LanguageCode, GetTranslationPropertyName.Name),
             })
             .ToListAsync();
 

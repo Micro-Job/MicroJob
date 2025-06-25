@@ -80,7 +80,6 @@ namespace AuthService.Business.Services.Auth
             dto.Email = dto.Email.Trim();
             await CheckUserExistAsync(dto.Email, dto.MainPhoneNumber);
 
-            //TODO : exceptionlar deyismelidir
             if (dto.IsCompany && dto.VOEN != null)
             {
                 if (await GetCompanyNameByVOENAsync(dto.VOEN) != null)
@@ -128,7 +127,6 @@ namespace AuthService.Business.Services.Auth
 
         public async Task<TokenResponseDto> LoginAsync(LoginDto dto)
         {
-            // useri email ve ya userName ile tapmaq
             var user = await _context.Users.FirstOrDefaultAsync(x => x.Email == dto.UserNameOrEmail)
                 ?? throw new LoginFailedException();
 
@@ -314,7 +312,6 @@ namespace AuthService.Business.Services.Auth
             await _context.SaveChangesAsync();
         }
 
-        //TODO : burada yeni auth proyektinde user tableinda voen tutulmalidir mi 
         public async Task CheckUserExistAsync(string email, string phoneNumber)
         {
             var user = await _context.Users.Where(x => x.Email == email || x.MainPhoneNumber == phoneNumber)

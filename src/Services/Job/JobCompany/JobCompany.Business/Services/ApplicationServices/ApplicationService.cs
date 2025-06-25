@@ -139,32 +139,6 @@ public class ApplicationService(JobCompanyDbContext _context,
         );
     }
 
-    /// <summary> Id'yə görə müraciətin gətirilməsi </summary>
-    public async Task<ApplicationGetByIdDto> GetApplicationByIdAsync(Guid applicationId)
-    {
-        var application = await _context.Applications
-                .AsNoTracking()
-                .Where(a => a.Id == applicationId && a.IsActive)
-                .Select(a => new ApplicationGetByIdDto
-                {
-                    VacancyId = a.VacancyId,
-                    VacancyImage = a.Vacancy.CompanyLogo,
-                    VacancyTitle = a.Vacancy.Title,
-                    CompanyName = a.Vacancy.CompanyName,
-                    CreatedDate = a.CreatedDate,
-                    Description = a.Vacancy.Description,
-                    Status = a.Status.StatusEnum,
-                    StatusColor = a.Status.StatusColor,
-                    Steps = _context
-                        .Statuses.OrderBy(s => s.Order)
-                        .Select(s => s.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name))
-                        .ToList(),
-                })
-                .FirstOrDefaultAsync() ?? throw new NotFoundException();
-
-        return application;
-    }
-
     /// <summary> Şirkətə daxil olan bütün müraciətlərin filterlə birlikdə detallı şəkildə gətirilməsi </summary>
     public async Task<DataListDto<AllApplicationListDto>> GetAllApplicationsListAsync(Guid? vacancyId, Gender? gender, StatusEnum? status, List<Guid>? skillIds, string? fullName, int skip = 1, int take = 10)
     {

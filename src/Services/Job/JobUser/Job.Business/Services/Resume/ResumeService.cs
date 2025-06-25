@@ -92,7 +92,7 @@ namespace Job.Business.Services.Resume
         public async Task<ResumeDetailItemDto> GetOwnResumeAsync()
         {
             var resume = await _context.Resumes
-                                        .Include(x => x.ResumeSkills).ThenInclude(x => x.Skill).ThenInclude(x => x.Translations)
+                                        .Include(x => x.ResumeSkills).ThenInclude(x => x.Skill.Translations)
                                         .Where(x => x.UserId == _currentUser.UserGuid)
                                         .Select(resume => new ResumeDetailItemDto
                                         {
@@ -120,7 +120,7 @@ namespace Job.Business.Services.Resume
                                             Skills = resume.ResumeSkills.Select(s => new SkillGetByIdDto
                                             {
                                                 Id = s.SkillId,
-                                                Name = s.Skill.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name)
+                                                Name = s.Skill.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name)
                                             }).ToList(),
                                             PhoneNumbers = resume.PhoneNumbers.Select(p => new NumberGetByIdDto
                                             {
@@ -238,7 +238,7 @@ namespace Job.Business.Services.Resume
                     })
                     .FirstOrDefault(),
                 SkillsName = x.ResumeSkills
-                .Select(s => s.Skill.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name))
+                .Select(s => s.Skill.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name))
                 .ToList(),
                 Position = x.Position != null ? x.Position.Name : null,
                 HasAccess = x.IsPublic || x.CompanyResumeAccesses.Any(cra => cra.CompanyUserId == _currentUser.UserGuid)
@@ -263,7 +263,6 @@ namespace Job.Business.Services.Resume
                 .Include(sr => sr.Resume)
                     .ThenInclude(r => r.ResumeSkills)
                         .ThenInclude(rs => rs.Skill.Translations)
-                .Include(sr => sr.Resume.Languages)
                 .Include(sr => sr.Resume.CompanyResumeAccesses)
                 .Select(sr => sr.Resume)
                 .AsNoTracking();
@@ -294,7 +293,7 @@ namespace Job.Business.Services.Resume
                        })
                        .FirstOrDefault(),
                    SkillsName = x.ResumeSkills
-                       .Select(s => s.Skill.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name))
+                       .Select(s => s.Skill.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name))
                        .ToList(),
                    Position = x.Position != null ? x.Position.Name : null,
                    HasAccess = x.IsPublic || x.CompanyResumeAccesses.Any(cra => cra.CompanyUserId == _currentUser.UserGuid)
@@ -346,6 +345,16 @@ namespace Job.Business.Services.Resume
 
             var resumeData = await _context.Resumes
                 .Where(r => r.Id == resumeId)
+                    .Include(r => r.SavedResumes)
+                    .Include(r => r.Position)
+                    .Include(r => r.PhoneNumbers)
+                    .Include(r => r.Educations)
+                    .Include(r => r.Experiences)
+                    .Include(r => r.Languages)
+                    .Include(r => r.Certificates)
+                    .Include(r => r.ResumeSkills)
+                        .ThenInclude(rs => rs.Skill)
+                            .ThenInclude(s => s.Translations)
                 .Select(r => new
                 {
                     Resume = r,
@@ -410,7 +419,7 @@ namespace Job.Business.Services.Resume
                 Skills = resume.ResumeSkills.Select(s => new SkillGetByIdDto
                 {
                     Id = s.SkillId,
-                    Name = s.Skill.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name)
+                    Name = s.Skill.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name)
                 }).ToList(),
 
                 Educations = resume.Educations.Select(e => new EducationGetByIdDto

@@ -71,7 +71,7 @@ public class UserManagementService(JobDbContext _context, IConfiguration _config
                 Skills = r.ResumeSkills.Select(s => new SkillGetByIdDto
                 {
                     Id = s.SkillId,
-                    Name = s.Skill.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name)
+                    Name = s.Skill.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name)
                 }).ToList(),
                 PhoneNumbers = r.IsPublic ?
                 r.PhoneNumbers.Select(p => new NumberGetByIdDto

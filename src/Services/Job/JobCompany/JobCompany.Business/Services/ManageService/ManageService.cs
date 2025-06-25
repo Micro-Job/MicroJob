@@ -230,7 +230,7 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
                         })
                         .ToList(),
                     CompanyName = x.CompanyName,
-                    CategoryName = x.Category.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name),
+                    CategoryName = x.Category.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name),
                     CompanyUserId = x.Company.UserId,
                     //Messages = _currentUser.UserGuid == x.Company.UserId
                     //    ? x.VacancyMessages.Select(vm => vm.Message.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Content)).ToList()
@@ -285,7 +285,7 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
             .Select(m => new MessageSelectDto
             {
                 Id = m.Id,
-                Content = m.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Content)
+                Content = m.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Content)
             }).ToListAsync();
 
         return messages;
@@ -303,7 +303,7 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
         {
             Id = message.Id,
             CreatedDate = message.CreatedDate,
-            Content = message.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Content)
+            Content = message.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Content)
         };
     }
 
@@ -400,9 +400,9 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
                 CreatedDate = x.CreatedDate,
                 EmployeeCount = x.EmployeeCount.HasValue ? x.EmployeeCount.Value : null,
                 CompanyLogo = $"{_currentUser.BaseUrl}/company/{x.CompanyLogo}",
-                Category = x.Category.GetTranslation(currentLanguage, GetTranslationPropertyName.Name),
-                City = x.City != null ? x.City.GetTranslation(currentLanguage, GetTranslationPropertyName.Name) : null,
-                Country = x.Country != null ? x.Country.GetTranslation(currentLanguage, GetTranslationPropertyName.Name) : null,
+                Category = x.Category.Translations.GetTranslation(currentLanguage, GetTranslationPropertyName.Name),
+                City = x.City != null ? x.City.Translations.GetTranslation(currentLanguage, GetTranslationPropertyName.Name) : null,
+                Country = x.Country != null ? x.Country.Translations.GetTranslation(currentLanguage, GetTranslationPropertyName.Name) : null,
                 CategoryId = x.CategoryId,
                 CityId = x.CityId,
                 CountryId = x.CountryId,
@@ -497,7 +497,7 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
         {
             Id = category.Id,
             IsCompany = category.IsCompany,
-            Name = category.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name)
+            Name = category.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name)
         };
     }
 

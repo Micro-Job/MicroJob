@@ -20,11 +20,11 @@ namespace JobCompany.API.Controllers
             return Ok(await reportService.GetSummaryAsync());
         }
 
-        [HttpGet("[action]")]
-        public async Task<IActionResult> GetRecentApplications()
-        {
-            return Ok(await reportService.GetRecentApplicationsAsync());
-        }
+        //[HttpGet("[action]")]
+        //public async Task<IActionResult> GetRecentApplications()
+        //{
+        //    return Ok(await reportService.GetRecentApplicationsAsync());
+        //}
 
         [HttpGet("[action]")]
         public async Task<IActionResult> GetApplicationStatistics(byte periodTime = 1)

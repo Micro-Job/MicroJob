@@ -1,4 +1,4 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using JobCompany.Business.Dtos.ReportDtos;
 using JobCompany.Business.Extensions;
 using JobCompany.Business.Statistics;
@@ -15,6 +15,7 @@ using SharedLibrary.HelperServices.Current;
 
 namespace JobCompany.Business.Services.ReportServices
 {
+    //TODO : Bu hissə yenidən yazılmalıdır
     public class ReportService(JobCompanyDbContext _context, IRequestClient<GetUsersDataRequest> _client, ICurrentUser _currentUser)
     {
         /// <summary>
@@ -63,34 +64,34 @@ namespace JobCompany.Business.Services.ReportServices
         /// <summary>
         /// admin/dashboard son muracietler
         /// </summary>
-        public async Task<List<RecentApplicationDto>> GetRecentApplicationsAsync()
-        {
-            var recentApplications = await _context
-                .Applications.OrderByDescending(a => a.CreatedDate)
-                .Take(7)
-                .Select(a => new
-                {
-                    a.UserId,
-                    a.Vacancy.Title,
-                    StatusName = a.Status.GetTranslation(_currentUser.LanguageCode,GetTranslationPropertyName.Name),
-                    a.Status.StatusColor,
-                })
-                .ToListAsync();
+        //public async Task<List<RecentApplicationDto>> GetRecentApplicationsAsync()
+        //{
+        //    var recentApplications = await _context
+        //        .Applications.OrderByDescending(a => a.CreatedDate)
+        //        .Take(7)
+        //        .Select(a => new
+        //        {
+        //            a.UserId,
+        //            a.Vacancy.Title,
+        //            StatusName = a.Status.GetTranslation(_currentUser.LanguageCode,GetTranslationPropertyName.Name),
+        //            a.Status.StatusColor,
+        //        })
+        //        .ToListAsync();
 
-            var userIds = recentApplications.Select(a => a.UserId).Distinct().ToList();
+        //    var userIds = recentApplications.Select(a => a.UserId).Distinct().ToList();
 
-            var userDataResponse = await GetUserDataResponseAsync(userIds);
+        //    var userDataResponse = await GetUserDataResponseAsync(userIds);
 
-            var recentApplicationDtos = new List<RecentApplicationDto>();
+        //    var recentApplicationDtos = new List<RecentApplicationDto>();
 
-            foreach (var application in recentApplications)
-            {
-                var userData = userDataResponse.Users.FirstOrDefault(u =>
-                    u.UserId == application.UserId
-                );
-            }
-            return recentApplicationDtos;
-        }
+        //    foreach (var application in recentApplications)
+        //    {
+        //        var userData = userDataResponse.Users.FirstOrDefault(u =>
+        //            u.UserId == application.UserId
+        //        );
+        //    }
+        //    return recentApplicationDtos;
+        //}
 
         public async Task<GetUsersDataResponse> GetUserDataResponseAsync(List<Guid> userIds)
         {

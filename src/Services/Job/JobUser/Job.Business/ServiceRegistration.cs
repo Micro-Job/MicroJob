@@ -29,7 +29,7 @@ namespace Job.Business
             services.AddScoped<NumberService>();
             services.AddScoped<ILanguageService, LanguageService>();
             services.AddScoped<ICertificateService, CertificateService>();
-            services.AddScoped<ISkillService, SkillService>();
+            services.AddScoped<SkillService>();
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<ICurrentUser, CurrentUser>();
             services.AddScoped<IPositionService, PositionService>();

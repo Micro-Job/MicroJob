@@ -36,14 +36,6 @@ namespace JobCompany.API.Controllers
             return Ok();
         }
 
-        [HttpGet("[action]")]
-        public async Task<IActionResult> GetApplicationById(Guid applicationId)
-        {
-            var data = await service.GetApplicationByIdAsync(applicationId);
-            return Ok(data);
-        }
-
-
         [HttpPost("[action]")]
         public async Task<IActionResult> CreateUserApplication(Guid vacancyId)
         {

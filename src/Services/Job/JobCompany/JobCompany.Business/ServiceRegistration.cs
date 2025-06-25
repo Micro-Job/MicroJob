@@ -31,7 +31,7 @@ namespace JobCompany.Business
             services.AddHttpContextAccessor();
             //services.AddHostedService<PeriodicPayPublisherService>();
             services.AddScoped<IFileService, FileService>();
-            services.AddScoped<IVacancyService, VacancyService>();
+            services.AddScoped<VacancyService>();
             services.AddScoped<IStatusService, StatusService>();
             services.AddScoped<ApplicationService>();
             services.AddScoped<ICategoryService, CategoryService>();

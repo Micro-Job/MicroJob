@@ -13,7 +13,7 @@ namespace JobCompany.API.Controllers
     [ApiController]
     [Route("api/[controller]")]
     //[AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser)]
-    public class VacancyController(IVacancyService _vacancyService) : ControllerBase
+    public class VacancyController(VacancyService _vacancyService) : ControllerBase
     {
         [HttpPost("[action]")]
         public async Task<IActionResult> CreateVacancy([FromForm] CreateVacancyDto vacancyDto, [FromForm] ICollection<CreateNumberDto>? numberDtos)
@@ -63,13 +63,6 @@ namespace JobCompany.API.Controllers
         {
             var data = await _vacancyService.GetVacancyDetailsAsync(id);
             return Ok(data);
-        }
-
-        [AllowAnonymous]
-        [HttpGet("[action]")]
-        public async Task<IActionResult> GetAllVacanciesForApp()
-        {
-            return Ok(await _vacancyService.GetAllVacanciesForAppAsync());
         }
 
         [AllowAnonymous]
