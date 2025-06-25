@@ -8,7 +8,7 @@ namespace JobCompany.API.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser, UserRole.SimpleUser)]
-    public class ApplicationController(IApplicationService service) : ControllerBase
+    public class ApplicationController(ApplicationService service) : ControllerBase
     {
         [HttpPost("[action]")]
         public async Task<IActionResult> RemoveApplication(string applicationId)
@@ -30,14 +30,14 @@ namespace JobCompany.API.Controllers
         }
 
         [HttpPost("[action]")]
-        public async Task<IActionResult> ChangeApplicationStatus(string applicationId, string statusId)
+        public async Task<IActionResult> ChangeApplicationStatus(Guid applicationId, Guid statusId)
         {
             await service.ChangeApplicationStatusAsync(applicationId, statusId);
             return Ok();
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetApplicationById(string applicationId)
+        public async Task<IActionResult> GetApplicationById(Guid applicationId)
         {
             var data = await service.GetApplicationByIdAsync(applicationId);
             return Ok(data);
@@ -45,7 +45,7 @@ namespace JobCompany.API.Controllers
 
 
         [HttpPost("[action]")]
-        public async Task<IActionResult> CreateUserApplication(string vacancyId)
+        public async Task<IActionResult> CreateUserApplication(Guid vacancyId)
         {
             await service.CreateUserApplicationAsync(vacancyId);
             return Ok();

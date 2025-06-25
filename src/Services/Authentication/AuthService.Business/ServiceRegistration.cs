@@ -38,28 +38,12 @@ namespace AuthService.Business
 
             services.AddMassTransit(x =>
             {
-                x.AddConsumer<GetUserDataConsumer>();
-                x.AddConsumer<GetUserMiniDataConsumer>();
                 x.AddConsumer<GetUsersDataConsumer>();
-                x.AddConsumer<UpdateUserJobStatusEventConsumer>();              
 
                 x.SetKebabCaseEndpointNameFormatter();
                 x.UsingRabbitMq((context, cfg) =>
                 {
-                    //if (string.IsNullOrEmpty(cString))
-                    //{
-                    //    h.Username(configuration["RabbitMQ:Username"]);
-                    //    h.Password(configuration["RabbitMQ:Password"]);
-                    //});
-
-                    //var rabbitMqConnectionString = configuration["RabbitMQ:ConnectionString"];
-                    //if (string.IsNullOrEmpty(rabbitMqConnectionString))
-                    //{
-                    //    throw new InvalidOperationException("RabbitMQ Connection String is missing.");
-                    //}
                     cfg.Host(cString);
-                    //cfg.Host(rabbitMqConnectionString);
-
                     cfg.ConfigureEndpoints(context);
                 });
             });

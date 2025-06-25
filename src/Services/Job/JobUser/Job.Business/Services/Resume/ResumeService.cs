@@ -40,17 +40,16 @@ namespace Job.Business.Services.Resume
 {
     public class ResumeService(JobDbContext _context,
             IFileService _fileService,
-            INumberService _numberService,
+            NumberService _numberService,
             IEducationService _educationService,
             IExperienceService _experienceService,
             ILanguageService _languageService,
             ICertificateService _certificateService,
-            IUserInformationService _userInformationService,
             ICurrentUser _currentUser,
             IPositionService _positionService,
             IPublishEndpoint _publishEndpoint,
             IRequestClient<CheckBalanceRequest> _balanceRequest,
-            IRequestClient<CheckApplicationRequest> _checkApplicationRequest) : IResumeService
+            IRequestClient<CheckApplicationRequest> _checkApplicationRequest)
     {
         public async Task CreateResumeAsync(ResumeCreateDto resumeCreateDto)
         {
@@ -92,11 +91,6 @@ namespace Job.Business.Services.Resume
 
         public async Task<ResumeDetailItemDto> GetOwnResumeAsync()
         {
-            var userData = await _userInformationService.GetUserDataAsync((Guid)_currentUser.UserGuid);
-
-            var userMainEmail = userData.Email;
-            var userMainPhoneNumber = userData.MainPhoneNumber;
-
             var resume = await _context.Resumes
                                         .Include(x => x.ResumeSkills).ThenInclude(x => x.Skill).ThenInclude(x => x.Translations)
                                         .Where(x => x.UserId == _currentUser.UserGuid)
@@ -116,8 +110,8 @@ namespace Job.Business.Services.Resume
                                             Adress = resume.Adress,
                                             BirthDay = resume.BirthDay,
                                             ResumeEmail = resume.ResumeEmail,
-                                            IsMainEmail = resume.ResumeEmail == userMainEmail,
-                                            IsMainNumber = resume.PhoneNumbers.Any(p => p.PhoneNumber == userMainPhoneNumber),
+                                            IsMainEmail = resume.ResumeEmail == resume.User.Email,
+                                            IsMainNumber = resume.PhoneNumbers.Any(p => p.PhoneNumber == resume.User.MainPhoneNumber),
                                             PositionId = resume.PositionId,
                                             ParentPositionId = resume.Position != null ? resume.Position.ParentPositionId : null,
                                             UserPhoto = resume.UserPhoto != null ? $"{_currentUser.BaseUrl}/userFiles/{resume.UserPhoto}" : null,
@@ -170,9 +164,6 @@ namespace Job.Business.Services.Resume
                                         .FirstOrDefaultAsync();
 
             if (resume is null) return new ResumeDetailItemDto();
-
-            //resume.FirstName = userData.FirstName;
-            //resume.LastName = userData.LastName;
 
             return resume;
         }
@@ -349,28 +340,16 @@ namespace Job.Business.Services.Resume
             return await _context.Resumes.AnyAsync(x => x.UserId == _currentUser.UserGuid);
         }
 
-        public async Task<ResumeDetailItemDto> GetByIdResumeAysnc(string id)
+        public async Task<ResumeDetailItemDto> GetByIdResumeAysnc(Guid resumeId)
         {
             var userId = _currentUser.UserGuid;
-            var resumeGuid = Guid.Parse(id);
 
             var resumeData = await _context.Resumes
-                .Where(r => r.Id == resumeGuid)
-                .Include(r => r.SavedResumes)
-                .Include(r => r.Position)
-                .Include(r => r.PhoneNumbers)
-                .Include(r => r.Educations)
-                .Include(r => r.Experiences)
-                .Include(r => r.Languages)
-                .Include(r => r.Certificates)
-                .Include(r => r.ResumeSkills)
-                    .ThenInclude(rs => rs.Skill).ThenInclude(s => s.Translations)
+                .Where(r => r.Id == resumeId)
                 .Select(r => new
                 {
                     Resume = r,
-                    ResumeUserId = r.UserId,
                     HasAccessByCompany = r.CompanyResumeAccesses.Any(x => x.CompanyUserId == userId),
-                    r.IsPublic
                 })
                 .FirstOrDefaultAsync() ?? throw new NotFoundException();
 
@@ -383,7 +362,7 @@ namespace Job.Business.Services.Resume
                     new CheckApplicationRequest
                     {
                         CompanyUserId = (Guid)userId,
-                        UserId = resumeData.ResumeUserId
+                        UserId = resumeData.Resume.UserId
                     });
 
                 hasApplied = checkApplicationResponse.Message.HasApplied;
@@ -393,7 +372,7 @@ namespace Job.Business.Services.Resume
             bool hasFullAccess = _currentUser.UserRole == (byte)UserRole.Admin // Əgər admindirsə
                 || hasApplied                                                  // Əgər müraciət edibsə
                 || resumeData.HasAccessByCompany                               // Əgər resume-yə baxma icazəsi varsa
-                || resumeData.IsPublic;                                        // Əgər resume public-dirsə
+                || resumeData.Resume.IsPublic;                                 // Əgər resume public-dirsə
 
             var resume = resumeData.Resume;
 
@@ -587,7 +566,7 @@ namespace Job.Business.Services.Resume
                 : new FileDto();
 
             string? email = dto.IsMainEmail
-                ? (await _userInformationService.GetUserDataAsync((Guid)_currentUser.UserGuid)).Email
+                ? (await _context.Users.Where(x=> x.Id == _currentUser.UserGuid).Select(x=> x.Email).FirstOrDefaultAsync())
                 : dto.ResumeEmail;
 
             return MapToResumeEntity(dto, $"{fileResult.FilePath}/{fileResult.FileName}", email, positionId);
@@ -621,7 +600,7 @@ namespace Job.Business.Services.Resume
             string? mainNumber = null;
 
             if (dto.IsMainNumber)
-                mainNumber = (await _userInformationService.GetUserDataAsync((Guid)_currentUser.UserGuid)).MainPhoneNumber;
+                mainNumber = (await _context.Users.Where(x=> x.Id == _currentUser.UserGuid).Select(x=> x.MainPhoneNumber).FirstOrDefaultAsync());
 
             return _numberService.CreateBulkNumber(dto.PhoneNumbers ?? [], resumeId, mainNumber);
         }
@@ -687,7 +666,7 @@ namespace Job.Business.Services.Resume
         private async Task UpdateResumeEmailAsync(Core.Entities.Resume resume, bool IsMainEmail, string? resumeEmail)
         {
             resume.ResumeEmail = IsMainEmail
-                ? (await _userInformationService.GetUserDataAsync((Guid)_currentUser.UserGuid)).Email
+                ? (await _context.Users.Where(x=> x.Id == _currentUser.UserGuid).Select(x=> x.Email).FirstOrDefaultAsync())
                 : resumeEmail;
         }
 
@@ -697,8 +676,8 @@ namespace Job.Business.Services.Resume
 
             if (isMainNumber)
             {
-                var userInfo = await _userInformationService.GetUserDataAsync((Guid)_currentUser.UserGuid);
-                mainNumber = userInfo.MainPhoneNumber;
+                var userInfo = await _context.Users.Where(x=> x.Id == _currentUser.UserGuid).Select(x=> x.MainPhoneNumber).FirstOrDefaultAsync();
+                mainNumber = userInfo;
             }
 
             resume.PhoneNumbers = await _numberService.UpdateBulkNumberAsync(phoneNumbers, resume.PhoneNumbers, resume.Id, mainNumber);

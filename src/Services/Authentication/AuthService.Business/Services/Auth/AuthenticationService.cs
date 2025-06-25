@@ -132,7 +132,7 @@ namespace AuthService.Business.Services.Auth
             var user = await _context.Users.FirstOrDefaultAsync(x => x.Email == dto.UserNameOrEmail)
                 ?? throw new LoginFailedException();
 
-            if (!user.IsVerified) throw new BadRequestException();
+            if (!user.IsVerified) throw new BadRequestException(MessageHelper.GetMessage("NOT_CONFIRMED"));
 
             var hashedPassword = _tokenHandler.GeneratePasswordHash(dto.Password);
             if (user.Password != hashedPassword)
@@ -187,6 +187,9 @@ namespace AuthService.Business.Services.Auth
 
             if (user.RefreshTokenExpireDate < DateTime.Now)
                 throw new RefreshTokenExpiredException();
+
+            if (!user.IsVerified) 
+                throw new BadRequestException(MessageHelper.GetMessage("NOT_CONFIRMED"));
 
             var newToken = _tokenHandler.CreateToken(user, 60);
             var newRefreshToken = _tokenHandler.GenerateRefreshToken(newToken, 1440);

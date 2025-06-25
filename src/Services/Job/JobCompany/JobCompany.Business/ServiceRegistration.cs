@@ -33,12 +33,12 @@ namespace JobCompany.Business
             services.AddScoped<IFileService, FileService>();
             services.AddScoped<IVacancyService, VacancyService>();
             services.AddScoped<IStatusService, StatusService>();
-            services.AddScoped<IApplicationService, ApplicationService>();
+            services.AddScoped<ApplicationService>();
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<ICountryService, CountryService>();
             services.AddScoped<ICompanyService, CompanyService>();
             services.AddScoped<ICityService, CityService>();
-            services.AddScoped<IReportService, ReportService>();
+            services.AddScoped<ReportService>();
             services.AddScoped<IQuestionService, QuestionService>();
             services.AddScoped<IAnswerService, AnswerService>();
             services.AddScoped<IExamService, ExamService>();

@@ -204,6 +204,9 @@
   <data name="NOTFOUNDEXCEPTION_USER" xml:space="preserve">
     <value>Пользователь не существует</value>
   </data>
+  <data name="NOT_CONFIRMED" xml:space="preserve">
+    <value>Ваш аккаунт не был проверен</value>
+  </data>
   <data name="NOT_EMPTY" xml:space="preserve">
     <value>Он не должен быть пустым</value>
   </data>

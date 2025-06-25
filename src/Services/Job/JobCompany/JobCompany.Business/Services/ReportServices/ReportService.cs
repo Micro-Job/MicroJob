@@ -15,30 +15,8 @@ using SharedLibrary.HelperServices.Current;
 
 namespace JobCompany.Business.Services.ReportServices
 {
-    public class ReportService : IReportService
+    public class ReportService(JobCompanyDbContext _context, IRequestClient<GetUsersDataRequest> _client, ICurrentUser _currentUser)
     {
-        private readonly JobCompanyDbContext _context;
-        private readonly IRequestClient<GetUsersDataRequest> _client;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly Guid _userGuid;
-        private readonly ICurrentUser _currentUser;
-
-        public ReportService(
-            JobCompanyDbContext context,
-            IRequestClient<GetUsersDataRequest> client,
-            IHttpContextAccessor httpContextAccessor
-,
-            ICurrentUser currentUser)
-        {
-            _context = context;
-            _client = client;
-            _httpContextAccessor = httpContextAccessor;
-            _userGuid = Guid.Parse(
-                _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value
-            );
-            _currentUser = currentUser;
-        }
-
         /// <summary>
         /// admin/dashboard yuxaridaki 3-luk
         /// </summary>
@@ -110,19 +88,6 @@ namespace JobCompany.Business.Services.ReportServices
                 var userData = userDataResponse.Users.FirstOrDefault(u =>
                     u.UserId == application.UserId
                 );
-
-                //if (userData != null)
-                //{
-                //    recentApplicationDtos.Add(
-                //        new RecentApplicationDto
-                //        {
-                //            Fullname = $"{userData.FirstName} {userData.LastName}",
-                //            VacancyName = application.Title,
-                //            StatusName = application.StatusName,
-                //            StatusColor = application.StatusColor,
-                //        }
-                //    );
-                //}
             }
             return recentApplicationDtos;
         }
@@ -136,14 +101,11 @@ namespace JobCompany.Business.Services.ReportServices
         }
 
         /// <summary> Applicationun statistikasi /// </summary>
-        public async Task<ApplicationStatisticsDto> GetApplicationStatisticsAsync(string periodTime)
+        public async Task<ApplicationStatisticsDto> GetApplicationStatisticsAsync(byte periodTime)
         {
-            var company =
-                await _context.Companies.FirstOrDefaultAsync(c => c.UserId == _userGuid)
-                ?? throw new NotFoundException();
             var applications = await _context
                 .Applications.Include(a => a.Vacancy)
-                .Where(a => a.Vacancy.CompanyId == company.Id)
+                .Where(a => a.Vacancy.Company.UserId == _currentUser.UserGuid)
                 .Select(a => new
                 {
                     a.VacancyId,
@@ -155,19 +117,19 @@ namespace JobCompany.Business.Services.ReportServices
             IEnumerable<IGrouping<string, dynamic>> groupedApplications;
             switch (periodTime)
             {
-                case "1":
+                case 1:
                     groupedApplications = applications
                         .GroupBy(a => $"{a.CreatedDate.Year} - Week {GetWeekNumber(a.CreatedDate)}")
                         .OrderByDescending(g => g.Key);
                     break;
 
-                case "2":
+                case 2:
                     groupedApplications = applications
                         .GroupBy(a => $"{a.CreatedDate.ToString("MMMM yyyy")}")
                         .OrderByDescending(g => g.Key);
                     break;
 
-                case "3":
+                case 3:
                     groupedApplications = applications
                         .GroupBy(a => a.CreatedDate.ToString("yyyy"))
                         .OrderByDescending(g => g.Key);
@@ -234,7 +196,7 @@ namespace JobCompany.Business.Services.ReportServices
             );
         }
 
-        public Task<SummaryDto> GetSummaryAsync()
+        public async Task<SummaryDto> GetSummaryAsync()
         {
             throw new NotImplementedException();
         }

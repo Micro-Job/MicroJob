@@ -14,7 +14,7 @@ namespace Job.API.Controllers
     [ApiController]
     [Route("api/[controller]")]
     //[AuthorizeRole(UserRole.SimpleUser)]
-    public class ResumeController(IResumeService _resumeService) : ControllerBase
+    public class ResumeController(ResumeService _resumeService) : ControllerBase
     {
         [HttpPost("[action]")]
         public async Task<IActionResult> CreateResume(ResumeCreateDto resumeCreateDto)
@@ -54,7 +54,7 @@ namespace Job.API.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetByIdResume(string id)
+        public async Task<IActionResult> GetByIdResume(Guid id)
         {
             return Ok(await _resumeService.GetByIdResumeAysnc(id));
         }

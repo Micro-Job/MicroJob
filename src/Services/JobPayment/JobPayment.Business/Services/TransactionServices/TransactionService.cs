@@ -23,7 +23,7 @@ using System.Threading.Tasks;
 
 namespace JobPayment.Business.Services.TransactionServices
 {
-    public class TransactionService(PaymentDbContext _context, IDepositService _depositService, ICurrentUser _currentUser, IRequestClient<GetUsersDataRequest> _usersDataRequest) : ITransactionService
+    public class TransactionService(PaymentDbContext _context, IDepositService _depositService, ICurrentUser _currentUser) : ITransactionService
     {
         public async Task CreateTransactionAsync(CreateTransactionDto dto)
         {

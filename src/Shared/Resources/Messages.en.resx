@@ -204,6 +204,9 @@
   <data name="NOTFOUNDEXCEPTION_USER" xml:space="preserve">
     <value>User does not exist</value>
   </data>
+  <data name="NOT_CONFIRMED" xml:space="preserve">
+    <value>Your account has not been verified</value>
+  </data>
   <data name="NOT_EMPTY" xml:space="preserve">
     <value>It should not be empty</value>
   </data>
