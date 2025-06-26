@@ -1,7 +1,6 @@
 ﻿using JobCompany.Business.Dtos.Common;
 using JobCompany.Business.Dtos.ExamDtos;
 using JobCompany.Business.Dtos.QuestionDtos;
-using Shared.Responses;
 
 namespace JobCompany.Business.Services.ExamServices
 {

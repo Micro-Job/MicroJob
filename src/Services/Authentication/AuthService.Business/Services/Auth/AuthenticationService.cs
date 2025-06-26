@@ -153,7 +153,7 @@ namespace AuthService.Business.Services.Auth
                 AccessToken = accessToken,
                 RefreshToken = refreshToken.Token,
                 Expires = refreshToken.Expires,
-                UserImage = user.Image != null ? $"{_currentUser.BaseUrl}/userFiles/{user.Image}" : null
+                //UserImage = user.Image != null ? $"{_currentUser.BaseUrl}/userFiles/{user.Image}" : null
             };
 
             if (user.UserRole == UserRole.CompanyUser || user.UserRole == UserRole.EmployeeUser)
@@ -205,7 +205,7 @@ namespace AuthService.Business.Services.Auth
                 RefreshToken = newRefreshToken.Token,
                 UserStatusId = (byte)user.UserRole,
                 Expires = newRefreshToken.Expires,
-                UserImage = user.Image != null ? $"{_currentUser.BaseUrl}/userFiles/{user.Image}" : null
+                //UserImage = user.Image != null ? $"{_currentUser.BaseUrl}/userFiles/{user.Image}" : null
             };
 
             if (user.UserRole == UserRole.CompanyUser || user.UserRole == UserRole.EmployeeUser)

@@ -7,8 +7,6 @@ using JobCompany.DAL.Contexts;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Shared.Requests;
-using Shared.Responses;
 using SharedLibrary.Exceptions;
 using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;
@@ -16,7 +14,7 @@ using SharedLibrary.HelperServices.Current;
 namespace JobCompany.Business.Services.ReportServices
 {
     //TODO : Bu hissə yenidən yazılmalıdır
-    public class ReportService(JobCompanyDbContext _context, IRequestClient<GetUsersDataRequest> _client, ICurrentUser _currentUser)
+    public class ReportService(JobCompanyDbContext _context, ICurrentUser _currentUser)
     {
         /// <summary>
         /// admin/dashboard yuxaridaki 3-luk
@@ -93,13 +91,13 @@ namespace JobCompany.Business.Services.ReportServices
         //    return recentApplicationDtos;
         //}
 
-        public async Task<GetUsersDataResponse> GetUserDataResponseAsync(List<Guid> userIds)
-        {
-            var request = new GetUsersDataRequest { UserIds = userIds };
-            var response = await _client.GetResponse<GetUsersDataResponse>(request);
-            var userDataResponse = new GetUsersDataResponse { Users = response.Message.Users };
-            return userDataResponse;
-        }
+        //public async Task<GetUsersDataResponse> GetUserDataResponseAsync(List<Guid> userIds)
+        //{
+        //    var request = new GetUsersDataRequest { UserIds = userIds };
+        //    var response = await _client.GetResponse<GetUsersDataResponse>(request);
+        //    var userDataResponse = new GetUsersDataResponse { Users = response.Message.Users };
+        //    return userDataResponse;
+        //}
 
         /// <summary> Applicationun statistikasi /// </summary>
         public async Task<ApplicationStatisticsDto> GetApplicationStatisticsAsync(byte periodTime)

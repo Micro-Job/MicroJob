@@ -8,8 +8,6 @@ using JobPayment.DAL.Contexts;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Shared.Requests;
-using Shared.Responses;
 using SharedLibrary.Enums;
 using SharedLibrary.Exceptions;
 using SharedLibrary.Extensions;

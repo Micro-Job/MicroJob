@@ -33,11 +33,11 @@ namespace AuthService.API.Controllers
             return Ok(await userService.UpdateUserInformationAsync(dto));
         }
 
-        [HttpPut("[action]")]
-        public async Task<IActionResult> UpdateUserProfileImageAsync([FromForm] UserProfileImageUpdateDto dto)
-        {
-            return Ok(await userService.UpdateUserProfileImageAsync(dto));
-        }
+        //[HttpPut("[action]")]
+        //public async Task<IActionResult> UpdateUserProfileImageAsync([FromForm] UserProfileImageUpdateDto dto)
+        //{
+        //    return Ok(await userService.UpdateUserProfileImageAsync(dto));
+        //}
 
         [AuthorizeRole(UserRole.Admin)]
         [HttpGet("[action]")]
