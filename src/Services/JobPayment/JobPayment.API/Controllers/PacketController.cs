@@ -7,7 +7,7 @@ namespace JobPayment.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PacketController(IPacketService _packetService) : ControllerBase
+    public class PacketController(PacketService _packetService) : ControllerBase
     {
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllPackets()

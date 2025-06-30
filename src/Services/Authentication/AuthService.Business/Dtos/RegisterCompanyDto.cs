@@ -25,7 +25,7 @@ public class RegisterCompanyValidator : AbstractValidator<RegisterCompanyDto>
             .NotEmpty()
             .When(x=> x.IsCompany)
             .WithMessage("CANNOT_BE_EMPTY")
-            .Length(1, 100)
+            .Length(1, 30)
             .When(x => x.IsCompany)
             .WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_100"));
         RuleFor(x => x.FirstName)

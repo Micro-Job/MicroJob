@@ -5,7 +5,7 @@ using SharedLibrary.Events;
 
 namespace JobPayment.Business.Consumers
 {
-    public class PayConsumer(IPaymentService _paymentService) : IConsumer<PayEvent>
+    public class PayConsumer(PaymentService _paymentService) : IConsumer<PayEvent>
     {
         public async Task Consume(ConsumeContext<PayEvent> context)
         {

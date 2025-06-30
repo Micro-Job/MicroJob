@@ -19,16 +19,10 @@ using SharedLibrary.Responses;
 
 namespace Job.Business.Services.UserManagement;
 
-public class UserManagementService(JobDbContext _context, IRequestClient<GetUserDataRequest> _userDataRequest, 
-    IConfiguration _configuration, ICurrentUser _currentUser) 
+public class UserManagementService(JobDbContext _context, IConfiguration _configuration, ICurrentUser _currentUser) 
 {
     public async Task<UserPersonalInfoDto> GetPersonalInfoAsync(Guid userId)
     {
-        var data = await _userDataRequest.GetResponse<GetUserDataResponse>(new GetUserDataRequest
-        {
-            UserId = userId
-        });
-
         var personalInfo = await _context.Users
             .AsNoTracking()
             .Where(x => x.Id == userId)
@@ -43,7 +37,7 @@ public class UserManagementService(JobDbContext _context, IRequestClient<GetUser
                 FullName = $"{x.FirstName} {x.LastName}",
                 Email = x.Email,
                 MainPhoneNumber = x.MainPhoneNumber,
-                ImageUrl = $"{_configuration["AuthService:BaseUrl"]}/userFiles/{data.Message.ProfileImage}",
+                ImageUrl = $"{_configuration["AuthService:BaseUrl"]}/userFiles/{x.Image}",
             }).FirstOrDefaultAsync() ?? throw new NotFoundException();
 
         return personalInfo;
@@ -77,7 +71,7 @@ public class UserManagementService(JobDbContext _context, IRequestClient<GetUser
                 Skills = r.ResumeSkills.Select(s => new SkillGetByIdDto
                 {
                     Id = s.SkillId,
-                    Name = s.Skill.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name)
+                    Name = s.Skill.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name)
                 }).ToList(),
                 PhoneNumbers = r.IsPublic ?
                 r.PhoneNumbers.Select(p => new NumberGetByIdDto

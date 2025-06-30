@@ -17,12 +17,12 @@ namespace JobPayment.Business
         {
             services.AddHttpContextAccessor();
             services.AddScoped<ICurrentUser, CurrentUser>();
-            services.AddScoped<IBalanceService , BalanceService>();
-            services.AddScoped<IDepositService , DepositService>();
-            services.AddScoped<IPacketService , PacketService>();
-            services.AddScoped<IPriceService , PriceService>();
-            services.AddScoped<IPaymentService , PaymentService>();
-            services.AddScoped<ITransactionService , TransactionService>();
+            services.AddScoped<BalanceService>();
+            services.AddScoped<DepositService>();
+            services.AddScoped<PacketService>();
+            services.AddScoped<PriceService>();
+            services.AddScoped<PaymentService>();
+            services.AddScoped<TransactionService>();
         }
 
         public static void AddMassTransit(this IServiceCollection services, string username, string password, string hostname, string port)

@@ -10,7 +10,7 @@ namespace JobCompany.API.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Authorize]
-    public class StatusController(IStatusService _statusService) : ControllerBase
+    public class StatusController(StatusService _statusService) : ControllerBase
     {
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllStatuses()

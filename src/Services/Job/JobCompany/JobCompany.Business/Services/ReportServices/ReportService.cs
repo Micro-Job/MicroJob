@@ -1,4 +1,4 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using JobCompany.Business.Dtos.ReportDtos;
 using JobCompany.Business.Extensions;
 using JobCompany.Business.Statistics;
@@ -7,38 +7,14 @@ using JobCompany.DAL.Contexts;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Shared.Requests;
-using Shared.Responses;
 using SharedLibrary.Exceptions;
 using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;
 
 namespace JobCompany.Business.Services.ReportServices
 {
-    public class ReportService : IReportService
+    public class ReportService(JobCompanyDbContext _context, ICurrentUser _currentUser)
     {
-        private readonly JobCompanyDbContext _context;
-        private readonly IRequestClient<GetUsersDataRequest> _client;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly Guid _userGuid;
-        private readonly ICurrentUser _currentUser;
-
-        public ReportService(
-            JobCompanyDbContext context,
-            IRequestClient<GetUsersDataRequest> client,
-            IHttpContextAccessor httpContextAccessor
-,
-            ICurrentUser currentUser)
-        {
-            _context = context;
-            _client = client;
-            _httpContextAccessor = httpContextAccessor;
-            _userGuid = Guid.Parse(
-                _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.Sid)?.Value
-            );
-            _currentUser = currentUser;
-        }
-
         /// <summary>
         /// admin/dashboard yuxaridaki 3-luk
         /// </summary>
@@ -85,65 +61,49 @@ namespace JobCompany.Business.Services.ReportServices
         /// <summary>
         /// admin/dashboard son muracietler
         /// </summary>
-        public async Task<List<RecentApplicationDto>> GetRecentApplicationsAsync()
-        {
-            var recentApplications = await _context
-                .Applications.OrderByDescending(a => a.CreatedDate)
-                .Take(7)
-                .Select(a => new
-                {
-                    a.UserId,
-                    a.Vacancy.Title,
-                    StatusName = a.Status.GetTranslation(_currentUser.LanguageCode,GetTranslationPropertyName.Name),
-                    a.Status.StatusColor,
-                })
-                .ToListAsync();
+        //public async Task<List<RecentApplicationDto>> GetRecentApplicationsAsync()
+        //{
+        //    var recentApplications = await _context
+        //        .Applications.OrderByDescending(a => a.CreatedDate)
+        //        .Take(7)
+        //        .Select(a => new
+        //        {
+        //            a.UserId,
+        //            a.Vacancy.Title,
+        //            StatusName = a.Status.GetTranslation(_currentUser.LanguageCode,GetTranslationPropertyName.Name),
+        //            a.Status.StatusColor,
+        //        })
+        //        .ToListAsync();
 
-            var userIds = recentApplications.Select(a => a.UserId).Distinct().ToList();
+        //    var userIds = recentApplications.Select(a => a.UserId).Distinct().ToList();
 
-            var userDataResponse = await GetUserDataResponseAsync(userIds);
+        //    var userDataResponse = await GetUserDataResponseAsync(userIds);
 
-            var recentApplicationDtos = new List<RecentApplicationDto>();
+        //    var recentApplicationDtos = new List<RecentApplicationDto>();
 
-            foreach (var application in recentApplications)
-            {
-                var userData = userDataResponse.Users.FirstOrDefault(u =>
-                    u.UserId == application.UserId
-                );
+        //    foreach (var application in recentApplications)
+        //    {
+        //        var userData = userDataResponse.Users.FirstOrDefault(u =>
+        //            u.UserId == application.UserId
+        //        );
+        //    }
+        //    return recentApplicationDtos;
+        //}
 
-                //if (userData != null)
-                //{
-                //    recentApplicationDtos.Add(
-                //        new RecentApplicationDto
-                //        {
-                //            Fullname = $"{userData.FirstName} {userData.LastName}",
-                //            VacancyName = application.Title,
-                //            StatusName = application.StatusName,
-                //            StatusColor = application.StatusColor,
-                //        }
-                //    );
-                //}
-            }
-            return recentApplicationDtos;
-        }
-
-        public async Task<GetUsersDataResponse> GetUserDataResponseAsync(List<Guid> userIds)
-        {
-            var request = new GetUsersDataRequest { UserIds = userIds };
-            var response = await _client.GetResponse<GetUsersDataResponse>(request);
-            var userDataResponse = new GetUsersDataResponse { Users = response.Message.Users };
-            return userDataResponse;
-        }
+        //public async Task<GetUsersDataResponse> GetUserDataResponseAsync(List<Guid> userIds)
+        //{
+        //    var request = new GetUsersDataRequest { UserIds = userIds };
+        //    var response = await _client.GetResponse<GetUsersDataResponse>(request);
+        //    var userDataResponse = new GetUsersDataResponse { Users = response.Message.Users };
+        //    return userDataResponse;
+        //}
 
         /// <summary> Applicationun statistikasi /// </summary>
-        public async Task<ApplicationStatisticsDto> GetApplicationStatisticsAsync(string periodTime)
+        public async Task<ApplicationStatisticsDto> GetApplicationStatisticsAsync(byte periodTime)
         {
-            var company =
-                await _context.Companies.FirstOrDefaultAsync(c => c.UserId == _userGuid)
-                ?? throw new NotFoundException();
             var applications = await _context
                 .Applications.Include(a => a.Vacancy)
-                .Where(a => a.Vacancy.CompanyId == company.Id)
+                .Where(a => a.Vacancy.Company.UserId == _currentUser.UserGuid)
                 .Select(a => new
                 {
                     a.VacancyId,
@@ -155,19 +115,19 @@ namespace JobCompany.Business.Services.ReportServices
             IEnumerable<IGrouping<string, dynamic>> groupedApplications;
             switch (periodTime)
             {
-                case "1":
+                case 1:
                     groupedApplications = applications
                         .GroupBy(a => $"{a.CreatedDate.Year} - Week {GetWeekNumber(a.CreatedDate)}")
                         .OrderByDescending(g => g.Key);
                     break;
 
-                case "2":
+                case 2:
                     groupedApplications = applications
                         .GroupBy(a => $"{a.CreatedDate.ToString("MMMM yyyy")}")
                         .OrderByDescending(g => g.Key);
                     break;
 
-                case "3":
+                case 3:
                     groupedApplications = applications
                         .GroupBy(a => a.CreatedDate.ToString("yyyy"))
                         .OrderByDescending(g => g.Key);
@@ -234,7 +194,7 @@ namespace JobCompany.Business.Services.ReportServices
             );
         }
 
-        public Task<SummaryDto> GetSummaryAsync()
+        public async Task<SummaryDto> GetSummaryAsync()
         {
             throw new NotImplementedException();
         }

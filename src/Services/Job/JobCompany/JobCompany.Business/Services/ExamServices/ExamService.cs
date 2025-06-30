@@ -15,7 +15,7 @@ using System.Threading;
 
 namespace JobCompany.Business.Services.ExamServices;
 
-public class ExamService(JobCompanyDbContext _context, IQuestionService _questionService, ICurrentUser _currentUser) : IExamService
+public class ExamService(JobCompanyDbContext _context, QuestionService _questionService, ICurrentUser _currentUser)
 {
     public async Task<Guid> CreateExamAsync(CreateExamDto dto)
     {

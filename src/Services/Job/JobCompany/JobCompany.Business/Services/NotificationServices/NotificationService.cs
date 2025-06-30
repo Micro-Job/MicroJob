@@ -5,54 +5,41 @@ using JobCompany.DAL.Contexts;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Shared.Requests;
-using Shared.Responses;
 using SharedLibrary.Exceptions;
 using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;
 
 namespace JobCompany.Business.Services.NotificationServices
 {
-    public class NotificationService(JobCompanyDbContext _context, ICurrentUser _currentUser, IConfiguration _configuration,IRequestClient<GetUsersDataRequest> _usersDataClient) : INotificationService
+    //TODO : Burada senderName ve senderImage birbasa ozunden gelmelidir yeni request response ile islemeli deyil
+    public class NotificationService(JobCompanyDbContext _context, ICurrentUser _currentUser)
     {
         public async Task<DataListDto<NotificationDto>> GetUserNotificationsAsync(bool? IsSeen, int skip, int take)
         {
-            var query = _context.Notifications.Where(n => n.Receiver.UserId == _currentUser.UserGuid).AsNoTracking();
-
+            var query = _context.Notifications
+                .Where(n => n.Receiver.UserId == _currentUser.UserGuid)
+                .OrderByDescending(n => n.CreatedDate)
+                .AsNoTracking();
+                                                                                                    
             if (IsSeen != null)
-                query = query.Where(n => n.IsSeen == IsSeen).OrderByDescending(n => n.CreatedDate);
+                query = query.Where(n => n.IsSeen == IsSeen);
 
-            var usersDataResponse = await _usersDataClient.GetResponse<GetUsersDataResponse>(new GetUsersDataRequest
-            {
-                UserIds = query.Where(n => n.SenderId.HasValue).Select(n => n.SenderId.Value).Distinct().ToList()
-            });
-
-            var usersDictionary = usersDataResponse.Message.Users.ToDictionary(u => u.UserId);
-
-            var notifications = await query
-                .Select(n => new
-                {
-                    Notification = n,
-                    User = n.SenderId.HasValue ? usersDictionary.GetValueOrDefault(n.SenderId.Value) : null
-                })
-                .Skip(Math.Max(0, (skip - 1) * take))
-                .Take(take)
-                .ToListAsync();
-
-            var notificationDtos = notifications
+            var notificationDtos = query
                 .Select(n => new NotificationDto
                 {
-                    Id = n.Notification.Id,
-                    ReceiverId = n.Notification.ReceiverId,
-                    SenderId = n.Notification.SenderId,
-                    InformationId = n.Notification.InformationId,
-                    InformationName = n.Notification.InformationName,
-                    NotificationType = n.Notification.NotificationType,
-                    CreatedDate = n.Notification.CreatedDate,
-                    SenderImage = $"{_currentUser.BaseUrl}/user/{n.User?.ProfileImage}",
-                    SenderName = n.User != null ? $"{n.User.FirstName} {n.User.LastName}" : null,
-                    IsSeen = n.Notification.IsSeen,
+                    Id = n.Id,
+                    ReceiverId = n.ReceiverId,
+                    SenderId = n.SenderId,
+                    InformationId = n.InformationId,
+                    InformationName = n.InformationName,
+                    NotificationType = n.NotificationType,
+                    CreatedDate = n.CreatedDate,
+                    SenderImage = $"{_currentUser.BaseUrl}/userFiles/{n.SenderImage}",
+                    SenderName = n.SenderName,
+                    IsSeen = n.IsSeen,
                 })
+                .Skip((skip - 1) * take)
+                .Take(take)
                 .ToList();
 
             return new DataListDto<NotificationDto>

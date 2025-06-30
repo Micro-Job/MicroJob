@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace JobPayment.Business.Services.DepositServices
 {
-    public class DepositService(PaymentDbContext _context) : IDepositService
+    public class DepositService(PaymentDbContext _context)
     {
         public async Task CreateDepositAsync(CreateDepositDto dto)
         {

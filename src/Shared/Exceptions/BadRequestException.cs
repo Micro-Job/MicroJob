@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using SharedLibrary.Exceptions.Common;
+using SharedLibrary.Helpers;
 
 namespace SharedLibrary.Exceptions
 {
@@ -11,7 +12,7 @@ namespace SharedLibrary.Exceptions
 
         public BadRequestException() : base()
         {
-            ErrorMessage = "Xəta baş verdi.";
+            ErrorMessage = MessageHelper.GetMessage("BAD_REQUEST");
         }
 
         public BadRequestException(string? message) : base(message)

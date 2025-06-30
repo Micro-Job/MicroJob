@@ -8,8 +8,8 @@ namespace Job.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [AuthorizeRole(UserRole.SimpleUser)]
-    public class SkillController(ISkillService skillService) : ControllerBase
+    //[AuthorizeRole(UserRole.SimpleUser)]
+    public class SkillController(SkillService skillService) : ControllerBase
     {
         [HttpPost("[action]")]
         public async Task<IActionResult> CreateSkill(SkillCreateDto dto)

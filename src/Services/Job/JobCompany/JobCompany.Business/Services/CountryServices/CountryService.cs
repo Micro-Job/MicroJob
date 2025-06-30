@@ -8,7 +8,7 @@ using SharedLibrary.HelperServices.Current;
 
 namespace JobCompany.Business.Services.CountryServices;
 
-public class CountryService(JobCompanyDbContext _context, ICurrentUser _user) : ICountryService
+public class CountryService(JobCompanyDbContext _context, ICurrentUser _user) 
 {
     public async Task CreateCountryAsync(CountryCreateDto dto)
     {

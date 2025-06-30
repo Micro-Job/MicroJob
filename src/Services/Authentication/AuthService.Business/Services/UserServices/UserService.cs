@@ -19,26 +19,8 @@ using SharedLibrary.Statics;
 
 namespace AuthService.Business.Services.UserServices
 {
-    public class UserService 
+    public class UserService(AppDbContext _context, ICurrentUser _currentUser, AuthenticationService _authService, IRequestClient<GetCompaniesDataByUserIdsRequest> _companyDataRequest, IPublishEndpoint _publishEndpoint)
     {
-        private readonly AppDbContext _context;
-        private readonly IFileService _fileService;
-        private readonly ICurrentUser _currentUser;
-        private readonly AuthenticationService _authService;
-        private readonly IConfiguration _configuration;
-        private readonly IPublishEndpoint _publishEndpoint;
-        private readonly IRequestClient<GetCompaniesDataByUserIdsRequest> _companyDataRequest;
-
-        public UserService(AppDbContext context, IFileService fileService, ICurrentUser currentUser, AuthenticationService authService, IRequestClient<GetCompaniesDataByUserIdsRequest> companyDataRequest, IConfiguration configuration, IPublishEndpoint publishEndpoint)
-        {
-            _context = context;
-            _fileService = fileService;
-            _currentUser = currentUser;
-            _authService = authService;
-            _configuration = configuration;
-            _publishEndpoint = publishEndpoint;
-            _companyDataRequest = companyDataRequest;
-        }
 
         //TODO : bu metot ve endpoint burada olmali deyil (ve bu user ve company ucun ayrica yazilmalidi daha sonra front ferqli yere sorgu atmalidi)
         /// <summary> Loginde olan User informasiyası </summary>
@@ -54,9 +36,7 @@ namespace AuthService.Business.Services.UserServices
                     LastName = x.LastName,
                     Email = x.Email,
                     MainPhoneNumber = x.MainPhoneNumber,
-                    Image = x.Image != null ? $"{_configuration["ApiGateway:BaseUrl"]}/authFiles/{x.Image}" : null,
                     UserRole = x.UserRole,
-                    //JobStatus = x.JobStatus,
                 }).FirstOrDefaultAsync() ?? throw new UserNotFoundException();
 
             return user;
@@ -110,63 +90,62 @@ namespace AuthService.Business.Services.UserServices
         }
 
         /// <summary> Logində olan userin şəkil update'si </summary>
-        public async Task<UserProfileImageUpdateResponseDto> UpdateUserProfileImageAsync(UserProfileImageUpdateDto dto)
-        {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == _currentUser.UserGuid)
-                        ?? throw new UserNotFoundException();
+        //public async Task<UserProfileImageUpdateResponseDto> UpdateUserProfileImageAsync(UserProfileImageUpdateDto dto)
+        //{
+        //    var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == _currentUser.UserGuid)
+        //                ?? throw new UserNotFoundException();
 
-            if (!string.IsNullOrEmpty(user.Image))
-            {
-                _fileService.DeleteFile(user.Image);
-                user.Image = null;
-            }
+        //    if (!string.IsNullOrEmpty(user.Image))
+        //    {
+        //        _fileService.DeleteFile(user.Image);
+        //        user.Image = null;
+        //    }
 
-            if (dto.Image is not null)
-            {
+        //    if (dto.Image is not null)
+        //    {
+        //        FileDto fileResult = dto.Image != null
+        //            ? await _fileService.UploadAsync(FilePaths.image, dto.Image)
+        //            : new FileDto();
 
-                FileDto fileResult = dto.Image != null
-                    ? await _fileService.UploadAsync(FilePaths.image, dto.Image)
-                    : new FileDto();
+        //        user.Image = $"{fileResult.FilePath}/{fileResult.FileName}";
+        //    }
 
-                user.Image = $"{fileResult.FilePath}/{fileResult.FileName}";
-            }
+        //    await _context.SaveChangesAsync();
 
-            await _context.SaveChangesAsync();
+        //    UpdateUserProfileImageEvent profileImageUpdateEvent;
 
-            UpdateUserProfileImageEvent profileImageUpdateEvent;
+        //    if (dto.Image is null)
+        //    {
+        //        // Əgər istifadəçi profil şəklini silmək istəyirsə
+        //        profileImageUpdateEvent = new UpdateUserProfileImageEvent
+        //        {
+        //            UserId = user.Id,
+        //            FileName = null,
+        //            Base64Image = null
+        //        };
+        //    }
+        //    else
+        //    {
+        //        using var ms = new MemoryStream();
+        //        await dto.Image.CopyToAsync(ms);
+        //        var bytes = ms.ToArray();
 
-            if (dto.Image is null)
-            {
-                // Əgər istifadəçi profil şəklini silmək istəyirsə
-                profileImageUpdateEvent = new UpdateUserProfileImageEvent
-                {
-                    UserId = user.Id,
-                    FileName = null,
-                    Base64Image = null
-                };
-            }
-            else
-            {
-                using var ms = new MemoryStream();
-                await dto.Image.CopyToAsync(ms);
-                var bytes = ms.ToArray();
+        //        profileImageUpdateEvent = new UpdateUserProfileImageEvent
+        //        {
+        //            UserId = user.Id,
+        //            FileName = dto.Image.FileName,
+        //            Base64Image = Convert.ToBase64String(bytes)
+        //        };
+        //    }
 
-                profileImageUpdateEvent = new UpdateUserProfileImageEvent
-                {
-                    UserId = user.Id,
-                    FileName = dto.Image.FileName,
-                    Base64Image = Convert.ToBase64String(bytes)
-                };
-            }
+        //    await _publishEndpoint.Publish(profileImageUpdateEvent);
 
-            await _publishEndpoint.Publish(profileImageUpdateEvent);
-
-            return new UserProfileImageUpdateResponseDto
-            {
-                UserId = user.Id,
-                ImageUrl = $"{_configuration["ApiGateway:BaseUrl"]}/authFiles/{user.Image}",
-            };
-        }
+        //    return new UserProfileImageUpdateResponseDto
+        //    {
+        //        UserId = user.Id,
+        //        ImageUrl = $"{_configuration["ApiGateway:BaseUrl"]}/authFiles/{user.Image}",
+        //    };
+        //}
 
         /// <summary> Admin paneldə bütün istifadəçilər siyahısının göründüyü hissə </summary>  
         public async Task<DataListDto<BasicUserInfoDto>> GetAllUsersAsync(UserRole userRole, string? fullName, string? email, string? phoneNumber, int pageIndex = 1, int pageSize = 10)

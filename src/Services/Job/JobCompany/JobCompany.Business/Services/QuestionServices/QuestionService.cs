@@ -11,11 +11,7 @@ using SharedLibrary.Statics;
 
 namespace JobCompany.Business.Services.QuestionServices
 {
-    public class QuestionService(
-        IFileService fileService,
-        JobCompanyDbContext context,
-        IAnswerService answerService
-    ) : IQuestionService
+    public class QuestionService(IFileService fileService, JobCompanyDbContext context, AnswerService answerService)
     {
         /// <summary> Question yaradılması tekli method + answers </summary>
         public async Task CreateQuestionAsync(QuestionCreateDto dto, CreateListAnswersDto dtos)

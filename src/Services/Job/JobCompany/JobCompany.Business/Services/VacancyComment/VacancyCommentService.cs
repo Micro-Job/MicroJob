@@ -7,7 +7,7 @@ using SharedLibrary.HelperServices.Current;
 
 namespace JobCompany.Business.Services.VacancyComment;
 
-public class VacancyCommentService(JobCompanyDbContext _context, ICurrentUser _user) : IVacancyCommentService
+public class VacancyCommentService(JobCompanyDbContext _context, ICurrentUser _user)
 {
     public async Task VacancyCommentCreateAsync(VacancyCommentCreateDto dto)
     {
@@ -53,12 +53,11 @@ public class VacancyCommentService(JobCompanyDbContext _context, ICurrentUser _u
 
     public async Task<ICollection<VacancyCommentListDto>> VacancyCommentGetAllAsync()
     {
-        var vacancyComments = await _context.VacancyComments
-            .IncludeTranslations()
+        var vacancyComments = await _context.VacancyComments.Include(x=> x.Translations)
         .Select(b => new VacancyCommentListDto
         {
             Id = b.Id.ToString(),
-            Comment = b.GetTranslation(_user.LanguageCode, GetTranslationPropertyName.Comment)
+            Comment = b.Translations.GetTranslation(_user.LanguageCode, GetTranslationPropertyName.Comment)
         })
         .ToListAsync();
 

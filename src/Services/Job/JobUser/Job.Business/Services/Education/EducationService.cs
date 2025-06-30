@@ -4,7 +4,7 @@ using SharedLibrary.Exceptions;
 
 namespace Job.Business.Services.Education;
 
-public class EducationService(JobDbContext context) : IEducationService
+public class EducationService(JobDbContext context)
 {
     public async Task<ICollection<Core.Entities.Education>> CreateBulkEducationAsync(ICollection<EducationCreateDto> dtos, Guid resumeId)
     {

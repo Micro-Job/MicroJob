@@ -5,7 +5,7 @@ namespace Job.API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class PositionController(IPositionService _positionService) : ControllerBase
+public class PositionController(PositionService _positionService) : ControllerBase
 {
     [HttpGet("[action]")]
     public async Task<IActionResult> GetAllPositions()

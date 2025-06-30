@@ -11,7 +11,7 @@ namespace JobPayment.API.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class BalanceController(IBalanceService _balanceService , PaymentDbContext _context) : ControllerBase
+    public class BalanceController(BalanceService _balanceService) : ControllerBase
     {
         [HttpPost("[action]")]
         public async Task<IActionResult> IncreaseBalance(string packetId)

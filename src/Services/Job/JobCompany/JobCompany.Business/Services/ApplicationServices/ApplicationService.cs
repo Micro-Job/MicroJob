@@ -22,50 +22,27 @@ using SharedLibrary.Responses;
 
 namespace JobCompany.Business.Services.ApplicationServices;
 
-public class ApplicationService : IApplicationService
+public class ApplicationService(JobCompanyDbContext _context,
+        IPublishEndpoint _publishEndpoint,
+        ICurrentUser _currentUser,
+        IRequestClient<GetFilteredUserIdsRequest> _filteredUserIdsRequest,
+        IRequestClient<GetResumeDataRequest> _resumeDataRequest) 
 {
-    private readonly JobCompanyDbContext _context;
-    private readonly IConfiguration _configuration;
-    readonly IPublishEndpoint _publishEndpoint;
-    private readonly ICurrentUser _currentUser;
-    private readonly string? _jobUserBaseUrl;
-    private readonly IRequestClient<GetFilteredUserIdsRequest> _filteredUserIdsRequest;
-    private readonly IRequestClient<GetResumeDataRequest> _resumeDataRequest;
-
-    public ApplicationService(
-        JobCompanyDbContext context,
-        IConfiguration configuration,
-        IPublishEndpoint publishEndpoint,
-        ICurrentUser currentUser,
-        IRequestClient<GetFilteredUserIdsRequest> filteredUserIdsRequest,
-        IRequestClient<GetResumeDataRequest> resumeDataRequest
-    )
-    {
-        _currentUser = currentUser;
-        _context = context;
-        _publishEndpoint = publishEndpoint;
-        _filteredUserIdsRequest = filteredUserIdsRequest;
-        _resumeDataRequest = resumeDataRequest;
-        _configuration = configuration;
-        _jobUserBaseUrl = configuration["JobUser:BaseUrl"];
-    }
 
     /// <summary> Vakansiya üçün müraciət yaradılması </summary>
-    public async Task CreateUserApplicationAsync(string vacancyId)
+    public async Task CreateUserApplicationAsync(Guid vacancyId)
     {
         var userGuid = _currentUser.UserGuid ?? throw new Exception(MessageHelper.GetMessage("NOT_FOUND"));
 
-        var vacancyGuid = Guid.Parse(vacancyId);
-
-        if (await _context.Applications.AnyAsync(x => x.VacancyId == vacancyGuid && x.IsActive == true && x.UserId == userGuid))
+        if (await _context.Applications.AnyAsync(x => x.VacancyId == vacancyId && x.IsActive == true && x.UserId == userGuid))
             throw new ApplicationIsAlreadyExistException();
 
         var vacancyInfo = await _context.Vacancies
-            .Where(v => v.Id == vacancyGuid && v.VacancyStatus == VacancyStatus.Active && v.EndDate > DateTime.Now)
+            .Where(v => v.Id == vacancyId && v.VacancyStatus == VacancyStatus.Active && v.EndDate > DateTime.Now)
             .Select(v => new { v.Title, v.VacancyStatus, v.CompanyId, v.EndDate })
             .FirstOrDefaultAsync() ?? throw new NotFoundException();
 
-        if (vacancyInfo.EndDate < DateTime.Now) throw new NotFoundException();
+        if (vacancyInfo.EndDate < DateTime.Now) throw new BadRequestException();
         if (vacancyInfo.VacancyStatus == VacancyStatus.Pause) throw new VacancyPausedException();
 
         var companyStatus = await _context.Statuses.FirstOrDefaultAsync(x => x.StatusEnum == StatusEnum.Pending && x.CompanyId == vacancyInfo.CompanyId) ??
@@ -76,7 +53,7 @@ public class ApplicationService : IApplicationService
         var newApplication = new Application
         {
             UserId = userGuid,
-            VacancyId = vacancyGuid,
+            VacancyId = vacancyId,
             StatusId = companyStatus.Id,
             IsActive = true,
             CreatedDate = DateTime.Now,
@@ -94,7 +71,7 @@ public class ApplicationService : IApplicationService
         {
             SenderId = userGuid,
             SenderName = _currentUser.UserFullName,
-            SenderImage = $"{_currentUser.BaseUrl}/userFiles/{resumeData.Message.ProfileImage}",
+            SenderImage = resumeData.Message.ProfileImage,
             NotificationType = NotificationType.Application,
             CreatedDate = DateTime.Now,
             InformationId = resumeData.Message.ResumeId,
@@ -127,13 +104,10 @@ public class ApplicationService : IApplicationService
     /// <summary>
     /// Müraciətin statusunun dəyişilməsi ve eventle usere bildiris publishi
     /// </summary>
-    public async Task ChangeApplicationStatusAsync(string applicationId, string statusId)
+    public async Task ChangeApplicationStatusAsync(Guid applicationId, Guid statusId)
     {
-        var statusGuid = Guid.Parse(statusId);
-        var applicationGuid = Guid.Parse(applicationId);
-
         var existAppVacancy = await _context.Applications
-            .Where(x => x.Id == applicationGuid && x.Vacancy.Company.UserId == _currentUser.UserGuid)
+            .Where(x => x.Id == applicationId && x.Vacancy.Company.UserId == _currentUser.UserGuid)
             .Select(x => new
             {
                 Application = x,
@@ -146,7 +120,7 @@ public class ApplicationService : IApplicationService
 
         var application = existAppVacancy.Application;
 
-        application.StatusId = statusGuid;
+        application.StatusId = statusId;
         await _context.SaveChangesAsync();
 
         //Müraciət statusu dəyişildikdə notification göndərilir
@@ -155,7 +129,7 @@ public class ApplicationService : IApplicationService
             {
                 ReceiverIds = [application.UserId],
                 SenderId = (Guid)_currentUser.UserGuid,
-                InformationId = applicationGuid,
+                InformationId = applicationId,
                 InformationName = existAppVacancy.VacancyTitle,
                 NotificationType = NotificationType.ApplicationStatusUpdate,
                 //TODO burada BaseUrl event vasitesile gonderilmeli deyil
@@ -164,78 +138,6 @@ public class ApplicationService : IApplicationService
             }
         );
     }
-
-    /// <summary> Id'yə görə müraciətin gətirilməsi </summary>
-    public async Task<ApplicationGetByIdDto> GetApplicationByIdAsync(string applicationId)
-    {
-        var applicationGuid = Guid.Parse(applicationId);
-
-        var application = await _context.Applications
-                .AsNoTracking()
-                .Where(a => a.Id == applicationGuid && a.IsActive)
-                .Select(a => new ApplicationGetByIdDto
-                {
-                    VacancyId = a.VacancyId,
-                    VacancyImage = a.Vacancy.CompanyLogo,
-                    VacancyTitle = a.Vacancy.Title,
-                    CompanyName = a.Vacancy.CompanyName,
-                    CreatedDate = a.CreatedDate,
-                    Description = a.Vacancy.Description,
-                    Status = a.Status.StatusEnum,
-                    StatusColor = a.Status.StatusColor,
-                    Steps = _context
-                        .Statuses.OrderBy(s => s.Order)
-                        .Select(s => s.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name))
-                        .ToList(),
-                })
-                .FirstOrDefaultAsync() ?? throw new NotFoundException();
-
-        return application;
-    }
-
-    /// <summary> Daxil olmus muracietler -> Şirkət üçün bütün müraciətlərin gətirilməsi </summary>
-    //public async Task<ICollection<ApplicationInfoListDto>> GetAllApplicationAsync(int skip = 1, int take = 9)
-    //{
-    //    var company = await _context.Companies.FirstOrDefaultAsync(c => c.UserId == _currentUser.UserGuid)
-    //        ?? throw new NotFoundException<Company>();
-
-    //    var applications = await _context.Applications
-    //        .Where(a => a.Vacancy.Company.UserId == _currentUser.UserGuid)
-    //        .Select(a => new ApplicationInfoDto
-    //        {
-    //            ApplicationId = a.Id,
-    //            UserId = a.UserId,
-    //            CreatedDate = a.CreatedDate,
-    //        })
-    //        .ToListAsync();
-
-    //    var userIds = applications.Select(a => a.UserId).ToList();
-
-    //    var userResumeResponse = await GetResumeDataResponseAsync(userIds);
-
-    //    var applicationList = applications
-    //        .GroupBy(a => a.UserId)
-    //        .SelectMany(group =>
-    //        {
-    //            var userResume = userResumeResponse.Users.FirstOrDefault(r =>
-    //                r.UserId == group.Key
-    //            );
-
-    //            return group.Select(application => new ApplicationInfoListDto
-    //            {
-    //                ApplicationId = application.ApplicationId,
-    //                FullName = $"{userResume?.FirstName} {userResume?.LastName}",
-    //                ImageUrl = $"{_authServiceBaseUrl}/{userResume?.ProfileImage}",
-    //                Position = userResume?.Position,
-    //                CreatedDate = application.CreatedDate,
-    //            });
-    //        })
-    //        .Skip((skip - 1) * take)
-    //        .Take(take)
-    //        .ToList();
-
-    //    return applicationList;
-    //}
 
     /// <summary> Şirkətə daxil olan bütün müraciətlərin filterlə birlikdə detallı şəkildə gətirilməsi </summary>
     public async Task<DataListDto<AllApplicationListDto>> GetAllApplicationsListAsync(Guid? vacancyId, Gender? gender, StatusEnum? status, List<Guid>? skillIds, string? fullName, int skip = 1, int take = 10)

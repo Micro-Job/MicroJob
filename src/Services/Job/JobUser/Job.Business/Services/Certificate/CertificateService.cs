@@ -6,7 +6,7 @@ using SharedLibrary.Statics;
 
 namespace Job.Business.Services.Certificate;
 
-public class CertificateService(JobDbContext context, IFileService fileService) : ICertificateService
+public class CertificateService(JobDbContext context, IFileService fileService)
 {
     public async Task<ICollection<Core.Entities.Certificate>> CreateBulkCertificateAsync(ICollection<CertificateCreateDto> dtos)
     {

@@ -3,7 +3,7 @@ using Job.DAL.Contexts;
 
 namespace Job.Business.Services.Number;
 
-public class NumberService(JobDbContext context) : INumberService
+public class NumberService(JobDbContext context)
 {
     public List<Core.Entities.Number> CreateBulkNumber(ICollection<NumberCreateDto> numbersDto, Guid resumeId, string? mainNumber = null)
     {

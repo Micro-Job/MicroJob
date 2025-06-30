@@ -8,7 +8,7 @@ using SharedLibrary.Responses;
 
 namespace JobPayment.Business.Consumers
 {
-    public class CheckBalanceConsumer(IBalanceService _balanceService , IPriceService _priceService) : IConsumer<CheckBalanceRequest>
+    public class CheckBalanceConsumer(BalanceService _balanceService , PriceService _priceService) : IConsumer<CheckBalanceRequest>
     {
         public async Task Consume(ConsumeContext<CheckBalanceRequest> context)
         {

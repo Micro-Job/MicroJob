@@ -10,7 +10,7 @@ using SharedLibrary.HelperServices.Current;
 
 namespace JobCompany.Business.Services.CityServices;
 
-public class CityService(JobCompanyDbContext _context, ICurrentUser _user) : ICityService
+public class CityService(JobCompanyDbContext _context, ICurrentUser _user) 
 {
     public async Task CreateCityAsync(CreateCityDto dto)
     {
@@ -30,13 +30,12 @@ public class CityService(JobCompanyDbContext _context, ICurrentUser _user) : ICi
 
     public async Task<ICollection<CityListDto>> GetAllCitiesAsync()
     {
-        var cities = await _context.Cities
+        var cities = await _context.Cities.Include(x=> x.Translations)
         .AsNoTracking()
-        .IncludeTranslations()
         .Select(b => new CityListDto
         {
             Id = b.Id,
-            CityName = b.GetTranslation(_user.LanguageCode, GetTranslationPropertyName.Name),
+            CityName = b.Translations.GetTranslation(_user.LanguageCode, GetTranslationPropertyName.Name),
             CountryId = b.CountryId,
         })
         .ToListAsync();

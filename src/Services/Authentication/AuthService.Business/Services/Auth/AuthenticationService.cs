@@ -80,7 +80,6 @@ namespace AuthService.Business.Services.Auth
             dto.Email = dto.Email.Trim();
             await CheckUserExistAsync(dto.Email, dto.MainPhoneNumber);
 
-            //TODO : exceptionlar deyismelidir
             if (dto.IsCompany && dto.VOEN != null)
             {
                 if (await GetCompanyNameByVOENAsync(dto.VOEN) != null)
@@ -104,7 +103,8 @@ namespace AuthService.Business.Services.Auth
                 MainPhoneNumber = dto.MainPhoneNumber,
                 RegistrationDate = DateTime.Now,
                 Password = _tokenHandler.GeneratePasswordHash(dto.Password),
-                UserRole = dto.IsCompany ? UserRole.CompanyUser : UserRole.EmployeeUser
+                UserRole = dto.IsCompany ? UserRole.CompanyUser : UserRole.EmployeeUser,
+                IsVerified = true
             };
 
             await _context.Users.AddAsync(user);
@@ -117,7 +117,9 @@ namespace AuthService.Business.Services.Auth
                     UserId = user.Id,
                     CompanyName = dto.IsCompany ? dto.CompanyName.Trim() : null,
                     IsCompany = dto.IsCompany,
-                    VOEN = dto.IsCompany ? dto.VOEN : null
+                    VOEN = dto.IsCompany ? dto.VOEN : null,
+                    Email = dto.Email,
+                    MainPhoneNumber = dto.MainPhoneNumber
                 }
             );
 
@@ -128,11 +130,10 @@ namespace AuthService.Business.Services.Auth
 
         public async Task<TokenResponseDto> LoginAsync(LoginDto dto)
         {
-            // useri email ve ya userName ile tapmaq
             var user = await _context.Users.FirstOrDefaultAsync(x => x.Email == dto.UserNameOrEmail)
                 ?? throw new LoginFailedException();
 
-            if (!user.IsVerified) throw new BadRequestException();
+            if (!user.IsVerified) throw new BadRequestException(MessageHelper.GetMessage("NOT_CONFIRMED"));
 
             var hashedPassword = _tokenHandler.GeneratePasswordHash(dto.Password);
             if (user.Password != hashedPassword)
@@ -155,7 +156,7 @@ namespace AuthService.Business.Services.Auth
                 AccessToken = accessToken,
                 RefreshToken = refreshToken.Token,
                 Expires = refreshToken.Expires,
-                UserImage = user.Image != null ? $"{_currentUser.BaseUrl}/userFiles/{user.Image}" : null
+                //UserImage = user.Image != null ? $"{_currentUser.BaseUrl}/userFiles/{user.Image}" : null
             };
 
             if (user.UserRole == UserRole.CompanyUser || user.UserRole == UserRole.EmployeeUser)
@@ -188,6 +189,9 @@ namespace AuthService.Business.Services.Auth
             if (user.RefreshTokenExpireDate < DateTime.Now)
                 throw new RefreshTokenExpiredException();
 
+            if (!user.IsVerified) 
+                throw new BadRequestException(MessageHelper.GetMessage("NOT_CONFIRMED"));
+
             var newToken = _tokenHandler.CreateToken(user, 60);
             var newRefreshToken = _tokenHandler.GenerateRefreshToken(newToken, 1440);
 
@@ -204,7 +208,7 @@ namespace AuthService.Business.Services.Auth
                 RefreshToken = newRefreshToken.Token,
                 UserStatusId = (byte)user.UserRole,
                 Expires = newRefreshToken.Expires,
-                UserImage = user.Image != null ? $"{_currentUser.BaseUrl}/userFiles/{user.Image}" : null
+                //UserImage = user.Image != null ? $"{_currentUser.BaseUrl}/userFiles/{user.Image}" : null
             };
 
             if (user.UserRole == UserRole.CompanyUser || user.UserRole == UserRole.EmployeeUser)
@@ -311,7 +315,6 @@ namespace AuthService.Business.Services.Auth
             await _context.SaveChangesAsync();
         }
 
-        //TODO : burada yeni auth proyektinde user tableinda voen tutulmalidir mi 
         public async Task CheckUserExistAsync(string email, string phoneNumber)
         {
             var user = await _context.Users.Where(x => x.Email == email || x.MainPhoneNumber == phoneNumber)
@@ -361,7 +364,6 @@ namespace AuthService.Business.Services.Auth
                     HttpResponseMessage response = await httpClient.PostAsync(apiUrl, content);
                     string responseBody = await response.Content.ReadAsStringAsync();
 
-
                     TaxpayerInfoRoot taxpayerInfo = JsonSerializer.Deserialize<TaxpayerInfoRoot>(responseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
                     if (taxpayerInfo?.taxpayers != null && taxpayerInfo.taxpayers.Any())
@@ -374,7 +376,7 @@ namespace AuthService.Business.Services.Auth
             }
             catch (Exception)
             {
-                throw new BadRequestException();
+                throw new BadRequestException(MessageHelper.GetMessage("VOEN_NOT_FOUND"));
             }
         }
 

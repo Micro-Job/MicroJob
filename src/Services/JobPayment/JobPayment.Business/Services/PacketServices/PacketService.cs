@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace JobPayment.Business.Services.PacketServices
 {
-    public class PacketService(PaymentDbContext _context) : IPacketService
+    public class PacketService(PaymentDbContext _context)
     {
         public async Task CreatePacketAsync(CreatePacketDto dto)
         {

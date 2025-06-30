@@ -129,6 +129,9 @@
   <data name="AUTHENTICATION_FAILED" xml:space="preserve">
     <value>Giriş uğursuzdur</value>
   </data>
+  <data name="BAD_REQUEST" xml:space="preserve">
+    <value>Xəta baş verdi</value>
+  </data>
   <data name="BIRTHDAY_MUST_BE_IN_THE_PAST" xml:space="preserve">
     <value>Ad günü tarixi keçmişdə olmalıdır</value>
   </data>
@@ -204,6 +207,9 @@
   <data name="NOTFOUNDEXCEPTION_USER" xml:space="preserve">
     <value>İstifadəçi mövcud deyil</value>
   </data>
+  <data name="NOT_CONFIRMED" xml:space="preserve">
+    <value>Hesabınız təsdiq edilməyib</value>
+  </data>
   <data name="NOT_EMPTY" xml:space="preserve">
     <value>Boş olmamalıdır</value>
   </data>
@@ -266,6 +272,9 @@
   </data>
   <data name="VACANCY_UPDATE" xml:space="preserve">
     <value>Vakansiya block olunduğu üçün update edilə bilməz</value>
+  </data>
+  <data name="VOEN_NOT_FOUND" xml:space="preserve">
+    <value>VÖEN mövcud deyil</value>
   </data>
   <data name="WELCOME" xml:space="preserve">
     <value>Xoş gəlmisiniz</value>

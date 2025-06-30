@@ -22,17 +22,17 @@ namespace Job.Business
         public static void AddJobServices(this IServiceCollection services)
         {
             services.AddScoped<IFileService, FileService>();
-            services.AddScoped<IResumeService, ResumeService>();
-            services.AddScoped<IEducationService, EducationService>();
-            services.AddScoped<IUserInformationService, UserInformationService>();
-            services.AddScoped<IExperienceService, ExperienceService>();
-            services.AddScoped<INumberService, NumberService>();
-            services.AddScoped<ILanguageService, LanguageService>();
-            services.AddScoped<ICertificateService, CertificateService>();
-            services.AddScoped<ISkillService, SkillService>();
-            services.AddScoped<INotificationService, NotificationService>();
+            services.AddScoped<ResumeService>();
+            services.AddScoped<EducationService>();
+            services.AddScoped<UserInformationService>();
+            services.AddScoped<ExperienceService>();
+            services.AddScoped<NumberService>();
+            services.AddScoped<LanguageService>();
+            services.AddScoped<CertificateService>();
+            services.AddScoped<SkillService>();
+            services.AddScoped<NotificationService>();
             services.AddScoped<ICurrentUser, CurrentUser>();
-            services.AddScoped<IPositionService, PositionService>();
+            services.AddScoped<PositionService>();
             services.AddScoped<UserManagementService>();
         }
 

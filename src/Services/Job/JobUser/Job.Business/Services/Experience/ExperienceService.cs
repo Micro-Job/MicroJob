@@ -3,7 +3,7 @@ using Job.DAL.Contexts;
 
 namespace Job.Business.Services.Experience;
 
-public class ExperienceService(JobDbContext context) : IExperienceService
+public class ExperienceService(JobDbContext context)
 {
     public async Task<ICollection<Core.Entities.Experience>> CreateBulkExperienceAsync(ICollection<ExperienceCreateDto> dtos, Guid resumeId)
     {

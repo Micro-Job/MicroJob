@@ -8,7 +8,7 @@ namespace JobCompany.API.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser)]
-    public class ReportController(IReportService reportService) : ControllerBase
+    public class ReportController(ReportService reportService) : ControllerBase
     {
         /// <summary>
         /// Admin/Dashboard/ Muraciet, active vakansiya, qebul olunmus vakansiya sayi/ mohteshem 3-lu ;)
@@ -17,22 +17,19 @@ namespace JobCompany.API.Controllers
         [HttpGet("[action]")]
         public async Task<IActionResult> GetSummary()
         {
-            var data = await reportService.GetSummaryAsync();
-            return Ok(data);
+            return Ok(await reportService.GetSummaryAsync());
         }
 
-        [HttpGet("[action]")]
-        public async Task<IActionResult> GetRecentApplications()
-        {
-            var recentApplications = await reportService.GetRecentApplicationsAsync();
-            return Ok(recentApplications);
-        }
+        //[HttpGet("[action]")]
+        //public async Task<IActionResult> GetRecentApplications()
+        //{
+        //    return Ok(await reportService.GetRecentApplicationsAsync());
+        //}
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetApplicationStatistics(string periodTime = "1")
+        public async Task<IActionResult> GetApplicationStatistics(byte periodTime = 1)
         {
-            var vacancyStatistics = await reportService.GetApplicationStatisticsAsync(periodTime);
-            return Ok(vacancyStatistics);
+            return Ok(await reportService.GetApplicationStatisticsAsync(periodTime));
         }
     }
 }

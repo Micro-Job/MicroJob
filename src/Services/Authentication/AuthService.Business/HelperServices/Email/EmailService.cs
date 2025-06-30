@@ -63,6 +63,16 @@ public class EmailService(IOptions<SmtpSettings> smtpSettings, EmailTemplate _em
         });
     }
 
+    //TODO : bu daha sonra email update edilərsə istifadə ediləcək
+    public async Task SendVerifyUpdateEmail(string toEmail, string fullName, string userId)
+    {
+        await SendEmailAsync(toEmail, new EmailMessage
+        {
+            Subject = "Hesabınızı təsdiqləyin...",
+            Content = _emailTemplate.VerifyUpdateEmail(fullName, userId)
+        });
+    }
+
     public async Task SendEmailAsync(string toEmail, EmailMessage emailMessage)
     {
         var fromAddress = new MailAddress(_smtpSettings.Username, "HIRI");

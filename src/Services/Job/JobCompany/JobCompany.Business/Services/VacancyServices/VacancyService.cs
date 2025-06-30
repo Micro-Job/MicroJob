@@ -25,7 +25,7 @@ using System.Data;
 
 namespace JobCompany.Business.Services.VacancyServices
 {
-    public class VacancyService(JobCompanyDbContext _context, IFileService _fileService, IPublishEndpoint _publishEndpoint, ICurrentUser _currentUser, IRequestClient<CheckBalanceRequest> _checkBalanceRequest, IConfiguration _configuration) : IVacancyService
+    public class VacancyService(JobCompanyDbContext _context, IFileService _fileService, IPublishEndpoint _publishEndpoint, ICurrentUser _currentUser, IRequestClient<CheckBalanceRequest> _checkBalanceRequest)
     {
         /// <summary> vacancy yaradılması </summary>
         /// vacancy yaradilan zaman exam yaradılması
@@ -56,6 +56,7 @@ namespace JobCompany.Business.Services.VacancyServices
                 CompanyId = company?.Id,
                 Title = vacancyDto.Title.Trim(),
                 CompanyLogo = companyLogoPath,
+                PaymentDate = vacancyDto.StartDate,
                 StartDate = vacancyDto.StartDate,
                 EndDate = vacancyDto.EndDate,
                 CreatedDate = DateTime.Now,
@@ -111,6 +112,7 @@ namespace JobCompany.Business.Services.VacancyServices
             await _context.Vacancies.AddAsync(vacancy);
             await _context.SaveChangesAsync();
 
+            //TODO : bu skillere uygun mesajlarin getmesi ucundur buna baxmaq lazimdir islemirdi en son
             //if (vacancyDto.SkillIds != null)
             //{
             //    await _publishEndpoint.Publish(
@@ -149,7 +151,7 @@ namespace JobCompany.Business.Services.VacancyServices
         public async Task<DataListDto<VacancyGetAllDto>> GetAllOwnVacanciesAsync(string? titleName, List<Guid>? categoryIds, List<Guid>? countryIds, List<Guid>? cityIds, VacancyStatus? IsActive, decimal? minSalary, decimal? maxSalary, List<byte>? workStyles, List<byte>? workTypes, List<Guid>? skillIds, int skip = 1, int take = 6)
         {
             var query = _context
-                .Vacancies.Where(x => x.Company.UserId == _currentUser.UserGuid)
+                .Vacancies.Where(x => x.Company.UserId == _currentUser.UserGuid && x.VacancyStatus != VacancyStatus.Deleted)
                 .OrderByDescending(x => x.CreatedDate)
                 .AsNoTracking();
 
@@ -194,21 +196,6 @@ namespace JobCompany.Business.Services.VacancyServices
                 Datas = vacancies,
                 TotalCount = await query.CountAsync()
             };
-        }
-
-        /// <summary> ??? </summary>
-        public async Task<List<VacancyListDtoForAppDto>> GetAllVacanciesForAppAsync()
-        {
-            var vacancies = await _context
-                .Vacancies.Where(x => x.Company.UserId == _currentUser.UserGuid && x.VacancyStatus == VacancyStatus.Active)
-                .Select(x => new VacancyListDtoForAppDto
-                {
-                    VacancyId = x.Id,
-                    VacancyName = x.Title,
-                })
-                .ToListAsync();
-
-            return vacancies;
         }
 
         /// <summary> şirkət id'sinə görə vacanciyaların gətirilməsi </summary>
@@ -305,10 +292,10 @@ namespace JobCompany.Business.Services.VacancyServices
                         //            Name = vc.Skill.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name)
                         //        }).ToList(),
                         CompanyName = x.Company.IsCompany ? x.Company.CompanyName : x.CompanyName,
-                        CategoryName = x.Category.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name),
+                        CategoryName = x.Category.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name),
                         CompanyUserId = x.Company.UserId,
                         Messages = _currentUser.UserGuid == x.Company.UserId
-                            ? x.VacancyMessages.Select(vm => vm.Message.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Content)).ToList()
+                            ? x.VacancyMessages.Select(vm => vm.Message.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Content)).ToList()
                             : null,
                         VacancyStatus = x.VacancyStatus,
                         IsApplied = userGuid.HasValue && x.Applications.Any(a => a.UserId == userGuid && a.IsActive == true),
@@ -370,11 +357,11 @@ namespace JobCompany.Business.Services.VacancyServices
                     CreatedDate = v.CreatedDate,
                     VacancyStatus = v.VacancyStatus,
                     CategoryId = v.CategoryId,
-                    CategoryName = v.Category != null ? v.Category.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name) : null,
+                    CategoryName = v.Category != null ? v.Category.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name) : null,
                     CityId = v.CityId,
-                    CityName = v.City != null ? v.City.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name) : null,
+                    CityName = v.City != null ? v.City.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name) : null,
                     CountryId = v.CountryId,
-                    CountryName = v.Country != null ? v.Country.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name) : null,
+                    CountryName = v.Country != null ? v.Country.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name) : null,
 
                     VacancyNumbers = v.VacancyNumbers != null ? v
                                 .VacancyNumbers.Select(vn => new VacancyNumberDto
@@ -388,7 +375,7 @@ namespace JobCompany.Business.Services.VacancyServices
                                 .Select(vc => new SkillDto
                                 {
                                     Id = vc.Skill.Id,
-                                    Name = vc.Skill.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name)
+                                    Name = vc.Skill.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name)
                                 }).ToList()
                 }).FirstOrDefaultAsync() ?? throw new NotFoundException();
 
@@ -413,6 +400,7 @@ namespace JobCompany.Business.Services.VacancyServices
             existingVacancy.CompanyId = Guid.Parse(vacancyDto.CompanyId);
             existingVacancy.CompanyName = vacancyDto.CompanyName;
             existingVacancy.Title = vacancyDto.Title;
+            existingVacancy.PaymentDate = vacancyDto.EndDate;
             existingVacancy.StartDate = vacancyDto.StartDate;
             existingVacancy.EndDate = vacancyDto.EndDate;
             existingVacancy.Location = vacancyDto.Location;
@@ -532,8 +520,7 @@ namespace JobCompany.Business.Services.VacancyServices
                     InformationName = existingVacancy.Title,
                     NotificationType = NotificationType.VacancyUpdate,
                     SenderName = existingVacancy.CompanyName,
-                    //TODO : burada baseUrl gonderilmeli deyil 
-                    SenderImage = $"{_currentUser.BaseUrl}/{existingVacancy.CompanyLogo}",
+                    SenderImage = existingVacancy.CompanyLogo,
                 }
             );
         }

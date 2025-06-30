@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace JobPayment.Business.Consumers
 {
-    public class CheckBalancesConsumer(IBalanceService _balanceService, IPriceService _priceService) : IConsumer<CheckBalancesRequest>
+    public class CheckBalancesConsumer(BalanceService _balanceService, PriceService _priceService) : IConsumer<CheckBalancesRequest>
     {
         public async Task Consume(ConsumeContext<CheckBalancesRequest> context)
         {

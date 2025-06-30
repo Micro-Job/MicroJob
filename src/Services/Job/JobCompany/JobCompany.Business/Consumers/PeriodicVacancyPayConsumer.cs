@@ -13,7 +13,7 @@ namespace JobCompany.Business.Consumers
     public class PeriodicVacancyPayConsumer
     (
         JobCompanyDbContext _context,
-        INotificationService _notificationService,
+        NotificationService _notificationService,
         IPublishEndpoint _publishEndpoint,
         IRequestClient<CheckBalanceRequest> _balanceRequest
     ) : IConsumer<PeriodicVacancyPayEvent>

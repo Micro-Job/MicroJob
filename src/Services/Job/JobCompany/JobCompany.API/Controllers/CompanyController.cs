@@ -9,7 +9,7 @@ namespace JobCompany.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class CompanyController(ICompanyService service) : ControllerBase
+    public class CompanyController(CompanyService service) : ControllerBase
     {
         [HttpPut("[action]")]
         [AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser)]
@@ -26,7 +26,7 @@ namespace JobCompany.API.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetCompanyDetail(string companyId)
+        public async Task<IActionResult> GetCompanyDetail(Guid companyId)
         {
             return Ok(await service.GetCompanyDetailAsync(companyId));
         }
@@ -38,7 +38,7 @@ namespace JobCompany.API.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetCompanyName(string companyId)
+        public async Task<IActionResult> GetCompanyName(Guid companyId)
         {
             return Ok(await service.GetCompanyNameAsync(companyId));
         }

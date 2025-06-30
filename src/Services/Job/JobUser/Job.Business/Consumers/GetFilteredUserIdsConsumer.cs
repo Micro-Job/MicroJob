@@ -20,9 +20,7 @@ public class GetFilteredUserIdsConsumer(JobDbContext _jobDbContext) : IConsumer<
 
         if (context.Message.SkillIds != null && context.Message.SkillIds.Count != 0)
         {
-            query = query.Where(r => context.Message.SkillIds.All(skillId => r.ResumeSkills.Any(rs => rs.SkillId == skillId))); // Skill ID-lərinə görə filtrləmə
-
-            query = query.Include(r => r.ResumeSkills);
+            query = query.Include(x=> x.ResumeSkills).Where(r => context.Message.SkillIds.All(skillId => r.ResumeSkills.Any(rs => rs.SkillId == skillId))); // Skill ID-lərinə görə filtrləmə
         }
 
         var matchingUserIds = await query.Select(r => r.UserId).ToListAsync();
