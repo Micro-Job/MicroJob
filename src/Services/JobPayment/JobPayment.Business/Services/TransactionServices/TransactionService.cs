@@ -105,12 +105,16 @@ namespace JobPayment.Business.Services.TransactionServices
             };
         }
 
-        public async Task<TransactionDetailDto> GetTransactionDetailAsync(string transactionId)
+        public async Task<TransactionDetailDto> GetTransactionDetailAsync(Guid transactionId)
         {
-            //TODO : bu hisse hem de admin ve ya operator terefinden islenir deye UserId silindi amma silinmeli deyil (muveqqeti hell)
-            //var transaction = await _context.Transactions.Where(x => x.Id == Guid.Parse(transactionId) && x.UserId == _currentUser.UserGuid)
+            var query = _context.Transactions.Where(x => x.Id == transactionId);
 
-            var transaction = await _context.Transactions.Where(x => x.Id == Guid.Parse(transactionId))
+            if (_currentUser.UserRole == (byte)UserRole.EmployeeUser || 
+                _currentUser.UserRole == (byte)UserRole.CompanyUser || 
+                _currentUser.UserRole == (byte)UserRole.SimpleUser)
+                query = query.Where(x => x.UserId == _currentUser.UserGuid);
+
+            var transaction = await query
             .Select(x => new TransactionDetailDto
             {
                 CompanyName = null,
@@ -126,10 +130,10 @@ namespace JobPayment.Business.Services.TransactionServices
             return transaction;
         }
 
-        public async Task<DataListDto<TransactionListDto>> GetAllTransactionsByUserIdAsync(string userId, string? startDate, string? endDate, byte? transactionStatus, byte? informationType, byte? transactionType, int skip, int take)
+        public async Task<DataListDto<TransactionListDto>> GetAllTransactionsByUserIdAsync(Guid userId, string? startDate, string? endDate, byte? transactionStatus, byte? informationType, byte? transactionType, int skip, int take)
         {
             var query = _context.Transactions
-                .Where(x => x.UserId == Guid.Parse(userId))
+                .Where(x => x.UserId == userId)
                 .OrderByDescending(x => x.CreatedDate)
                 .AsNoTracking()
                 .AsQueryable();

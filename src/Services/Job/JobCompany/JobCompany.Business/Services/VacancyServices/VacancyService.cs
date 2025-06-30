@@ -520,8 +520,7 @@ namespace JobCompany.Business.Services.VacancyServices
                     InformationName = existingVacancy.Title,
                     NotificationType = NotificationType.VacancyUpdate,
                     SenderName = existingVacancy.CompanyName,
-                    //TODO : burada baseUrl gonderilmeli deyil 
-                    SenderImage = $"{_currentUser.BaseUrl}/{existingVacancy.CompanyLogo}",
+                    SenderImage = existingVacancy.CompanyLogo,
                 }
             );
         }

@@ -13,7 +13,6 @@ using SharedLibrary.HelperServices.Current;
 
 namespace JobCompany.Business.Services.ReportServices
 {
-    //TODO : Bu hissə yenidən yazılmalıdır
     public class ReportService(JobCompanyDbContext _context, ICurrentUser _currentUser)
     {
         /// <summary>

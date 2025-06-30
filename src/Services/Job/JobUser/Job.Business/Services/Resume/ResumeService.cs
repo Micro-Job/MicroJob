@@ -479,7 +479,6 @@ namespace Job.Business.Services.Resume
 
             if (resume.IsPublic) throw new ResumeIsPublicException();
 
-            //TODO : bu hisse olmaya da biler.Bir basa exception qaytararaq
             var checkBalanceResponse = await _balanceRequest.GetResponse<CheckBalanceResponse>(new CheckBalanceRequest
             {
                 InformationType = InformationType.AnonymResume,
@@ -495,8 +494,7 @@ namespace Job.Business.Services.Resume
                     UserId = (Guid)_currentUser.UserGuid
                 });
             }
-            //TODO : Burada exception qaytarmaq prinsip olaraq dogru deyil
-            else throw new NotFoundException("Yeterli balans yoxdur");
+            else throw new BadRequestException(MessageHelper.GetMessage("INSUFFICIENT_BALANCE"));
 
             await _context.CompanyResumeAccesses.AddAsync(new CompanyResumeAccess
             {

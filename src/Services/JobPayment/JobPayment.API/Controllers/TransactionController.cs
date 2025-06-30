@@ -18,13 +18,13 @@ namespace JobPayment.API.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetTransactionDetail(string transactionId)
+        public async Task<IActionResult> GetTransactionDetail(Guid transactionId)
         {
             return Ok(await _transactionService.GetTransactionDetailAsync(transactionId));
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetAllTransactionsByUserId(string userId, string? startDate, string? endDate, byte? transactionStatus, byte? informationType, byte? transactionType, int skip, int take)
+        public async Task<IActionResult> GetAllTransactionsByUserId(Guid userId, string? startDate, string? endDate, byte? transactionStatus, byte? informationType, byte? transactionType, int skip, int take)
         {
             return Ok(await _transactionService.GetAllTransactionsByUserIdAsync(userId , startDate , endDate , transactionStatus , informationType , transactionType , skip , take));
         }
