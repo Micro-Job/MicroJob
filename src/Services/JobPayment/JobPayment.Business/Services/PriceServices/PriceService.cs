@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace JobPayment.Business.Services.PriceServices
 {
-    public class PriceService(PaymentDbContext _context) : IPriceService
+    public class PriceService(PaymentDbContext _context)
     {
         public async Task<List<PriceListDto>> GetAllPricesAsync()
         {

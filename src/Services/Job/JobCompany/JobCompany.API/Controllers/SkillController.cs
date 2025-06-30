@@ -10,7 +10,7 @@ namespace JobCompany.API.Controllers
     [ApiController]
     [Route("api/[controller]")]
     //[AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser)]
-    public class SkillController(ISkillService _skillService) : ControllerBase
+    public class SkillController(SkillService _skillService) : ControllerBase
     {
         [HttpPost("[action]")]
         public async Task<IActionResult> CreateSkill(SkillCreateDto dto)

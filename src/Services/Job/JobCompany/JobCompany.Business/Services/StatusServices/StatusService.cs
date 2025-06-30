@@ -14,7 +14,7 @@ using SharedLibrary.HelperServices.Current;
 
 namespace JobCompany.Business.Services.StatusServices
 {
-    public class StatusService(JobCompanyDbContext _context, ICurrentUser _currentUser) : IStatusService
+    public class StatusService(JobCompanyDbContext _context, ICurrentUser _currentUser)
     {
         public async Task<List<StatusListDto>> GetAllStatusesAsync()
         {

@@ -6,7 +6,7 @@ using SharedLibrary.Exceptions;
 
 namespace Job.Business.Services.Position;
 
-public class PositionService(JobDbContext _context) : IPositionService
+public class PositionService(JobDbContext _context)
 {
     /// <summary>
     /// Sadəcə IsActive-i true olan positionları qaytarır.

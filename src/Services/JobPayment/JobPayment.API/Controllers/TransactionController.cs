@@ -9,7 +9,7 @@ namespace JobPayment.API.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class TransactionController(ITransactionService _transactionService) : ControllerBase
+    public class TransactionController(TransactionService _transactionService) : ControllerBase
     {
         [HttpGet("[action]")]
         public async Task<IActionResult> GetOwnTransactions(string? startDate, string? endDate, byte? transactionStatus, byte? informationType, byte? transactionType, int skip = 1, int take = 7)

@@ -6,7 +6,7 @@ using SharedLibrary.Exceptions;
 
 namespace Job.Business.Services.Language;
 
-public class LanguageService(JobDbContext context) : ILanguageService
+public class LanguageService(JobDbContext context)
 {
     public async Task<ICollection<Core.Entities.Language>> CreateBulkLanguageAsync(ICollection<LanguageCreateDto> dtos, Guid resumeId)
     {

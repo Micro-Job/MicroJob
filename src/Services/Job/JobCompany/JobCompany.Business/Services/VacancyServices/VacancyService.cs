@@ -56,6 +56,7 @@ namespace JobCompany.Business.Services.VacancyServices
                 CompanyId = company?.Id,
                 Title = vacancyDto.Title.Trim(),
                 CompanyLogo = companyLogoPath,
+                PaymentDate = vacancyDto.StartDate,
                 StartDate = vacancyDto.StartDate,
                 EndDate = vacancyDto.EndDate,
                 CreatedDate = DateTime.Now,
@@ -111,6 +112,7 @@ namespace JobCompany.Business.Services.VacancyServices
             await _context.Vacancies.AddAsync(vacancy);
             await _context.SaveChangesAsync();
 
+            //TODO : bu skillere uygun mesajlarin getmesi ucundur buna baxmaq lazimdir islemirdi en son
             //if (vacancyDto.SkillIds != null)
             //{
             //    await _publishEndpoint.Publish(
@@ -149,7 +151,7 @@ namespace JobCompany.Business.Services.VacancyServices
         public async Task<DataListDto<VacancyGetAllDto>> GetAllOwnVacanciesAsync(string? titleName, List<Guid>? categoryIds, List<Guid>? countryIds, List<Guid>? cityIds, VacancyStatus? IsActive, decimal? minSalary, decimal? maxSalary, List<byte>? workStyles, List<byte>? workTypes, List<Guid>? skillIds, int skip = 1, int take = 6)
         {
             var query = _context
-                .Vacancies.Where(x => x.Company.UserId == _currentUser.UserGuid)
+                .Vacancies.Where(x => x.Company.UserId == _currentUser.UserGuid && x.VacancyStatus != VacancyStatus.Deleted)
                 .OrderByDescending(x => x.CreatedDate)
                 .AsNoTracking();
 
@@ -398,6 +400,7 @@ namespace JobCompany.Business.Services.VacancyServices
             existingVacancy.CompanyId = Guid.Parse(vacancyDto.CompanyId);
             existingVacancy.CompanyName = vacancyDto.CompanyName;
             existingVacancy.Title = vacancyDto.Title;
+            existingVacancy.PaymentDate = vacancyDto.EndDate;
             existingVacancy.StartDate = vacancyDto.StartDate;
             existingVacancy.EndDate = vacancyDto.EndDate;
             existingVacancy.Location = vacancyDto.Location;

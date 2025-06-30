@@ -10,7 +10,7 @@ namespace JobCompany.API.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser)]
-    public class CityController(ICityService service) : ControllerBase
+    public class CityController(CityService service) : ControllerBase
     {
         [HttpPost("[action]")]
         public async Task<IActionResult> CreateCity(CreateCityDto dto)

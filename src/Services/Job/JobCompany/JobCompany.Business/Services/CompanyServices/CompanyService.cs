@@ -20,34 +20,13 @@ using SharedLibrary.Statics;
 
 namespace JobCompany.Business.Services.CompanyServices
 {
-    public class CompanyService : ICompanyService
+    public class CompanyService(JobCompanyDbContext _context, ICurrentUser _currentUser, IFileService _fileService)
     {
-        private JobCompanyDbContext _context;
-        readonly IConfiguration _configuration;
-        private readonly string? _authServiceBaseUrl;
-        private readonly ICurrentUser _currentUser;
-        private readonly IFileService _fileService;
-        private readonly IHttpContextAccessor _contextAccessor;
-
-        public CompanyService(
-            JobCompanyDbContext context,
-            IHttpContextAccessor contextAccessor,
-            IConfiguration configuration, ICurrentUser currentUser
-            , IFileService fileService
-        )
-        {
-            _context = context;
-            _authServiceBaseUrl = configuration["AuthService:BaseUrl"];
-            _configuration = configuration;
-            _currentUser = currentUser;
-            _fileService = fileService;
-            _contextAccessor = contextAccessor;
-        }
 
         public async Task<CompanyUpdateResponseDto> UpdateCompanyAsync(CompanyUpdateDto dto, ICollection<UpdateNumberDto>? numbersDto)
         {
             var company = await _context.Companies.Include(c => c.CompanyNumbers).FirstOrDefaultAsync(x => x.UserId == _currentUser.UserGuid)
-                ?? throw new SharedLibrary.Exceptions.NotFoundException();
+                ?? throw new NotFoundException();
 
             if (dto.Email != null && await _context.Companies.AnyAsync(x => x.Email == dto.Email && x.Id != company.Id))
                 throw new EmailAlreadyUsedException();
@@ -165,11 +144,9 @@ namespace JobCompany.Business.Services.CompanyServices
             };
         }
 
-        /// <summary> İdyə görə şirkət detaili consumer metodundan istifadə ilə </summary>
-        public async Task<CompanyDetailItemDto> GetCompanyDetailAsync(string id)
+        public async Task<CompanyDetailItemDto> GetCompanyDetailAsync(Guid companyId)
         {
-            var companyGuid = Guid.Parse(id);
-            var company = await _context.Companies.AsNoTracking().Where(c => c.Id == companyGuid)
+            var company = await _context.Companies.Where(c => c.Id == companyId)
                         .Select(x => new CompanyDetailItemDto
                         {
                             CompanyInformation = x.CompanyInformation,
@@ -187,8 +164,8 @@ namespace JobCompany.Business.Services.CompanyServices
                                             .ToList(),
                             Email = x.Email,
                         })
-                        .FirstOrDefaultAsync()
-                    ?? throw new SharedLibrary.Exceptions.NotFoundException();
+                        .FirstOrDefaultAsync() ?? throw new NotFoundException();
+
             return company;
         }
 
@@ -229,20 +206,16 @@ namespace JobCompany.Business.Services.CompanyServices
                         }).ToList()
                         : new List<CompanyNumberDto>()
                 })
-                .FirstOrDefaultAsync()
-                    ?? throw new SharedLibrary.Exceptions.NotFoundException();
+                .FirstOrDefaultAsync() ?? throw new NotFoundException();
 
             return companyProfile;
         }
 
-        public async Task<string?> GetCompanyNameAsync(string companyId)
+        public async Task<string?> GetCompanyNameAsync(Guid companyId)
         {
-            var companyGuid = Guid.Parse(companyId);
-
-            return await _context.Companies.Where(x => x.Id == companyGuid)
+            return await _context.Companies.Where(x => x.Id == companyId)
                 .Select(x => x.CompanyName)
-                .FirstOrDefaultAsync()
-                ?? throw new NotFoundException();
+                .FirstOrDefaultAsync() ?? throw new NotFoundException();
         }
     }
 }

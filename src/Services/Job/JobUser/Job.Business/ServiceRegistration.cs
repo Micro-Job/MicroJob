@@ -23,16 +23,16 @@ namespace Job.Business
         {
             services.AddScoped<IFileService, FileService>();
             services.AddScoped<ResumeService>();
-            services.AddScoped<IEducationService, EducationService>();
+            services.AddScoped<EducationService>();
             services.AddScoped<UserInformationService>();
-            services.AddScoped<IExperienceService, ExperienceService>();
+            services.AddScoped<ExperienceService>();
             services.AddScoped<NumberService>();
-            services.AddScoped<ILanguageService, LanguageService>();
-            services.AddScoped<ICertificateService, CertificateService>();
+            services.AddScoped<LanguageService>();
+            services.AddScoped<CertificateService>();
             services.AddScoped<SkillService>();
-            services.AddScoped<INotificationService, NotificationService>();
+            services.AddScoped<NotificationService>();
             services.AddScoped<ICurrentUser, CurrentUser>();
-            services.AddScoped<IPositionService, PositionService>();
+            services.AddScoped<PositionService>();
             services.AddScoped<UserManagementService>();
         }
 

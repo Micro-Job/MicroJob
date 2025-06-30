@@ -12,6 +12,7 @@
         public int? EmployeeCount { get; set; }
         public string? CompanyLogo { get; set; }
         public string? Email { get; set; }
+        public string MainPhoneNumber { get; set; }
         public bool IsCompany { get; set; }
         public string? VOEN { get; set; }
 

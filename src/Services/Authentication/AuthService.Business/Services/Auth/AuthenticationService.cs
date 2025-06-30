@@ -103,7 +103,8 @@ namespace AuthService.Business.Services.Auth
                 MainPhoneNumber = dto.MainPhoneNumber,
                 RegistrationDate = DateTime.Now,
                 Password = _tokenHandler.GeneratePasswordHash(dto.Password),
-                UserRole = dto.IsCompany ? UserRole.CompanyUser : UserRole.EmployeeUser
+                UserRole = dto.IsCompany ? UserRole.CompanyUser : UserRole.EmployeeUser,
+                IsVerified = true
             };
 
             await _context.Users.AddAsync(user);
@@ -116,7 +117,9 @@ namespace AuthService.Business.Services.Auth
                     UserId = user.Id,
                     CompanyName = dto.IsCompany ? dto.CompanyName.Trim() : null,
                     IsCompany = dto.IsCompany,
-                    VOEN = dto.IsCompany ? dto.VOEN : null
+                    VOEN = dto.IsCompany ? dto.VOEN : null,
+                    Email = dto.Email,
+                    MainPhoneNumber = dto.MainPhoneNumber
                 }
             );
 
@@ -361,7 +364,6 @@ namespace AuthService.Business.Services.Auth
                     HttpResponseMessage response = await httpClient.PostAsync(apiUrl, content);
                     string responseBody = await response.Content.ReadAsStringAsync();
 
-
                     TaxpayerInfoRoot taxpayerInfo = JsonSerializer.Deserialize<TaxpayerInfoRoot>(responseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
                     if (taxpayerInfo?.taxpayers != null && taxpayerInfo.taxpayers.Any())
@@ -374,7 +376,7 @@ namespace AuthService.Business.Services.Auth
             }
             catch (Exception)
             {
-                throw new BadRequestException();
+                throw new BadRequestException(MessageHelper.GetMessage("VOEN_NOT_FOUND"));
             }
         }
 

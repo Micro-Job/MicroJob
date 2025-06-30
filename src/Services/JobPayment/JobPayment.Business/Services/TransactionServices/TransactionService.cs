@@ -21,7 +21,7 @@ using System.Threading.Tasks;
 
 namespace JobPayment.Business.Services.TransactionServices
 {
-    public class TransactionService(PaymentDbContext _context, IDepositService _depositService, ICurrentUser _currentUser) : ITransactionService
+    public class TransactionService(PaymentDbContext _context, DepositService _depositService, ICurrentUser _currentUser)
     {
         public async Task CreateTransactionAsync(CreateTransactionDto dto)
         {

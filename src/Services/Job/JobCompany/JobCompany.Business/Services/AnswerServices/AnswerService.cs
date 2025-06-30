@@ -5,7 +5,7 @@ using JobCompany.DAL.Contexts;
 
 namespace JobCompany.Business.Services.AnswerServices
 {
-    public class AnswerService(JobCompanyDbContext _context) : IAnswerService
+    public class AnswerService(JobCompanyDbContext _context) 
     {
         public async Task<ICollection<Answer>> CreateBulkAnswerAsync(
             ICollection<CreateAnswerDto> dtos,

@@ -14,7 +14,7 @@ using SharedLibrary.Responses;
 
 namespace JobCompany.Business.Consumers
 {
-    public class VacancyAcceptConsumer(JobCompanyDbContext _context, IRequestClient<CheckBalanceRequest> _balanceRequest, IPublishEndpoint _publishEndpoint, INotificationService _notificationService, IConfiguration _configuration) : IConsumer<VacancyAcceptEvent>
+    public class VacancyAcceptConsumer(JobCompanyDbContext _context, IRequestClient<CheckBalanceRequest> _balanceRequest, IPublishEndpoint _publishEndpoint, NotificationService _notificationService) : IConsumer<VacancyAcceptEvent>
     {
         public async Task Consume(ConsumeContext<VacancyAcceptEvent> context)
         {
@@ -25,11 +25,10 @@ namespace JobCompany.Business.Consumers
 
             if ((vacancy.VacancyStatus == VacancyStatus.Pending ||
                 vacancy.VacancyStatus == VacancyStatus.Update ||
-                vacancy.VacancyStatus == VacancyStatus.PendingActive) &&
-                vacancy.EndDate >= DateTime.Now)
+                vacancy.VacancyStatus == VacancyStatus.PendingActive) && 
+                vacancy.EndDate >= DateTime.Now.AddHours(4))
             {
-                //TODO : bu hissede kod oxunaqligi itib yeniden daha seliqeli yazilmalidir
-                if (vacancy.VacancyStatus == VacancyStatus.Update && vacancy.PaymentDate > DateTime.Now)
+                if (vacancy.VacancyStatus == VacancyStatus.Update && vacancy.PaymentDate > DateTime.Now.AddHours(4))
                 {
                     vacancy.VacancyStatus = VacancyStatus.Active;
                     await _notificationService.CreateNotificationAsync(new CreateNotificationDto
@@ -79,7 +78,7 @@ namespace JobCompany.Business.Consumers
                             {
                                 SenderId = vacancy.Company.UserId,
                                 SenderName = vacancy.Company.CompanyName,
-                                SenderImage = $"{_configuration["JobCompany:BaseUrl"]}{vacancy.Company.CompanyLogo}",
+                                SenderImage = vacancy.Company.CompanyLogo,
                                 InformationId = vacancyGuid,
                                 NotificationType = NotificationType.VacancyUpdate,
                                 InformationName = vacancy.Title,
@@ -120,11 +119,10 @@ namespace JobCompany.Business.Consumers
                             ReceiverId = (Guid)vacancy.CompanyId
                         });
                     }
-
                 }
-            }
 
-            await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }

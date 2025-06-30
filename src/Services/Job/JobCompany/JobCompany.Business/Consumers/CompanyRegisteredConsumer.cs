@@ -11,25 +11,33 @@ public class CompanyRegisteredConsumer(JobCompanyDbContext _dbContext) : IConsum
 {
     public async Task Consume(ConsumeContext<CompanyRegisteredEvent> context)
     {
-        Guid companyId = context.Message.CompanyId;
+        var message = context.Message;
 
         var newCompany = new Company
         {
-            Id = companyId,
-            UserId = context.Message.UserId,
-            CompanyName = context.Message.CompanyName,
+            Id = message.CompanyId,
+            UserId = message.UserId,
+            CompanyName = message.CompanyName,
             CompanyLogo = Path.Combine(FilePaths.image, "defaultlogo.jpg"),
-            IsCompany = context.Message.IsCompany,
-            VOEN = context.Message.IsCompany ? context.Message.VOEN : null
+            IsCompany = message.IsCompany,
+            VOEN = message.IsCompany ? message.VOEN : null,
+            Email = message.Email,
+            MainPhoneNumber = message.MainPhoneNumber
         };
 
         await _dbContext.Companies.AddAsync(newCompany);
+
+        await _dbContext.CompanyNumbers.AddAsync(new CompanyNumber
+        {
+            CompanyId = message.CompanyId,
+            Number = message.MainPhoneNumber
+        });
 
         var steps = await _dbContext.ApplicationSteps.ToListAsync();
 
         var statuses = steps.Select(s => new Status
         {
-            CompanyId = companyId,
+            CompanyId = message.CompanyId,
             StatusEnum = s.StatusEnum,
             StatusColor = s.StatusColor,
             IsVisible = s.IsVisible,

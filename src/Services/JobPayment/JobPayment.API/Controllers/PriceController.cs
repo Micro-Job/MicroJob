@@ -8,7 +8,7 @@ namespace JobPayment.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PriceController(IPriceService _priceService) : ControllerBase
+    public class PriceController(PriceService _priceService) : ControllerBase
     {
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllPrices()

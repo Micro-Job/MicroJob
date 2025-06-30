@@ -23,7 +23,7 @@ public enum NotificationType : byte
     /// </summary>
     VacancyDeleted = 5,
     /// <summary>
-    /// Vakansiyanin silinmesi bildirisi
+    /// Vakansiyanin yenilenmesi bildirisi
     /// </summary>
     VacancyUpdate = 6,
     /// <summary>

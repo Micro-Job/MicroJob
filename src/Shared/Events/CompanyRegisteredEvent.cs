@@ -7,5 +7,7 @@
         public string? VOEN { get; set; }
         public string? CompanyName { get; set; }
         public bool IsCompany { get; set; }
+        public string Email { get; set; }
+        public string MainPhoneNumber { get; set; }
     }
 }

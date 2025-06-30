@@ -11,7 +11,7 @@ using SharedLibrary.HelperServices.Current;
 
 namespace JobCompany.Business.Services.CategoryServices;
 
-public class CategoryService(JobCompanyDbContext _context, ICurrentUser _user) : ICategoryService
+public class CategoryService(JobCompanyDbContext _context, ICurrentUser _user) 
 {
     public async Task CreateCategoryAsync(CategoryCreateDto dto)
     {

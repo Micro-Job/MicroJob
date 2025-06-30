@@ -12,7 +12,7 @@ namespace JobCompany.API.Controllers
     [Route("api/[controller]")]
     //[AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser)]
     [Authorize]
-    public class ExamController(IExamService examService) : ControllerBase
+    public class ExamController(ExamService examService) : ControllerBase
     {
         [HttpPost("[action]")]
         public async Task<IActionResult> CreateExam([FromForm] CreateExamDto dto)

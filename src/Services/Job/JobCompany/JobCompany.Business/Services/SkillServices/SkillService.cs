@@ -9,7 +9,7 @@ using SharedLibrary.HelperServices.Current;
 
 namespace JobCompany.Business.Services.SkillServices;
 
-public class SkillService(JobCompanyDbContext _context, ICurrentUser _user) : ISkillService
+public class SkillService(JobCompanyDbContext _context, ICurrentUser _user)
 {
     public async Task CreateSkillAsync(SkillCreateDto dto)
     {

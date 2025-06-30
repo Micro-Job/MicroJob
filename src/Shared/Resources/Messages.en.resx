@@ -129,6 +129,9 @@
   <data name="AUTHENTICATION_FAILED" xml:space="preserve">
     <value>Authentication failed</value>
   </data>
+  <data name="BAD_REQUEST" xml:space="preserve">
+    <value>An error occurred</value>
+  </data>
   <data name="BIRTHDAY_MUST_BE_IN_THE_PAST" xml:space="preserve">
     <value>Birthday date must be in the past</value>
   </data>
@@ -269,6 +272,9 @@
   </data>
   <data name="VACANCY_UPDATE" xml:space="preserve">
     <value>The vacancy cannot be updated because it is blocked.</value>
+  </data>
+  <data name="VOEN_NOT_FOUND" xml:space="preserve">
+    <value>TAX ID does not exist</value>
   </data>
   <data name="WELCOME" xml:space="preserve">
     <value>Welcome</value>

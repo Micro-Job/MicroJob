@@ -8,7 +8,7 @@ namespace JobCompany.API.Controllers
     [ApiController]
     [Route("api/[controller]")]
     //[AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser)]
-    public class NotificationController(INotificationService _notificationService) : ControllerBase
+    public class NotificationController(NotificationService _notificationService) : ControllerBase
     {
         [HttpGet("[action]")]
         public async Task<IActionResult> GetUserNotificationsAsync(bool? IsSeen , int skip, int take)

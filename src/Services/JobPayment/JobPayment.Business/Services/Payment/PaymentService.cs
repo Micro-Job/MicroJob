@@ -9,7 +9,7 @@ using JobPayment.DAL.Contexts;
 
 namespace JobPayment.Business.Services.Payment
 {
-    public class PaymentService(PaymentDbContext _context , IBalanceService _balanceService , IPriceService _priceService , ITransactionService _transactionService) : IPaymentService
+    public class PaymentService(PaymentDbContext _context , BalanceService _balanceService , PriceService _priceService , TransactionService _transactionService)
     {
         public async Task Pay(PayDto dto)
         {

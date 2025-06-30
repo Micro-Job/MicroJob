@@ -7,7 +7,7 @@ using SharedLibrary.HelperServices.Current;
 
 namespace JobCompany.Business.Services.VacancyComment;
 
-public class VacancyCommentService(JobCompanyDbContext _context, ICurrentUser _user) : IVacancyCommentService
+public class VacancyCommentService(JobCompanyDbContext _context, ICurrentUser _user)
 {
     public async Task VacancyCommentCreateAsync(VacancyCommentCreateDto dto)
     {

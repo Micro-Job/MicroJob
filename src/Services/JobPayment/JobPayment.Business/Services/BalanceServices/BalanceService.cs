@@ -13,7 +13,7 @@ using System.Xml.Linq;
 
 namespace JobPayment.Business.Services.BalanceServices
 {
-    public class BalanceService(PaymentDbContext _context, ITransactionService _transactionService, IPacketService _packetService, ICurrentUser _currentUser) : IBalanceService
+    public class BalanceService(PaymentDbContext _context, TransactionService _transactionService, PacketService _packetService, ICurrentUser _currentUser)
     {
         public async Task IncreaseBalanceAsync(string packetId)
         {

@@ -8,7 +8,7 @@ namespace Job.API.Controllers
     [ApiController]
     [Route("api/[controller]")]
     //[AuthorizeRole(UserRole.SimpleUser)]
-    public class NotificationController(INotificationService service) : ControllerBase
+    public class NotificationController(NotificationService service) : ControllerBase
     {
         [HttpGet("[action]")]
         public async Task<IActionResult> GetUserNotifications(bool? IsSeen , int skip = 1,int take = 6)

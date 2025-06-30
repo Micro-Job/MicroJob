@@ -1,6 +1,7 @@
 ﻿using JobCompany.Core.Entites;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System.Reflection.Emit;
 
 namespace JobCompany.DAL.Configurations
 {
@@ -17,7 +18,14 @@ namespace JobCompany.DAL.Configurations
                 .HasMaxLength(500);
 
             builder.Property(x => x.VOEN)
-                .HasMaxLength(16);
+            .HasMaxLength(16);
+
+            builder.Property(u => u.MainPhoneNumber)
+               .HasMaxLength(32)
+               .IsRequired();
+
+            builder.Property(u => u.Email)
+               .HasMaxLength(100);
 
             builder.Property(c => c.CompanyLocation)
                 .HasMaxLength(128);
@@ -64,6 +72,10 @@ namespace JobCompany.DAL.Configurations
                    .WithOne(e => e.Company)
                    .HasForeignKey(e => e.CompanyId)
                    .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Property(x => x.CompanyName)
+                .IsRequired(false)
+                .HasMaxLength(32);
         }
     }
 }

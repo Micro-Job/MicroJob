@@ -129,6 +129,9 @@
   <data name="AUTHENTICATION_FAILED" xml:space="preserve">
     <value>Ошибка аутентификации</value>
   </data>
+  <data name="BAD_REQUEST" xml:space="preserve">
+    <value>Произошла ошибка</value>
+  </data>
   <data name="BIRTHDAY_MUST_BE_IN_THE_PAST" xml:space="preserve">
     <value>День рождения должен быть в прошлом</value>
   </data>
@@ -269,6 +272,9 @@
   </data>
   <data name="VACANCY_UPDATE" xml:space="preserve">
     <value>Вакансия не может быть обновлена, так как она заблокирована</value>
+  </data>
+  <data name="VOEN_NOT_FOUND" xml:space="preserve">
+    <value>ИНН не существует</value>
   </data>
   <data name="WELCOME" xml:space="preserve">
     <value>Добро пожаловать</value>

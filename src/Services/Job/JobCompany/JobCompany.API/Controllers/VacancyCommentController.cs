@@ -7,7 +7,7 @@ namespace JobCompany.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class VacancyCommentController(IVacancyCommentService _service) : ControllerBase
+    public class VacancyCommentController(VacancyCommentService _service) : ControllerBase
     {
         [HttpPost("[action]")]
         public async Task<IActionResult> VacancyCommentCreate(VacancyCommentCreateDto dto)

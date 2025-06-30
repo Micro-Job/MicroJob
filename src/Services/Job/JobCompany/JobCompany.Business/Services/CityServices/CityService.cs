@@ -10,7 +10,7 @@ using SharedLibrary.HelperServices.Current;
 
 namespace JobCompany.Business.Services.CityServices;
 
-public class CityService(JobCompanyDbContext _context, ICurrentUser _user) : ICityService
+public class CityService(JobCompanyDbContext _context, ICurrentUser _user) 
 {
     public async Task CreateCityAsync(CreateCityDto dto)
     {

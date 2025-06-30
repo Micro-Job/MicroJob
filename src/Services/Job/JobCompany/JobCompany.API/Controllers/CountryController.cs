@@ -10,7 +10,7 @@ namespace JobCompany.API.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser)]
-    public class CountryController(ICountryService service) : ControllerBase
+    public class CountryController(CountryService service) : ControllerBase
     {
         [HttpPost("[action]")]
         public async Task<IActionResult> CreateCountry(CountryCreateDto dto)
