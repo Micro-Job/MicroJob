@@ -27,26 +27,26 @@ public class VacancyCreatedConsumer(JobDbContext _dbContext) : IConsumer<Vacancy
             .Select(g => g.Key)
             .ToListAsync();
 
-        if (matchedUserIds.Any())
+        if (!matchedUserIds.Any())
         {
             await context.ConsumeCompleted; 
             return;
-        };
-
-        var notifications = matchedUserIds.Select(userId => new Notification
+        }
+        else
         {
-            ReceiverId = userId,
-            SenderId = message.SenderId,
-            NotificationType = NotificationType.Vacancy,
-            InformationId = message.InformationId,
-            InformationName = message.InformatioName,
-            SenderName = message.SenderName,
-            SenderImage = message.SenderImage,
-            IsSeen = false
-        }).ToList();
+            var notifications = matchedUserIds.Select(userId => new Notification
+            {
+                ReceiverId = userId,
+                SenderId = message.SenderId,
+                NotificationType = NotificationType.Vacancy,
+                InformationId = message.InformationId,
+                InformationName = message.InformatioName,
+                SenderName = message.SenderName,
+                SenderImage = message.SenderImage,
+                CreatedDate = DateTime.Now.AddHours(4),
+                IsSeen = false
+            }).ToList();
 
-        if (notifications.Any())
-        {
             await _dbContext.Notifications.AddRangeAsync(notifications);
             await _dbContext.SaveChangesAsync();
         }

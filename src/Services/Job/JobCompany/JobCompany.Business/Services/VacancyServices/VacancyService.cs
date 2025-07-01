@@ -53,7 +53,7 @@ namespace JobCompany.Business.Services.VacancyServices
             var vacancy = new Vacancy
             {
                 Id = Guid.NewGuid(),
-                CompanyName = company.IsCompany ? company.CompanyName : vacancyDto.CompanyName.Trim(),
+                CompanyName = company.IsCompany ? company.CompanyName.Substring(0,30) : vacancyDto.CompanyName.Trim(),
                 CompanyId = company?.Id,
                 Title = vacancyDto.Title.Trim(),
                 CompanyLogo = companyLogoPath,
@@ -114,18 +114,20 @@ namespace JobCompany.Business.Services.VacancyServices
             await _context.SaveChangesAsync();
 
             //TODO : bu hisse burada yeni vakansiya yaranan zaman deyil de qebul edildikden sonra görsenmelidir
-            if (vacancyDto.SkillIds != null)
-            {
-                await _publishEndpoint.Publish(
-                    new VacancyCreatedEvent
-                    {
-                        SenderId = (Guid)_currentUser.UserGuid,
-                        SkillIds = vacancyDto.SkillIds,
-                        InformationId = vacancy.Id,
-                        InformatioName = vacancy.Title,
-                    }
-                );
-            }
+            //if (vacancyDto.SkillIds != null)
+            //{
+            //    await _publishEndpoint.Publish(
+            //        new VacancyCreatedEvent
+            //        {
+            //            SenderId = (Guid)_currentUser.UserGuid,
+            //            SkillIds = vacancyDto.SkillIds,
+            //            InformationId = vacancy.Id,
+            //            InformatioName = vacancy.Title,
+            //            SenderImage = vacancy.CompanyLogo,
+            //            SenderName = vacancy.CompanyName
+            //        }
+            //    );
+            //}
         }
 
         public async Task DeleteAsync(List<string> ids)

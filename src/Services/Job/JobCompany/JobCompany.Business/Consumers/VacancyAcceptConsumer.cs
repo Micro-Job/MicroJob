@@ -96,8 +96,8 @@ namespace JobCompany.Business.Consumers
                                     SkillIds = vacancy.VacancySkills.Select(x => x.SkillId).ToList(),
                                     InformationId = vacancy.Id,
                                     InformatioName = vacancy.Title,
+                                    SenderImage = vacancy.CompanyLogo,
                                     SenderName = vacancy.CompanyName,
-                                    SenderImage = vacancy.CompanyLogo
                                 }
                             );
                         }
