@@ -12,7 +12,7 @@ namespace JobCompany.DAL.Configurations
 
             builder.Property(v => v.CompanyName)
                    .IsRequired()
-                   .HasMaxLength(64);
+                   .HasMaxLength(32);
 
             builder.Property(v => v.Title)
                    .IsRequired()

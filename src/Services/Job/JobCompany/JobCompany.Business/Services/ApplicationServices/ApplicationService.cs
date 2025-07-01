@@ -132,8 +132,7 @@ public class ApplicationService(JobCompanyDbContext _context,
                 InformationId = applicationId,
                 InformationName = existAppVacancy.VacancyTitle,
                 NotificationType = NotificationType.ApplicationStatusUpdate,
-                //TODO burada BaseUrl event vasitesile gonderilmeli deyil
-                SenderImage = $"{_currentUser.BaseUrl}/companyFiles/{existAppVacancy.CompanyLogo}",
+                SenderImage = existAppVacancy.CompanyLogo,
                 SenderName = existAppVacancy.CompanyName,
             }
         );

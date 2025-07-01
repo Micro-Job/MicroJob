@@ -20,15 +20,17 @@ namespace JobCompany.Business.Consumers
         {
             var vacancyGuid = Guid.Parse(context.Message.vacancyId);
 
+            DateTime nowDate = DateTime.Now.AddHours(4);
+
             var vacancy = await _context.Vacancies.Include(x => x.VacancySkills).Include(x => x.Company).FirstOrDefaultAsync(v => v.Id == vacancyGuid)
                 ?? throw new NotFoundException();
 
             if ((vacancy.VacancyStatus == VacancyStatus.Pending ||
                 vacancy.VacancyStatus == VacancyStatus.Update ||
                 vacancy.VacancyStatus == VacancyStatus.PendingActive) && 
-                vacancy.EndDate >= DateTime.Now.AddHours(4))
+                vacancy.EndDate >= nowDate)
             {
-                if (vacancy.VacancyStatus == VacancyStatus.Update && vacancy.PaymentDate > DateTime.Now.AddHours(4))
+                if (vacancy.VacancyStatus == VacancyStatus.Update && vacancy.PaymentDate > nowDate)
                 {
                     vacancy.VacancyStatus = VacancyStatus.Active;
                     await _notificationService.CreateNotificationAsync(new CreateNotificationDto
@@ -85,7 +87,7 @@ namespace JobCompany.Business.Consumers
                                 ReceiverIds = appliedUserIds
                             });
                         }
-                        if (vacancy.VacancySkills != null && vacancy.VacancyStatus == VacancyStatus.Pending)
+                        if (vacancy.VacancySkills != null && vacancy.VacancyStatus == VacancyStatus.Pending && vacancy.StartDate <= nowDate)
                         {
                             await _publishEndpoint.Publish(
                                 new VacancyCreatedEvent
@@ -94,6 +96,8 @@ namespace JobCompany.Business.Consumers
                                     SkillIds = vacancy.VacancySkills.Select(x => x.SkillId).ToList(),
                                     InformationId = vacancy.Id,
                                     InformatioName = vacancy.Title,
+                                    SenderName = vacancy.CompanyName,
+                                    SenderImage = vacancy.CompanyLogo
                                 }
                             );
                         }

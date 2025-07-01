@@ -36,7 +36,8 @@ namespace JobCompany.Business.Services.VacancyServices
             {
                 x.Id,
                 x.CompanyName,
-                x.CompanyLogo
+                x.CompanyLogo,
+                x.IsCompany
             }).FirstOrDefaultAsync();
 
             if (company != null && !string.IsNullOrEmpty(company.CompanyLogo))
@@ -52,7 +53,7 @@ namespace JobCompany.Business.Services.VacancyServices
             var vacancy = new Vacancy
             {
                 Id = Guid.NewGuid(),
-                CompanyName = _currentUser.UserRole == (byte)UserRole.CompanyUser ? company.CompanyName : vacancyDto.CompanyName.Trim(),
+                CompanyName = company.IsCompany ? company.CompanyName : vacancyDto.CompanyName.Trim(),
                 CompanyId = company?.Id,
                 Title = vacancyDto.Title.Trim(),
                 CompanyLogo = companyLogoPath,
@@ -112,19 +113,19 @@ namespace JobCompany.Business.Services.VacancyServices
             await _context.Vacancies.AddAsync(vacancy);
             await _context.SaveChangesAsync();
 
-            //TODO : bu skillere uygun mesajlarin getmesi ucundur buna baxmaq lazimdir islemirdi en son
-            //if (vacancyDto.SkillIds != null)
-            //{
-            //    await _publishEndpoint.Publish(
-            //        new VacancyCreatedEvent
-            //        {
-            //            SenderId = (Guid)_currentUser.UserGuid,
-            //            SkillIds = vacancyDto.SkillIds,
-            //            InformationId = vacancy.Id,
-            //            InformatioName = vacancy.Title,
-            //        }
-            //    );
-            //}
+            //TODO : bu hisse burada yeni vakansiya yaranan zaman deyil de qebul edildikden sonra görsenmelidir
+            if (vacancyDto.SkillIds != null)
+            {
+                await _publishEndpoint.Publish(
+                    new VacancyCreatedEvent
+                    {
+                        SenderId = (Guid)_currentUser.UserGuid,
+                        SkillIds = vacancyDto.SkillIds,
+                        InformationId = vacancy.Id,
+                        InformatioName = vacancy.Title,
+                    }
+                );
+            }
         }
 
         public async Task DeleteAsync(List<string> ids)
@@ -306,8 +307,15 @@ namespace JobCompany.Business.Services.VacancyServices
 
             if (vacancyDto.CompanyUserId != userGuid)
             {
-                if (vacancyDto.EndDate < DateTime.Now && vacancyDto.VacancyStatus != VacancyStatus.Active)
-                    throw new NotFoundException();
+                if ((vacancyDto.EndDate < DateTime.Now || 
+                    vacancyDto.VacancyStatus != VacancyStatus.Active) 
+                    && 
+                    (
+                    _currentUser.UserRole == (byte)UserRole.SimpleUser ||
+                    _currentUser.UserRole == (byte)UserRole.CompanyUser ||
+                    _currentUser.UserRole == (byte)UserRole.EmployeeUser)
+                    )
+                throw new NotFoundException();
 
                 var existVacancy = await _context.Vacancies.FirstOrDefaultAsync(x => x.Id == vacancyId);
                 existVacancy.ViewCount++;
@@ -721,7 +729,6 @@ namespace JobCompany.Business.Services.VacancyServices
             return vacancies;
         }
 
-        //TODO : burada iseduzelden eger vakansiya yaradarsa bu zaman vakansiyaya sekil qoyur ona gore de sekil hissesinde companyLogo olmali deyil
         public async Task<DataListDto<VacancyGetAllDto>> GetAllSavedVacancyAsync(int skip, int take, string? vacancyName)
         {
             var query = _context.SavedVacancies.Where(x => x.UserId == _currentUser.UserGuid)
@@ -751,7 +758,7 @@ namespace JobCompany.Business.Services.VacancyServices
                     IsSaved = true,
                     SalaryCurrency = x.Vacancy.SalaryCurrency
                 })
-                .Skip(Math.Max(0, (skip - 1) * take))
+                .Skip((skip - 1) * take)
                 .Take(take)
                 .ToListAsync();
 

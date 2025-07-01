@@ -11,7 +11,6 @@ using SharedLibrary.HelperServices.Current;
 
 namespace JobCompany.Business.Services.NotificationServices
 {
-    //TODO : Burada senderName ve senderImage birbasa ozunden gelmelidir yeni request response ile islemeli deyil
     public class NotificationService(JobCompanyDbContext _context, ICurrentUser _currentUser)
     {
         public async Task<DataListDto<NotificationDto>> GetUserNotificationsAsync(bool? IsSeen, int skip, int take)
