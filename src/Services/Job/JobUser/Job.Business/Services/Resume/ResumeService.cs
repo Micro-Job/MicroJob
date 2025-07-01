@@ -15,7 +15,6 @@ using Job.Business.Services.Experience;
 using Job.Business.Services.Language;
 using Job.Business.Services.Number;
 using Job.Business.Services.Position;
-using Job.Business.Services.User;
 using Job.Business.Statistics;
 using Job.Core.Entities;
 using Job.Core.Enums;
@@ -365,7 +364,8 @@ namespace Job.Business.Services.Resume
             bool hasApplied = false;
 
             // Əgər CompanyUser-dursa, şirkətin hər hansı bir vakansiyasına müraciət edib-etmədiyini yoxlayırıq
-            if (_currentUser.UserRole == (byte)UserRole.CompanyUser)
+            //TODO : burada request responseden istifade edilmeli deyil
+            if (_currentUser.UserRole == (byte)UserRole.CompanyUser || _currentUser.UserRole == (byte)UserRole.EmployeeUser)
             {
                 var checkApplicationResponse = await _checkApplicationRequest.GetResponse<CheckApplicationResponse>(
                     new CheckApplicationRequest
@@ -379,6 +379,7 @@ namespace Job.Business.Services.Resume
 
             // İcazə olub-olmadığını yoxlayırıq. 4 halda resume-nin bütün datalarına tam baxma icazəsi var:
             bool hasFullAccess = _currentUser.UserRole == (byte)UserRole.Admin // Əgər admindirsə
+                || _currentUser.UserRole == (byte)UserRole.SuperAdmin          // Əgər Superadmindirsə
                 || hasApplied                                                  // Əgər müraciət edibsə
                 || resumeData.HasAccessByCompany                               // Əgər resume-yə baxma icazəsi varsa
                 || resumeData.Resume.IsPublic;                                 // Əgər resume public-dirsə

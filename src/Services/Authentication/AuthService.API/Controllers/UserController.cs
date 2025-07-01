@@ -12,13 +12,6 @@ namespace AuthService.API.Controllers
     [Route("api/[controller]")]
     public class UserController(UserService userService) : ControllerBase
     {
-        [HttpGet("[action]")]
-        public async Task<IActionResult> GetUserInformationAsync()
-        {
-            var data = await userService.GetUserInformationAsync();
-            return Ok(data);
-        }
-
         [AuthorizeRole(UserRole.Admin, UserRole.Operator)]
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllUsers(UserRole userRole, string? fullName, string? email, string? phoneNumber, int pageIndex = 1, int pageSize = 10)
@@ -26,18 +19,6 @@ namespace AuthService.API.Controllers
             var result = await userService.GetAllUsersAsync(userRole, fullName, email, phoneNumber, pageIndex, pageSize);
             return Ok(result);
         }
-
-        [HttpPut("[action]")]
-        public async Task<IActionResult> UpdateUserInformationAsync(UserUpdateDto dto)
-        {
-            return Ok(await userService.UpdateUserInformationAsync(dto));
-        }
-
-        //[HttpPut("[action]")]
-        //public async Task<IActionResult> UpdateUserProfileImageAsync([FromForm] UserProfileImageUpdateDto dto)
-        //{
-        //    return Ok(await userService.UpdateUserProfileImageAsync(dto));
-        //}
 
         [AuthorizeRole(UserRole.Admin)]
         [HttpGet("[action]")]

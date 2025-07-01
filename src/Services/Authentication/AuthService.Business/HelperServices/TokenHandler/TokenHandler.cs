@@ -9,7 +9,7 @@ using System.Text;
 
 namespace AuthService.Business.HelperServices.TokenHandler;
 
-public class TokenHandler(IConfiguration _configuration) : ITokenHandler
+public class TokenHandler(IConfiguration _configuration)
 {
     public string CreateToken(User user, int expires = 60)
     {

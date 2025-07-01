@@ -53,7 +53,7 @@ namespace JobCompany.Business.Services.VacancyServices
             var vacancy = new Vacancy
             {
                 Id = Guid.NewGuid(),
-                CompanyName = company.IsCompany ? company.CompanyName.Substring(0,30) : vacancyDto.CompanyName.Trim(),
+                CompanyName = company.IsCompany ? company.CompanyName : vacancyDto.CompanyName.Trim(),
                 CompanyId = company?.Id,
                 Title = vacancyDto.Title.Trim(),
                 CompanyLogo = companyLogoPath,

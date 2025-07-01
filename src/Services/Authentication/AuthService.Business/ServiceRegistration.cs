@@ -1,4 +1,5 @@
-﻿using AuthService.Business.HelperServices.Email;
+﻿using AuthService.Business.Consumers;
+using AuthService.Business.HelperServices.Email;
 using AuthService.Business.HelperServices.TokenHandler;
 using AuthService.Business.Publishers;
 using AuthService.Business.Services.Auth;
@@ -20,7 +21,7 @@ namespace AuthService.Business
             services.Configure<SmtpSettings>(configuration.GetSection("SmtpSettings"));
 
             services.AddHttpContextAccessor();
-            services.AddScoped<ITokenHandler, TokenHandler>();
+            services.AddScoped<TokenHandler>();
             services.AddScoped<EmailService>();
             services.AddScoped<AuthenticationService>();
             services.AddScoped<EmailPublisher>();
@@ -37,7 +38,10 @@ namespace AuthService.Business
 
             services.AddMassTransit(x =>
             {
+                x.AddConsumer<UpdateUserConsumer>();
+
                 x.SetKebabCaseEndpointNameFormatter();
+
                 x.UsingRabbitMq((context, cfg) =>
                 {
                     cfg.Host(cString);
