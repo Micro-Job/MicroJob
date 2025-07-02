@@ -12,9 +12,9 @@ namespace JobCompany.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    //[AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser)]
     public class VacancyController(VacancyService _vacancyService) : ControllerBase
     {
+        [AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser)]
         [HttpPost("[action]")]
         public async Task<IActionResult> CreateVacancy([FromForm] CreateVacancyDto vacancyDto, [FromForm] ICollection<CreateNumberDto>? numberDtos)
         {
@@ -22,6 +22,7 @@ namespace JobCompany.API.Controllers
             return Ok();
         }
 
+        [AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser)]
         [HttpPut("[action]")]
         public async Task<IActionResult> UpdateVacancy([FromForm] UpdateVacancyDto vacancyDto, [FromForm] ICollection<UpdateNumberDto>? numberDtos)
         {
@@ -29,6 +30,7 @@ namespace JobCompany.API.Controllers
             return Ok();
         }
 
+        [AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser)]
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllOwnVacancies(string? titleName, [FromQuery] List<Guid>? categoryIds, [FromQuery] List<Guid>? countryIds, [FromQuery] List<Guid>? cityIds, VacancyStatus? IsActive, decimal? minSalary, decimal? maxSalary, [FromQuery] List<byte>? workStyles, [FromQuery] List<byte>? workTypes, [FromQuery] List<Guid>? skills, int skip = 1, int take = 6)
         {
@@ -80,12 +82,14 @@ namespace JobCompany.API.Controllers
             return Ok();
         }
 
+        [AuthorizeRole(UserRole.SimpleUser)]
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllSavedVacancy(int skip, int take, string? vacancyName)
         {
             return Ok(await _vacancyService.GetAllSavedVacancyAsync(skip, take, vacancyName));
         }
 
+        [AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser)]
         [HttpPut("[action]")]
         public async Task<IActionResult> DeleteVacancy(Guid vacancyId)
         {
@@ -93,6 +97,7 @@ namespace JobCompany.API.Controllers
             return Ok();
         }
 
+        [AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser)]
         [HttpPut("[action]")]
         public async Task<IActionResult> TogglePauseVacancy(Guid vacancyId)
         {
@@ -100,6 +105,7 @@ namespace JobCompany.API.Controllers
             return Ok();
         }
 
+        [AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser)]
         [HttpPost("[action]")]
         public async Task<IActionResult> ActivateVacancy(Guid vacancyId)
         {

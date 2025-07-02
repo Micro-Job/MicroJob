@@ -9,9 +9,9 @@ namespace JobCompany.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser)]
     public class CountryController(CountryService service) : ControllerBase
     {
+        [AuthorizeRole(UserRole.SuperAdmin, UserRole.Admin, UserRole.Operator)]
         [HttpPost("[action]")]
         public async Task<IActionResult> CreateCountry(CountryCreateDto dto)
         {
@@ -19,6 +19,7 @@ namespace JobCompany.API.Controllers
             return Ok();
         }
 
+        [AuthorizeRole(UserRole.SuperAdmin, UserRole.Admin, UserRole.Operator)]
         [HttpPut("[action]/{id}")]
         public async Task<IActionResult> UpdateCountry(List<CountryUpdateDto> dtos)
         {
@@ -26,22 +27,21 @@ namespace JobCompany.API.Controllers
             return Ok();
         }
 
-        [AllowAnonymous]
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllCountries()
         {
             return Ok(await service.GetAllCountryAsync());
         }
 
-        [AllowAnonymous]
         [HttpGet("[action]")]
         public async Task<IActionResult> GetPagedCountries(string? name, int skip = 1, int take = 5)
         {
             return Ok(await service.GetPagedCountriesAsync(name, skip, take));
         }
 
+        [AuthorizeRole(UserRole.SuperAdmin, UserRole.Admin, UserRole.Operator)]
         [HttpDelete("[action]/{id}")]
-        public async Task<IActionResult> DeleteCountry(string id)
+        public async Task<IActionResult> DeleteCountry(Guid id)
         {
             await service.DeleteCountryAsync(id);
             return Ok();

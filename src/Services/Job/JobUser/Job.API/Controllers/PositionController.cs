@@ -1,10 +1,13 @@
 ﻿using Job.Business.Services.Position;
 using Microsoft.AspNetCore.Mvc;
+using SharedLibrary.Attributes;
+using SharedLibrary.Enums;
 
 namespace Job.API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[AuthorizeRole(UserRole.SimpleUser)]
 public class PositionController(PositionService _positionService) : ControllerBase
 {
     [HttpGet("[action]")]
@@ -20,7 +23,7 @@ public class PositionController(PositionService _positionService) : ControllerBa
     }
 
     [HttpGet("[action]")]
-    public async Task<IActionResult> GetSubPositions(string mainPositionId)
+    public async Task<IActionResult> GetSubPositions(Guid mainPositionId)
     {
         return Ok(await _positionService.GetSubPositionsAsync(mainPositionId));
     }

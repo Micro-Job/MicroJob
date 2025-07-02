@@ -48,10 +48,8 @@ namespace JobCompany.Business.Services.NotificationServices
             };
         }
 
-        public async Task MarkNotificationAsReadAsync(string id)
+        public async Task MarkNotificationAsReadAsync(Guid notificationGuid)
         {
-            var notificationGuid = Guid.Parse(id);
-
             var notification = await _context.Notifications.FirstOrDefaultAsync(x => x.Id == notificationGuid && x.Receiver.UserId == _currentUser.UserGuid)
                                             ?? throw new NotFoundException();
 

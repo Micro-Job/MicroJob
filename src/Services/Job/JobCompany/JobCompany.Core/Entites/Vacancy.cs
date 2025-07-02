@@ -15,10 +15,6 @@ namespace JobCompany.Core.Entites
         public DateTime CreatedDate { get; set; }
         public DateTime? PaymentDate { get; set; }
 
-        /// <summary>
-        /// Odenilmeli olan vaxt - hele ki elave edilmeyib
-        /// </summary>
-        //public DateTime? PayDate { get; set; }
         public string? Location { get; set; }
         public int ViewCount { get; set; }
         public string? Email { get; set; }
@@ -35,7 +31,6 @@ namespace JobCompany.Core.Entites
         public FamilySituation Family { get; set; }
         public Citizenship Citizenship { get; set; }
         public VacancyStatus VacancyStatus { get; set; }
-        //public bool IsVip { get; set; }
 
         public Guid? CompanyId { get; set; }
         public Company? Company { get; set; }

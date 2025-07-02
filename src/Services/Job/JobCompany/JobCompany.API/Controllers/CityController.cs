@@ -9,7 +9,6 @@ namespace JobCompany.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    //[Authorize]
     public class CityController(CityService service) : ControllerBase
     {
         [AuthorizeRole(UserRole.SuperAdmin)]
@@ -28,7 +27,6 @@ namespace JobCompany.API.Controllers
             return Ok();
         }
 
-        [AllowAnonymous]
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllCities()
         {
@@ -36,14 +34,12 @@ namespace JobCompany.API.Controllers
             return Ok(data);
         }
 
-        [AllowAnonymous]
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllCitiesByCountryId(string countryId)
         {
             return Ok(await service.GetAllCitiesByCountryIdAsync(countryId));
         }
 
-        [AllowAnonymous]
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllCitiesByCountryIds([FromQuery] List<string> countryIds, string? name, int skip = 1, int take = 5)
         {

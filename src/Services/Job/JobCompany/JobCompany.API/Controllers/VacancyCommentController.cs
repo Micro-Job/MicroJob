@@ -2,11 +2,14 @@
 using JobCompany.Business.Services.VacancyComment;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using SharedLibrary.Attributes;
+using SharedLibrary.Enums;
 
 namespace JobCompany.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [AuthorizeRole(UserRole.SuperAdmin, UserRole.Admin, UserRole.Operator)]
     public class VacancyCommentController(VacancyCommentService _service) : ControllerBase
     {
         [HttpPost("[action]")]
@@ -30,13 +33,13 @@ namespace JobCompany.API.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> VacancyCommentGetDetail(string id)
+        public async Task<IActionResult> VacancyCommentGetDetail(Guid id)
         {
             return Ok(await _service.VacancyCommentGetDetailAsync(id));
         }
 
         [HttpDelete("[action]")]
-        public async Task<IActionResult> VacancyCommentDelete(string id)
+        public async Task<IActionResult> VacancyCommentDelete(Guid id)
         {
             await _service.VacancyCommentDeleteAsync(id);
             return Ok();

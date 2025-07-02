@@ -3,6 +3,7 @@ using Job.Business.Dtos.ResumeDtos;
 using Job.Business.Services.Resume;
 using Job.Core.Entities;
 using Job.Core.Enums;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Enums;
 using SharedLibrary.Attributes;
@@ -13,9 +14,10 @@ namespace Job.API.Controllers
 
     [ApiController]
     [Route("api/[controller]")]
-    //[AuthorizeRole(UserRole.SimpleUser)]
+    [Authorize]
     public class ResumeController(ResumeService _resumeService) : ControllerBase
     {
+        [AuthorizeRole(UserRole.SimpleUser)]
         [HttpPost("[action]")]
         public async Task<IActionResult> CreateResume(ResumeCreateDto resumeCreateDto)
         {
@@ -23,6 +25,7 @@ namespace Job.API.Controllers
             return Ok();
         }
 
+        [AuthorizeRole(UserRole.SimpleUser)]
         [HttpPut("[action]")]
         public async Task<IActionResult> UpdateResume(ResumeUpdateDto resumeUpdateDto)
         {
@@ -30,12 +33,14 @@ namespace Job.API.Controllers
             return Ok();
         }
 
+        [AuthorizeRole(UserRole.SimpleUser)]
         [HttpGet("[action]")]
         public async Task<IActionResult> GetOwnResume()
         {
             return Ok(await _resumeService.GetOwnResumeAsync());
         }
 
+        [AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser)]
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllResumes([FromQuery] string? fullname,
             [FromQuery] bool? isPublic,
@@ -59,6 +64,7 @@ namespace Job.API.Controllers
             return Ok(await _resumeService.GetByIdResumeAysnc(id));
         }
 
+        [AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser)]
         [HttpGet("[action]")]
         public async Task<IActionResult> GetSavedResumes([FromQuery] string? fullname,
             [FromQuery] bool? isPublic,
@@ -74,6 +80,7 @@ namespace Job.API.Controllers
             return Ok(await _resumeService.GetSavedResumesAsync(fullname, isPublic, jobStatus, professionDegree, citizenship, gender, isExperience, skillIds, languages, skip, take));
         }
 
+        [AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser)]
         [HttpPost("[action]")]
         public async Task<IActionResult> ToggleSaveResume(string resumeId)
         {
@@ -81,12 +88,14 @@ namespace Job.API.Controllers
             return Ok();
         }
 
+        [AuthorizeRole(UserRole.SimpleUser)]
         [HttpGet("[action]")]
         public async Task<IActionResult> IsExistResume()
         {
             return Ok(await _resumeService.IsExistResumeAsync());
         }
 
+        [AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser)]
         [HttpPost("[action]")]
         public async Task<IActionResult> TakeResumeAccess(string resumeId)
         {

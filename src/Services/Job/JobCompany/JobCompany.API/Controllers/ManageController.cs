@@ -60,7 +60,7 @@ namespace JobCompany.API.Controllers
         }
 
         [HttpGet("[action]/{id}")]
-        public async Task<IActionResult> GetMessageById(string id)
+        public async Task<IActionResult> GetMessageById(Guid id)
         {
             return Ok(await _manageService.GetMessageByIdAsync(id));
         }
@@ -72,29 +72,27 @@ namespace JobCompany.API.Controllers
         }
 
         [HttpPut("[action]/{id}")]
-        public async Task<IActionResult> UpdateMessage(string id, UpdateMessageDto dto)
+        public async Task<IActionResult> UpdateMessage(Guid id, UpdateMessageDto dto)
         {
             await _manageService.UpdateMessageAsync(id, dto);
             return Ok();
         }
 
         [HttpDelete("[action]/{id}")]
-        public async Task<IActionResult> DeleteMessage(string id)
+        public async Task<IActionResult> DeleteMessage(Guid id)
         {
             await _manageService.DeleteMessageAsync(id);
             return Ok();
         }
 
-
-
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetCompanyDetails(string companyUserId)
+        public async Task<IActionResult> GetCompanyDetails(Guid companyUserId)
         {
             return Ok(await _manageService.GetCompanyDetailsAsync(companyUserId));
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetVacanciesByCompanyUserId(string companyUserId, int skip = 1, int take = 9)
+        public async Task<IActionResult> GetVacanciesByCompanyUserId(Guid companyUserId, int skip = 1, int take = 9)
         {
             return Ok(await _manageService.GetVacanciesByCompanyUserIdAsync(companyUserId, skip, take));
         }
@@ -108,7 +106,7 @@ namespace JobCompany.API.Controllers
         }
 
         [HttpGet("[action]/{id}")]
-        public async Task<IActionResult> GetCategoryById(string id)
+        public async Task<IActionResult> GetCategoryById(Guid id)
         {
             return Ok(await _manageService.GetCategoryByIdAsync(id));
         }
@@ -121,14 +119,14 @@ namespace JobCompany.API.Controllers
         }
 
         [HttpPut("[action]/{id}")]
-        public async Task<IActionResult> UpdateCategory(string id, List<CategoryTranslationDto> categories)
+        public async Task<IActionResult> UpdateCategory(Guid id, List<CategoryTranslationDto> categories)
         {
             await _manageService.UpdateCategoryAsync(id, categories);
             return Ok();
         }
 
         [HttpDelete("[action]/{id}")]
-        public async Task<IActionResult> DeleteCategory(string id)
+        public async Task<IActionResult> DeleteCategory(Guid id)
         {
             await _manageService.DeleteCategoryAsync(id);
             return Ok();

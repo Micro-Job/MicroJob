@@ -8,8 +8,6 @@ namespace JobCompany.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
-    //[AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser, UserRole.SimpleUser)]
     public class ApplicationController(ApplicationService service) : ControllerBase
     {
         [AuthorizeRole(UserRole.SimpleUser)]

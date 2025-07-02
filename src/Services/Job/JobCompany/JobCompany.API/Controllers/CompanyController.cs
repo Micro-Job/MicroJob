@@ -30,7 +30,7 @@ namespace JobCompany.API.Controllers
             return Ok(await service.GetCompanyDetailAsync(companyId));
         }
 
-        [AuthorizeRole(UserRole.EmployeeUser, UserRole.CompanyUser)]
+        //[AuthorizeRole(UserRole.EmployeeUser, UserRole.CompanyUser)]
         [HttpGet("[action]")]
         public async Task<IActionResult> GetOwnCompanyInformation()
         {

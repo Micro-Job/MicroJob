@@ -1,11 +1,14 @@
 ﻿using Job.Business.Dtos.UserDtos;
 using Job.Business.Services;
 using Microsoft.AspNetCore.Mvc;
+using SharedLibrary.Attributes;
+using SharedLibrary.Enums;
 
 namespace Job.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [AuthorizeRole(UserRole.SimpleUser)]
     public class UserController(UserInformationService _service) : ControllerBase
     {
         [HttpPut("[action]")]

@@ -8,6 +8,7 @@ namespace JobCompany.API.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser)]
+    //bu controller istifade edilmir
     public class ReportController(ReportService reportService) : ControllerBase
     {
         /// <summary>

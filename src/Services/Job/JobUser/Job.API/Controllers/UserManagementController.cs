@@ -7,7 +7,7 @@ namespace Job.API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-[AuthorizeRole(UserRole.Admin, UserRole.Operator)]
+[AuthorizeRole(UserRole.SuperAdmin, UserRole.Admin, UserRole.Operator)]
 public class UserManagementController(UserManagementService _service) : ControllerBase
 {
     [HttpGet("[action]/{userId}")]
