@@ -130,26 +130,6 @@ namespace JobCompany.Business.Services.VacancyServices
             //}
         }
 
-        public async Task DeleteAsync(List<string> ids)
-        {
-            if (ids == null || ids.Count == 0)
-                throw new ArgumentException(MessageHelper.GetMessage("NOT_EMPTY"));
-            var vacancyGuids = ids.Select(id =>
-                {
-                    if (Guid.TryParse(id, out var guid))
-                        return guid;
-                    throw new FormatException(MessageHelper.GetMessage("INVALID_FORMAT"));
-                })
-                .ToList();
-
-            var deletedCount = await _context
-                .Vacancies.Where(x => vacancyGuids.Contains(x.Id) && x.Company.UserId == _currentUser.UserGuid)
-                .ExecuteUpdateAsync(x => x.SetProperty(v => v.VacancyStatus, VacancyStatus.Deactive));
-
-            if (deletedCount == 0)
-                throw new NotFoundException();
-        }
-
         /// <summary> Şirkətin profilində bütün vakansiyalarını gətirmək(Filterlerle birlikde) </summary>
         public async Task<DataListDto<VacancyGetAllDto>> GetAllOwnVacanciesAsync(string? titleName, List<Guid>? categoryIds, List<Guid>? countryIds, List<Guid>? cityIds, VacancyStatus? IsActive, decimal? minSalary, decimal? maxSalary, List<byte>? workStyles, List<byte>? workTypes, List<Guid>? skillIds, int skip = 1, int take = 6)
         {
@@ -625,14 +605,13 @@ namespace JobCompany.Business.Services.VacancyServices
             return query;
         }
 
-        public async Task ToggleSaveVacancyAsync(string vacancyId)
+        public async Task ToggleSaveVacancyAsync(Guid vacancyId)
         {
-            Guid vacancyGuid = Guid.Parse(vacancyId);
 
-            if (!await _context.Vacancies.AnyAsync(x => x.Id == vacancyGuid))
+            if (!await _context.Vacancies.AnyAsync(x => x.Id == vacancyId))
                 throw new NotFoundException();
 
-            var vacancyCheck = await _context.SavedVacancies.FirstOrDefaultAsync(x => x.VacancyId == vacancyGuid);
+            var vacancyCheck = await _context.SavedVacancies.FirstOrDefaultAsync(x => x.VacancyId == vacancyId);
 
             if (vacancyCheck != null)
             {
@@ -641,7 +620,7 @@ namespace JobCompany.Business.Services.VacancyServices
             else
             {
                 await _context.SavedVacancies.AddAsync(
-                    new SavedVacancy { UserId = _currentUser.UserGuid, VacancyId = vacancyGuid, SavedAt = DateTime.Now }
+                    new SavedVacancy { UserId = _currentUser.UserGuid, VacancyId = vacancyId, SavedAt = DateTime.Now }
                 );
             }
             await _context.SaveChangesAsync();
@@ -778,7 +757,7 @@ namespace JobCompany.Business.Services.VacancyServices
         /// <returns></returns>
         public async Task DeleteVacancyAsync(Guid vacancyId)
         {
-            var vacancy = await _context.Vacancies.Include(x => x.Applications).FirstOrDefaultAsync(x => x.Id == vacancyId)
+            var vacancy = await _context.Vacancies.Include(x => x.Applications).FirstOrDefaultAsync(x => x.Id == vacancyId && x.Company.UserId == _currentUser.UserGuid)
                 ?? throw new NotFoundException();
 
             vacancy.PaymentDate = null;

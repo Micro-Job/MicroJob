@@ -22,7 +22,8 @@ public class CompanyRegisteredConsumer(JobCompanyDbContext _dbContext) : IConsum
             IsCompany = message.IsCompany,
             VOEN = message.IsCompany ? message.VOEN : null,
             Email = message.Email,
-            MainPhoneNumber = message.MainPhoneNumber
+            MainPhoneNumber = message.MainPhoneNumber,
+            EmployeeCount = 0,
         };
 
         await _dbContext.Companies.AddAsync(newCompany);

@@ -29,13 +29,6 @@ namespace JobCompany.API.Controllers
             return Ok();
         }
 
-        [HttpDelete("[action]")]
-        public async Task<IActionResult> Delete(List<string> ids)
-        {
-            await _vacancyService.DeleteAsync(ids);
-            return Ok();
-        }
-
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllOwnVacancies(string? titleName, [FromQuery] List<Guid>? categoryIds, [FromQuery] List<Guid>? countryIds, [FromQuery] List<Guid>? cityIds, VacancyStatus? IsActive, decimal? minSalary, decimal? maxSalary, [FromQuery] List<byte>? workStyles, [FromQuery] List<byte>? workTypes, [FromQuery] List<Guid>? skills, int skip = 1, int take = 6)
         {
@@ -81,7 +74,7 @@ namespace JobCompany.API.Controllers
 
         [HttpPost("[action]")]
         [AuthorizeRole(UserRole.SimpleUser)]
-        public async Task<IActionResult> ToggleSaveVacancy(string vacancyId)
+        public async Task<IActionResult> ToggleSaveVacancy(Guid vacancyId)
         {
             await _vacancyService.ToggleSaveVacancyAsync(vacancyId);
             return Ok();

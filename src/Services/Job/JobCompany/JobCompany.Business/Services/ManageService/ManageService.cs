@@ -398,7 +398,7 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
                 Location = x.CompanyLocation,
                 WebLink = x.WebLink,
                 CreatedDate = x.CreatedDate,
-                EmployeeCount = x.EmployeeCount.HasValue ? x.EmployeeCount.Value : null,
+                EmployeeCount = x.EmployeeCount,
                 CompanyLogo = $"{_currentUser.BaseUrl}/company/{x.CompanyLogo}",
                 Category = x.Category.Translations.GetTranslation(currentLanguage, GetTranslationPropertyName.Name),
                 City = x.City != null ? x.City.Translations.GetTranslation(currentLanguage, GetTranslationPropertyName.Name) : null,

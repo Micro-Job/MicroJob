@@ -6,5 +6,8 @@
         public string CompanyName { get; set; }
         public string? CompanyImage { get; set; }
         public int CompanyVacancyCount { get; set; }
+        public int EmployeeCount { get; set; }
+        public string? WebLink { get; set; }
+        public string? CategoryName { get; set; }
     }
 }
