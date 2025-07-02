@@ -10,7 +10,7 @@ namespace JobCompany.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [AuthorizeRole(UserRole.Admin, UserRole.Operator)]
+    [AuthorizeRole(UserRole.SuperAdmin, UserRole.Admin, UserRole.Operator)]
     public class ManageController(ManageService _manageService) : ControllerBase
     {
         [HttpPost("[action]")]

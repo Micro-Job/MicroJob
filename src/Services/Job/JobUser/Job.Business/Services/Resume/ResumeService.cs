@@ -99,7 +99,6 @@ namespace Job.Business.Services.Resume
                                             UserId = resume.UserId,
                                             FirstName = resume.FirstName,
                                             LastName = resume.LastName,
-                                            FatherName = resume.FatherName,
                                             Position = resume.Position != null ? resume.Position.Name : null,
                                             IsDriver = resume.IsDriver,
                                             IsMarried = resume.IsMarried,
@@ -393,7 +392,6 @@ namespace Job.Business.Services.Resume
                 IsSaved = resume.SavedResumes.Any(sr => sr.ResumeId == resume.Id && sr.CompanyUserId == _currentUser.UserGuid),
                 FirstName = hasFullAccess ? resume.FirstName : null,
                 LastName = hasFullAccess ? resume.LastName : null,
-                FatherName = hasFullAccess ? resume.FatherName : null,
                 ResumeEmail = hasFullAccess ? resume.ResumeEmail : null,
 
                 PhoneNumbers = hasFullAccess
@@ -587,7 +585,7 @@ namespace Job.Business.Services.Resume
                 UserId = (Guid)_currentUser.UserGuid,
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
-                FatherName = dto.FatherName,
+                //FatherName = dto.FatherName,
                 PositionId = dto.PositionId,
                 IsDriver = dto.IsDriver,
                 IsMarried = dto.IsMarried,
@@ -646,7 +644,7 @@ namespace Job.Business.Services.Resume
 
         private static void UpdateResumePersonalInfo(Core.Entities.Resume resume, ResumeUpdateDto updateDto)
         {
-            resume.FatherName = updateDto.FatherName.Trim();
+            //resume.FatherName = updateDto.FatherName.Trim();
             resume.FirstName = updateDto.FirstName.Trim();
             resume.LastName = updateDto.LastName.Trim();
             resume.IsDriver = updateDto.IsDriver;

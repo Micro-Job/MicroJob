@@ -9,9 +9,10 @@ namespace JobCompany.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser)]
+    //[Authorize]
     public class CityController(CityService service) : ControllerBase
     {
+        [AuthorizeRole(UserRole.SuperAdmin)]
         [HttpPost("[action]")]
         public async Task<IActionResult> CreateCity(CreateCityDto dto)
         {
@@ -19,6 +20,7 @@ namespace JobCompany.API.Controllers
             return Ok();
         }
 
+        [AuthorizeRole(UserRole.SuperAdmin)]
         [HttpPut("[action]/{id}")]
         public async Task<IActionResult> UpdateCity(List<UpdateCityDto> dtos)
         {
@@ -26,6 +28,7 @@ namespace JobCompany.API.Controllers
             return Ok();
         }
 
+        [AllowAnonymous]
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllCities()
         {
@@ -47,11 +50,13 @@ namespace JobCompany.API.Controllers
             return Ok(await service.GetAllCitiesByCountryIdsAsync(countryIds, name, skip, take));
         }
 
-        [HttpDelete("[action]/{id}")]
-        public async Task<IActionResult> DeleteCity(string id)
-        {
-            await service.DeleteCityAsync(id);
-            return Ok();
-        }
+
+        //[AuthorizeRole(UserRole.SuperAdmin)]
+        //[HttpDelete("[action]/{id}")]
+        //public async Task<IActionResult> DeleteCity(string id)
+        //{
+        //    await service.DeleteCityAsync(id);
+        //    return Ok();
+        //}
     }
 }

@@ -8,7 +8,7 @@ namespace Job.DAL.Configurations
     {
         public void Configure(EntityTypeBuilder<Resume> builder)
         {
-            builder.Property(r => r.FatherName).HasMaxLength(32).IsRequired();
+            //builder.Property(r => r.FatherName).HasMaxLength(32).IsRequired();
             builder.Property(r => r.UserPhoto).HasMaxLength(255);
             builder.Property(r => r.Adress).HasMaxLength(128);
             builder.Property(x => x.FirstName).HasMaxLength(32);

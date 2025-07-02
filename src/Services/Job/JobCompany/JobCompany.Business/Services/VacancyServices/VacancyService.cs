@@ -159,7 +159,8 @@ namespace JobCompany.Business.Services.VacancyServices
                     Id = x.Id,
                     Title = x.Title,
                     StartDate = x.StartDate,
-                    Location = x.Location,
+                    CityName = x.City.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name),
+                    CountryName = x.Country.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name),
                     CompanyLogo = $"{_currentUser.BaseUrl}/companyFiles/{x.Company.CompanyLogo}",
                     CompanyName = x.Company.IsCompany ? x.Company.CompanyName : x.CompanyName,
                     ViewCount = x.ViewCount,
@@ -197,7 +198,7 @@ namespace JobCompany.Business.Services.VacancyServices
             var vacancies = await query
                 .Select(x => new VacancyGetByCompanyIdDto
                 {
-                    VacancyId = x.Id,
+                    Id = x.Id,
                     CompanyName = x.Company.IsCompany ? x.Company.CompanyName : x.CompanyName,
                     Title = x.Title,
                     Location = x.Location,
@@ -532,7 +533,8 @@ namespace JobCompany.Business.Services.VacancyServices
                     CompanyLogo = v.Company.CompanyLogo != null ? $"{_currentUser.BaseUrl}/companyFiles/{v.Company.CompanyLogo}" : null,
                     CompanyName = v.Company.IsCompany ? v.Company.CompanyName : v.CompanyName,
                     StartDate = v.StartDate,
-                    Location = v.Location,
+                    CityName = v.City.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name),
+                    CountryName = v.Country.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name),
                     ViewCount = v.ViewCount,
                     WorkType = v.WorkType,
                     WorkStyle = v.WorkStyle,
@@ -541,7 +543,7 @@ namespace JobCompany.Business.Services.VacancyServices
                     IsSaved = _currentUser.UserId != null && v.SavedVacancies.Any(x => x.VacancyId == v.Id && x.UserId == _currentUser.UserGuid),
                     SalaryCurrency = v.SalaryCurrency
                 })
-                .Skip(Math.Max(0, (skip - 1) * take))
+                .Skip((skip - 1) * take)
                 .Take(take)
                 .ToListAsync();
 
@@ -695,7 +697,8 @@ namespace JobCompany.Business.Services.VacancyServices
                     CompanyLogo = x.CompanyLogo != null ? $"{_currentUser.BaseUrl}/companyFiles/{x.Company.CompanyLogo}" : null,
                     CompanyName = x.Company.IsCompany ? x.Company.CompanyName : x.CompanyName,
                     StartDate = x.StartDate,
-                    Location = x.Location,
+                    CityName = x.City.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name),
+                    CountryName = x.Country.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name),
                     ViewCount = x.ViewCount,
                     WorkType = x.WorkType,
                     WorkStyle = x.WorkStyle,
@@ -730,7 +733,8 @@ namespace JobCompany.Business.Services.VacancyServices
                     CompanyLogo = x.Vacancy.Company.CompanyLogo != null ? $"{_currentUser.BaseUrl}/companyFiles/{x.Vacancy.Company.CompanyLogo}" : null,
                     CompanyName = x.Vacancy.Company.IsCompany ? x.Vacancy.Company.CompanyName : x.Vacancy.CompanyName,
                     StartDate = x.Vacancy.StartDate,
-                    Location = x.Vacancy.Location,
+                    CityName = x.Vacancy.City.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name),
+                    CountryName = x.Vacancy.Country.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name),
                     ViewCount = x.Vacancy.ViewCount,
                     WorkType = x.Vacancy.WorkType,
                     WorkStyle = x.Vacancy.WorkStyle,

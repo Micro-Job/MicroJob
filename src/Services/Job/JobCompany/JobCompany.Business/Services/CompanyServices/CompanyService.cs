@@ -220,11 +220,5 @@ namespace JobCompany.Business.Services.CompanyServices
             return companyProfile;
         }
 
-        public async Task<string?> GetCompanyNameAsync(Guid companyId)
-        {
-            return await _context.Companies.Where(x => x.Id == companyId)
-                .Select(x => x.CompanyName)
-                .FirstOrDefaultAsync() ?? throw new NotFoundException();
-        }
     }
 }

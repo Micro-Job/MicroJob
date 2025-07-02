@@ -431,7 +431,7 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
             .Take(take)
             .Select(x => new VacancyGetByCompanyIdDto
             {
-                VacancyId = x.Id,
+                Id = x.Id,
                 CompanyName = x.CompanyName,
                 Title = x.Title,
                 Location = x.Location,

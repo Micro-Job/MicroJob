@@ -11,7 +11,9 @@ namespace JobCompany.Business.Dtos.VacancyDtos
         public string? CompanyName { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime? EndDate { get; set; }
-        public string? Location { get; set; }
+        //public string? Location { get; set; }
+        public string CountryName { get; set; }
+        public string CityName { get; set; }
         public int? ViewCount { get; set; }
         public WorkType? WorkType { get; set; }
         public WorkStyle? WorkStyle { get; set; }
