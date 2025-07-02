@@ -115,11 +115,6 @@ namespace Job.Business.Services.Resume
                                             UserPhoto = resume.UserPhoto != null ? $"{_currentUser.BaseUrl}/userFiles/{resume.UserPhoto}" : null,
                                             IsPublic = resume.IsPublic,
                                             IsAnonym = resume.IsAnonym,
-                                            Skills = resume.ResumeSkills.Select(s => new SkillGetByIdDto
-                                            {
-                                                Id = s.SkillId,
-                                                Name = s.Skill.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name)
-                                            }).ToList(),
                                             PhoneNumbers = resume.PhoneNumbers.Select(p => new NumberGetByIdDto
                                             {
                                                 PhoneNumberId = p.Id,
@@ -160,6 +155,12 @@ namespace Job.Business.Services.Resume
                                             }).ToList()
                                         })
                                         .FirstOrDefaultAsync();
+
+            resume.Skills = await _context.ResumeSkills.Where(x=> x.Resume.UserId == _currentUser.UserGuid).Select(x => new SkillGetByIdDto
+            {
+                Id = x.Skill.Id,
+                Name = x.Skill.Translations.Where(x => x.Language == _currentUser.LanguageCode).Select(x => x.Name).FirstOrDefault()
+            }).ToListAsync();
 
             if (resume is null) return new ResumeDetailItemDto();
 
