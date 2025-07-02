@@ -132,8 +132,7 @@ public class ApplicationService(JobCompanyDbContext _context,
                 InformationId = applicationId,
                 InformationName = existAppVacancy.VacancyTitle,
                 NotificationType = NotificationType.ApplicationStatusUpdate,
-                //TODO burada BaseUrl event vasitesile gonderilmeli deyil
-                SenderImage = $"{_currentUser.BaseUrl}/companyFiles/{existAppVacancy.CompanyLogo}",
+                SenderImage = existAppVacancy.CompanyLogo,
                 SenderName = existAppVacancy.CompanyName,
             }
         );
@@ -144,6 +143,7 @@ public class ApplicationService(JobCompanyDbContext _context,
     {
         var query = GetApplicationsQuery(vacancyId, status, fullName);
 
+        //TODO : bu hisse request responseden cixmalidir
         if (gender != null || (skillIds != null && skillIds.Count != 0)) //Filterdə gender və ya skillids varsa sorğu atılır
         {
             var userIds = await query.Select(a => a.UserId).Distinct().ToListAsync();
@@ -215,7 +215,7 @@ public class ApplicationService(JobCompanyDbContext _context,
                 MainSalary = a.Vacancy.MainSalary,
                 MaxSalary = a.Vacancy.MaxSalary
             })
-            .Skip(Math.Max(0, (skip - 1) * take))
+            .Skip((skip - 1) * take)
             .Take(take)
             .ToListAsync();
 
@@ -226,13 +226,11 @@ public class ApplicationService(JobCompanyDbContext _context,
         };
     }
 
-    public async Task<ApplicationDetailDto> GetUserApplicationByIdAsync(string applicationId)
+    public async Task<ApplicationDetailDto> GetUserApplicationByIdAsync(Guid applicationId)
     {
-        var applicationGuid = Guid.Parse(applicationId);
-
         var application = await _context.Applications
             .Include(x => x.Status)
-            .Where(a => a.UserId == _currentUser.UserGuid && a.Id == applicationGuid)
+            .Where(a => a.UserId == _currentUser.UserGuid && a.Id == applicationId)
             .Select(application => new ApplicationDetailDto
             {
                 VacancyId = application.VacancyId,
@@ -261,33 +259,33 @@ public class ApplicationService(JobCompanyDbContext _context,
         return application;
     }
 
-    public async Task<DataListDto<ApplicationWithStatusInfoListDto>> GetAllApplicationWithStatusAsync(int skip = 1, int take = 9)
-    {
-        var applications = GetApplicationsQuery(null, null, null);
+    //public async Task<DataListDto<ApplicationWithStatusInfoListDto>> GetAllApplicationWithStatusAsync(int skip = 1, int take = 9)
+    //{
+    //    var applications = GetApplicationsQuery(null, null, null);
 
-        var totalCount = await applications.CountAsync();
+    //    var totalCount = await applications.CountAsync();
 
-        var data = applications
-            .Skip((skip - 1) * take)
-            .Take(take)
-            .Select(a => new ApplicationWithStatusInfoListDto
-            {
-                ApplicationId = a.Id,
-                ProfileImage = $"{_currentUser.BaseUrl}/userFiles/{a.ProfileImage}",
-                FirstName = a.FirstName,
-                LastName = a.LastName,
-                StatusId = a.StatusId,
-                StatusName = a.Status.StatusEnum,
-                Position = a.Vacancy.Title,
-                DateTime = a.CreatedDate
-            }).ToList();
+    //    var data = applications
+    //        .Skip((skip - 1) * take)
+    //        .Take(take)
+    //        .Select(a => new ApplicationWithStatusInfoListDto
+    //        {
+    //            ApplicationId = a.Id,
+    //            ProfileImage = $"{_currentUser.BaseUrl}/userFiles/{a.ProfileImage}",
+    //            FirstName = a.FirstName,
+    //            LastName = a.LastName,
+    //            StatusId = a.StatusId,
+    //            StatusName = a.Status.StatusEnum,
+    //            Position = a.Vacancy.Title,
+    //            DateTime = a.CreatedDate
+    //        }).ToList();
 
-        return new DataListDto<ApplicationWithStatusInfoListDto>
-        {
-            Datas = data,
-            TotalCount = totalCount
-        };
-    }
+    //    return new DataListDto<ApplicationWithStatusInfoListDto>
+    //    {
+    //        Datas = data,
+    //        TotalCount = totalCount
+    //    };
+    //}
 
     private IQueryable<Application> GetApplicationsQuery(Guid? vacancyId, StatusEnum? status, string? userFullName)
     {

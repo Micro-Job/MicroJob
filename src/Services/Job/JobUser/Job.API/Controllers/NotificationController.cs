@@ -7,7 +7,7 @@ namespace Job.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    //[AuthorizeRole(UserRole.SimpleUser)]
+    [AuthorizeRole(UserRole.SimpleUser)]
     public class NotificationController(NotificationService service) : ControllerBase
     {
         [HttpGet("[action]")]

@@ -5,6 +5,7 @@ using JobCompany.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Exceptions;
 using SharedLibrary.HelperServices.Current;
+using System.Net.Sockets;
 
 namespace JobCompany.Business.Services.CountryServices;
 
@@ -25,10 +26,9 @@ public class CountryService(JobCompanyDbContext _context, ICurrentUser _user)
         await _context.SaveChangesAsync();
     }
 
-    public async Task DeleteCountryAsync(string id)
+    public async Task DeleteCountryAsync(Guid id)
     {
-        var countryId = Guid.Parse(id);
-        var country = await _context.Countries.FindAsync(countryId) ?? throw new NotFoundException();
+        var country = await _context.Countries.FirstOrDefaultAsync(x=> x.Id == id) ?? throw new NotFoundException();
 
         _context.Countries.Remove(country);
         await _context.SaveChangesAsync();

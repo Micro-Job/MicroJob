@@ -18,11 +18,10 @@ namespace JobCompany.API.Controllers
             return Ok(await service.UpdateCompanyAsync(request.CompanyDto, request.NumbersDto));
         }
 
-        [AllowAnonymous]
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetAllCompanies(string? searchTerm = null, int skip = 1, int take = 6)
+        public async Task<IActionResult> GetAllCompanies(string? searchTerm, bool? countDesc, int skip = 1, int take = 6)
         {
-            return Ok(await service.GetAllCompaniesAsync(searchTerm, skip, take));
+            return Ok(await service.GetAllCompaniesAsync(searchTerm, countDesc, skip, take));
         }
 
         [HttpGet("[action]")]
@@ -31,16 +30,12 @@ namespace JobCompany.API.Controllers
             return Ok(await service.GetCompanyDetailAsync(companyId));
         }
 
+        //[AuthorizeRole(UserRole.EmployeeUser, UserRole.CompanyUser)]
         [HttpGet("[action]")]
         public async Task<IActionResult> GetOwnCompanyInformation()
         {
             return Ok(await service.GetOwnCompanyInformationAsync());
         }
 
-        [HttpGet("[action]")]
-        public async Task<IActionResult> GetCompanyName(Guid companyId)
-        {
-            return Ok(await service.GetCompanyNameAsync(companyId));
-        }
     }
 }

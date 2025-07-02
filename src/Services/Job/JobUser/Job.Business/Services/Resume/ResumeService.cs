@@ -15,7 +15,6 @@ using Job.Business.Services.Experience;
 using Job.Business.Services.Language;
 using Job.Business.Services.Number;
 using Job.Business.Services.Position;
-using Job.Business.Services.User;
 using Job.Business.Statistics;
 using Job.Core.Entities;
 using Job.Core.Enums;
@@ -100,7 +99,6 @@ namespace Job.Business.Services.Resume
                                             UserId = resume.UserId,
                                             FirstName = resume.FirstName,
                                             LastName = resume.LastName,
-                                            FatherName = resume.FatherName,
                                             Position = resume.Position != null ? resume.Position.Name : null,
                                             IsDriver = resume.IsDriver,
                                             IsMarried = resume.IsMarried,
@@ -117,11 +115,6 @@ namespace Job.Business.Services.Resume
                                             UserPhoto = resume.UserPhoto != null ? $"{_currentUser.BaseUrl}/userFiles/{resume.UserPhoto}" : null,
                                             IsPublic = resume.IsPublic,
                                             IsAnonym = resume.IsAnonym,
-                                            Skills = resume.ResumeSkills.Select(s => new SkillGetByIdDto
-                                            {
-                                                Id = s.SkillId,
-                                                Name = s.Skill.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name)
-                                            }).ToList(),
                                             PhoneNumbers = resume.PhoneNumbers.Select(p => new NumberGetByIdDto
                                             {
                                                 PhoneNumberId = p.Id,
@@ -162,6 +155,12 @@ namespace Job.Business.Services.Resume
                                             }).ToList()
                                         })
                                         .FirstOrDefaultAsync();
+
+            resume.Skills = await _context.ResumeSkills.Where(x=> x.Resume.UserId == _currentUser.UserGuid).Select(x => new SkillGetByIdDto
+            {
+                Id = x.Skill.Id,
+                Name = x.Skill.Translations.Where(x => x.Language == _currentUser.LanguageCode).Select(x => x.Name).FirstOrDefault()
+            }).ToListAsync();
 
             if (resume is null) return new ResumeDetailItemDto();
 
@@ -365,7 +364,8 @@ namespace Job.Business.Services.Resume
             bool hasApplied = false;
 
             // Əgər CompanyUser-dursa, şirkətin hər hansı bir vakansiyasına müraciət edib-etmədiyini yoxlayırıq
-            if (_currentUser.UserRole == (byte)UserRole.CompanyUser)
+            //TODO : burada request responseden istifade edilmeli deyil
+            if (_currentUser.UserRole == (byte)UserRole.CompanyUser || _currentUser.UserRole == (byte)UserRole.EmployeeUser)
             {
                 var checkApplicationResponse = await _checkApplicationRequest.GetResponse<CheckApplicationResponse>(
                     new CheckApplicationRequest
@@ -379,6 +379,7 @@ namespace Job.Business.Services.Resume
 
             // İcazə olub-olmadığını yoxlayırıq. 4 halda resume-nin bütün datalarına tam baxma icazəsi var:
             bool hasFullAccess = _currentUser.UserRole == (byte)UserRole.Admin // Əgər admindirsə
+                || _currentUser.UserRole == (byte)UserRole.SuperAdmin          // Əgər Superadmindirsə
                 || hasApplied                                                  // Əgər müraciət edibsə
                 || resumeData.HasAccessByCompany                               // Əgər resume-yə baxma icazəsi varsa
                 || resumeData.Resume.IsPublic;                                 // Əgər resume public-dirsə
@@ -392,7 +393,6 @@ namespace Job.Business.Services.Resume
                 IsSaved = resume.SavedResumes.Any(sr => sr.ResumeId == resume.Id && sr.CompanyUserId == _currentUser.UserGuid),
                 FirstName = hasFullAccess ? resume.FirstName : null,
                 LastName = hasFullAccess ? resume.LastName : null,
-                FatherName = hasFullAccess ? resume.FatherName : null,
                 ResumeEmail = hasFullAccess ? resume.ResumeEmail : null,
 
                 PhoneNumbers = hasFullAccess
@@ -586,7 +586,7 @@ namespace Job.Business.Services.Resume
                 UserId = (Guid)_currentUser.UserGuid,
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
-                FatherName = dto.FatherName,
+                //FatherName = dto.FatherName,
                 PositionId = dto.PositionId,
                 IsDriver = dto.IsDriver,
                 IsMarried = dto.IsMarried,
@@ -645,7 +645,7 @@ namespace Job.Business.Services.Resume
 
         private static void UpdateResumePersonalInfo(Core.Entities.Resume resume, ResumeUpdateDto updateDto)
         {
-            resume.FatherName = updateDto.FatherName.Trim();
+            //resume.FatherName = updateDto.FatherName.Trim();
             resume.FirstName = updateDto.FirstName.Trim();
             resume.LastName = updateDto.LastName.Trim();
             resume.IsDriver = updateDto.IsDriver;

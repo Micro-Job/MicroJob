@@ -2,6 +2,8 @@
 using JobPayment.Business.Services.PacketServices;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using SharedLibrary.Attributes;
+using SharedLibrary.Enums;
 
 namespace JobPayment.API.Controllers
 {
@@ -15,6 +17,7 @@ namespace JobPayment.API.Controllers
             return Ok(await _packetService.GetAllPacketsAsync());
         }
 
+        [AuthorizeRole(UserRole.SuperAdmin, UserRole.Admin)]
         [HttpPost("[action]")]
         public async Task<IActionResult> CreatePacket(CreatePacketDto dto)
         {
@@ -22,6 +25,7 @@ namespace JobPayment.API.Controllers
             return Ok();
         }
 
+        [AuthorizeRole(UserRole.SuperAdmin, UserRole.Admin)]
         [HttpPut("[action]")]
         public async Task<IActionResult> UpdatePacket(UpdatePacketDto dto)
         {

@@ -9,7 +9,7 @@ namespace JobCompany.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
+    [AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser)]
     public class StatusController(StatusService _statusService) : ControllerBase
     {
         [HttpGet("[action]")]
@@ -18,7 +18,6 @@ namespace JobCompany.API.Controllers
             return Ok(await _statusService.GetAllStatusesAsync());
         }
 
-        [AuthorizeRole(UserRole.CompanyUser , UserRole.EmployeeUser)]
         [HttpPut("[action]")]
         public async Task<IActionResult> ChangeStatusOrderAsync([FromBody]List<ChangeStatusOrderDto> dtos)
         {

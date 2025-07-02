@@ -28,7 +28,7 @@ using System.Text;
 
 namespace AuthService.Business.Services.Auth
 {
-    public class AuthenticationService(AppDbContext _context, ITokenHandler _tokenHandler, IPublishEndpoint _publishEndpoint, IConfiguration _configuration, EmailService _emailService, ICurrentUser _currentUser, IRequestClient<GetCompaniesDataByUserIdsRequest> _companyDataClient , IRequestClient<CheckVoenRequest> _voenCheckRequest) 
+    public class AuthenticationService(AppDbContext _context, TokenHandler _tokenHandler, IPublishEndpoint _publishEndpoint, EmailService _emailService, ICurrentUser _currentUser, IRequestClient<GetCompaniesDataByUserIdsRequest> _companyDataClient , IRequestClient<CheckVoenRequest> _voenCheckRequest) 
     {
         public async Task RegisterAsync(RegisterDto dto)
         {

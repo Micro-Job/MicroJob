@@ -1,4 +1,5 @@
 ﻿using Job.Business.Consumers;
+using Job.Business.Services;
 using Job.Business.Services.Certificate;
 using Job.Business.Services.Education;
 using Job.Business.Services.Experience;
@@ -8,7 +9,6 @@ using Job.Business.Services.Number;
 using Job.Business.Services.Position;
 using Job.Business.Services.Resume;
 using Job.Business.Services.Skill;
-using Job.Business.Services.User;
 using Job.Business.Services.UserManagement;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
@@ -41,7 +41,6 @@ namespace Job.Business
             password = Uri.EscapeDataString(password);
             string cString = $"amqp://{username}:{password}@{hostname}:{port}/";
 
-            //var rabbitMqConfig = configuration.GetSection("RabbitMQ");
             services.AddMassTransit(x =>
             {
                 x.AddConsumer<UserRegisteredConsumer>();
@@ -49,20 +48,17 @@ namespace Job.Business
                 x.AddConsumer<VacancyCreatedConsumer>();                
                 x.AddConsumer<GetFilteredUserIdsConsumer>();
                 x.AddConsumer<NotificationEventConsumer>();
-                x.AddConsumer<UpdateUserInfoEventConsumer>();
-                x.AddConsumer<UpdateUserProfileImageEventConsumer>();
 
                 x.SetKebabCaseEndpointNameFormatter();
 
                 x.UsingRabbitMq((context, cfg) =>
                 {
                     cfg.Host(cString);
-
                     cfg.ConfigureEndpoints(context);
                 });
             });
 
-            services.AddMassTransitHostedService();
+            //services.AddMassTransitHostedService();
 
             return services;
         }

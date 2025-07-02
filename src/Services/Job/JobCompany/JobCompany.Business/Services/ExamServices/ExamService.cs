@@ -96,10 +96,8 @@ public class ExamService(JobCompanyDbContext _context, QuestionService _question
         }
     }
 
-    public async Task<GetExamByIdDto> GetExamByIdAsync(string examId)
+    public async Task<GetExamByIdDto> GetExamByIdAsync(Guid examId)
     {
-        var examGuid = Guid.Parse(examId);
-
         return await _context.Exams.AsNoTracking()
                 .Select(e => new GetExamByIdDto
                 {
@@ -110,17 +108,15 @@ public class ExamService(JobCompanyDbContext _context, QuestionService _question
                     LimitRate = e.LimitRate,
                     IsTemplate = e.IsTemplate
                 })
-                .FirstOrDefaultAsync(e => e.Id == examGuid)
+                .FirstOrDefaultAsync(e => e.Id == examId)
             ?? throw new NotFoundException();
     }
 
-    public async Task<GetQuestionByStepDto> GetExamQuestionByStepAsync(string examId, int step)
+    public async Task<GetQuestionByStepDto> GetExamQuestionByStepAsync(Guid examId, int step)
     {
-        var examGuid = Guid.Parse(examId);
-
         var question = await _context.Exams
             .AsNoTracking()
-            .Where(e => e.Id == examGuid)
+            .Where(e => e.Id == examId)
             .SelectMany(e => e.ExamQuestions)
             .Skip(step - 1)
             .Select(eq => new GetQuestionByStepDto
@@ -147,12 +143,10 @@ public class ExamService(JobCompanyDbContext _context, QuestionService _question
         return question;
     }
 
-    public async Task DeleteExamAsync(string examId)
+    public async Task DeleteExamAsync(Guid examId)
     {
-        var examGuid = Guid.Parse(examId);
-
         var affectedRows = await _context.Exams
-            .Where(e =>e.Id == examGuid && e.Company.UserId == _currentUser.UserGuid)
+            .Where(e =>e.Id == examId && e.Company.UserId == _currentUser.UserGuid)
             .ExecuteDeleteAsync();
 
         if (affectedRows == 0)
@@ -187,17 +181,14 @@ public class ExamService(JobCompanyDbContext _context, QuestionService _question
         };
     }
 
-    public async Task<GetExamIntroDto> GetExamIntroAsync(string examId, string vacancyId)
+    public async Task<GetExamIntroDto> GetExamIntroAsync(Guid examId, Guid vacancyId)
     {
-        var examGuid = Guid.Parse(examId);
-        var vacancyGuid = Guid.Parse(vacancyId);
-
-        var hasTakenExam = await _context.UserExams.AnyAsync(x => x.ExamId == examGuid && x.UserId == _currentUser.UserGuid && x.VacancyId == vacancyGuid);
+        var hasTakenExam = await _context.UserExams.AnyAsync(x => x.ExamId == examId && x.UserId == _currentUser.UserGuid && x.VacancyId == vacancyId);
 
         if (hasTakenExam)
             return new GetExamIntroDto { IsTaken = true };
 
-        var data = await _context.Exams.Where(x => x.Id == examGuid)
+        var data = await _context.Exams.Where(x => x.Id == examId)
             .AsNoTracking()
             .Select(x => new GetExamIntroDto
             {
@@ -212,13 +203,12 @@ public class ExamService(JobCompanyDbContext _context, QuestionService _question
         return data;
     }
 
-    public async Task<GetExamQuestionsDetailDto> GetExamQuestionsAsync(string examId)
+    //Sirketin butun suallari ve cavablarini gormesi ucun
+    public async Task<GetExamQuestionsDetailDto> GetExamQuestionsAsync(Guid examId)
     {
-        var examGuid = Guid.Parse(examId);
-
         var examQuestions = await _context.Exams
             .AsNoTracking()
-            .Where(x => x.Id == examGuid)
+            .Where(x => x.Id == examId && x.Company.UserId == _currentUser.UserGuid)
             .Select(exam => new GetExamQuestionsDetailDto
             {
                 TotalQuestions = exam.ExamQuestions.Count,
@@ -244,13 +234,12 @@ public class ExamService(JobCompanyDbContext _context, QuestionService _question
         return examQuestions;
     }
 
-    public async Task<GetExamQuestionsDetailDto> GetExamQuestionsForUserAsync(string examId)
+    //Isaxtaranin butun suallari gormesi ucun
+    public async Task<GetExamQuestionsDetailDto> GetExamQuestionsForUserAsync(Guid examId)
     {
-        var examGuid = Guid.Parse(examId);
-
         var examQuestions = await _context.Exams
             .AsNoTracking()
-            .Where(x => x.Id == examGuid)
+            .Where(x => x.Id == examId)
             .Select(exam => new GetExamQuestionsDetailDto
             {
                 TotalQuestions = exam.ExamQuestions.Count,
@@ -288,11 +277,11 @@ public class ExamService(JobCompanyDbContext _context, QuestionService _question
         var answerResults = exam.ExamQuestions
             .Select(eq =>
             {
-                var question = eq.Question;
-                var userAnswer = dto.Answers.FirstOrDefault(a => a.QuestionId == question.Id);
+                Question question = eq.Question;
+                UserAnswerDto? userAnswer = dto.Answers.FirstOrDefault(a => a.QuestionId == question.Id);
                 if (userAnswer == null) return false;
 
-                var correctAnswers = question.Answers
+                List<Guid>? correctAnswers = question.Answers
                     .Where(a => a.IsCorrect ?? false)
                     .Select(a => a.Id)
                     .ToList();
@@ -332,8 +321,7 @@ public class ExamService(JobCompanyDbContext _context, QuestionService _question
             FalseAnswerCount = (byte)falseCount,
         };
 
-
-        _context.UserExams.Add(userExam);
+        await _context.UserExams.AddAsync(userExam);
         await _context.SaveChangesAsync();
 
         return new SubmitExamResultDto

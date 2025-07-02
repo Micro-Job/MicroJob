@@ -15,7 +15,6 @@ namespace Job.Business.Dtos.ResumeDtos
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public string FatherName { get; set; }
         public Guid? PositionId { get; set; } //Əgər position varsa db-də onun id-si yazılmalıdır
         public string? Position { get; set; } //Əgər position yoxdursa bu adda olan bir position yaradılır db-də
         public Guid? ParentPositionId { get; set; }
@@ -46,9 +45,9 @@ namespace Job.Business.Dtos.ResumeDtos
     {
         public ResumeCreateDtoValidator()
         {
-            RuleFor(x => x.FatherName)
-                .NotEmpty().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
-                .MaximumLength(50).WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_50"));
+            //RuleFor(x => x.FatherName)
+            //    .NotEmpty().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
+            //    .MaximumLength(50).WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_50"));
 
             RuleFor(x => x.Position)
                 //.NotEmpty().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))

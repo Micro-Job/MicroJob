@@ -9,9 +9,10 @@ namespace JobCompany.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    //[AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser)]
+    [Authorize]
     public class SkillController(SkillService _skillService) : ControllerBase
     {
+        [AuthorizeRole(UserRole.SuperAdmin, UserRole.Admin, UserRole.Operator)]
         [HttpPost("[action]")]
         public async Task<IActionResult> CreateSkill(SkillCreateDto dto)
         {
@@ -19,6 +20,7 @@ namespace JobCompany.API.Controllers
             return Ok();
         }
 
+        [AuthorizeRole(UserRole.SuperAdmin, UserRole.Admin, UserRole.Operator)]
         [HttpPost("[action]")]
         public async Task<IActionResult> UpdateSkill(List<SkillUpdateDto> dto)
         {
@@ -26,6 +28,7 @@ namespace JobCompany.API.Controllers
             return Ok();
         }
 
+        [AllowAnonymous]
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllSkills()
         {
@@ -33,8 +36,9 @@ namespace JobCompany.API.Controllers
             return Ok(data);
         }
 
+        [AuthorizeRole(UserRole.SuperAdmin, UserRole.Admin, UserRole.Operator)]
         [HttpDelete("[action]")]
-        public async Task<IActionResult> DeleteSkill(string skillId)
+        public async Task<IActionResult> DeleteSkill(Guid skillId)
         {
             await _skillService.DeleteSkillAsync(skillId);
             return Ok();

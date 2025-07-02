@@ -12,6 +12,7 @@ namespace JobCompany.API.Controllers
     [AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser)]
     public class CategoryController(CategoryService service) : ControllerBase
     {
+        [AuthorizeRole(UserRole.SuperAdmin, UserRole.Admin, UserRole.Operator)]
         [HttpPost("[action]")]
         public async Task<IActionResult> CreateCategory(CategoryCreateDto dto)
         {

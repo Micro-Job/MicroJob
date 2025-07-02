@@ -1,13 +1,12 @@
 using JobCompany.Business.Services.NotificationServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SharedLibrary.Attributes;
-using SharedLibrary.Enums;
 
 namespace JobCompany.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    //[AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser)]
+    [Authorize]
     public class NotificationController(NotificationService _notificationService) : ControllerBase
     {
         [HttpGet("[action]")]
@@ -18,7 +17,7 @@ namespace JobCompany.API.Controllers
         }
 
         [HttpPost("[action]")]
-        public async Task<IActionResult> MarkNotificationAsReadAsync(string notificationId)
+        public async Task<IActionResult> MarkNotificationAsReadAsync(Guid notificationId)
         {
             await _notificationService.MarkNotificationAsReadAsync(notificationId);
             return Ok();

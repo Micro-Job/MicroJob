@@ -4,6 +4,7 @@ namespace JobCompany.Core.Entites
 {
     public class Category : BaseEntity
     {
+        //TODO : bunu anlamadim arasdirilmalidi neye gore yazildigi
         public bool IsCompany { get; set; }
 
         public ICollection<Vacancy> Vacancies { get; set; }

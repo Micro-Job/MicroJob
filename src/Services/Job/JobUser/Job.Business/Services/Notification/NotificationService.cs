@@ -42,17 +42,7 @@ public class NotificationService(JobDbContext _context, ICurrentUser _currentUse
             query = query.OrderBy(n => n.IsSeen).ThenByDescending(n => n.CreatedDate);
         }
 
-        var companyDataResponse = await _companyDataClient.GetResponse<GetCompaniesDataByUserIdsResponse>(new GetCompaniesDataByUserIdsRequest
-        {
-            UserIds = query.Where(n => n.SenderId.HasValue)
-                           .Select(n => n.SenderId.Value)
-                           .Distinct()
-                           .ToList()
-        });
-
         var notifications = await query
-        .Skip(Math.Max(0, (skip - 1) * take))
-        .Take(take)
         .Select(n => new NotificationListDto
         {
             Id = n.Id,
@@ -62,10 +52,13 @@ public class NotificationService(JobDbContext _context, ICurrentUser _currentUse
             InformationName = n.InformationName,
             CreatedDate = n.CreatedDate,
             NotificationType = n.NotificationType,
-            SenderName = n.SenderId.HasValue ? companyDataResponse.Message.Companies[n.SenderId.Value].CompanyName : null,
-            SenderImage = n.SenderId.HasValue ? $"{_currentUser.BaseUrl}/companyFiles/{companyDataResponse.Message.Companies[n.SenderId.Value].CompanyLogo}" : null,
+            SenderName = n.SenderId.HasValue ? n.SenderName : null,
+            SenderImage = n.SenderId.HasValue ? $"{_currentUser.BaseUrl}/companyFiles/{n.SenderImage}" : null,
             IsSeen = n.IsSeen,
-        }).ToListAsync();
+        })
+        .Skip((skip - 1) * take)
+        .Take(take)
+        .ToListAsync();
 
         return new PaginatedNotificationDto
         {

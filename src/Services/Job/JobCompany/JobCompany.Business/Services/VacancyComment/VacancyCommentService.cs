@@ -41,10 +41,9 @@ public class VacancyCommentService(JobCompanyDbContext _context, ICurrentUser _u
         }
     }
 
-    public async Task VacancyCommentDeleteAsync(string id)
+    public async Task VacancyCommentDeleteAsync(Guid id)
     {
-        var guidNoticeComment = Guid.Parse(id);
-        var noticeComment = await _context.VacancyComments.Include(x => x.Translations).Where(x => x.Id == guidNoticeComment).FirstOrDefaultAsync();
+        var noticeComment = await _context.VacancyComments.Include(x => x.Translations).Where(x => x.Id == id).FirstOrDefaultAsync();
         var noticeCommentTranslation = noticeComment.Translations.ToList();
         _context.VacancyCommentTranslations.RemoveRange(noticeCommentTranslation);
         _context.VacancyComments.Remove(noticeComment);
@@ -64,11 +63,10 @@ public class VacancyCommentService(JobCompanyDbContext _context, ICurrentUser _u
         return vacancyComments!;
     }
 
-    public async Task<VacancyCommentDetailDto> VacancyCommentGetDetailAsync(string id)
+    public async Task<VacancyCommentDetailDto> VacancyCommentGetDetailAsync(Guid id)
     {
-        var guidVacancyComment = Guid.Parse(id);
         var res = await _context.VacancyComments
-          .Where(x => x.Id == guidVacancyComment)
+          .Where(x => x.Id == id)
           .Include(x => x.Translations)
           .Select(x => new VacancyCommentDetailDto
           {

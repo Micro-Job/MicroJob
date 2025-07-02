@@ -8,9 +8,9 @@ namespace Job.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    //[AuthorizeRole(UserRole.SimpleUser)]
     public class SkillController(SkillService skillService) : ControllerBase
     {
+        [AuthorizeRole(UserRole.SuperAdmin, UserRole.Admin, UserRole.Operator)]
         [HttpPost("[action]")]
         public async Task<IActionResult> CreateSkill(SkillCreateDto dto)
         {
@@ -18,6 +18,7 @@ namespace Job.API.Controllers
             return Ok();
         }
 
+        [AuthorizeRole(UserRole.SuperAdmin, UserRole.Admin, UserRole.Operator)]
         [HttpPut("[action]")]
         public async Task<IActionResult> UpdateSkil(SkillCreateDto dto)
         {

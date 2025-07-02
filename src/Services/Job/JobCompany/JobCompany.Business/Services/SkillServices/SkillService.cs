@@ -81,10 +81,9 @@ public class SkillService(JobCompanyDbContext _context, ICurrentUser _user)
         await _context.SaveChangesAsync();
     }
 
-    public async Task DeleteSkillAsync(string skillId)
+    public async Task DeleteSkillAsync(Guid skillId)
     {
-        var skillGuid = Guid.Parse(skillId);
-        var skill = await _context.Skills.Include(x => x.Translations).Where(x => x.Id == skillGuid).FirstOrDefaultAsync();
+        var skill = await _context.Skills.Include(x => x.Translations).Where(x => x.Id == skillId).FirstOrDefaultAsync();
 
         var skillTranslations = skill.Translations.Select(x => x).ToList();
         _context.SkillTranslations.RemoveRange(skillTranslations);

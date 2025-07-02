@@ -15,30 +15,38 @@ public class VacancyCreatedConsumer(JobDbContext _dbContext) : IConsumer<Vacancy
 {
     public async Task Consume(ConsumeContext<VacancyCreatedEvent> context)
     {
-        var requiredMatchCount = Math.Ceiling(context.Message.SkillIds.Count * 0.5);
+        VacancyCreatedEvent message = context.Message;
 
-        var matchedUserIds = await _dbContext.ResumeSkills
+        double requiredMatchCount = Math.Ceiling(message.SkillIds.Count * 0.5);
+
+        List<Guid> matchedUserIds = await _dbContext.ResumeSkills
             .AsNoTracking()
-            .Where(rs => context.Message.SkillIds.Contains(rs.SkillId))
+            .Where(rs => message.SkillIds.Contains(rs.SkillId))
             .GroupBy(rs => rs.Resume.UserId)
             .Where(g => g.Count() >= requiredMatchCount)
             .Select(g => g.Key)
             .ToListAsync();
 
-        if (matchedUserIds.Count == 0) return;
-
-        var notifications = matchedUserIds.Select(userId => new Notification
+        if (!matchedUserIds.Any())
         {
-            ReceiverId = userId,
-            SenderId = context.Message.SenderId,
-            NotificationType = NotificationType.Vacancy,
-            InformationId = context.Message.InformationId,
-            InformationName = context.Message.InformatioName,
-            IsSeen = false
-        }).ToList();
-
-        if (notifications.Count > 0)
+            await context.ConsumeCompleted; 
+            return;
+        }
+        else
         {
+            var notifications = matchedUserIds.Select(userId => new Notification
+            {
+                ReceiverId = userId,
+                SenderId = message.SenderId,
+                NotificationType = NotificationType.Vacancy,
+                InformationId = message.InformationId,
+                InformationName = message.InformatioName,
+                SenderName = message.SenderName,
+                SenderImage = message.SenderImage,
+                CreatedDate = DateTime.Now.AddHours(4),
+                IsSeen = false
+            }).ToList();
+
             await _dbContext.Notifications.AddRangeAsync(notifications);
             await _dbContext.SaveChangesAsync();
         }

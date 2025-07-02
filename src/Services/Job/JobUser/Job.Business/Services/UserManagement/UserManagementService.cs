@@ -57,7 +57,6 @@ public class UserManagementService(JobDbContext _context, IConfiguration _config
                 ResumeId = r.Id,
                 FirstName = r.FirstName,
                 LastName = r.LastName,
-                FatherName = r.FatherName,
                 IsDriver = r.IsDriver,
                 IsMarried = r.IsMarried,
                 IsCitizen = r.IsCitizen,

@@ -35,7 +35,7 @@ namespace JobCompany.Business.Services.CompanyServices
             company.CompanyInformation = dto.CompanyInformation?.Trim();
             company.CompanyLocation = dto.CompanyLocation?.Trim();
             company.WebLink = dto.WebLink;
-            company.EmployeeCount = dto.EmployeeCount ?? null;
+            company.EmployeeCount = dto.EmployeeCount ?? 0;
             company.CreatedDate = dto.CreatedDate;
             company.CategoryId = dto.CategoryId;
             company.CountryId = dto.CountryId;
@@ -113,15 +113,21 @@ namespace JobCompany.Business.Services.CompanyServices
             };
         }
 
-        public async Task<DataListDto<CompanyDto>> GetAllCompaniesAsync(string? searchTerm, int skip = 1, int take = 12)
+        public async Task<DataListDto<CompanyDto>> GetAllCompaniesAsync(string? searchTerm, bool? countDesc, int skip = 1, int take = 12)
         {
-            var query = _context.Companies.AsNoTracking();
+            var query = _context.Companies.Where(x=> x.IsCompany).AsQueryable().AsNoTracking();
 
             if (!string.IsNullOrWhiteSpace(searchTerm))
                 query = query.Where(x => x.CompanyName.Contains(searchTerm));
 
-            skip = !string.IsNullOrWhiteSpace(searchTerm) ? 1 : Math.Max(1, skip);
-            var offset = (skip - 1) * take;
+            if (countDesc.HasValue)
+            {
+                if (countDesc == false)
+                    query = query.OrderBy(x=> x.Vacancies.Count(v => v.VacancyStatus == VacancyStatus.Active && v.EndDate > DateTime.Now));
+
+                else
+                    query = query.OrderByDescending(x=> x.Vacancies.Count(v => v.VacancyStatus == VacancyStatus.Active && v.EndDate > DateTime.Now));
+            }
 
             var companies = await query
                 .Select(c => new CompanyDto
@@ -130,8 +136,11 @@ namespace JobCompany.Business.Services.CompanyServices
                     CompanyName = c.CompanyName,
                     CompanyImage = c.CompanyLogo != null ? $"{_currentUser.BaseUrl}/companyFiles/{c.CompanyLogo}" : null,
                     CompanyVacancyCount = c.Vacancies != null ? c.Vacancies.Count(v => v.VacancyStatus == VacancyStatus.Active && v.EndDate > DateTime.Now) : 0,
+                    EmployeeCount = c.EmployeeCount,
+                    WebLink = c.WebLink,
+                    CategoryName = c.Category.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name)
                 })
-                .Skip(offset)
+                .Skip(skip)
                 .Take(take)
                 .ToListAsync();
 
@@ -189,7 +198,7 @@ namespace JobCompany.Business.Services.CompanyServices
                     Location = x.CompanyLocation,
                     WebLink = x.WebLink,
                     CreatedDate = x.CreatedDate,
-                    EmployeeCount = x.EmployeeCount.HasValue ? x.EmployeeCount.Value : null,
+                    EmployeeCount = x.EmployeeCount,
                     CompanyLogo = $"{_currentUser.BaseUrl}/companyFiles/{x.CompanyLogo}",
                     Category = x.Category.Translations.GetTranslation(currentLanguage, GetTranslationPropertyName.Name),
                     City = x.City != null ? x.City.Translations.GetTranslation(currentLanguage, GetTranslationPropertyName.Name) : null,
@@ -211,11 +220,5 @@ namespace JobCompany.Business.Services.CompanyServices
             return companyProfile;
         }
 
-        public async Task<string?> GetCompanyNameAsync(Guid companyId)
-        {
-            return await _context.Companies.Where(x => x.Id == companyId)
-                .Select(x => x.CompanyName)
-                .FirstOrDefaultAsync() ?? throw new NotFoundException();
-        }
     }
 }

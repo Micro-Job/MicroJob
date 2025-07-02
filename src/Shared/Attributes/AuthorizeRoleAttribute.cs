@@ -11,8 +11,8 @@ public class AuthorizeRoleAttribute(params UserRole[] roles) : Attribute, IAutho
 {
     public void OnAuthorization(AuthorizationFilterContext context)
     {
+        //bu hisse olmaya da biler. Bunun meqsedi odur ki, istifade edilen actiona AllowAnonymous verilibse 
         var hasAllowAnonymous = context.ActionDescriptor.EndpointMetadata.Any(meta => meta is AllowAnonymousAttribute);
-
         if (hasAllowAnonymous) return;  
 
         var user = context.HttpContext.User;
@@ -23,7 +23,7 @@ public class AuthorizeRoleAttribute(params UserRole[] roles) : Attribute, IAutho
             return;
         }
 
-        var userRoleClaim = user.FindFirst(ClaimTypes.Role)?.Value;
+        string? userRoleClaim = user.FindFirst(ClaimTypes.Role)?.Value;
         
         UserRole enumUserRoleClaim = Enum.Parse<UserRole>(userRoleClaim!);
 
