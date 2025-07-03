@@ -15,7 +15,7 @@ namespace AuthService.Business.Exceptions.UserException
             ErrorMessage = MessageHelper.GetMessage("NO_PERMISSION");
         }
 
-        public UserAccessException(string? message) : base(message)
+        public UserAccessException(string message) : base(message)
         {
             ErrorMessage = message;
         }

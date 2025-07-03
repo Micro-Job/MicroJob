@@ -36,7 +36,7 @@ namespace AuthService.Business.Services.Auth
             dto.Email = dto.Email.Trim();
             await CheckUserExistAsync(dto.Email, dto.MainPhoneNumber);
 
-            CheckPasswordAndThrowException(dto.Password);
+            CheckPasswordAndThrowException(dto.Password!);
 
             var user = new User
             {
@@ -46,7 +46,7 @@ namespace AuthService.Business.Services.Auth
                 LastName = dto.LastName.Trim(),
                 MainPhoneNumber = dto.MainPhoneNumber,
                 RegistrationDate = DateTime.Now,
-                Password = _tokenHandler.GeneratePasswordHash(dto.Password),
+                Password = _tokenHandler.GeneratePasswordHash(dto.Password!),
                 UserRole = UserRole.SimpleUser,
                 IsVerified = false
             };
@@ -65,7 +65,7 @@ namespace AuthService.Business.Services.Auth
 
             await CreateBalance(user.Id, user.FirstName, user.LastName);
 
-            await _emailService.SendVerifyEmail(user.Email, $"{user.FirstName} {user.LastName}", user.Id.ToString());
+            _emailService.SendVerifyEmail(user.Email, $"{user.FirstName} {user.LastName}", user.Id.ToString());
         }
 
         public async Task CompanyRegisterAsync(RegisterCompanyDto dto)
@@ -104,7 +104,7 @@ namespace AuthService.Business.Services.Auth
                 RegistrationDate = DateTime.Now,
                 Password = _tokenHandler.GeneratePasswordHash(dto.Password),
                 UserRole = dto.IsCompany ? UserRole.CompanyUser : UserRole.EmployeeUser,
-                IsVerified = true
+                IsVerified = dto.IsCompany ? true : false
             };
 
             await _context.Users.AddAsync(user);
@@ -115,7 +115,7 @@ namespace AuthService.Business.Services.Auth
                 {
                     CompanyId = Guid.NewGuid(),
                     UserId = user.Id,
-                    CompanyName = dto.IsCompany ? dto.CompanyName.Trim() : null,
+                    CompanyName = dto.IsCompany ? dto.CompanyName!.Trim() : null,
                     IsCompany = dto.IsCompany,
                     VOEN = dto.IsCompany ? dto.VOEN : null,
                     Email = dto.Email,
@@ -125,7 +125,10 @@ namespace AuthService.Business.Services.Auth
 
             await CreateBalance(user.Id, user.FirstName, user.LastName);
 
-            await _emailService.SendRegister(dto.Email, $"{user.FirstName} {user.LastName}");
+            if (dto.IsCompany)
+                _emailService.SendRegister(dto.Email, $"{user.FirstName} {user.LastName}");
+            else
+                _emailService.SendVerifyEmail(user.Email, $"{user.FirstName} {user.LastName}", user.Id.ToString());
         }
 
         public async Task<TokenResponseDto> LoginAsync(LoginDto dto)
@@ -156,9 +159,9 @@ namespace AuthService.Business.Services.Auth
                 AccessToken = accessToken,
                 RefreshToken = refreshToken.Token,
                 Expires = refreshToken.Expires,
-                //UserImage = user.Image != null ? $"{_currentUser.BaseUrl}/userFiles/{user.Image}" : null
             };
 
+            //TODO : burada request response olmasa da olar
             if (user.UserRole == UserRole.CompanyUser || user.UserRole == UserRole.EmployeeUser)
             {
                 var companyResponse = await _companyDataClient.GetResponse<GetCompaniesDataByUserIdsResponse>(
@@ -170,7 +173,7 @@ namespace AuthService.Business.Services.Auth
                 var companyData = companyResponse.Message.Companies[user.Id];
 
                 if (user.UserRole == UserRole.CompanyUser)
-                    responseDto.FullName = companyData.CompanyName;
+                    responseDto.FullName = companyData.CompanyName!;
 
                 responseDto.UserImage = $"{_currentUser.BaseUrl}/companyFiles/{companyData.CompanyLogo}" ?? null;
             }
@@ -221,7 +224,7 @@ namespace AuthService.Business.Services.Auth
 
                 var companyData = companyResponse.Message.Companies[user.Id];
 
-                responseDto.FullName = companyData.CompanyName;
+                responseDto.FullName = companyData.CompanyName!;
                 responseDto.UserImage = $"{_currentUser.BaseUrl}/companyFiles/{companyData.CompanyLogo}" ?? null;
             }
 
@@ -259,7 +262,7 @@ namespace AuthService.Business.Services.Auth
 
             await _context.PasswordTokens.AddAsync(passwordToken);
             await _context.SaveChangesAsync();
-            await _emailService.SendResetPassword(user, token);
+            _emailService.SendResetPassword(user, token);
 
         }
 
@@ -364,11 +367,11 @@ namespace AuthService.Business.Services.Auth
                     HttpResponseMessage response = await httpClient.PostAsync(apiUrl, content);
                     string responseBody = await response.Content.ReadAsStringAsync();
 
-                    TaxpayerInfoRoot taxpayerInfo = JsonSerializer.Deserialize<TaxpayerInfoRoot>(responseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    TaxpayerInfoRoot? taxpayerInfo = JsonSerializer.Deserialize<TaxpayerInfoRoot>(responseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
                     if (taxpayerInfo?.taxpayers != null && taxpayerInfo.taxpayers.Any())
                     {
-                        string companyName = taxpayerInfo.taxpayers.FirstOrDefault()?.name;
+                        string companyName = taxpayerInfo.taxpayers.FirstOrDefault()!.name!;
                         return companyName;
                     }
                     else throw new NotFoundException();

@@ -15,7 +15,7 @@ namespace AuthService.Business.Exceptions.UserException
             ErrorMessage = MessageHelper.GetMessage("USER_PHONE_OR_EMAIL_EXISTS");
         }
 
-        public UserExistException(string? message) : base(message)
+        public UserExistException(string message) : base(message)
         {
             ErrorMessage = message;
         }

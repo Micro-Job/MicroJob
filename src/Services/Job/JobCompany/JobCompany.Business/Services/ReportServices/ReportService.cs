@@ -194,9 +194,9 @@ namespace JobCompany.Business.Services.ReportServices
             );
         }
 
-        public async Task<SummaryDto> GetSummaryAsync()
-        {
-            throw new NotImplementedException();
-        }
+        //public async Task<SummaryDto> GetSummaryAsync()
+        //{
+        //    throw new NotImplementedException();
+        //}
     }
 }

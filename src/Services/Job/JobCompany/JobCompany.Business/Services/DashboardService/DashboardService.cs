@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace JobCompany.Business.Services.DashboardService
 {
-    public class DashboardService(JobCompanyDbContext _context)
+    public class DashboardService
     {
         //public async Task<VacancyMiniDataDto> GetVacanciesMiniData(DateFilter? dateFilter)
         //{

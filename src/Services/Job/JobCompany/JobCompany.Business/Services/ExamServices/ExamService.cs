@@ -30,8 +30,8 @@ public class ExamService(JobCompanyDbContext _context, QuestionService _question
         {
             var exam = new Exam
             {
-                Title = dto.Title,
-                IntroDescription = dto.IntroDescription,
+                Title = dto.Title!,
+                IntroDescription = dto.IntroDescription!,
                 LimitRate = dto.LimitRate,
                 CompanyId = companyId,
                 IsTemplate = dto.IsTemplate,
@@ -77,13 +77,13 @@ public class ExamService(JobCompanyDbContext _context, QuestionService _question
 
         try
         {
-            exam.Title = dto.Title;
-            exam.IntroDescription = dto.IntroDescription;
+            exam.Title = dto.Title!;
+            exam.IntroDescription = dto.IntroDescription!;
             exam.LimitRate = dto.LimitRate;
             exam.IsTemplate = dto.IsTemplate;
             exam.Duration = dto.Duration;
 
-            var updatedQuestionIds = await _questionService.UpdateBulkQuestionsAsync(dto.Id, dto.Questions);
+            var updatedQuestionIds = await _questionService.UpdateBulkQuestionsAsync(dto.Id, dto.Questions!);
 
             await _context.SaveChangesAsync();
 
@@ -131,7 +131,7 @@ public class ExamService(JobCompanyDbContext _context, QuestionService _question
                     QuestionType = eq.Question.QuestionType,
                     IsRequired = eq.Question.IsRequired,
                     Order = eq.Question.Order,
-                    Answers = eq.Question.Answers.Select(a => new AnswerDetailDto
+                    Answers = eq.Question.Answers!.Select(a => new AnswerDetailDto
                     {
                         Id = a.Id,
                         Text = a.Text,
@@ -192,6 +192,7 @@ public class ExamService(JobCompanyDbContext _context, QuestionService _question
             .AsNoTracking()
             .Select(x => new GetExamIntroDto
             {
+                //TODO : burada isaxtaran eger imtahan yaratsa bu zaman Company.CompanyName bu zaman vacancy.CompanyName olmalidir
                 CompanyName = x.Company.CompanyName,
                 IntroDescription = x.IntroDescription,
                 Duration = x.Duration,
@@ -222,7 +223,7 @@ public class ExamService(JobCompanyDbContext _context, QuestionService _question
                     QuestionType = eq.Question.QuestionType,
                     IsRequired = eq.Question.IsRequired,
                     Order = eq.Question.Order,
-                    Answers = eq.Question.Answers.Select(a => new AnswerPublicDto
+                    Answers = eq.Question.Answers!.Select(a => new AnswerPublicDto
                     {
                         Id = a.Id,
                         Text = a.Text,
@@ -253,7 +254,7 @@ public class ExamService(JobCompanyDbContext _context, QuestionService _question
                     QuestionType = eq.Question.QuestionType,
                     IsRequired = eq.Question.IsRequired,
                     Order = eq.Question.Order,
-                    Answers = eq.Question.Answers.Select(a => new AnswerPublicDto
+                    Answers = eq.Question.Answers!.Select(a => new AnswerPublicDto
                     {
                         Id = a.Id,
                         Text = a.Text,
@@ -281,7 +282,7 @@ public class ExamService(JobCompanyDbContext _context, QuestionService _question
                 UserAnswerDto? userAnswer = dto.Answers.FirstOrDefault(a => a.QuestionId == question.Id);
                 if (userAnswer == null) return false;
 
-                List<Guid>? correctAnswers = question.Answers
+                List<Guid>? correctAnswers = question.Answers!
                     .Where(a => a.IsCorrect ?? false)
                     .Select(a => a.Id)
                     .ToList();
@@ -296,7 +297,7 @@ public class ExamService(JobCompanyDbContext _context, QuestionService _question
                         !string.IsNullOrEmpty(userAnswer.Text) &&
                         string.Equals(
                             userAnswer.Text.Trim(),
-                            question.Answers.FirstOrDefault(a => a.IsCorrect ?? false)?.Text?.Trim(),
+                            question.Answers!.FirstOrDefault(a => a.IsCorrect ?? false)?.Text?.Trim(),
                             StringComparison.OrdinalIgnoreCase
                         ),
 

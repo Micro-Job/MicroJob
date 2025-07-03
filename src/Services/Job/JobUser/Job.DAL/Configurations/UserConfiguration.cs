@@ -31,10 +31,10 @@ namespace Job.DAL.Configurations
                 .HasForeignKey(sv => sv.ReceiverId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            builder.HasMany(x=> x.SavedResumes)
-                .WithOne(x=> x.CompanyUser)
-                .HasForeignKey(x=> x.CompanyUserId)
-                .OnDelete(DeleteBehavior.NoAction);
+            //builder.HasMany(x=> x.SavedResumes)
+            //    .WithOne(x=> x.CompanyUser)
+            //    .HasForeignKey(x=> x.CompanyUserId)
+            //    .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using JobCompany.Business.Dtos.CategoryDtos;
 using JobCompany.Business.Dtos.Common;
-using JobCompany.Business.Exceptions.Common;
 using JobCompany.Business.Extensions;
 using JobCompany.Business.Statistics;
 using JobCompany.Core.Entites;
@@ -93,7 +92,7 @@ public class CategoryService(JobCompanyDbContext _context, ICurrentUser _user)
                   LanguageCode = t.Language
               }).ToList()
           })
-          .FirstOrDefaultAsync();
+          .FirstOrDefaultAsync() ?? throw new NotFoundException();
 
         return res;
     }

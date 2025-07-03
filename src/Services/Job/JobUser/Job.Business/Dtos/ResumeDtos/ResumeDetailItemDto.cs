@@ -15,8 +15,8 @@ namespace Job.Business.Dtos.ResumeDtos
         public Guid UserId { get; set; }
         public Guid ResumeId { get; set; }
         public bool IsSaved { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
         public string? Position { get; set; }
         public string? UserPhoto { get; set; }
         public Driver IsDriver { get; set; }
@@ -32,6 +32,7 @@ namespace Job.Business.Dtos.ResumeDtos
         public bool IsMainNumber { get; set; }
         public bool IsPublic { get; set; }
         public bool IsAnonym { get; set; }
+        public bool HasAccess { get; set; }
 
         public string? ResumeEmail { get; set; }
         public ICollection<SkillGetByIdDto>? Skills { get; set; }

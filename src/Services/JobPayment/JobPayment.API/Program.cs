@@ -1,6 +1,5 @@
 using JobPayment.Business;
 using JobPayment.DAL.Contexts;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Middlewares;
 using SharedLibrary.ServiceRegistration;

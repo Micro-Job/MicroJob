@@ -19,7 +19,7 @@ namespace Job.Business.Exceptions.UserExceptions
             ErrorMessage = MessageHelper.GetMessage("NOTFOUNDEXCEPTION_USER");
         }
 
-        public NotFoundUserException(string? message) : base(message)
+        public NotFoundUserException(string message) : base(message)
         {
             ErrorMessage = message;
         }

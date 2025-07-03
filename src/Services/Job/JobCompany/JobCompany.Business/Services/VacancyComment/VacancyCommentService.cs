@@ -3,6 +3,7 @@ using JobCompany.Business.Extensions;
 using JobCompany.Business.Statistics;
 using JobCompany.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
+using SharedLibrary.Exceptions;
 using SharedLibrary.HelperServices.Current;
 
 namespace JobCompany.Business.Services.VacancyComment;
@@ -43,7 +44,7 @@ public class VacancyCommentService(JobCompanyDbContext _context, ICurrentUser _u
 
     public async Task VacancyCommentDeleteAsync(Guid id)
     {
-        var noticeComment = await _context.VacancyComments.Include(x => x.Translations).Where(x => x.Id == id).FirstOrDefaultAsync();
+        var noticeComment = await _context.VacancyComments.Include(x => x.Translations).Where(x => x.Id == id).FirstOrDefaultAsync() ?? throw new NotFoundException();
         var noticeCommentTranslation = noticeComment.Translations.ToList();
         _context.VacancyCommentTranslations.RemoveRange(noticeCommentTranslation);
         _context.VacancyComments.Remove(noticeComment);
@@ -78,7 +79,7 @@ public class VacancyCommentService(JobCompanyDbContext _context, ICurrentUser _u
                   LanguageCode = t.Language
               }).ToList()
           })
-          .FirstOrDefaultAsync();
+          .FirstOrDefaultAsync() ?? throw new NotFoundException();
 
         return res;
     }

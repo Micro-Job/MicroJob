@@ -15,11 +15,11 @@ namespace JobCompany.API.Controllers
         /// Admin/Dashboard/ Muraciet, active vakansiya, qebul olunmus vakansiya sayi/ mohteshem 3-lu ;)
         /// </summary>
 
-        [HttpGet("[action]")]
-        public async Task<IActionResult> GetSummary()
-        {
-            return Ok(await reportService.GetSummaryAsync());
-        }
+        //[HttpGet("[action]")]
+        //public async Task<IActionResult> GetSummary()
+        //{
+        //    return Ok(await reportService.GetSummaryAsync());
+        //}
 
         //[HttpGet("[action]")]
         //public async Task<IActionResult> GetRecentApplications()

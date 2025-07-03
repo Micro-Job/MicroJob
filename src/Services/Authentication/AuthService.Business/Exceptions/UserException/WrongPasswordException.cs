@@ -19,7 +19,7 @@ namespace AuthService.Business.Exceptions.UserException
         {
             ErrorMessage = MessageHelper.GetMessage("PASSWORDS_DO_NOT_MATCH");
         }
-        public WrongPasswordException(string? message) : base(message)
+        public WrongPasswordException(string message) : base(message)
         {
             ErrorMessage = message;
         }

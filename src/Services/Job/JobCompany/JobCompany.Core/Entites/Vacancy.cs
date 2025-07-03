@@ -7,8 +7,8 @@ namespace JobCompany.Core.Entites
 {
     public class Vacancy : BaseEntity
     {
-        public string CompanyName { get; set; }
-        public string Title { get; set; }
+        public required string CompanyName { get; set; }
+        public required string Title { get; set; }
         public string? CompanyLogo { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime? EndDate { get; set; }
@@ -23,7 +23,7 @@ namespace JobCompany.Core.Entites
         public decimal? MainSalary { get; set; }
         public decimal? MaxSalary { get; set; }
         public SalaryCurrencyType? SalaryCurrency { get; set; }
-        public string Requirement { get; set; }
+        public required string Requirement { get; set; }
         public string? Description { get; set; }
         public Gender Gender { get; set; }
         public Military Military { get; set; }
@@ -32,7 +32,7 @@ namespace JobCompany.Core.Entites
         public Citizenship Citizenship { get; set; }
         public VacancyStatus VacancyStatus { get; set; }
 
-        public Guid? CompanyId { get; set; }
+        public Guid CompanyId { get; set; }
         public Company? Company { get; set; }
 
         public Guid? CountryId { get; set; }

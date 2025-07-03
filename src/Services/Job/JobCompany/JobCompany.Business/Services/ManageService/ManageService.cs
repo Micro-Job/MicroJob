@@ -4,7 +4,6 @@ using JobCompany.Business.Dtos.CompanyDtos;
 using JobCompany.Business.Dtos.MessageDtos;
 using JobCompany.Business.Dtos.NumberDtos;
 using JobCompany.Business.Dtos.VacancyDtos;
-using JobCompany.Business.Exceptions.Common;
 using JobCompany.Business.Extensions;
 using JobCompany.Business.Statistics;
 using JobCompany.Core.Entites;
@@ -47,7 +46,7 @@ public class ManageService(JobCompanyDbContext _context, ICurrentUser _currentUs
             .FirstOrDefaultAsync(v => v.Id == vacancyGuid)
             ?? throw new NotFoundException();
 
-        var appliedUserIds = vacancy.Applications
+        var appliedUserIds = vacancy.Applications?
              .Where(a => !a.IsDeleted)
              .Select(a => a.UserId)
              .ToList();

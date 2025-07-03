@@ -82,7 +82,7 @@ namespace Job.API.Controllers
 
         [AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser)]
         [HttpPost("[action]")]
-        public async Task<IActionResult> ToggleSaveResume(string resumeId)
+        public async Task<IActionResult> ToggleSaveResume(Guid resumeId)
         {
             await _resumeService.ToggleSaveResumeAsync(resumeId);
             return Ok();
@@ -97,7 +97,7 @@ namespace Job.API.Controllers
 
         [AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser)]
         [HttpPost("[action]")]
-        public async Task<IActionResult> TakeResumeAccess(string resumeId)
+        public async Task<IActionResult> TakeResumeAccess(Guid resumeId)
         {
             await _resumeService.TakeResumeAccessAsync(resumeId);
             return Ok();

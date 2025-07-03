@@ -9,7 +9,7 @@ namespace AuthService.Business.Dtos
     public class VoenRequest
     {
         public string? middleName { get; set; }
-        public string type { get; set; }
-        public string tin { get; set; }
+        public required string type { get; set; }
+        public required string tin { get; set; }
     }
 }

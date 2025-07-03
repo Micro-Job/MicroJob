@@ -14,7 +14,7 @@ namespace AuthService.Business.Exceptions.UserException
             ErrorMessage = MessageHelper.GetMessage("NOTFOUNDEXCEPTION_USER");
         }
 
-        public UserNotFoundException(string? message) : base(message)
+        public UserNotFoundException(string message) : base(message)
         {
             ErrorMessage = message;
         }

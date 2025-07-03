@@ -18,7 +18,7 @@ namespace Job.Business.Exceptions.Common
             ErrorMessage = typeof(T).Name + " is already exists";
         }
 
-        public IsAlreadyExistException(string? message) : base(message)
+        public IsAlreadyExistException(string message) : base(message)
         {
             ErrorMessage = message;
         }

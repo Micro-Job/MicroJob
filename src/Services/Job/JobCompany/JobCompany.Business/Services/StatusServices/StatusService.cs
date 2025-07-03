@@ -66,7 +66,7 @@ namespace JobCompany.Business.Services.StatusServices
                 throw new CannotChangeStatusVisibilityException();
             }
 
-            if (existStatus.Applications.Any())
+            if (existStatus.Applications != null && existStatus.Applications.Any())
                 throw new CannotChangeStatusVisibilityException();
 
             existStatus.IsVisible = !existStatus.IsVisible;

@@ -9,15 +9,16 @@ namespace JobPayment.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [AuthorizeRole(UserRole.SuperAdmin, UserRole.Admin)]
     public class PriceController(PriceService _priceService) : ControllerBase
     {
+        [AuthorizeRole(UserRole.SuperAdmin, UserRole.Admin)]
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllPrices()
         {
             return Ok(await _priceService.GetAllPricesAsync());
         }
 
+        [AuthorizeRole(UserRole.SuperAdmin, UserRole.Admin)]
         [HttpPut("[action]")]
         public async Task<IActionResult> UpdatePrice(UpdatePriceDto dto)
         {

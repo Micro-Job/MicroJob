@@ -15,7 +15,7 @@ public class CheckApplicationConsumer(JobCompanyDbContext _jobCompanyDb) : ICons
     {
         var hasApplied = await _jobCompanyDb.Applications.AnyAsync(app =>
             app.UserId == context.Message.UserId &&
-            app.Vacancy.Company != null && app.Vacancy.Company.UserId == context.Message.CompanyUserId);
+            app.Vacancy.Company != null && app.Vacancy.Company.UserId == context.Message.CompanyUserId && !app.IsDeleted);
 
         await context.RespondAsync(new CheckApplicationResponse
         {

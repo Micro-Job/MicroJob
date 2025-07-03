@@ -1,4 +1,5 @@
-﻿using AuthService.DAL.Contexts;
+﻿using AuthService.Core.Entities;
+using AuthService.DAL.Contexts;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Events;
@@ -18,7 +19,7 @@ namespace AuthService.Business.Consumers
         {
             UpdateUserEvent message = context.Message;
 
-            var user = await _context.Users.FirstOrDefaultAsync(x=> x.Id == message.UserId);
+            User user = await _context.Users.FirstOrDefaultAsync(x=> x.Id == message.UserId);
 
             user.FirstName = message.FirstName;
             user.LastName = message.LastName;

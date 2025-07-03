@@ -9,7 +9,7 @@ namespace SharedLibrary.Requests
 {
     public class CheckBalancesRequest
     {
-        public ICollection<Guid> UserIds { get; set; }
+        public required ICollection<Guid> UserIds { get; set; }
         public InformationType InformationType { get; set; }
     }
 }

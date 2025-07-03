@@ -11,7 +11,7 @@ public class UserAlreadyCompletedExamException : Exception, IBaseException
     {
         ErrorMessage = "User already completed exam";
     }
-    public UserAlreadyCompletedExamException(string? message) : base(message)
+    public UserAlreadyCompletedExamException(string message) : base(message)
     {
         ErrorMessage = message;
     }

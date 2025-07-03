@@ -8,6 +8,6 @@ namespace SharedLibrary.Requests
 {
     public class CheckVoenRequest
     {
-        public string VOEN { get; set; }
+        public required string VOEN { get; set; }
     }
 }

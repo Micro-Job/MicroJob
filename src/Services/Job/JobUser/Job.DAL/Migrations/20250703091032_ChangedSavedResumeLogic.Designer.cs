@@ -4,6 +4,7 @@ using Job.DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Job.DAL.Migrations
 {
     [DbContext(typeof(JobDbContext))]
-    partial class JobDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250703091032_ChangedSavedResumeLogic")]
+    partial class ChangedSavedResumeLogic
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -462,11 +465,19 @@ namespace Job.DAL.Migrations
 
             modelBuilder.Entity("Job.Core.Entities.CompanyResumeAccess", b =>
                 {
+                    b.HasOne("Job.Core.Entities.User", "CompanyUser")
+                        .WithMany("CompanyResumeAccesses")
+                        .HasForeignKey("CompanyUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Job.Core.Entities.Resume", "Resume")
                         .WithMany("CompanyResumeAccesses")
                         .HasForeignKey("ResumeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("CompanyUser");
 
                     b.Navigation("Resume");
                 });
@@ -634,6 +645,8 @@ namespace Job.DAL.Migrations
 
             modelBuilder.Entity("Job.Core.Entities.User", b =>
                 {
+                    b.Navigation("CompanyResumeAccesses");
+
                     b.Navigation("Notifications");
 
                     b.Navigation("Resume");

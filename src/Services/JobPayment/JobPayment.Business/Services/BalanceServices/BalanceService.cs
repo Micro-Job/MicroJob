@@ -30,7 +30,7 @@ namespace JobPayment.Business.Services.BalanceServices
                 InformationType = InformationType.PacketPayment,
                 TransactionStatus = TransactionStatus.Success,
                 InformationId = existPacket.Id,
-                UserId = (Guid)_currentUser.UserGuid,
+                UserId = (Guid)_currentUser.UserGuid!,
                 Amount = existPacket.Value
             });
 

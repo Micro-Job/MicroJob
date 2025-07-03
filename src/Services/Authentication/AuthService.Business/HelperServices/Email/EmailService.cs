@@ -13,50 +13,36 @@ public class EmailService(IOptions<SmtpSettings> smtpSettings, EmailTemplate _em
 {
     private readonly SmtpSettings _smtpSettings = smtpSettings.Value;
 
-    public async Task SendSetPassword(string toEmail, string token)
+    public void SendSetPassword(string toEmail, string token)
     {
-        await SendEmailAsync(toEmail, new EmailMessage
+        SendEmailAsync(toEmail, new EmailMessage
         {
             Subject = "Şifrənizi müəyyən edin...",
             Content = _emailTemplate.ResetPassword(toEmail, token)
         });
     }
 
-    public async Task SendResetPassword(User user, string token)
+    public void SendResetPassword(User user, string token)
     {
-        //var user = await _context.PasswordTokens
-        //    .Where(pt => pt.Token == token && pt.ExpireTime > DateTime.Now)
-        //    .Select(pt => new
-        //    {
-        //        Email = pt.User.Email,
-        //        UserName = pt.User.FirstName + pt.User.LastName
-        //    })
-        //    .SingleOrDefaultAsync();
-
-        //var user = await _context.Users.Firsr
-
-        //if (user == null || user.Email != u) throw new NotFoundException<User>(MessageHelper.GetMessage("NOTFOUNDEXCEPTION_USER"));
-
-
-        await SendEmailAsync(user.Email, new EmailMessage
+        SendEmailAsync(user.Email, new EmailMessage
         {
             Subject = "Şifrənizi yeniləyin...",
             Content = _emailTemplate.ResetPassword(token, $"{user.FirstName} {user.LastName}")
         });
     }
 
-    public async Task SendRegister(string toEmail, string fullName)
+    public void SendRegister(string toEmail, string fullName)
     {
-        await SendEmailAsync(toEmail, new EmailMessage
+        SendEmailAsync(toEmail, new EmailMessage
         {
             Subject = "Xoş gəlmişsiniz...",
             Content = _emailTemplate.RegisterCompleted(fullName)
         });
     }
 
-    public async Task SendVerifyEmail(string toEmail, string fullName, string userId)
+    public void SendVerifyEmail(string toEmail, string fullName, string userId)
     {
-        await SendEmailAsync(toEmail, new EmailMessage
+        SendEmailAsync(toEmail, new EmailMessage
         {
             Subject = "Hesabınızı təsdiqləyin...",
             Content = _emailTemplate.VerifyEmail(fullName, userId)
@@ -64,16 +50,16 @@ public class EmailService(IOptions<SmtpSettings> smtpSettings, EmailTemplate _em
     }
 
     //TODO : bu daha sonra email update edilərsə istifadə ediləcək
-    public async Task SendVerifyUpdateEmail(string toEmail, string fullName, string userId)
+    public void SendVerifyUpdateEmail(string toEmail, string fullName, string userId)
     {
-        await SendEmailAsync(toEmail, new EmailMessage
+        SendEmailAsync(toEmail, new EmailMessage
         {
             Subject = "Hesabınızı təsdiqləyin...",
             Content = _emailTemplate.VerifyUpdateEmail(fullName, userId)
         });
     }
 
-    public async Task SendEmailAsync(string toEmail, EmailMessage emailMessage)
+    public void SendEmailAsync(string toEmail, EmailMessage emailMessage)
     {
         var fromAddress = new MailAddress(_smtpSettings.Username, "HIRI");
         var toAddress = new MailAddress(toEmail);
@@ -96,7 +82,7 @@ public class EmailService(IOptions<SmtpSettings> smtpSettings, EmailTemplate _em
             IsBodyHtml = true,
             Body = body,
         })
-            smtp.Send(message);
+        smtp.Send(message);
     }
 
 

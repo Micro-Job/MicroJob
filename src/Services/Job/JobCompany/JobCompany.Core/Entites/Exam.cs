@@ -6,7 +6,7 @@ namespace JobCompany.Core.Entites
     {
         public string Title { get; set; }
         public bool IsTemplate { get; set; }
-        public string IntroDescription { get; set; }
+        public required string IntroDescription { get; set; }
         
         //public string? Result { get; set; } laz?ms?zd?r dey? silindi
         public float LimitRate { get; set; }
