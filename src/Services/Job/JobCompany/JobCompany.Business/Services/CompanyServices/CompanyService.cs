@@ -114,7 +114,7 @@ namespace JobCompany.Business.Services.CompanyServices
 
         public async Task<DataListDto<CompanyDto>> GetAllCompaniesAsync(string? searchTerm, bool? countDesc, int skip = 1, int take = 12)
         {
-            var query = _context.Companies.Where(x=> x.IsCompany).AsQueryable().AsNoTracking();
+            var query = _context.Companies.Where(x => x.IsCompany).AsQueryable().AsNoTracking();
 
             if (!string.IsNullOrWhiteSpace(searchTerm))
                 query = query.Where(x => x.CompanyName!.Contains(searchTerm));
@@ -122,10 +122,10 @@ namespace JobCompany.Business.Services.CompanyServices
             if (countDesc.HasValue)
             {
                 if (countDesc == false)
-                    query = query.OrderBy(x=> x.Vacancies.Count(v => v.VacancyStatus == VacancyStatus.Active && v.EndDate > DateTime.Now));
+                    query = query.OrderBy(x => x.Vacancies.Count(v => v.VacancyStatus == VacancyStatus.Active && v.EndDate > DateTime.Now));
 
                 else
-                    query = query.OrderByDescending(x=> x.Vacancies.Count(v => v.VacancyStatus == VacancyStatus.Active && v.EndDate > DateTime.Now));
+                    query = query.OrderByDescending(x => x.Vacancies.Count(v => v.VacancyStatus == VacancyStatus.Active && v.EndDate > DateTime.Now));
             }
 
             var companies = await query
@@ -171,6 +171,10 @@ namespace JobCompany.Business.Services.CompanyServices
                                             })
                                             .ToList(),
                             Email = x.Email!,
+                            EmployeeCount = x.EmployeeCount,
+                            CreatedDate = x.CreatedDate,
+                            VacancyCount = x.Vacancies != null ? x.Vacancies.Count(v => v.VacancyStatus == VacancyStatus.Active && v.EndDate > DateTime.Now) : 0,
+                            CategoryName = x.Category.Translations.Where(x => x.Language == _currentUser.LanguageCode).Select(y => y.Name).FirstOrDefault()
                         })
                         .FirstOrDefaultAsync() ?? throw new NotFoundException();
 

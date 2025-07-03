@@ -12,5 +12,9 @@ namespace JobCompany.Business.Dtos.CompanyDtos
         public string? CompanyLocation { get; set; }
         public string Email { get; set; }
         public string? WebLink { get; set; }
+        public int VacancyCount { get; set; }
+        public string? CategoryName { get; set; }
+        public DateTime? CreatedDate { get; set; }
+        public int EmployeeCount { get; set; }
     }
 }   

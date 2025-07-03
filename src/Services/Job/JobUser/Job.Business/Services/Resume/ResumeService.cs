@@ -237,7 +237,7 @@ namespace Job.Business.Services.Resume
                     })
                     .FirstOrDefault(),
                 SkillsName = x.ResumeSkills
-                .Select(s => s.Skill.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name))
+                .Select(s => s.Skill.Translations.Where(x=> x.Language == _currentUser.LanguageCode).Select(z=> z.Name).FirstOrDefault())
                 .ToList(),
                 Position = x.Position != null ? x.Position.Name : null,
                 HasAccess = x.IsPublic || x.CompanyResumeAccesses.Any(cra => cra.CompanyUserId == _currentUser.UserGuid)
