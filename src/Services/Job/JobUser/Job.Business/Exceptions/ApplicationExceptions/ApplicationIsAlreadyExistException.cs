@@ -18,8 +18,7 @@ namespace Job.Business.Exceptions.ApplicationExceptions
             ErrorMessage = "User not found";
         }
 
-        public ApplicationIsAlreadyExistException(string? message)
-            : base(message)
+        public ApplicationIsAlreadyExistException(string message) : base(message)
         {
             ErrorMessage = message;
         }

@@ -17,7 +17,7 @@ public class VacancyCreatedConsumer(JobDbContext _dbContext) : IConsumer<Vacancy
     {
         VacancyCreatedEvent message = context.Message;
 
-        double requiredMatchCount = Math.Ceiling(message.SkillIds.Count * 0.5);
+        double requiredMatchCount = Math.Ceiling(message.SkillIds!.Count * 0.5);
 
         List<Guid> matchedUserIds = await _dbContext.ResumeSkills
             .AsNoTracking()

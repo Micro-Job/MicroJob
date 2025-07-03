@@ -19,11 +19,11 @@ public class GetResumeDataConsumer(JobDbContext _jobDbContext) : IConsumer<GetRe
                 Position = r.Position != null ? r.Position.Name : null,
                 FirstName = r.FirstName,
                 LastName = r.LastName,
-                ProfileImage = r.UserPhoto,
-                Email = r.ResumeEmail,
-                PhoneNumber = r.PhoneNumbers.Select(p => p.PhoneNumber).ToList()
-            }).FirstOrDefaultAsync() ?? new GetResumeDataResponse();
+                ProfileImage = r.UserPhoto!,
+                Email = r.ResumeEmail!,
+                PhoneNumber = r.PhoneNumbers.Select(x=> x.PhoneNumber).FirstOrDefault()!
+            }).FirstOrDefaultAsync();
 
-        await context.RespondAsync(resumeData);
+        await context.RespondAsync(resumeData!);
     }
 }

@@ -9,10 +9,10 @@ namespace JobPayment.Core.Entities
 {
     public class User : BaseEntity
     {
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
+        public required string FirstName { get; set; }
+        public required string LastName { get; set; }
 
-        public Balance Balance { get; set; }
+        public Balance? Balance { get; set; }
         public ICollection<Transaction>? Transactions { get; set; }
     }
 }

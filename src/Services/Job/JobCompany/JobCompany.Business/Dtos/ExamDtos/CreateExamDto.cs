@@ -9,7 +9,7 @@ public record CreateExamDto
     public string? Title { get; set; }
     public string? IntroDescription { get; set; }
     public float LimitRate { get; set; }
-    public ICollection<QuestionCreateDto>? Questions { get; set; }
+    public required ICollection<QuestionCreateDto> Questions { get; set; }
     public bool IsTemplate { get; set; }
     public short? Duration { get; set; }
 }

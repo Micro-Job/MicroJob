@@ -83,10 +83,9 @@ public class SkillService(JobCompanyDbContext _context, ICurrentUser _user)
 
     public async Task DeleteSkillAsync(Guid skillId)
     {
-        var skill = await _context.Skills.Include(x => x.Translations).Where(x => x.Id == skillId).FirstOrDefaultAsync();
+        var skill = await _context.Skills.Include(x => x.Translations).Where(x => x.Id == skillId).FirstOrDefaultAsync() ?? throw new DirectoryNotFoundException();
 
-        var skillTranslations = skill.Translations.Select(x => x).ToList();
-        _context.SkillTranslations.RemoveRange(skillTranslations);
+        _context.SkillTranslations.RemoveRange(skill.Translations);
         _context.Skills.Remove(skill);
         await _context.SaveChangesAsync();
     }

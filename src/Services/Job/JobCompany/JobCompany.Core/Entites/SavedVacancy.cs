@@ -12,7 +12,7 @@ namespace JobCompany.Core.Entites
         public Guid? UserId { get; set; }
 
         public Guid VacancyId { get; set; }
-        public Vacancy Vacancy { get; set; }
+        public Vacancy? Vacancy { get; set; }
 
         public DateTime SavedAt { get; set; }
     }

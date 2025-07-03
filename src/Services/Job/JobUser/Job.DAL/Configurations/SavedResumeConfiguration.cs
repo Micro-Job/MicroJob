@@ -17,9 +17,14 @@ namespace Job.DAL.Configurations
                 .WithMany(x => x.SavedResumes)
                 .HasForeignKey(x => x.ResumeId);
 
-            builder.HasOne(x => x.CompanyUser)
-                .WithMany(x => x.SavedResumes)
-                .HasForeignKey(x => x.CompanyUserId);
+            builder.Property(sv => sv.ResumeId)
+                   .IsRequired();
+
+            builder.Property(sv => sv.CompanyUserId)
+                   .IsRequired();
+
+            builder.HasIndex(sv => new { sv.ResumeId, sv.CompanyUserId })
+                   .IsUnique();
         }
     }
 }

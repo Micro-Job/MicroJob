@@ -18,7 +18,7 @@ namespace Job.Business.Exceptions.Common
             ErrorMessage = typeof(T).Name + " created failed for some reason";
         }
 
-        public CreateException(string? message) : base(message)
+        public CreateException(string message) : base(message)
         {
             ErrorMessage = message;
         }

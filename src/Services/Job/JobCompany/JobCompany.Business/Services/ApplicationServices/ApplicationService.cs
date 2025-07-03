@@ -62,7 +62,7 @@ public class ApplicationService(JobCompanyDbContext _context,
             Email = resumeData.Message.Email,
             FirstName = resumeData.Message.FirstName,
             LastName = resumeData.Message.LastName,
-            PhoneNumber = resumeData.Message.PhoneNumber.FirstOrDefault()
+            PhoneNumber = resumeData.Message.PhoneNumber
         };
 
         await _context.Applications.AddAsync(newApplication);
@@ -107,12 +107,12 @@ public class ApplicationService(JobCompanyDbContext _context,
     public async Task ChangeApplicationStatusAsync(Guid applicationId, Guid statusId)
     {
         var existAppVacancy = await _context.Applications
-            .Where(x => x.Id == applicationId && x.Vacancy.Company.UserId == _currentUser.UserGuid)
+            .Where(x => x.Id == applicationId && x.Vacancy.Company!.UserId == _currentUser.UserGuid)
             .Select(x => new
             {
                 Application = x,
                 VacancyId = x.VacancyId,
-                CompanyName = x.Vacancy.Company.CompanyName,
+                CompanyName = x.Vacancy.Company!.CompanyName,
                 CompanyLogo = x.Vacancy.Company.CompanyLogo,
                 VacancyTitle = x.Vacancy.Title
             })
@@ -128,7 +128,7 @@ public class ApplicationService(JobCompanyDbContext _context,
             new NotificationToUserEvent
             {
                 ReceiverIds = [application.UserId],
-                SenderId = (Guid)_currentUser.UserGuid,
+                SenderId = (Guid)_currentUser.UserGuid!,
                 InformationId = applicationId,
                 InformationName = existAppVacancy.VacancyTitle,
                 NotificationType = NotificationType.ApplicationStatusUpdate,
@@ -204,7 +204,7 @@ public class ApplicationService(JobCompanyDbContext _context,
                 VacancyId = a.VacancyId,
                 Title = a.Vacancy.Title,
                 CompanyId = a.Vacancy.CompanyId,
-                CompanyLogo = a.Vacancy.Company.CompanyLogo != null ? $"{_currentUser.BaseUrl}/companyFiles/{a.Vacancy.Company.CompanyLogo}" : null,
+                CompanyLogo = a.Vacancy.Company!.CompanyLogo != null ? $"{_currentUser.BaseUrl}/companyFiles/{a.Vacancy.Company.CompanyLogo}" : null,
                 CompanyName = a.Vacancy.Company.CompanyName,
                 WorkType = a.Vacancy.WorkType,
                 VacancyStatus = a.Vacancy.VacancyStatus,
@@ -237,7 +237,7 @@ public class ApplicationService(JobCompanyDbContext _context,
                 VacancyName = application.Vacancy.Title,
                 IsSavedVacancy = application.Vacancy.SavedVacancies.Any(x => x.UserId == _currentUser.UserGuid),
                 CompanyId = application.Vacancy.CompanyId,
-                CompanyName = application.Vacancy.Company.CompanyName,
+                CompanyName = application.Vacancy.Company!.CompanyName,
                 CompanyLogo = $"{_currentUser.BaseUrl}/companyFiles/{application.Vacancy.Company.CompanyLogo}",
                 Location = application.Vacancy.Company.CompanyLocation,
                 WorkType = application.Vacancy.WorkType,
@@ -290,7 +290,7 @@ public class ApplicationService(JobCompanyDbContext _context,
     private IQueryable<Application> GetApplicationsQuery(Guid? vacancyId, StatusEnum? status, string? userFullName)
     {
         var query = _context.Applications.AsNoTracking()
-            .Where(a => a.Vacancy.Company.UserId == _currentUser.UserGuid && a.IsActive && !a.IsDeleted);
+            .Where(a => a.Vacancy.Company!.UserId == _currentUser.UserGuid && a.IsActive && !a.IsDeleted);
 
         if (vacancyId != null) // Vakansiyaya görə filterlənmə
             query = query.Where(a => a.VacancyId == vacancyId);

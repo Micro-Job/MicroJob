@@ -29,7 +29,7 @@ namespace JobCompany.Business.Consumers
                 .Select(x => new
                 {
                     x.Id,
-                    x.Company.UserId,
+                    x.Company!.UserId,
                     x.CompanyId,
                     x.EndDate,
                     x.Title
@@ -75,7 +75,7 @@ namespace JobCompany.Business.Consumers
                             InformationId = vacancy.Id,
                             InformationName = vacancy.Title,
                             NotificationType = NotificationType.VacancySuccessDailyPayment,
-                            ReceiverId = (Guid)vacancy.CompanyId,
+                            ReceiverId = vacancy.CompanyId,
                             SenderId = null
                         });
                     }

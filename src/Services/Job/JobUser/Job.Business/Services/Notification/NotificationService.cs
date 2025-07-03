@@ -11,7 +11,7 @@ using SharedLibrary.Responses;
 
 namespace Job.Business.Services.Notification;
 
-public class NotificationService(JobDbContext _context, ICurrentUser _currentUser, IRequestClient<GetCompaniesDataByUserIdsRequest> _companyDataClient) 
+public class NotificationService(JobDbContext _context, ICurrentUser _currentUser) 
 {
     public async Task CreateNotificationAsync(NotificationDto notificationDto)
     {

@@ -20,7 +20,7 @@ namespace AuthService.Business.Exceptions.UserException
             ErrorMessage = MessageHelper.GetMessage("USEREXISTEXCEPTION_EMAIL");
         }
 
-        public ExistEmailException(string? message) : base(message)
+        public ExistEmailException(string message) : base(message)
         {
             ErrorMessage = message;
         }

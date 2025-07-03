@@ -14,7 +14,7 @@ namespace JobPayment.Business.Exceptions.PaymentExceptions
             ErrorMessage = "Yetərli balans yoxdur";
         }
 
-        public InsufficientBalanceException(string? message) : base(message)
+        public InsufficientBalanceException(string message) : base(message)
         {
             ErrorMessage = message;
         }

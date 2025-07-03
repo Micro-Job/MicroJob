@@ -20,7 +20,7 @@ namespace AuthService.Business.Exceptions.UserException
             ErrorMessage = MessageHelper.GetMessage("TERMS_NOT_ACCEPTED");
         }
 
-        public PolicyException(string? message) : base(message)
+        public PolicyException(string message) : base(message)
         {
             ErrorMessage = message;
         }

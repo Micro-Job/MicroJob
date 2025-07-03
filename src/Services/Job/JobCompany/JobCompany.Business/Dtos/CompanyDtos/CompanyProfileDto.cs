@@ -5,7 +5,7 @@ namespace JobCompany.Business.Dtos.CompanyDtos;
 public class CompanyProfileDto
 {
     public Guid Id { get; set; }
-    public string Name { get; set; }
+    public string? Name { get; set; }
     public string? CompanyLogo { get; set; }
     public string? Information { get; set; }
     public DateTime? CreatedDate { get; set; }

@@ -9,7 +9,7 @@ namespace SharedLibrary.Responses
 {
     public class CheckBalancesResponse
     {
-        public ICollection<BalancesResponseDto> UserBalanceInformations { get; set; }
+        public ICollection<BalancesResponseDto>? UserBalanceInformations { get; set; }
     }
 
     public class BalancesResponseDto

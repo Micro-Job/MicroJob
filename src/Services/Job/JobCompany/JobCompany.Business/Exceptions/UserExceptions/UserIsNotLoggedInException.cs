@@ -18,7 +18,7 @@ namespace JobCompany.Business.Exceptions.UserExceptions
             ErrorMessage = "User is not logged in";
         }
 
-        public UserIsNotLoggedInException(string? message) : base(message)
+        public UserIsNotLoggedInException(string message) : base(message)
         {
             ErrorMessage = message;
         }

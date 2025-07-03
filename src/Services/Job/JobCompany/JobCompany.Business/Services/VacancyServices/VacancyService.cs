@@ -31,14 +31,15 @@ namespace JobCompany.Business.Services.VacancyServices
         /// vacancy yaradilan zaman exam yaradılması
         public async Task CreateVacancyAsync(CreateVacancyDto vacancyDto, ICollection<CreateNumberDto>? numberDto)
         {
-            string? companyLogoPath = null;
             var company = await _context.Companies.Where(x => x.UserId == _currentUser.UserGuid).Select(x => new
             {
                 x.Id,
                 x.CompanyName,
                 x.CompanyLogo,
                 x.IsCompany
-            }).FirstOrDefaultAsync();
+            }).FirstOrDefaultAsync() ?? throw new NotFoundException();
+
+            string? companyLogoPath = null;
 
             if (company != null && !string.IsNullOrEmpty(company.CompanyLogo))
             {
@@ -53,8 +54,8 @@ namespace JobCompany.Business.Services.VacancyServices
             var vacancy = new Vacancy
             {
                 Id = Guid.NewGuid(),
-                CompanyName = company.IsCompany ? company.CompanyName : vacancyDto.CompanyName.Trim(),
-                CompanyId = company?.Id,
+                CompanyName = company!.IsCompany ? company.CompanyName! : vacancyDto.CompanyName!.Trim(),
+                CompanyId = company.Id,
                 Title = vacancyDto.Title.Trim(),
                 CompanyLogo = companyLogoPath,
                 PaymentDate = vacancyDto.StartDate,
@@ -113,28 +114,13 @@ namespace JobCompany.Business.Services.VacancyServices
             await _context.Vacancies.AddAsync(vacancy);
             await _context.SaveChangesAsync();
 
-            //TODO : bu hisse burada yeni vakansiya yaranan zaman deyil de qebul edildikden sonra görsenmelidir
-            //if (vacancyDto.SkillIds != null)
-            //{
-            //    await _publishEndpoint.Publish(
-            //        new VacancyCreatedEvent
-            //        {
-            //            SenderId = (Guid)_currentUser.UserGuid,
-            //            SkillIds = vacancyDto.SkillIds,
-            //            InformationId = vacancy.Id,
-            //            InformatioName = vacancy.Title,
-            //            SenderImage = vacancy.CompanyLogo,
-            //            SenderName = vacancy.CompanyName
-            //        }
-            //    );
-            //}
         }
 
         /// <summary> Şirkətin profilində bütün vakansiyalarını gətirmək(Filterlerle birlikde) </summary>
         public async Task<DataListDto<VacancyGetAllDto>> GetAllOwnVacanciesAsync(string? titleName, List<Guid>? categoryIds, List<Guid>? countryIds, List<Guid>? cityIds, VacancyStatus? IsActive, decimal? minSalary, decimal? maxSalary, List<byte>? workStyles, List<byte>? workTypes, List<Guid>? skillIds, int skip = 1, int take = 6)
         {
             var query = _context
-                .Vacancies.Where(x => x.Company.UserId == _currentUser.UserGuid && x.VacancyStatus != VacancyStatus.Deleted)
+                .Vacancies.Where(x => x.Company!.UserId == _currentUser.UserGuid && x.VacancyStatus != VacancyStatus.Deleted)
                 .OrderByDescending(x => x.CreatedDate)
                 .AsNoTracking();
 
@@ -159,9 +145,9 @@ namespace JobCompany.Business.Services.VacancyServices
                     Id = x.Id,
                     Title = x.Title,
                     StartDate = x.StartDate,
-                    CityName = x.City.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name),
-                    CountryName = x.Country.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name),
-                    CompanyLogo = $"{_currentUser.BaseUrl}/companyFiles/{x.Company.CompanyLogo}",
+                    CityName = x.City!.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name)!,
+                    CountryName = x.Country!.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name)!,
+                    CompanyLogo = $"{_currentUser.BaseUrl}/companyFiles/{x.Company!.CompanyLogo}",
                     CompanyName = x.Company.IsCompany ? x.Company.CompanyName : x.CompanyName,
                     ViewCount = x.ViewCount,
                     WorkType = x.WorkType,
@@ -785,7 +771,7 @@ namespace JobCompany.Business.Services.VacancyServices
             var balance = await _checkBalanceRequest.GetResponse<CheckBalanceResponse>(new CheckBalanceRequest
             {
                 InformationType = InformationType.Vacancy,
-                UserId = (Guid)_currentUser.UserGuid
+                UserId = (Guid)_currentUser.UserGuid!
             });
 
             if(vacancy.VacancyStatus == VacancyStatus.PendingActive && vacancy.EndDate > DateTime.Now && vacancy.PaymentDate == null)

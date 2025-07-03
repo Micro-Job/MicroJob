@@ -15,7 +15,7 @@ namespace SharedLibrary.Exceptions
             ErrorMessage = MessageHelper.GetMessage("BAD_REQUEST");
         }
 
-        public BadRequestException(string? message) : base(message)
+        public BadRequestException(string message) : base(message)
         {
             ErrorMessage = message;
         }

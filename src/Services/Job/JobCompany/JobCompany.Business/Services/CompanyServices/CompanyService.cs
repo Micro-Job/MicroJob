@@ -1,7 +1,6 @@
 using JobCompany.Business.Dtos.Common;
 using JobCompany.Business.Dtos.CompanyDtos;
 using JobCompany.Business.Dtos.NumberDtos;
-using JobCompany.Business.Exceptions.Common;
 using JobCompany.Business.Exceptions.UserExceptions;
 using JobCompany.Business.Extensions;
 using JobCompany.Business.Statistics;
@@ -46,11 +45,11 @@ namespace JobCompany.Business.Services.CompanyServices
             {
                 var defaultLogo = Path.Combine(FilePaths.image, "defaultlogo.jpg").NormalizeSlashes();
 
-                var currentLogo = company.CompanyLogo.NormalizeSlashes();
+                var currentLogo = company.CompanyLogo!.NormalizeSlashes();
 
                 if (!string.IsNullOrEmpty(currentLogo) && currentLogo != defaultLogo)
                 {
-                    _fileService.DeleteFile(company.CompanyLogo);
+                    _fileService.DeleteFile(company.CompanyLogo!);
                 }
 
                 var fileResult = await _fileService.UploadAsync(FilePaths.image, dto.CompanyLogo);
@@ -118,7 +117,7 @@ namespace JobCompany.Business.Services.CompanyServices
             var query = _context.Companies.Where(x=> x.IsCompany).AsQueryable().AsNoTracking();
 
             if (!string.IsNullOrWhiteSpace(searchTerm))
-                query = query.Where(x => x.CompanyName.Contains(searchTerm));
+                query = query.Where(x => x.CompanyName!.Contains(searchTerm));
 
             if (countDesc.HasValue)
             {
@@ -133,7 +132,7 @@ namespace JobCompany.Business.Services.CompanyServices
                 .Select(c => new CompanyDto
                 {
                     CompanyId = c.Id,
-                    CompanyName = c.CompanyName,
+                    CompanyName = c.CompanyName!,
                     CompanyImage = c.CompanyLogo != null ? $"{_currentUser.BaseUrl}/companyFiles/{c.CompanyLogo}" : null,
                     CompanyVacancyCount = c.Vacancies != null ? c.Vacancies.Count(v => v.VacancyStatus == VacancyStatus.Active && v.EndDate > DateTime.Now) : 0,
                     EmployeeCount = c.EmployeeCount,
@@ -160,18 +159,18 @@ namespace JobCompany.Business.Services.CompanyServices
                         {
                             CompanyInformation = x.CompanyInformation,
                             CompanyLocation = x.CompanyLocation,
-                            CompanyName = x.CompanyName,
+                            CompanyName = x.CompanyName!,
                             CompanyLogo = $"{_currentUser.BaseUrl}/companyFiles/{x.CompanyLogo}",
                             WebLink = x.WebLink,
                             UserId = x.UserId,
-                            CompanyNumbers = x.CompanyNumbers
+                            CompanyNumbers = x.CompanyNumbers!
                                             .Select(cn => new CompanyNumberDto
                                             {
                                                 Id = cn.Id,
                                                 Number = cn.Number,
                                             })
                                             .ToList(),
-                            Email = x.Email,
+                            Email = x.Email!,
                         })
                         .FirstOrDefaultAsync() ?? throw new NotFoundException();
 

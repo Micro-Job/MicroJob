@@ -15,7 +15,7 @@ public class ResumeIsPublicException : Exception, IBaseException
         ErrorMessage = MessageHelper.GetMessage("RESUME_IS_PUBLIC");
     }
 
-    public ResumeIsPublicException(string? message) : base(message)
+    public ResumeIsPublicException(string message) : base(message)
     {
         ErrorMessage = message;
     }

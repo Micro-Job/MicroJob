@@ -22,12 +22,12 @@ namespace JobPayment.Business.Services.PriceServices
                 Id = x.Id,
                 Coin = x.Coin,
                 InformationType = x.InformationType,
-                OldPrices = x.OldPrices.Select(y=> new OldPriceDto
+                OldPrices = x.OldPrices != null ? x.OldPrices.Select(y=> new OldPriceDto
                 { 
                     Id = y.Id,
                     MainPriceId = y.PriceId,
                     OldCoin = y.OldCoin
-                }).ToList()
+                }).ToList() : null
             })
             .ToListAsync();
 

@@ -15,7 +15,7 @@ public class EmailAlreadyUsedException : Exception, IBaseException
         ErrorMessage = MessageHelper.GetMessage("EMAIL_ALREADY_USED");
     }
 
-    public EmailAlreadyUsedException(string? message) : base(message)
+    public EmailAlreadyUsedException(string message) : base(message)
     {
         ErrorMessage = message;
     }

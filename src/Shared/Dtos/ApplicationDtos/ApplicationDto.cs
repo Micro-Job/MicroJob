@@ -6,10 +6,10 @@ public class ApplicationDto
 {
     public Guid ApplicationId { get; set; }
     public Guid VacancyId { get; set; }
-    public string Title { get; set; }
+    public required string Title { get; set; }
     public Guid? CompanyId { get; set; }
-    public string CompanyLogo { get; set; }
-    public string CompanyName { get; set; }
+    public string? CompanyLogo { get; set; }
+    public string? CompanyName { get; set; }
     public WorkType? WorkType { get; set; }
     public VacancyStatus VacancyStatus { get; set; }
     public StatusEnum Status { get; set; }

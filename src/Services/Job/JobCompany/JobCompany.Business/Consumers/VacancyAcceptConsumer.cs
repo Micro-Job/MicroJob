@@ -47,7 +47,7 @@ namespace JobCompany.Business.Consumers
                     var balanceResponse = await _balanceRequest.GetResponse<CheckBalanceResponse>(new CheckBalanceRequest
                     {
                         InformationType = InformationType.Vacancy,
-                        UserId = vacancy.Company.UserId
+                        UserId = vacancy.Company!.UserId
                     });
 
                     if (balanceResponse.Message.HasEnoughBalance)

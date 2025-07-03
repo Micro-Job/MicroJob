@@ -6,7 +6,7 @@ namespace JobCompany.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class DashboardController(DashboardService _dashboardService) : ControllerBase
+    public class DashboardController : ControllerBase
     {
 
     }

@@ -15,7 +15,7 @@ namespace AuthService.Business.Exceptions.UserException
             ErrorMessage = MessageHelper.GetMessage("LOGIN_REQUIRED");
         }
 
-        public RefreshTokenExpiredException(string? message) : base(message)
+        public RefreshTokenExpiredException(string message) : base(message)
         {
             ErrorMessage = message;
         }

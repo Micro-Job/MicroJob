@@ -8,7 +8,7 @@ namespace JobCompany.Business.Dtos.ExamDtos
 {
     public class GetExamIntroDto
     {
-        public string CompanyName { get; set; }
+        public string? CompanyName { get; set; }
         public int QuestionCount { get; set; }
         public short? Duration { get; set; }
         public float LimitRate { get; set; }

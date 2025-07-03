@@ -20,7 +20,7 @@ namespace AuthService.Business.Exceptions.UserException
             ErrorMessage = MessageHelper.GetMessage("USEREXISTEXCEPTION_PHONE");
         }
 
-        public ExistPhoneNumberException(string? message) : base(message)
+        public ExistPhoneNumberException(string message) : base(message)
         {
             ErrorMessage = message;
         }

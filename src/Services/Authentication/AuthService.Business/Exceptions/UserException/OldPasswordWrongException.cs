@@ -15,7 +15,7 @@ public class OldPasswordWrongException : Exception, IBaseException
         ErrorMessage = MessageHelper.GetMessage("OLD_PASSWORD_WRONG");
     }
 
-    public OldPasswordWrongException(string? message) : base(message)
+    public OldPasswordWrongException(string message) : base(message)
     {
         ErrorMessage = message;
     }
