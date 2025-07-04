@@ -12,5 +12,8 @@ public class UserExamConfiguration : IEntityTypeConfiguration<UserExam>
                .WithMany(u => u.UserExams)
                .HasForeignKey(ua => ua.ExamId)
                .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Property(x=> x.TotalPercent)
+            .HasMaxLength(100);
     }
 }

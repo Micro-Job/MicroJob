@@ -275,19 +275,21 @@ public class ExamService(JobCompanyDbContext _context, QuestionService _question
             .FirstOrDefaultAsync(x => x.Id == dto.ExamId)
             ?? throw new NotFoundException();
 
+        UserAnswerDto? userAnswer = new();
+        List<Guid>? correctAnswers = new();
+
         var answerResults = exam.ExamQuestions
             .Select(eq =>
             {
-                Question question = eq.Question;
-                UserAnswerDto? userAnswer = dto.Answers.FirstOrDefault(a => a.QuestionId == question.Id);
+                userAnswer = dto.Answers.FirstOrDefault(a => a.QuestionId == eq.Question.Id);
                 if (userAnswer == null) return false;
 
-                List<Guid>? correctAnswers = question.Answers!
+                correctAnswers = eq.Question.Answers!
                     .Where(a => a.IsCorrect ?? false)
                     .Select(a => a.Id)
                     .ToList();
 
-                return question.QuestionType switch
+                return eq.Question.QuestionType switch
                 {
                     QuestionType.MultipleChoice or QuestionType.SingleChoice =>
                         userAnswer.AnswerIds?.Count == correctAnswers.Count &&
@@ -297,7 +299,7 @@ public class ExamService(JobCompanyDbContext _context, QuestionService _question
                         !string.IsNullOrEmpty(userAnswer.Text) &&
                         string.Equals(
                             userAnswer.Text.Trim(),
-                            question.Answers!.FirstOrDefault(a => a.IsCorrect ?? false)?.Text?.Trim(),
+                            eq.Question.Answers!.FirstOrDefault(a => a.IsCorrect ?? false)?.Text?.Trim(),
                             StringComparison.OrdinalIgnoreCase
                         ),
 
@@ -310,7 +312,7 @@ public class ExamService(JobCompanyDbContext _context, QuestionService _question
         int falseCount = answerResults.Count(isCorrect => !isCorrect);
 
         int totalQuestions = exam.ExamQuestions.Count;
-        float resultRate = totalQuestions > 0 ? (float)trueCount / totalQuestions * 100 : 0;
+        float resultRate = totalQuestions > 0 ? (float)(trueCount / totalQuestions) * 100 : 0;
         bool isPassed = resultRate >= exam.LimitRate;
 
         var userExam = new UserExam
@@ -320,6 +322,7 @@ public class ExamService(JobCompanyDbContext _context, QuestionService _question
             VacancyId = dto.VacancyId,
             TrueAnswerCount = (byte)trueCount,
             FalseAnswerCount = (byte)falseCount,
+            TotalPercent = resultRate
         };
 
         await _context.UserExams.AddAsync(userExam);
