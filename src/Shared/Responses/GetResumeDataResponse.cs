@@ -1,3 +1,5 @@
+using SharedLibrary.Enums;
+
 namespace SharedLibrary.Responses;
 
 public class GetResumeDataResponse
@@ -9,4 +11,5 @@ public class GetResumeDataResponse
     public required string ProfileImage { get; set; }
     public required string Email { get; set; }
     public required string PhoneNumber { get; set; }
+    public Gender Gender { get; set; }
 }

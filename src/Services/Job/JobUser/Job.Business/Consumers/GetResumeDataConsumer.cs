@@ -21,7 +21,8 @@ public class GetResumeDataConsumer(JobDbContext _jobDbContext) : IConsumer<GetRe
                 LastName = r.LastName,
                 ProfileImage = r.UserPhoto!,
                 Email = r.ResumeEmail!,
-                PhoneNumber = r.PhoneNumbers.Select(x=> x.PhoneNumber).FirstOrDefault()!
+                PhoneNumber = r.PhoneNumbers.Select(x=> x.PhoneNumber).FirstOrDefault()!,
+                Gender = r.Gender
             }).FirstOrDefaultAsync();
 
         await context.RespondAsync(resumeData!);

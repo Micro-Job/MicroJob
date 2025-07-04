@@ -13,11 +13,6 @@ public class GetFilteredUserIdsConsumer(JobDbContext _jobDbContext) : IConsumer<
     {
         var query = _jobDbContext.Resumes.Where(r => context.Message.UserIds.Contains(r.UserId));
 
-        if (context.Message.Gender != null)  
-        {
-            query = query.Where(r => r.Gender == context.Message.Gender); // Genderə görə filtrləmə
-        }
-
         if (context.Message.SkillIds != null && context.Message.SkillIds.Count != 0)
         {
             query = query.Include(x=> x.ResumeSkills).Where(r => context.Message.SkillIds.All(skillId => r.ResumeSkills.Any(rs => rs.SkillId == skillId))); // Skill ID-lərinə görə filtrləmə
