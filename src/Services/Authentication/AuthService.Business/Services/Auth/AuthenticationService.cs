@@ -68,31 +68,94 @@ namespace AuthService.Business.Services.Auth
             _emailService.SendVerifyEmail(user.Email, $"{user.FirstName} {user.LastName}", user.Id.ToString());
         }
 
+        //public async Task CompanyRegisterAsync(RegisterCompanyDto dto)
+        //{
+        //    if (!dto.Policy)
+        //        throw new PolicyException();
+
+        //    CheckPasswordAndThrowException(dto.Password);
+
+        //    // email veya istifadeci adı tekrarlanmasını yoxla
+        //    dto.MainPhoneNumber = dto.MainPhoneNumber.Trim();
+        //    dto.Email = dto.Email.Trim();
+        //    await CheckUserExistAsync(dto.Email, dto.MainPhoneNumber);
+
+        //    if (dto.IsCompany && dto.VOEN != null)
+        //    {
+        //        if (await GetCompanyNameByVOENAsync(dto.VOEN) != null)
+        //        {
+        //            var voenResponse = await _voenCheckRequest.GetResponse<CheckVoenResponse>(new CheckVoenRequest
+        //            {
+        //                VOEN = dto.VOEN
+        //            });
+
+        //            if (voenResponse.Message.IsExist)
+        //                throw new UserExistException("VÖEN istifadə edilib.");
+        //        }
+        //    }
+
+        //    var user = new User
+        //    {
+        //        Id = Guid.NewGuid(),
+        //        Email = dto.Email,
+        //        FirstName = dto.FirstName,
+        //        LastName = dto.LastName,
+        //        MainPhoneNumber = dto.MainPhoneNumber,
+        //        RegistrationDate = DateTime.Now,
+        //        Password = _tokenHandler.GeneratePasswordHash(dto.Password),
+        //        UserRole = dto.IsCompany ? UserRole.CompanyUser : UserRole.EmployeeUser,
+        //        IsVerified = dto.IsCompany ? true : false
+        //    };
+
+        //    await _context.Users.AddAsync(user);
+        //    await _context.SaveChangesAsync();
+
+        //    await _publishEndpoint.Publish(
+        //        new CompanyRegisteredEvent
+        //        {
+        //            CompanyId = Guid.NewGuid(),
+        //            UserId = user.Id,
+        //            CompanyName = dto.IsCompany ? dto.CompanyName!.Trim() : null,
+        //            IsCompany = dto.IsCompany,
+        //            VOEN = dto.IsCompany ? dto.VOEN : null,
+        //            Email = dto.Email,
+        //            MainPhoneNumber = dto.MainPhoneNumber
+        //        }
+        //    );
+
+        //    await CreateBalance(user.Id, user.FirstName, user.LastName);
+
+        //    if (dto.IsCompany)
+        //        _emailService.SendRegister(dto.Email, $"{user.FirstName} {user.LastName}");
+        //    else
+        //        _emailService.SendVerifyEmail(user.Email, $"{user.FirstName} {user.LastName}", user.Id.ToString());
+        //}
+
         public async Task CompanyRegisterAsync(RegisterCompanyDto dto)
         {
             if (!dto.Policy)
                 throw new PolicyException();
 
             CheckPasswordAndThrowException(dto.Password);
-            
+
             // email veya istifadeci adı tekrarlanmasını yoxla
             dto.MainPhoneNumber = dto.MainPhoneNumber.Trim();
             dto.Email = dto.Email.Trim();
             await CheckUserExistAsync(dto.Email, dto.MainPhoneNumber);
 
-            if (dto.IsCompany && dto.VOEN != null)
-            {
-                if (await GetCompanyNameByVOENAsync(dto.VOEN) != null)
-                {
-                    var voenResponse = await _voenCheckRequest.GetResponse<CheckVoenResponse>(new CheckVoenRequest
-                    {
-                        VOEN = dto.VOEN
-                    });
+            //if (dto.IsCompany && dto.VOEN != null)
+            //{
+            //    if (await GetCompanyNameByVOENAsync(dto.VOEN) != null)
+            //    {
+            //        var voenResponse = await _voenCheckRequest.GetResponse<CheckVoenResponse>(new CheckVoenRequest
+            //        {
+            //            VOEN = dto.VOEN
+            //        });
 
-                    if (voenResponse.Message.IsExist)
-                        throw new UserExistException("VÖEN istifadə edilib.");
-                }
-            }
+            //        if (voenResponse.Message.IsExist)
+            //            throw new UserExistException("VÖEN istifadə edilib.");
+            //    }
+            //}
 
             var user = new User
             {
@@ -349,38 +412,39 @@ namespace AuthService.Business.Services.Auth
 
         public async Task<string?> GetCompanyNameByVOENAsync(string voen)
         {
-            try
-            {
-                string apiUrl = "https://new.e-taxes.gov.az/api/po/authless/public/v1/authless/findTaxpayer";
-                using (HttpClient httpClient = new HttpClient())
-                {
-                    var requestData = new VoenRequest
-                    {
-                        middleName = null,
-                        tin = voen,
-                        type = "legalEntity"
-                    };
+            //try
+            //{
+            //    string apiUrl = "https://new.e-taxes.gov.az/api/po/authless/public/v1/authless/findTaxpayer";
+            //    using (HttpClient httpClient = new HttpClient())
+            //    {
+            //        var requestData = new VoenRequest
+            //        {
+            //            middleName = null,
+            //            tin = voen,
+            //            type = "legalEntity"
+            //        };
 
-                    string jsonContent = JsonSerializer.Serialize(requestData);
-                    var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+            //        string jsonContent = JsonSerializer.Serialize(requestData);
+            //        var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-                    HttpResponseMessage response = await httpClient.PostAsync(apiUrl, content);
-                    string responseBody = await response.Content.ReadAsStringAsync();
+            //        HttpResponseMessage response = await httpClient.PostAsync(apiUrl, content);
+            //        string responseBody = await response.Content.ReadAsStringAsync();
 
-                    TaxpayerInfoRoot? taxpayerInfo = JsonSerializer.Deserialize<TaxpayerInfoRoot>(responseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            //        TaxpayerInfoRoot? taxpayerInfo = JsonSerializer.Deserialize<TaxpayerInfoRoot>(responseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-                    if (taxpayerInfo?.taxpayers != null && taxpayerInfo.taxpayers.Any())
-                    {
-                        string companyName = taxpayerInfo.taxpayers.FirstOrDefault()!.name!;
-                        return companyName;
-                    }
-                    else throw new NotFoundException();
-                }
-            }
-            catch (Exception)
-            {
-                throw new BadRequestException(MessageHelper.GetMessage("VOEN_NOT_FOUND"));
-            }
+            //        if (taxpayerInfo?.taxpayers != null && taxpayerInfo.taxpayers.Any())
+            //        {
+            //            string companyName = taxpayerInfo.taxpayers.FirstOrDefault()!.name!;
+            //            return companyName;
+            //        }
+            //        else throw new NotFoundException();
+            //    }
+            //}
+            //catch (Exception)
+            //{
+            //    throw new BadRequestException(MessageHelper.GetMessage("VOEN_NOT_FOUND"));
+            //}
+            return string.Empty;
         }
 
         public async Task VerifyAccountAsync(string userId)
