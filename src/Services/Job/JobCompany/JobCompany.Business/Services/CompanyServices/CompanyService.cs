@@ -139,7 +139,7 @@ namespace JobCompany.Business.Services.CompanyServices
                     WebLink = c.WebLink,
                     CategoryName = c.Category.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name)
                 })
-                .Skip(skip * take)
+                .Skip((skip - 1) * take)
                 .Take(take)
                 .ToListAsync();
 

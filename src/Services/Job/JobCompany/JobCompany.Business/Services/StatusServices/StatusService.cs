@@ -74,8 +74,6 @@ namespace JobCompany.Business.Services.StatusServices
             await _context.SaveChangesAsync();
         }
 
-
-
         //public async Task CreateStatusAsync(CreateStatusDto dto)
         //{
         //    var companyId = await _context

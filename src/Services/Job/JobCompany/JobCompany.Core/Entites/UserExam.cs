@@ -7,6 +7,8 @@ public class UserExam : BaseEntity
     public byte TrueAnswerCount { get; set; }
     public byte FalseAnswerCount { get; set; }
 
+    public float TotalPercent { get; set; }
+
     public Guid UserId { get; set; }
     public Guid VacancyId { get; set; }
 
