@@ -97,7 +97,7 @@ public class CityService(JobCompanyDbContext _context, ICurrentUser _user)
         var totalCount = await query.CountAsync();
 
         var items = await query
-            .Skip(skip)
+            .Skip(skip * take)
             .Take(take)
             .Select(c => new CityNameDto
             {
