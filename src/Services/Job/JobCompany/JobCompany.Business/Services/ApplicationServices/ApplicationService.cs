@@ -50,6 +50,8 @@ public class ApplicationService(JobCompanyDbContext _context,
 
         var resumeData = await _resumeDataRequest.GetResponse<GetResumeDataResponse>(new GetResumeDataRequest { UserId = userGuid });
 
+        var message = resumeData.Message;
+
         var newApplication = new Application
         {
             UserId = userGuid,
@@ -57,12 +59,13 @@ public class ApplicationService(JobCompanyDbContext _context,
             StatusId = companyStatus.Id,
             IsActive = true,
             CreatedDate = DateTime.Now,
-            ResumeId = resumeData.Message.ResumeId,
-            ProfileImage = resumeData.Message.ProfileImage,
-            Email = resumeData.Message.Email,
-            FirstName = resumeData.Message.FirstName,
-            LastName = resumeData.Message.LastName,
-            PhoneNumber = resumeData.Message.PhoneNumber
+            ResumeId = message.ResumeId,
+            ProfileImage = message.ProfileImage,
+            Email = message.Email,
+            FirstName = message.FirstName,
+            LastName = message.LastName,
+            PhoneNumber = message.PhoneNumber,
+            Gender = message.Gender
         };
 
         await _context.Applications.AddAsync(newApplication);
@@ -141,15 +144,15 @@ public class ApplicationService(JobCompanyDbContext _context,
     /// <summary> Şirkətə daxil olan bütün müraciətlərin filterlə birlikdə detallı şəkildə gətirilməsi </summary>
     public async Task<DataListDto<AllApplicationListDto>> GetAllApplicationsListAsync(List<Guid>? vacancyIds, Gender? gender, List<StatusEnum>? status, List<Guid>? skillIds, string? fullName, StatusEnum? skipStatus, int skip = 1, int take = 10)
     {
-        var query = GetApplicationsQuery(vacancyIds, status, fullName, skipStatus);
+        var query = GetApplicationsQuery(vacancyIds, status, fullName, skipStatus, gender);
 
         //TODO : bu hisse request responseden cixmalidir
-        if (gender != null || (skillIds != null && skillIds.Count != 0)) //Filterdə gender və ya skillids varsa sorğu atılır
+        if (skillIds != null && skillIds.Count != 0) //Filterdə gender və ya skillids varsa sorğu atılır
         {
             var userIds = await query.Select(a => a.UserId).Distinct().ToListAsync();
 
             var response = await _filteredUserIdsRequest.GetResponse<GetFilteredUserIdsResponse>(
-                new GetFilteredUserIdsRequest { UserIds = userIds, Gender = gender, SkillIds = skillIds }); //Parametrlərə uyğun user id-ləri filtrlənir
+                new GetFilteredUserIdsRequest { UserIds = userIds, SkillIds = skillIds }); //Parametrlərə uyğun user id-ləri filtrlənir
 
             if (response.Message.UserIds.Count != 0)
                 query = query.Where(a => response.Message.UserIds.Contains(a.UserId));
@@ -287,7 +290,7 @@ public class ApplicationService(JobCompanyDbContext _context,
     //    };
     //}
 
-    private IQueryable<Application> GetApplicationsQuery(List<Guid>? vacancyIds, List<StatusEnum>? statuses, string? userFullName, StatusEnum? skipStatus)
+    private IQueryable<Application> GetApplicationsQuery(List<Guid>? vacancyIds, List<StatusEnum>? statuses, string? userFullName, StatusEnum? skipStatus, Gender? gender)
     {
         var query = _context.Applications.AsNoTracking()
             .Where(a => a.Vacancy.Company!.UserId == _currentUser.UserGuid && a.IsActive && !a.IsDeleted);
@@ -299,14 +302,13 @@ public class ApplicationService(JobCompanyDbContext _context,
             query = query.Where(a => statuses.Contains(a.Status.StatusEnum));
 
         if (!string.IsNullOrEmpty(userFullName)) // Fullname-a görə filterlənmə
-        {
             query = query.Where(a => (a.FirstName + a.LastName).Contains(userFullName));
-        }
 
         if (skipStatus != null)
-        {
             query = query.Where(x => x.Status.StatusEnum == skipStatus);
-        }
+
+        if (gender != null)
+            query = query.Where(x=> x.Gender == gender);
 
         return query;
     }
