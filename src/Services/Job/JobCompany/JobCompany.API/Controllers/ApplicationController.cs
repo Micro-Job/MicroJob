@@ -20,9 +20,9 @@ namespace JobCompany.API.Controllers
 
         [AuthorizeRole(UserRole.EmployeeUser, UserRole.CompanyUser)]
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetAllApplicationsList([FromQuery] List<Guid>? vacancyIds, Gender? gender, [FromQuery] List<StatusEnum>? status, [FromQuery] List<Guid>? skillIds, string? fullName, StatusEnum? skipStatus, int skip = 1, int take = 10)
+        public async Task<IActionResult> GetAllApplicationsList([FromQuery] List<Guid>? vacancyIds, Gender? gender, [FromQuery] List<StatusEnum>? status, string? fullName, StatusEnum? skipStatus, int skip = 1, int take = 10)
         {
-            return Ok(await service.GetAllApplicationsListAsync(vacancyIds, gender, status, skillIds, fullName, skipStatus, skip, take));
+            return Ok(await service.GetAllApplicationsListAsync(vacancyIds, gender, status, fullName, skipStatus, skip, take));
         }
 
         [AuthorizeRole(UserRole.EmployeeUser, UserRole.CompanyUser)]
@@ -54,11 +54,5 @@ namespace JobCompany.API.Controllers
         {
             return Ok(await service.GetUserApplicationByIdAsync(applicationId));
         }
-
-        //[HttpGet("[action]")]
-        //public async Task<IActionResult> GetAllApplicationWithStatus()
-        //{
-        //    return Ok(await service.GetAllApplicationWithStatusAsync());
-        //}
     }
 }
