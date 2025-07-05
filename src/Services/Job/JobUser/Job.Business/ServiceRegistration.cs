@@ -44,9 +44,9 @@ namespace Job.Business
             services.AddMassTransit(x =>
             {
                 x.AddConsumer<UserRegisteredConsumer>();
-                x.AddConsumer<GetResumeDataConsumer>();             
-                x.AddConsumer<VacancyCreatedConsumer>();                
-                x.AddConsumer<GetFilteredUserIdsConsumer>();
+                x.AddConsumer<GetResumeDataConsumer>();
+                x.AddConsumer<VacancyCreatedConsumer>();
+                //x.AddConsumer<GetFilteredUserIdsConsumer>();
                 x.AddConsumer<NotificationEventConsumer>();
 
                 x.SetKebabCaseEndpointNameFormatter();

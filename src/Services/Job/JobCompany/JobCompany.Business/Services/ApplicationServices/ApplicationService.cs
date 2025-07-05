@@ -22,13 +22,8 @@ using SharedLibrary.Responses;
 
 namespace JobCompany.Business.Services.ApplicationServices;
 
-public class ApplicationService(JobCompanyDbContext _context,
-        IPublishEndpoint _publishEndpoint,
-        ICurrentUser _currentUser,
-        IRequestClient<GetFilteredUserIdsRequest> _filteredUserIdsRequest,
-        IRequestClient<GetResumeDataRequest> _resumeDataRequest) 
+public class ApplicationService(JobCompanyDbContext _context, IPublishEndpoint _publishEndpoint, ICurrentUser _currentUser, IRequestClient<GetResumeDataRequest> _resumeDataRequest) 
 {
-
     /// <summary> Vakansiya üçün müraciət yaradılması </summary>
     public async Task CreateUserApplicationAsync(Guid vacancyId)
     {
@@ -114,9 +109,9 @@ public class ApplicationService(JobCompanyDbContext _context,
             .Select(x => new
             {
                 Application = x,
-                VacancyId = x.VacancyId,
-                CompanyName = x.Vacancy.Company!.CompanyName,
-                CompanyLogo = x.Vacancy.Company.CompanyLogo,
+                x.VacancyId,
+                x.Vacancy.Company!.CompanyName,
+                x.Vacancy.Company.CompanyLogo,
                 VacancyTitle = x.Vacancy.Title
             })
             .FirstOrDefaultAsync() ?? throw new NotFoundException();
@@ -142,25 +137,23 @@ public class ApplicationService(JobCompanyDbContext _context,
     }
 
     /// <summary> Şirkətə daxil olan bütün müraciətlərin filterlə birlikdə detallı şəkildə gətirilməsi </summary>
-    public async Task<DataListDto<AllApplicationListDto>> GetAllApplicationsListAsync(List<Guid>? vacancyIds, Gender? gender, List<StatusEnum>? status, List<Guid>? skillIds, string? fullName, StatusEnum? skipStatus, int skip = 1, int take = 10)
+    public async Task<DataListDto<AllApplicationListDto>> GetAllApplicationsListAsync(List<Guid>? vacancyIds, Gender? gender, List<StatusEnum>? status, string? fullName, StatusEnum? skipStatus, int skip = 1, int take = 10)
     {
         var query = GetApplicationsQuery(vacancyIds, status, fullName, skipStatus, gender);
 
         //TODO : bu hisse request responseden cixmalidir
-        if (skillIds != null && skillIds.Count != 0) //Filterdə gender və ya skillids varsa sorğu atılır
-        {
-            var userIds = await query.Select(a => a.UserId).Distinct().ToListAsync();
+        //if (skillIds != null && skillIds.Count != 0) //Filterdə gender və ya skillids varsa sorğu atılır
+        //{
+        //    var userIds = await query.Select(a => a.UserId).Distinct().ToListAsync();
 
-            var response = await _filteredUserIdsRequest.GetResponse<GetFilteredUserIdsResponse>(
-                new GetFilteredUserIdsRequest { UserIds = userIds, SkillIds = skillIds }); //Parametrlərə uyğun user id-ləri filtrlənir
+        //    var response = await _filteredUserIdsRequest.GetResponse<GetFilteredUserIdsResponse>(
+        //        new GetFilteredUserIdsRequest { UserIds = userIds, SkillIds = skillIds }); //Parametrlərə uyğun user id-ləri filtrlənir
 
-            if (response.Message.UserIds.Count != 0)
-                query = query.Where(a => response.Message.UserIds.Contains(a.UserId));
-        }
+        //    if (response.Message.UserIds.Count != 0)
+        //        query = query.Where(a => response.Message.UserIds.Contains(a.UserId));
+        //}
 
         var data = await query
-            .Skip((skip - 1) * take)
-            .Take(take)
             .OrderByDescending(a => a.CreatedDate)
             .Select(a => new AllApplicationListDto
             {
@@ -176,7 +169,10 @@ public class ApplicationService(JobCompanyDbContext _context,
                 Status = a.Status.StatusEnum,
                 VacancyId = a.VacancyId,
                 VacancyName = a.Vacancy.Title
-            }).ToListAsync();
+            })
+            .Skip((skip - 1) * take)
+            .Take(take)
+            .ToListAsync();
 
         return new DataListDto<AllApplicationListDto>
         {
@@ -261,34 +257,6 @@ public class ApplicationService(JobCompanyDbContext _context,
 
         return application;
     }
-
-    //public async Task<DataListDto<ApplicationWithStatusInfoListDto>> GetAllApplicationWithStatusAsync(int skip = 1, int take = 9)
-    //{
-    //    var applications = GetApplicationsQuery(null, null, null);
-
-    //    var totalCount = await applications.CountAsync();
-
-    //    var data = applications
-    //        .Skip((skip - 1) * take)
-    //        .Take(take)
-    //        .Select(a => new ApplicationWithStatusInfoListDto
-    //        {
-    //            ApplicationId = a.Id,
-    //            ProfileImage = $"{_currentUser.BaseUrl}/userFiles/{a.ProfileImage}",
-    //            FirstName = a.FirstName,
-    //            LastName = a.LastName,
-    //            StatusId = a.StatusId,
-    //            StatusName = a.Status.StatusEnum,
-    //            Position = a.Vacancy.Title,
-    //            DateTime = a.CreatedDate
-    //        }).ToList();
-
-    //    return new DataListDto<ApplicationWithStatusInfoListDto>
-    //    {
-    //        Datas = data,
-    //        TotalCount = totalCount
-    //    };
-    //}
 
     private IQueryable<Application> GetApplicationsQuery(List<Guid>? vacancyIds, List<StatusEnum>? statuses, string? userFullName, StatusEnum? skipStatus, Gender? gender)
     {
