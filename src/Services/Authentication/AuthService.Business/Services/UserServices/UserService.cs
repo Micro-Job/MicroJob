@@ -56,7 +56,7 @@ namespace AuthService.Business.Services.UserServices
             // CompanyUser-dirsə şirkət adını gətirmək üçün jobcompany-yə sorğu atır
             if (userRole == UserRole.CompanyUser)
             {
-                var allUserIds = await userQuery.Select(u => u.Id).ToListAsync();
+                var allUserIds = await userQuery.Skip((pageIndex - 1) * pageSize).Take(pageSize).Select(u => u.Id).ToListAsync();
 
                 var companyResponse = await _companyDataRequest.GetResponse<GetCompaniesDataByUserIdsResponse>(
                     new GetCompaniesDataByUserIdsRequest
