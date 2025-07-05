@@ -22,9 +22,10 @@ namespace AuthService.Business.Services.UserServices
     public class UserService(AppDbContext _context, AuthenticationService _authService, IRequestClient<GetCompaniesDataByUserIdsRequest> _companyDataRequest)
     {
         /// <summary> Admin paneldə bütün istifadəçilər siyahısının göründüyü hissə </summary>  
+        //TODO : Bu endpoint optimize edilmelidir
         public async Task<DataListDto<BasicUserInfoDto>> GetAllUsersAsync(UserRole userRole, string? fullName, string? email, string? phoneNumber, int pageIndex = 1, int pageSize = 10)
         {
-            var userQuery = _context.Users.Where(u => u.UserRole == userRole)
+            var mainQuery = _context.Users.Where(u => u.UserRole == userRole)
                 .Select(x => new
                 {
                     x.Id,
@@ -33,8 +34,9 @@ namespace AuthService.Business.Services.UserServices
                     x.Email,
                     x.MainPhoneNumber
                 })
-                .Skip((pageIndex - 1) * pageSize).Take(pageSize)
                 .AsNoTracking();
+
+            var userQuery = mainQuery.Skip((pageIndex - 1) * pageSize).Take(pageSize);
 
             if (!string.IsNullOrEmpty(email))
             {
@@ -84,7 +86,7 @@ namespace AuthService.Business.Services.UserServices
                     .Where(u => (u.FirstName + u.LastName).Contains(fullName));
             }
 
-            var totalCount = await userQuery.CountAsync();
+            int totalCount = await mainQuery.CountAsync();
 
             var users = await userQuery
                 .Select(u => new BasicUserInfoDto
