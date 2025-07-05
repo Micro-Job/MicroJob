@@ -3,6 +3,7 @@ using AuthService.Business.Exceptions.UserException;
 using AuthService.Business.Services.Auth;
 using AuthService.Core.Entities;
 using AuthService.DAL.Contexts;
+using Azure;
 using MassTransit;
 using MassTransit.Initializers;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +23,7 @@ namespace AuthService.Business.Services.UserServices
     public class UserService(AppDbContext _context, AuthenticationService _authService, IRequestClient<GetCompaniesDataByUserIdsRequest> _companyDataRequest)
     {
         /// <summary> Admin paneldə bütün istifadəçilər siyahısının göründüyü hissə </summary>  
+        //TODO : Bu endpoint optimize edilmelidir
         public async Task<DataListDto<BasicUserInfoDto>> GetAllUsersAsync(UserRole userRole, string? fullName, string? email, string? phoneNumber, int pageIndex = 1, int pageSize = 10)
         {
             var userQuery = _context.Users.Where(u => u.UserRole == userRole)
@@ -33,7 +35,7 @@ namespace AuthService.Business.Services.UserServices
                     x.Email,
                     x.MainPhoneNumber
                 })
-                .Skip((pageIndex - 1) * pageSize).Take(pageSize)
+                .AsQueryable()
                 .AsNoTracking();
 
             if (!string.IsNullOrEmpty(email))
@@ -54,7 +56,7 @@ namespace AuthService.Business.Services.UserServices
             // CompanyUser-dirsə şirkət adını gətirmək üçün jobcompany-yə sorğu atır
             if (userRole == UserRole.CompanyUser)
             {
-                var allUserIds = await userQuery.Select(u => u.Id).ToListAsync();
+                var allUserIds = await userQuery.Skip((pageIndex - 1) * pageSize).Take(pageSize).Select(u => u.Id).ToListAsync();
 
                 var companyResponse = await _companyDataRequest.GetResponse<GetCompaniesDataByUserIdsResponse>(
                     new GetCompaniesDataByUserIdsRequest
@@ -84,8 +86,6 @@ namespace AuthService.Business.Services.UserServices
                     .Where(u => (u.FirstName + u.LastName).Contains(fullName));
             }
 
-            var totalCount = await userQuery.CountAsync();
-
             var users = await userQuery
                 .Select(u => new BasicUserInfoDto
                 {
@@ -94,7 +94,11 @@ namespace AuthService.Business.Services.UserServices
                     Email = u.Email,
                     MainPhoneNumber = u.MainPhoneNumber
                 })
+                .Skip((pageIndex - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
+
+            int totalCount = await userQuery.CountAsync();
 
             // CompanyUser üçün CompanyName əvəzlənməsi
             if (companyDataByUserId.Count != 0)

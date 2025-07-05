@@ -94,8 +94,8 @@ namespace Job.Business.Services.Resume
                                         .Where(x => x.UserId == _currentUser.UserGuid)
                                         .Select(resume => new ResumeDetailItemDto
                                         {
-                                            ResumeId = resume.Id,
-                                            UserId = resume.UserId,
+                                            //ResumeId = resume.Id,
+                                            //UserId = resume.UserId,
                                             FirstName = resume.FirstName,
                                             LastName = resume.LastName,
                                             Position = resume.Position != null ? resume.Position.Name : null,
@@ -386,8 +386,8 @@ namespace Job.Business.Services.Resume
 
             var resumeResponse = new ResumeDetailItemDto
             {
-                ResumeId = resume.Id,
-                UserId = resume.UserId,
+                //ResumeId = resume.Id,
+                //UserId = resume.UserId,
                 IsSaved = resume.SavedResumes.Any(sr => sr.ResumeId == resume.Id && sr.CompanyUserId == _currentUser.UserGuid),
                 FirstName = hasFullAccess ? resume.FirstName : null,
                 LastName = hasFullAccess ? resume.LastName : null,

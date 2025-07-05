@@ -263,10 +263,10 @@ public class ApplicationService(JobCompanyDbContext _context, IPublishEndpoint _
         var query = _context.Applications.AsNoTracking()
             .Where(a => a.Vacancy.Company!.UserId == _currentUser.UserGuid && a.IsActive && !a.IsDeleted);
 
-        if (vacancyIds != null) // Vakansiyaya görə filterlənmə
+        if (vacancyIds != null && vacancyIds.Count > 0) // Vakansiyaya görə filterlənmə
             query = query.Where(a => vacancyIds.Contains(a.VacancyId));
 
-        if (statuses != null) // Statusa görə filterlənmə
+        if (statuses != null && statuses.Count > 0) // Statusa görə filterlənmə
             query = query.Where(a => statuses.Contains(a.Status.StatusEnum));
 
         if (!string.IsNullOrEmpty(userFullName)) // Fullname-a görə filterlənmə
