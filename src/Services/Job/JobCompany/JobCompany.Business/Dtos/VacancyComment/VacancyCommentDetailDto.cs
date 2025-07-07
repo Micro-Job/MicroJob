@@ -7,7 +7,7 @@ public class VacancyCommentDetailDto
     public Guid Id { get; set; }
     public List<VacancyCommentTranslationDetailDto> VacancyCommentTranslations { get; set; }
 }
-public record VacancyCommentTranslationDetailDto
+public class VacancyCommentTranslationDetailDto
 {
     public Guid Id { get; set; }
     public string Comment { get; set; }

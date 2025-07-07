@@ -11,7 +11,6 @@ namespace JobPayment.Business.Dtos.PacketDtos
 {
     public class CreatePacketDto
     {
-
         public string Title { get; set; }
         public PacketType PacketType { get; set; }
         public decimal Value { get; set; }
