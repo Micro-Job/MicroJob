@@ -12,10 +12,10 @@ namespace Job.Business.Dtos.UserDtos
     public class UpdateUserDto
     {
         public IFormFile? Image { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string Email { get; set; }
-        public string MainPhoneNumber { get; set; }
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
+        public string? Email { get; set; }
+        public string? MainPhoneNumber { get; set; }
     }
 
     public class UpdateUserDtoValidator : AbstractValidator<UpdateUserDto>

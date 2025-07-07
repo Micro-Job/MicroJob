@@ -22,12 +22,15 @@ namespace JobCompany.DAL.Configurations
                    .HasMaxLength(255);
 
             builder.Property(v => v.Requirement)
-                   .IsRequired();           
-            
+                   .IsRequired();
+
             builder.Property(v => v.Email)
                    .HasMaxLength(32);
 
-            builder.Property(v => v.StartDate)
+            builder.Property(v => v.StartDate).HasColumnType("DATE")
+                   .IsRequired();
+
+            builder.Property(v => v.EndDate).HasColumnType("DATE")
                    .IsRequired();
 
             builder.Property(v => v.Location)
@@ -61,7 +64,7 @@ namespace JobCompany.DAL.Configurations
                    .OnDelete(DeleteBehavior.SetNull);
 
             builder.HasOne(v => v.City)
-                   .WithMany(c=>c.Vacancies)
+                   .WithMany(c => c.Vacancies)
                    .HasForeignKey(v => v.CityId)
                    .OnDelete(DeleteBehavior.SetNull);
 
@@ -74,7 +77,7 @@ namespace JobCompany.DAL.Configurations
                    .WithOne(v => v.Vacancy)
                    .HasForeignKey(v => v.VacancyId)
                    .OnDelete(DeleteBehavior.Restrict);
-            
+
             builder.HasMany(c => c.VacancyNumbers)
                    .WithOne(v => v.Vacancy)
                    .HasForeignKey(v => v.VacancyId)
