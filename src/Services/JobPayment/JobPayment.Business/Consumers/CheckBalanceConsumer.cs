@@ -1,5 +1,4 @@
-﻿using JobPayment.Business.Dtos.BalanceDtos;
-using JobPayment.Business.Services.BalanceServices;
+﻿using JobPayment.Business.Services.BalanceServices;
 using JobPayment.Business.Services.PriceServices;
 using JobPayment.Core.Entities;
 using MassTransit;

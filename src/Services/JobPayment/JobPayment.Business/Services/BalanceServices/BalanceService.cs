@@ -1,5 +1,4 @@
-﻿using JobPayment.Business.Dtos.BalanceDtos;
-using JobPayment.Business.Dtos.TransactionDtos;
+﻿using JobPayment.Business.Dtos.TransactionDtos;
 using JobPayment.Business.Services.PacketServices;
 using JobPayment.Business.Services.TransactionServices;
 using JobPayment.Core.Entities;

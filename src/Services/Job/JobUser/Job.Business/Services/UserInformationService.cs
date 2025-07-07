@@ -47,24 +47,28 @@ public class UserInformationService(JobDbContext _context, ICurrentUser _current
         return user;
     }
 
-    public async Task UpdateUserInformationAsync(UpdateUserDto dto)
+    public async Task<string?> UpdateUserInformationAsync(UpdateUserDto dto)
     {
         User user = await _context.Users.FirstOrDefaultAsync(u => u.Id == _currentUser.UserGuid)
                         ?? throw new NotFoundUserException();
 
-        if (!string.IsNullOrEmpty(user.Image))
-        {
-            _fileService.DeleteFile(user.Image);
-            user.Image = null;
-        }
-
         if (dto.Image is not null)
         {
+            if (!string.IsNullOrEmpty(user.Image))
+            {
+                _fileService.DeleteFile(user.Image);
+                user.Image = null;
+            }
+
             FileDto fileResult = dto.Image != null
                 ? await _fileService.UploadAsync(FilePaths.image, dto.Image)
                 : new FileDto();
 
             user.Image = $"{fileResult.FilePath}/{fileResult.FileName}";
+        }
+        else
+        {
+            user.Image = null;
         }
 
         dto.Email = dto.Email.Trim();
@@ -87,6 +91,10 @@ public class UserInformationService(JobDbContext _context, ICurrentUser _current
             Email = user.Email,
             MainPhoneNumber = user.MainPhoneNumber
         });
+
+        string? imageUrl = dto.Image != null ? $"{_currentUser.BaseUrl}/userFiles/{user.Image}" : null;
+        
+        return imageUrl;
     }
 
     public async Task CheckUserExistAsync(string email, string phoneNumber)
@@ -107,5 +115,4 @@ public class UserInformationService(JobDbContext _context, ICurrentUser _current
                 throw new BadRequestException("USEREXISTEXCEPTION_PHONE");
         }
     }
-
 }
