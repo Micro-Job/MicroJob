@@ -66,10 +66,10 @@ public class UserInformationService(JobDbContext _context, ICurrentUser _current
 
             user.Image = $"{fileResult.FilePath}/{fileResult.FileName}";
         }
-        else
-        {
-            user.Image = null;
-        }
+        //else
+        //{
+        //    user.Image = null;
+        //}
 
         dto.Email = dto.Email.Trim();
         dto.MainPhoneNumber = dto.MainPhoneNumber.Trim();
