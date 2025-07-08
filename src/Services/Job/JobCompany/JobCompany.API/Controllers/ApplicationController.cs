@@ -1,3 +1,4 @@
+using JobCompany.Business.Dtos.ApplicationDtos;
 using JobCompany.Business.Services.ApplicationServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -27,9 +28,9 @@ namespace JobCompany.API.Controllers
 
         [AuthorizeRole(UserRole.EmployeeUser, UserRole.CompanyUser)]
         [HttpPost("[action]")]
-        public async Task<IActionResult> ChangeApplicationStatus(Guid applicationId, Guid statusId)
+        public async Task<IActionResult> ChangeApplicationStatus(ChangeApplicationStatusDto dto)
         {
-            await service.ChangeApplicationStatusAsync(applicationId, statusId);
+            await service.ChangeApplicationStatusAsync(dto);
             return Ok();
         }
 

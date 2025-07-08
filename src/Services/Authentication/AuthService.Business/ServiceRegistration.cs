@@ -1,7 +1,6 @@
 ﻿using AuthService.Business.Consumers;
 using AuthService.Business.HelperServices.Email;
 using AuthService.Business.HelperServices.TokenHandler;
-using AuthService.Business.Publishers;
 using AuthService.Business.Services.Auth;
 using AuthService.Business.Services.UserServices;
 using AuthService.Business.Templates;
@@ -24,7 +23,6 @@ namespace AuthService.Business
             services.AddScoped<TokenHandler>();
             services.AddScoped<EmailService>();
             services.AddScoped<AuthenticationService>();
-            services.AddScoped<EmailPublisher>();
             services.AddScoped<UserService>();
             services.AddScoped<IFileService, FileService>();
             services.AddScoped<ICurrentUser, CurrentUser>();
@@ -39,6 +37,8 @@ namespace AuthService.Business
             services.AddMassTransit(x =>
             {
                 x.AddConsumer<UpdateUserConsumer>();
+                //Bu consumerin burada olmagi tamamile yanlisdir amma emailService burada oldugu ucun istifade edilib
+                x.AddConsumer<ChangedApplicationStatusConsumer>();
 
                 x.SetKebabCaseEndpointNameFormatter();
 

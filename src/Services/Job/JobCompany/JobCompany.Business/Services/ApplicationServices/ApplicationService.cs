@@ -102,10 +102,10 @@ public class ApplicationService(JobCompanyDbContext _context, IPublishEndpoint _
     /// <summary>
     /// Müraciətin statusunun dəyişilməsi ve eventle usere bildiris publishi
     /// </summary>
-    public async Task ChangeApplicationStatusAsync(Guid applicationId, Guid statusId)
+    public async Task ChangeApplicationStatusAsync(ChangeApplicationStatusDto dto)
     {
         var existAppVacancy = await _context.Applications
-            .Where(x => x.Id == applicationId && x.Vacancy.Company!.UserId == _currentUser.UserGuid)
+            .Where(x => x.Id == dto.ApplicationId && x.Vacancy.Company!.UserId == _currentUser.UserGuid)
             .Select(x => new
             {
                 Application = x,
@@ -118,7 +118,7 @@ public class ApplicationService(JobCompanyDbContext _context, IPublishEndpoint _
 
         var application = existAppVacancy.Application;
 
-        application.StatusId = statusId;
+        application.StatusId = dto.StatusId;
         await _context.SaveChangesAsync();
 
         //Müraciət statusu dəyişildikdə notification göndərilir
@@ -126,12 +126,21 @@ public class ApplicationService(JobCompanyDbContext _context, IPublishEndpoint _
             new NotificationToUserEvent
             {
                 ReceiverIds = [application.UserId],
-                SenderId = (Guid)_currentUser.UserGuid!,
-                InformationId = applicationId,
+                SenderId = _currentUser.UserGuid,
+                InformationId = dto.ApplicationId,
                 InformationName = existAppVacancy.VacancyTitle,
                 NotificationType = NotificationType.ApplicationStatusUpdate,
                 SenderImage = existAppVacancy.CompanyLogo,
                 SenderName = existAppVacancy.CompanyName,
+            }
+        );
+
+        await _publishEndpoint.Publish(
+            new ChangedApplicationStatusEvent
+            {
+                UserId = application.UserId,
+                Message = dto.Message,
+                ApplicationId = dto.ApplicationId
             }
         );
     }
