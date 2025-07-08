@@ -83,13 +83,11 @@ public class ApplicationService(JobCompanyDbContext _context, IPublishEndpoint _
     }
 
     /// <summary> Yaradılan müraciətin geri alınması </summary>
-    public async Task RemoveApplicationAsync(string applicationId)
+    public async Task RemoveApplicationAsync(Guid applicationId)
     {
-        var applicationGuid = Guid.Parse(applicationId);
-
         var existApplication =
             await _context.Applications.FirstOrDefaultAsync(x =>
-                x.Id == applicationGuid && x.UserId == _currentUser.UserGuid)
+                x.Id == applicationId && x.UserId == _currentUser.UserGuid)
             ?? throw new NotFoundException();
 
         if (existApplication.IsActive == false)

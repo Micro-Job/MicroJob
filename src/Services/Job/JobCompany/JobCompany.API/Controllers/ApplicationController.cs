@@ -12,7 +12,7 @@ namespace JobCompany.API.Controllers
     {
         [AuthorizeRole(UserRole.SimpleUser)]
         [HttpPost("[action]")]
-        public async Task<IActionResult> RemoveApplication(string applicationId)
+        public async Task<IActionResult> RemoveApplication(Guid applicationId)
         {
             await service.RemoveApplicationAsync(applicationId);
             return Ok();
