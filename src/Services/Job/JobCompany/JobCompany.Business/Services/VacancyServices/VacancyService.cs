@@ -269,7 +269,7 @@ namespace JobCompany.Business.Services.VacancyServices
                             : null,
                         VacancyStatus = x.VacancyStatus,
                         IsApplied = userGuid.HasValue && x.Applications.Any(a => a.UserId == userGuid && a.IsActive == true),
-                        //ApplicationId = userGuid.HasValue ? x.Applications.Where(a=> a.UserId == userGuid && a.VacancyId == x.Id && a.).Select(a=> a.Id).FirstOrDefault(): null
+                        //ApplicationId = userGuid.HasValue ? x.Applications.Where(a => a.UserId == userGuid && a.VacancyId == x.Id).Select(a => a.Id).FirstOrDefault() : null
                     })
                     .FirstOrDefaultAsync() ?? throw new NotFoundException();
 

@@ -50,7 +50,7 @@ namespace Job.Business.Services.Resume
             IRequestClient<CheckBalanceRequest> _balanceRequest,
             IRequestClient<CheckApplicationRequest> _checkApplicationRequest)
     {
-        public async Task CreateResumeAsync(ResumeCreateDto resumeCreateDto)
+        public async Task<string> CreateResumeAsync(ResumeCreateDto resumeCreateDto)
         {
             if (await _context.Resumes.AnyAsync(x => x.UserId == _currentUser.UserGuid))
                 throw new IsAlreadyExistException<Core.Entities.Resume>();
@@ -85,7 +85,20 @@ namespace Job.Business.Services.Resume
             resume.Certificates = certificates;
             resume.ResumeSkills = resumeSkills;
 
+            var user = await _context.Users.FirstOrDefaultAsync(x=> x.Id == _currentUser.UserGuid) ?? throw new NotFoundException();
+
+            if(user.Image == null)
+            {
+                FileDto fileResult = resumeCreateDto.UserPhoto != null
+                    ? await _fileService.UploadAsync(FilePaths.image, resumeCreateDto.UserPhoto)
+                    : new FileDto();
+
+                user.Image = $"{fileResult.FilePath}/{fileResult.FileName}";
+            }
+
             await _context.SaveChangesAsync();
+
+            return $"{_currentUser.BaseUrl}/userFiles/{user.Image}";
         }
 
         public async Task<ResumeDetailItemDto> GetOwnResumeAsync()

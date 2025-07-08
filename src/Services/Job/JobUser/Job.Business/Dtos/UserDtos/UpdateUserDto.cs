@@ -12,6 +12,7 @@ namespace Job.Business.Dtos.UserDtos
     public class UpdateUserDto
     {
         public IFormFile? Image { get; set; }
+        public bool DeleteImage { get; set; }
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
         public string? Email { get; set; }
