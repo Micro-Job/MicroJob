@@ -9,11 +9,12 @@ namespace SharedLibrary.HelperServices.Current
 {
     public interface ICurrentUser
     {
-        public string? UserId { get; }
+        //public string? UserId { get; }
         public Guid? UserGuid { get; }
         public string? UserFullName { get; }
         public string? BaseUrl { get; }
-        public byte UserRole { get;}
+        public byte UserRole { get; }
+        public bool IsAuthenticated { get; }
         public LanguageCode LanguageCode { get; }
     }
 }

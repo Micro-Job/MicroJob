@@ -212,6 +212,7 @@ namespace JobCompany.Business.Services.VacancyServices
         /// <summary> vacanciya id'sinə görə vacancyın gətirilməsi </summary>
         public async Task<VacancyGetByIdDto> GetByIdVacancyAsync(Guid vacancyId)
         {
+            var saa = _currentUser.IsAuthenticated;
             Guid? userGuid = _currentUser.UserGuid;
 
             var vacancyDto = await _context.Vacancies
@@ -246,7 +247,7 @@ namespace JobCompany.Business.Services.VacancyServices
                         Driver = x.Driver,
                         Citizenship = x.Citizenship,
                         ExamId = x.ExamId,
-                        IsSaved = userGuid != null ? x.SavedVacancies.Any(y => y.UserId == userGuid && y.VacancyId == vacancyId) : false,
+                        IsSaved = _currentUser.IsAuthenticated ? x.SavedVacancies.Any(y => y.UserId == userGuid && y.VacancyId == vacancyId) : false,
                         VacancyNumbers = x
                             .VacancyNumbers.Select(vn => new VacancyNumberDto
                             {
@@ -254,25 +255,19 @@ namespace JobCompany.Business.Services.VacancyServices
                                 VacancyNumber = vn.Number,
                             })
                             .ToList(),
-                        //Skills = x.VacancySkills
-                        //        .Where(vc => vc.Skill != null)
-                        //        .Select(vc => new SkillDto
-                        //        {
-                        //            Id = vc.Skill.Id,
-                        //            Name = vc.Skill.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name)
-                        //        }).ToList(),
                         CompanyName = x.Company.IsCompany ? x.Company.CompanyName : x.CompanyName,
                         CategoryName = x.Category.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name),
                         CompanyUserId = x.Company.UserId,
-                        Messages = _currentUser.UserGuid == x.Company.UserId
+                        Messages = userGuid == x.Company.UserId
                             ? x.VacancyMessages.Select(vm => vm.Message.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Content)).ToList()
                             : null,
                         VacancyStatus = x.VacancyStatus,
-                        IsApplied = userGuid.HasValue && x.Applications.Any(a => a.UserId == userGuid && a.IsActive == true),
-                        //ApplicationId = userGuid.HasValue ? x.Applications.Where(a => a.UserId == userGuid && a.VacancyId == x.Id).Select(a => a.Id).FirstOrDefault() : null
+                        //IsApplied = _currentUser.IsAuthenticated && x.Applications.Any(a => a.UserId == userGuid && a.IsActive == true),
+                        ApplicationId = _currentUser.IsAuthenticated ? x.Applications.Where(a => a.UserId == userGuid && a.IsActive == true).Select(a => a.Id).FirstOrDefault() : null
                     })
                     .FirstOrDefaultAsync() ?? throw new NotFoundException();
 
+            vacancyDto.IsApplied = vacancyDto.ApplicationId != null ? true : false;
 
             if (vacancyDto.CompanyUserId != userGuid)
             {
@@ -340,8 +335,8 @@ namespace JobCompany.Business.Services.VacancyServices
                     CountryId = v.CountryId,
                     CountryName = v.Country != null ? v.Country.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name) : null,
 
-                    VacancyNumbers = v.VacancyNumbers != null ? v
-                                .VacancyNumbers.Select(vn => new VacancyNumberDto
+                    VacancyNumbers = v.VacancyNumbers != null ? 
+                                v.VacancyNumbers.Select(vn => new VacancyNumberDto
                                 {
                                     Id = vn.Id,
                                     VacancyNumber = vn.Number,
@@ -352,7 +347,7 @@ namespace JobCompany.Business.Services.VacancyServices
                                 .Select(vc => new SkillDto
                                 {
                                     Id = vc.Skill.Id,
-                                    Name = vc.Skill.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name)
+                                    Name = vc.Skill.Translations.Where(x => x.Language == _currentUser.LanguageCode).Select(x => x.Name).FirstOrDefault()
                                 }).ToList()
                 }).FirstOrDefaultAsync() ?? throw new NotFoundException();
 
@@ -524,7 +519,7 @@ namespace JobCompany.Business.Services.VacancyServices
                     WorkStyle = v.WorkStyle,
                     MainSalary = v.MainSalary,
                     MaxSalary = v.MaxSalary,
-                    IsSaved = _currentUser.UserId != null && v.SavedVacancies.Any(x => x.VacancyId == v.Id && x.UserId == _currentUser.UserGuid),
+                    IsSaved = _currentUser.IsAuthenticated && v.SavedVacancies.Any(x => x.VacancyId == v.Id && x.UserId == _currentUser.UserGuid),
                     SalaryCurrency = v.SalaryCurrency
                 })
                 .Skip((skip - 1) * take)
