@@ -4,7 +4,7 @@ using SharedLibrary.Helpers;
 
 namespace Job.Business.Dtos.CertificateDtos
 {
-    public record CertificateCreateDto
+    public class CertificateCreateDto
     {
         public string CertificateName { get; set; }
         public string GivenOrganization { get; set; }

@@ -9,7 +9,6 @@ namespace JobPayment.Business.Dtos.Common
     public class DataListDto<T> where T : class
     {
         public ICollection<T>? Datas { get; set; }
-        public int? TotalPage { get; set; }
         public int? TotalCount { get; set; }
     }
 }

@@ -21,8 +21,7 @@ namespace Job.API.Controllers
         [HttpPost("[action]")]
         public async Task<IActionResult> CreateResume(ResumeCreateDto resumeCreateDto)
         {
-            await _resumeService.CreateResumeAsync(resumeCreateDto);
-            return Ok();
+            return Ok(await _resumeService.CreateResumeAsync(resumeCreateDto));
         }
 
         [AuthorizeRole(UserRole.SimpleUser)]

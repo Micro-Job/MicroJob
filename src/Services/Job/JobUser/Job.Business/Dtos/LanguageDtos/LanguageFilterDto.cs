@@ -4,6 +4,6 @@ namespace Job.Business.Dtos.LanguageDtos;
 
 public class LanguageFilterDto
 {
-    public Core.Enums.Language Language { get; set; }
+    public Language Language { get; set; }
     public LanguageLevel LanguageLevel { get; set; }
 }

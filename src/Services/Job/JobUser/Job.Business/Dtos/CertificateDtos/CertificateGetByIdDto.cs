@@ -1,6 +1,6 @@
 ﻿namespace Job.Business.Dtos.CertificateDtos
 {
-    public record CertificateGetByIdDto
+    public class CertificateGetByIdDto
     {
         public Guid CertificateId { get; set; }
         public string CertificateName { get; set; }

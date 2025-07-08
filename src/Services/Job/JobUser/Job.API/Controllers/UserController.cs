@@ -27,8 +27,7 @@ namespace Job.API.Controllers
         [HttpPut("[action]")]
         public async Task<IActionResult> UpdateUserInformation(UpdateUserDto dto)
         {
-            await _service.UpdateUserInformationAsync(dto);
-            return Ok();
+            return Ok(await _service.UpdateUserInformationAsync(dto));
         }
     }
 }

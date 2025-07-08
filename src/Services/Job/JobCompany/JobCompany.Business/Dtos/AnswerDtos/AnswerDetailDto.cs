@@ -4,6 +4,5 @@ namespace JobCompany.Business.Dtos.AnswerDtos
     {
         public Guid Id { get; set; }
         public string? Text { get; set; }
-        public bool? IsCorrect { get; set; }
     }
 }
