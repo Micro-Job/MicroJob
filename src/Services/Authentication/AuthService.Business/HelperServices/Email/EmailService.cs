@@ -15,7 +15,7 @@ public class EmailService(IOptions<SmtpSettings> smtpSettings, EmailTemplate _em
 
     public void SendSetPassword(string toEmail, string token)
     {
-        SendEmailAsync(toEmail, new EmailMessage
+        SendEmail(toEmail, new EmailMessage
         {
             Subject = "Şifrənizi müəyyən edin...",
             Content = _emailTemplate.ResetPassword(toEmail, token)
@@ -24,7 +24,7 @@ public class EmailService(IOptions<SmtpSettings> smtpSettings, EmailTemplate _em
 
     public void SendResetPassword(User user, string token)
     {
-        SendEmailAsync(user.Email, new EmailMessage
+        SendEmail(user.Email, new EmailMessage
         {
             Subject = "Şifrənizi yeniləyin...",
             Content = _emailTemplate.ResetPassword(token, $"{user.FirstName} {user.LastName}")
@@ -33,7 +33,7 @@ public class EmailService(IOptions<SmtpSettings> smtpSettings, EmailTemplate _em
 
     public void SendRegister(string toEmail, string fullName)
     {
-        SendEmailAsync(toEmail, new EmailMessage
+        SendEmail(toEmail, new EmailMessage
         {
             Subject = "Xoş gəlmişsiniz...",
             Content = _emailTemplate.RegisterCompleted(fullName)
@@ -42,7 +42,7 @@ public class EmailService(IOptions<SmtpSettings> smtpSettings, EmailTemplate _em
 
     public void SendVerifyEmail(string toEmail, string fullName, string userId)
     {
-        SendEmailAsync(toEmail, new EmailMessage
+        SendEmail(toEmail, new EmailMessage
         {
             Subject = "Hesabınızı təsdiqləyin...",
             Content = _emailTemplate.VerifyEmail(fullName, userId)
@@ -52,20 +52,17 @@ public class EmailService(IOptions<SmtpSettings> smtpSettings, EmailTemplate _em
     //TODO : bu daha sonra email update edilərsə istifadə ediləcək
     public void SendVerifyUpdateEmail(string toEmail, string fullName, string userId)
     {
-        SendEmailAsync(toEmail, new EmailMessage
+        SendEmail(toEmail, new EmailMessage
         {
             Subject = "Hesabınızı təsdiqləyin...",
             Content = _emailTemplate.VerifyUpdateEmail(fullName, userId)
         });
     }
 
-    public void SendEmailAsync(string toEmail, EmailMessage emailMessage)
+    public void SendEmail(string toEmail, EmailMessage emailMessage)
     {
         var fromAddress = new MailAddress(_smtpSettings.Username, "HIRI");
         var toAddress = new MailAddress(toEmail);
-        string fromPassword = _smtpSettings.Password;
-        string subject = emailMessage.Subject;
-        string body = emailMessage.Content;
 
         var smtp = new SmtpClient
         {
@@ -73,14 +70,14 @@ public class EmailService(IOptions<SmtpSettings> smtpSettings, EmailTemplate _em
             Port = _smtpSettings.Port,
             EnableSsl = true,
             UseDefaultCredentials = false,
-            Credentials = new NetworkCredential(fromAddress.Address, fromPassword)
+            Credentials = new NetworkCredential(fromAddress.Address, _smtpSettings.Password)
         };
 
         using (var message = new MailMessage(fromAddress, toAddress)
         {
-            Subject = subject,
+            Subject = emailMessage.Subject,
             IsBodyHtml = true,
-            Body = body,
+            Body = emailMessage.Content,
         })
         smtp.Send(message);
     }

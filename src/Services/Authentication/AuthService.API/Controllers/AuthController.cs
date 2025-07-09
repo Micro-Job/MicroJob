@@ -9,6 +9,13 @@ namespace AuthService.API.Controllers
     public class AuthController(AuthenticationService _authService) : ControllerBase
     {
         [HttpPost("[action]")]
+        public IActionResult TestMail(string email)
+        {
+            _authService.TestEmail(email);
+            return Ok();
+        }
+
+        [HttpPost("[action]")]
         public async Task<IActionResult> Register(RegisterDto dto)
         {
             await _authService.RegisterAsync(dto);
@@ -54,12 +61,6 @@ namespace AuthService.API.Controllers
             await _authService.UpdatePasswordAsync(oldPassword, newPassword);
             return Ok();
         }
-
-        //[HttpGet("[action]")]
-        //public async Task<IActionResult> TryLanguage()
-        //{
-        //    return Ok(MessageHelper.GetMessage("WELCOME"));
-        //}
 
         [HttpGet("[action]")]
         public async Task<IActionResult> CheckUserExist(string email , string phoneNumber)

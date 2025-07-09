@@ -37,5 +37,10 @@ namespace JobCompany.API.Controllers
             return Ok(await service.GetOwnCompanyInformationAsync());
         }
 
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetAllCompaniesForSelect(int? take)
+        {
+            return Ok(await service.GetAllCompaniesForSelectAsync(take));
+        }
     }
 }
