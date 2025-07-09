@@ -38,9 +38,9 @@ namespace JobCompany.API.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetAllCompaniesForSelect(int? take)
-        {
-            return Ok(await service.GetAllCompaniesForSelectAsync(take));
+        public async Task<IActionResult> GetAllCompaniesForSelect(string? searchTerm, int? take)
+        {   
+            return Ok(await service.GetAllCompaniesForSelectAsync(searchTerm, take));
         }
     }
 }
