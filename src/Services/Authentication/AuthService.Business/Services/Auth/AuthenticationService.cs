@@ -30,15 +30,6 @@ namespace AuthService.Business.Services.Auth
 {
     public class AuthenticationService(AppDbContext _context, TokenHandler _tokenHandler, IPublishEndpoint _publishEndpoint, EmailService _emailService, ICurrentUser _currentUser, IRequestClient<GetCompaniesDataByUserIdsRequest> _companyDataClient , IRequestClient<CheckVoenRequest> _voenCheckRequest) 
     {
-        public void TestEmail(string email)
-        {
-            _emailService.SendEmail(email, new EmailMessage
-            {
-                Content = "salam",
-                Subject = "Test"
-            });
-        }
-
         public async Task RegisterAsync(RegisterDto dto)
         {
             dto.MainPhoneNumber = dto.MainPhoneNumber.Trim();

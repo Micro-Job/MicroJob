@@ -16,4 +16,5 @@ public record AllApplicationListDto
     public StatusEnum Status { get; set; }
     public string? ProfileImage { get; set; }
     public DateTime DateTime { get; set; }
+    public float? ExamPercent { get; set; }
 }

@@ -139,18 +139,6 @@ public class ApplicationService(JobCompanyDbContext _context, IPublishEndpoint _
     {
         var query = GetApplicationsQuery(vacancyIds, status, fullName, skipStatus, gender);
 
-        //TODO : bu hisse request responseden cixmalidir
-        //if (skillIds != null && skillIds.Count != 0) //Filterdə gender və ya skillids varsa sorğu atılır
-        //{
-        //    var userIds = await query.Select(a => a.UserId).Distinct().ToListAsync();
-
-        //    var response = await _filteredUserIdsRequest.GetResponse<GetFilteredUserIdsResponse>(
-        //        new GetFilteredUserIdsRequest { UserIds = userIds, SkillIds = skillIds }); //Parametrlərə uyğun user id-ləri filtrlənir
-
-        //    if (response.Message.UserIds.Count != 0)
-        //        query = query.Where(a => response.Message.UserIds.Contains(a.UserId));
-        //}
-
         var data = await query
             .OrderByDescending(a => a.CreatedDate)
             .Select(a => new AllApplicationListDto
@@ -166,7 +154,8 @@ public class ApplicationService(JobCompanyDbContext _context, IPublishEndpoint _
                 StatusId = a.StatusId,
                 Status = a.Status.StatusEnum,
                 VacancyId = a.VacancyId,
-                VacancyName = a.Vacancy.Title
+                VacancyName = a.Vacancy.Title,
+                ExamPercent = a.Vacancy.Exam != null ? a.Vacancy.Exam.UserExams.Where(x=> x.UserId == a.UserId).Select(x=> x.TotalPercent).FirstOrDefault() : null
             })
             .Skip((skip - 1) * take)
             .Take(take)

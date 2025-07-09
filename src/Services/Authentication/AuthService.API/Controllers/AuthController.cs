@@ -9,13 +9,6 @@ namespace AuthService.API.Controllers
     public class AuthController(AuthenticationService _authService) : ControllerBase
     {
         [HttpPost("[action]")]
-        public IActionResult TestMail(string email)
-        {
-            _authService.TestEmail(email);
-            return Ok();
-        }
-
-        [HttpPost("[action]")]
         public async Task<IActionResult> Register(RegisterDto dto)
         {
             await _authService.RegisterAsync(dto);
