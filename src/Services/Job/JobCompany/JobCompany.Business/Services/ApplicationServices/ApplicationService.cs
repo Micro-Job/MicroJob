@@ -9,6 +9,7 @@ using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using MassTransit;
 using MassTransit.Initializers;
+using Microsoft.AspNetCore.Routing.Constraints;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using SharedLibrary.Dtos.ApplicationDtos;
@@ -22,7 +23,7 @@ using SharedLibrary.Responses;
 
 namespace JobCompany.Business.Services.ApplicationServices;
 
-public class ApplicationService(JobCompanyDbContext _context, IPublishEndpoint _publishEndpoint, ICurrentUser _currentUser, IRequestClient<GetResumeDataRequest> _resumeDataRequest) 
+public class ApplicationService(JobCompanyDbContext _context, IPublishEndpoint _publishEndpoint, ICurrentUser _currentUser, IRequestClient<GetResumeDataRequest> _resumeDataRequest)
 {
     /// <summary> Vakansiya üçün müraciət yaradılması </summary>
     public async Task CreateUserApplicationAsync(Guid vacancyId)
@@ -75,7 +76,7 @@ public class ApplicationService(JobCompanyDbContext _context, IPublishEndpoint _
             InformationId = resumeData.Message.ResumeId,
             InformationName = vacancyInfo.Title,
             IsSeen = false,
-            ReceiverId = (Guid)vacancyInfo.CompanyId!,
+            ReceiverId = vacancyInfo.CompanyId!,
         };
 
         await _context.Notifications.AddAsync(notification);
@@ -83,17 +84,47 @@ public class ApplicationService(JobCompanyDbContext _context, IPublishEndpoint _
     }
 
     /// <summary> Yaradılan müraciətin geri alınması </summary>
-    public async Task RemoveApplicationAsync(Guid applicationId)
+    public async Task RemoveApplicationAsync(RemoveAppDto dto)
     {
         var existApplication =
-            await _context.Applications.FirstOrDefaultAsync(x =>
-                x.Id == applicationId && x.UserId == _currentUser.UserGuid)
+            await _context.Applications.Where(x => x.Id == dto.ApplicationId && x.UserId == _currentUser.UserGuid)
+            .Select(x => new
+            {
+                Application = x,
+                Status = x.Status.StatusEnum,
+                x.Vacancy
+            })
+            .FirstOrDefaultAsync()
             ?? throw new NotFoundException();
 
-        if (existApplication.IsActive == false)
+        if ((existApplication.Status == StatusEnum.Interview || existApplication.Status == StatusEnum.Accepted) && !string.IsNullOrEmpty(dto.Message))
+        {
+            var resumeData = await _resumeDataRequest.GetResponse<GetResumeDataResponse>(new GetResumeDataRequest { UserId = (Guid)_currentUser.UserGuid! });
+
+            var message = resumeData.Message;
+
+            var notification = new Notification
+            {
+                SenderId = _currentUser.UserGuid,
+                SenderName = _currentUser.UserFullName,
+                SenderImage = resumeData.Message.ProfileImage,
+                NotificationType = NotificationType.Application,
+                CreatedDate = DateTime.Now,
+                InformationId = resumeData.Message.ResumeId,
+                InformationName = existApplication.Vacancy.Title,
+                IsSeen = false,
+                ReceiverId = existApplication.Vacancy.CompanyId!,
+            };
+
+            await _context.Notifications.AddAsync(notification);
+        }
+        else throw new BadRequestException("Səbəb daxil etməlisiniz!");
+        //TODO : bu xəta dilə görə olmalıdır
+
+        if (existApplication.Application.IsActive == false)
             throw new ApplicationStatusIsDeactiveException();
 
-        existApplication.IsActive = false;
+        existApplication.Application.IsActive = false;
         await _context.SaveChangesAsync();
     }
 
@@ -274,7 +305,7 @@ public class ApplicationService(JobCompanyDbContext _context, IPublishEndpoint _
             query = query.Where(x => x.Status.StatusEnum == skipStatus);
 
         if (gender != null)
-            query = query.Where(x=> x.Gender == gender);
+            query = query.Where(x => x.Gender == gender);
 
         return query;
     }

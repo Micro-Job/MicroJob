@@ -47,5 +47,10 @@ public enum NotificationType : byte
     /// Müraciət statusunun dəyişməsi
     /// </summary>  
     ApplicationStatusUpdate = 12,
+    //TODO : Bu hisse ucun front ana metn yazmalidir
+    /// <summary>
+    /// İşaxtaranın müraciəti dəyişməsi
+    /// </summary>
+    ApplicationRemoved = 13
 }
 

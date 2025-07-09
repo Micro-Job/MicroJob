@@ -1,3 +1,4 @@
+using JobCompany.Business.Dtos.ApplicationDtos;
 using JobCompany.Business.Services.ApplicationServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,9 +13,9 @@ namespace JobCompany.API.Controllers
     {
         [AuthorizeRole(UserRole.SimpleUser)]
         [HttpPost("[action]")]
-        public async Task<IActionResult> RemoveApplication(Guid applicationId)
+        public async Task<IActionResult> RemoveApplication(RemoveAppDto dto)
         {
-            await service.RemoveApplicationAsync(applicationId);
+            await service.RemoveApplicationAsync(dto);
             return Ok();
         }
 
