@@ -59,9 +59,6 @@ namespace Job.Business.Services.Resume
 
             var resume = await BuildResumeAsync(resumeCreateDto, positionId);
 
-            if (positionId != Guid.Empty)
-                resume.PositionId = positionId;
-
             await _context.Resumes.AddAsync(resume);
             await _context.SaveChangesAsync();
 

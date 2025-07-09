@@ -588,11 +588,10 @@ namespace JobCompany.Business.Services.VacancyServices
 
         public async Task ToggleSaveVacancyAsync(Guid vacancyId)
         {
-
             if (!await _context.Vacancies.AnyAsync(x => x.Id == vacancyId))
                 throw new NotFoundException();
 
-            var vacancyCheck = await _context.SavedVacancies.FirstOrDefaultAsync(x => x.VacancyId == vacancyId);
+            var vacancyCheck = await _context.SavedVacancies.FirstOrDefaultAsync(x => x.VacancyId == vacancyId && x.UserId == _currentUser.UserGuid);
 
             if (vacancyCheck != null)
             {
