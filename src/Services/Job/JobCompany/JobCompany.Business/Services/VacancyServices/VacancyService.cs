@@ -262,12 +262,13 @@ namespace JobCompany.Business.Services.VacancyServices
                             ? x.VacancyMessages.Select(vm => vm.Message.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Content)).ToList()
                             : null,
                         VacancyStatus = x.VacancyStatus,
-                        //IsApplied = _currentUser.IsAuthenticated && x.Applications.Any(a => a.UserId == userGuid && a.IsActive == true),
+                        //TODO : burada ApplicationId yanlisdir empty gelir ve asagidaki commentdeki hissede de problem var
+                        IsApplied = _currentUser.IsAuthenticated && x.Applications.Any(a => a.UserId == userGuid && a.IsActive == true),
                         ApplicationId = _currentUser.IsAuthenticated ? x.Applications.Where(a => a.UserId == userGuid && a.IsActive == true).Select(a => a.Id).FirstOrDefault() : null
                     })
                     .FirstOrDefaultAsync() ?? throw new NotFoundException();
 
-            vacancyDto.IsApplied = vacancyDto.ApplicationId != null ? true : false;
+            //vacancyDto.IsApplied = vacancyDto.ApplicationId != null ? true : false;
 
             if (vacancyDto.CompanyUserId != userGuid)
             {

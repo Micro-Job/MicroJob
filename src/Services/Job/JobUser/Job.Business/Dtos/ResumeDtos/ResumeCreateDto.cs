@@ -3,6 +3,7 @@ using Job.Business.Dtos.CertificateDtos;
 using Job.Business.Dtos.EducationDtos;
 using Job.Business.Dtos.ExperienceDtos;
 using Job.Business.Dtos.LanguageDtos;
+using Job.Business.Dtos.LinkDtos;
 using Job.Business.Dtos.NumberDtos;
 using Microsoft.AspNetCore.Http;
 using Shared.Enums;
@@ -30,11 +31,12 @@ namespace Job.Business.Dtos.ResumeDtos
         public bool IsAnonym { get; set; }
         public string? ResumeEmail { get; set; }
         public string? Adress { get; set; }
+        public string? Summary { get; set; }
         public DateTime BirthDay { get; set; }
 
         public ICollection<Guid>? SkillIds { get; set; }
-
         public ICollection<CertificateCreateDto>? Certificates { get; set; }
+        public ICollection<CreateLinkDto>? Urls { get; set; }
         public ICollection<NumberCreateDto> PhoneNumbers { get; set; }
         public ICollection<ExperienceCreateDto>? Experiences { get; set; }
         public ICollection<EducationCreateDto>? Educations { get; set; }
@@ -50,11 +52,13 @@ namespace Job.Business.Dtos.ResumeDtos
             //    .MaximumLength(50).WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_50"));
 
             RuleFor(x => x.Position)
-                //.NotEmpty().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
                 .MaximumLength(100).WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_100"));
 
             RuleFor(x => x.Adress)
                 .MaximumLength(200).WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_200"));
+
+            RuleFor(x => x.Summary)
+                .MaximumLength(2048).WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_2048"));
 
             //RuleFor(x => x.BirthDay)
             //    .NotEmpty().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
@@ -71,6 +75,9 @@ namespace Job.Business.Dtos.ResumeDtos
 
             RuleForEach(x => x.Educations)
                 .SetValidator(new EducationCreateDtoValidator());
+
+            RuleForEach(x => x.Urls)
+                .SetValidator(new CreateLinkValidator());
         }
     }
 }

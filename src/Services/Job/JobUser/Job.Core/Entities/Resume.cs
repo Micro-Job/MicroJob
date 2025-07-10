@@ -32,7 +32,9 @@ namespace Job.Core.Entities
         public string? Adress { get; set; }
         public DateTime BirthDay { get; set; }
         public string? ResumeEmail { get; set; }
+        public string? Summary { get; set; }
 
+        public ICollection<ResumeLink>? ResumeLinks { get; set; }
         public ICollection<Number> PhoneNumbers { get; set; }
         public ICollection<Education> Educations { get; set; }
         public ICollection<Experience>? Experiences { get; set; }

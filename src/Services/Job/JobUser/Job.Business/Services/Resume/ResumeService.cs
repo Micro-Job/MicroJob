@@ -3,6 +3,7 @@ using Job.Business.Dtos.Common;
 using Job.Business.Dtos.EducationDtos;
 using Job.Business.Dtos.ExperienceDtos;
 using Job.Business.Dtos.LanguageDtos;
+using Job.Business.Dtos.LinkDtos;
 using Job.Business.Dtos.NumberDtos;
 using Job.Business.Dtos.ResumeDtos;
 using Job.Business.Dtos.SkillDtos;
@@ -74,7 +75,15 @@ namespace Job.Business.Services.Resume
                 : [];
             var certificates = await GetCertificatesAsync(resumeCreateDto);
             var resumeSkills = GetResumeSkills(resumeCreateDto.SkillIds, resume.Id);
+            
+            var urls = resumeCreateDto.Urls != null ? resumeCreateDto.Urls.Select(x=> new ResumeLink
+            {
+                ResumeId = resume.Id,
+                LinkType = x.LinkType,
+                Url = x.Url
+            }).ToList() : null;
 
+            resume.ResumeLinks = urls;
             resume.PhoneNumbers = phoneNumbers;
             resume.Educations = educations;
             resume.Experiences = experiences;
@@ -100,12 +109,10 @@ namespace Job.Business.Services.Resume
 
         public async Task<ResumeDetailItemDto> GetOwnResumeAsync()
         {
-            var resume = await _context.Resumes
+            var resume = await _context.Resumes.AsNoTracking()
                                         .Where(x => x.UserId == _currentUser.UserGuid)
                                         .Select(resume => new ResumeDetailItemDto
                                         {
-                                            //ResumeId = resume.Id,
-                                            //UserId = resume.UserId,
                                             FirstName = resume.FirstName,
                                             LastName = resume.LastName,
                                             Position = resume.Position != null ? resume.Position.Name : null,
@@ -124,6 +131,7 @@ namespace Job.Business.Services.Resume
                                             UserPhoto = resume.UserPhoto != null ? $"{_currentUser.BaseUrl}/userFiles/{resume.UserPhoto}" : null,
                                             IsPublic = resume.IsPublic,
                                             IsAnonym = resume.IsAnonym,
+                                            Summary = resume.Summary,
                                             PhoneNumbers = resume.PhoneNumbers.Select(p => new NumberGetByIdDto
                                             {
                                                 PhoneNumberId = p.Id,
@@ -161,6 +169,11 @@ namespace Job.Business.Services.Resume
                                                 CertificateName = c.CertificateName,
                                                 GivenOrganization = c.GivenOrganization,
                                                 CertificateFile = $"{_currentUser.BaseUrl}/userFiles/{c.CertificateFile}"
+                                            }).ToList(),
+                                            Urls = resume.ResumeLinks.Select(x=> new LinkDto
+                                            {
+                                                LinkType = x.LinkType,
+                                                Url = x.Url
                                             }).ToList()
                                         })
                                         .FirstOrDefaultAsync();
@@ -362,58 +375,20 @@ namespace Job.Business.Services.Resume
                     .Include(r => r.Experiences)
                     .Include(r => r.Languages)
                     .Include(r => r.Certificates)
+                    .Include(r => r.ResumeLinks)
                 .Select(r => new
                 {
                     Resume = r,
                     HasAccessByCompany = r.CompanyResumeAccesses.Any(x => x.CompanyUserId == userId),
                 })
+                .AsNoTracking()
                 .FirstOrDefaultAsync() ?? throw new NotFoundException();
-
-            bool hasApplied = false;
-
-            // Əgər CompanyUser-dursa, şirkətin hər hansı bir vakansiyasına müraciət edib-etmədiyini yoxlayırıq
-            //TODO : burada request responseden istifade edilmeli deyil
-            if (!resumeData.HasAccessByCompany && (_currentUser.UserRole == (byte)UserRole.CompanyUser || _currentUser.UserRole == (byte)UserRole.EmployeeUser))
-            {
-                var checkApplicationResponse = await _checkApplicationRequest.GetResponse<CheckApplicationResponse>(
-                    new CheckApplicationRequest
-                    {
-                        CompanyUserId = (Guid)userId,
-                        UserId = resumeData.Resume.UserId
-                    });
-
-                hasApplied = checkApplicationResponse.Message.HasApplied;
-            }
-
-            // İcazə olub-olmadığını yoxlayırıq. 4 halda resume-nin bütün datalarına tam baxma icazəsi var:
-            bool hasFullAccess = _currentUser.UserRole == (byte)UserRole.Admin // Əgər admindirsə
-                || _currentUser.UserRole == (byte)UserRole.SuperAdmin          // Əgər Superadmindirsə
-                || hasApplied                                                  // Əgər müraciət edibsə
-                || resumeData.HasAccessByCompany                               // Əgər resume-yə baxma icazəsi varsa
-                || resumeData.Resume.IsPublic;                                 // Əgər resume public-dirsə
 
             var resume = resumeData.Resume;
 
             var resumeResponse = new ResumeDetailItemDto
             {
-                //ResumeId = resume.Id,
-                //UserId = resume.UserId,
                 IsSaved = resume.SavedResumes.Any(sr => sr.ResumeId == resume.Id && sr.CompanyUserId == _currentUser.UserGuid),
-                FirstName = hasFullAccess ? resume.FirstName : null,
-                LastName = hasFullAccess ? resume.LastName : null,
-                ResumeEmail = hasFullAccess ? resume.ResumeEmail : null,
-
-                PhoneNumbers = hasFullAccess
-                    ? resume.PhoneNumbers.Select(p => new NumberGetByIdDto
-                    {
-                        PhoneNumberId = p.Id,
-                        PhoneNumber = p.PhoneNumber
-                    }).ToList()
-                    : [],
-
-                UserPhoto = hasFullAccess && resume.UserPhoto != null
-                    ? $"{_currentUser.BaseUrl}/userFiles/{resume.UserPhoto}"
-                    : null,
 
                 BirthDay = resume.BirthDay,
                 Gender = resume.Gender,
@@ -459,8 +434,59 @@ namespace Job.Business.Services.Resume
                     GivenOrganization = c.GivenOrganization,
                     CertificateFile = $"{_currentUser.BaseUrl}/userFiles/{c.CertificateFile}"
                 }).ToList(),
-                HasAccess = hasFullAccess
             };
+
+            bool hasApplied = false;
+
+            // Əgər CompanyUser-dursa, şirkətin hər hansı bir vakansiyasına müraciət edib-etmədiyini yoxlayırıq
+            //TODO : burada request responseden istifade edilmeli deyil
+            if (!resumeData.HasAccessByCompany && (_currentUser.UserRole == (byte)UserRole.CompanyUser || _currentUser.UserRole == (byte)UserRole.EmployeeUser))
+            {
+                var checkApplicationResponse = await _checkApplicationRequest.GetResponse<CheckApplicationResponse>(
+                    new CheckApplicationRequest
+                    {
+                        CompanyUserId = (Guid)userId,
+                        UserId = resumeData.Resume.UserId
+                    });
+
+                hasApplied = checkApplicationResponse.Message.HasApplied;
+            }
+
+            // İcazə olub-olmadığını yoxlayırıq. 4 halda resume-nin bütün datalarına tam baxma icazəsi var:
+            bool hasFullAccess = _currentUser.UserRole == (byte)UserRole.Admin // Əgər admindirsə
+                || _currentUser.UserRole == (byte)UserRole.SuperAdmin          // Əgər Superadmindirsə
+                || hasApplied                                                  // Əgər müraciət edibsə
+                || resumeData.HasAccessByCompany                               // Əgər resume-yə baxma icazəsi varsa
+                || resumeData.Resume.IsPublic;                                 // Əgər resume public-dirsə
+
+            if (hasFullAccess)
+            {
+                resumeResponse.FirstName = hasFullAccess ? resume.FirstName : null;
+                resumeResponse.LastName = hasFullAccess ? resume.LastName : null;
+                resumeResponse.ResumeEmail = hasFullAccess ? resume.ResumeEmail : null;
+
+                resumeResponse.PhoneNumbers = hasFullAccess
+                    ? resume.PhoneNumbers.Select(p => new NumberGetByIdDto
+                    {
+                        PhoneNumberId = p.Id,
+                        PhoneNumber = p.PhoneNumber
+                    }).ToList()
+                    : [];
+
+                resumeResponse.UserPhoto = hasFullAccess && resume.UserPhoto != null
+                    ? $"{_currentUser.BaseUrl}/userFiles/{resume.UserPhoto}"
+                    : null;
+
+                resumeResponse.Urls = hasFullAccess ? resume.ResumeLinks.Select(x => new LinkDto
+                {
+                    LinkType = x.LinkType,
+                    Url = x.Url
+                }).ToList() : null;
+
+                resumeResponse.Summary = hasFullAccess ? resume.Summary : null;
+
+                resumeResponse.HasAccess = hasFullAccess;
+            }
 
             resumeResponse.Skills = await _context.ResumeSkills.Where(x => x.ResumeId == resumeId)
             .Select(x => new SkillGetByIdDto
@@ -596,6 +622,7 @@ namespace Job.Business.Services.Resume
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
                 PositionId = dto.PositionId,
+                Summary = dto.Summary,
                 IsDriver = dto.IsDriver,
                 IsMarried = dto.IsMarried,
                 IsCitizen = dto.IsCitizen,

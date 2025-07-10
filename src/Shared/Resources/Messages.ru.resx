@@ -180,9 +180,6 @@
   <data name="LENGTH_MUST_BE_BETWEEN_1_100" xml:space="preserve">
     <value>Длина должна быть от 1 до 100</value>
   </data>
-  <data name="LENGTH_MUST_BE_BETWEEN_1_1000" xml:space="preserve">
-    <value>Длина должна быть от 1 до 1000</value>
-  </data>
   <data name="LENGTH_MUST_BE_BETWEEN_1_200" xml:space="preserve">
     <value>Длина должна быть от 1 до 200</value>
   </data>
@@ -278,5 +275,11 @@
   </data>
   <data name="WELCOME" xml:space="preserve">
     <value>Добро пожаловать</value>
+  </data>
+  <data name="LENGTH_MUST_BE_BETWEEN_1_1000" xml:space="preserve">
+    <value>Длина должна быть от 1 до 1000</value>
+  </data>
+  <data name="LENGTH_MUST_BE_BETWEEN_1_2048" xml:space="preserve">
+    <value>Длина должна быть от 1 до 2048</value>
   </data>
 </root>

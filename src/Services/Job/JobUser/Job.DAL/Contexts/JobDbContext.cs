@@ -17,6 +17,7 @@ namespace Job.DAL.Contexts
         public DbSet<User> Users { get; set; }
         public DbSet<Skill> Skills { get; set; }
         public DbSet<ResumeSkill> ResumeSkills { get; set; }
+        public DbSet<ResumeLink> ResumeLinks { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<SavedResume> SavedResumes { get; set; }
         public DbSet<CompanyResumeAccess> CompanyResumeAccesses { get; set; }

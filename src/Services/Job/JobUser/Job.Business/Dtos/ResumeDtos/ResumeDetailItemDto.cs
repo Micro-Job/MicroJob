@@ -2,9 +2,11 @@ using Job.Business.Dtos.CertificateDtos;
 using Job.Business.Dtos.EducationDtos;
 using Job.Business.Dtos.ExperienceDtos;
 using Job.Business.Dtos.LanguageDtos;
+using Job.Business.Dtos.LinkDtos;
 using Job.Business.Dtos.NumberDtos;
 using Job.Business.Dtos.SkillDtos;
 using Job.Core.Enums;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Shared.Enums;
 using SharedLibrary.Enums;
 
@@ -33,8 +35,10 @@ namespace Job.Business.Dtos.ResumeDtos
         public bool IsPublic { get; set; }
         public bool IsAnonym { get; set; }
         public bool HasAccess { get; set; }
-
         public string? ResumeEmail { get; set; }
+        public string? Summary { get; set; }
+
+        public ICollection<LinkDto>? Urls { get; set; }
         public ICollection<SkillGetByIdDto>? Skills { get; set; }
         public ICollection<NumberGetByIdDto>? PhoneNumbers { get; set; }
         public ICollection<EducationGetByIdDto>? Educations { get; set; }
