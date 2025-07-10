@@ -2,6 +2,7 @@
 using Job.Business.Dtos.EducationDtos;
 using Job.Business.Dtos.ExperienceDtos;
 using Job.Business.Dtos.LanguageDtos;
+using Job.Business.Dtos.LinkDtos;
 using Job.Business.Dtos.NumberDtos;
 using Job.Business.Dtos.ResumeDtos;
 using Job.Business.Dtos.SkillDtos;
@@ -67,6 +68,7 @@ public class UserManagementService(JobDbContext _context, IConfiguration _config
                 BirthDay = r.BirthDay,
                 ResumeEmail = r.ResumeEmail,
                 UserPhoto = r.UserPhoto != null ? $"{_currentUser.BaseUrl}/userFiles/{r.UserPhoto}" : null,
+                Summary = r.Summary,
                 Skills = r.ResumeSkills.Select(s => new SkillGetByIdDto
                 {
                     Id = s.SkillId,
@@ -110,6 +112,11 @@ public class UserManagementService(JobDbContext _context, IConfiguration _config
                     CertificateName = c.CertificateName,
                     GivenOrganization = c.GivenOrganization,
                     CertificateFile = $"{_currentUser.BaseUrl}/userFiles/{c.CertificateFile}"
+                }).ToList(),
+                Urls = r.ResumeLinks.Select(x=> new LinkDto
+                {
+                    LinkType = x.LinkType,
+                    Url = x.Url
                 }).ToList()
             }).FirstOrDefaultAsync() ?? throw new NotFoundException();
 

@@ -228,6 +228,12 @@ namespace Job.Business.Services.Resume
             await _context.SaveChangesAsync();
         }
 
+        public async Task<bool> IsExistResumeAsync()
+        {
+            return await _context.Resumes.AnyAsync(x => x.UserId == _currentUser.UserGuid);
+        }
+
+
         //Sirket hissəsində resumelerin metodlari
         public async Task<DataListDto<ResumeListDto>> GetAllResumesAsync(string? fullname, bool? isPublic, List<ProfessionDegree>? professionDegree, Citizenship? citizenship, Gender? gender, bool? isExperience, JobStatus? jobStatus, List<Guid>? skillIds, List<LanguageFilterDto>? languages, int skip, int take)
         {
@@ -355,11 +361,6 @@ namespace Job.Business.Services.Resume
             }
 
             await _context.SaveChangesAsync();
-        }
-
-        public async Task<bool> IsExistResumeAsync()
-        {
-            return await _context.Resumes.AnyAsync(x => x.UserId == _currentUser.UserGuid);
         }
 
         public async Task<ResumeDetailItemDto> GetByIdResumeAysnc(Guid resumeId)
@@ -541,6 +542,8 @@ namespace Job.Business.Services.Resume
             else throw new BadRequestException(MessageHelper.GetMessage("INSUFFICIENT_BALANCE"));
         }
 
+
+        //TODO : buradaki priv metodlardan yalnız ApplyFilters mentiqlidir. Qalanlari boşunadır. Çünki priv mentiqi yanlışdır
         #region Private Methods
 
         private IQueryable<Core.Entities.Resume> ApplyFilters(IQueryable<Core.Entities.Resume> query, string? fullname, bool? isPublic, List<ProfessionDegree>? professionDegrees, Citizenship? citizenship, Gender? gender, bool? isExperience, List<Guid>? skillIds, List<LanguageFilterDto>? languages, JobStatus? jobStatus)
