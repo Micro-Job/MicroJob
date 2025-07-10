@@ -44,8 +44,7 @@ namespace JobCompany.API.Controllers
         [HttpPost("[action]")]
         public async Task<IActionResult> CreateUserApplication(Guid vacancyId)
         {
-            await service.CreateUserApplicationAsync(vacancyId);
-            return Ok();
+            return Ok(await service.CreateUserApplicationAsync(vacancyId));
         }
 
         [AuthorizeRole(UserRole.SimpleUser)]

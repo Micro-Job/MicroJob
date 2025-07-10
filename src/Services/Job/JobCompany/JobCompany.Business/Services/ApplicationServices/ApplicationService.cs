@@ -26,7 +26,7 @@ namespace JobCompany.Business.Services.ApplicationServices;
 public class ApplicationService(JobCompanyDbContext _context, IPublishEndpoint _publishEndpoint, ICurrentUser _currentUser, IRequestClient<GetResumeDataRequest> _resumeDataRequest)
 {
     /// <summary> Vakansiya üçün müraciət yaradılması </summary>
-    public async Task CreateUserApplicationAsync(Guid vacancyId)
+    public async Task<Guid> CreateUserApplicationAsync(Guid vacancyId)
     {
         var userGuid = _currentUser.UserGuid ?? throw new Exception(MessageHelper.GetMessage("NOT_FOUND"));
 
@@ -50,6 +50,7 @@ public class ApplicationService(JobCompanyDbContext _context, IPublishEndpoint _
 
         var newApplication = new Application
         {
+            Id = Guid.NewGuid(),
             UserId = userGuid,
             VacancyId = vacancyId,
             StatusId = companyStatus.Id,
@@ -76,11 +77,12 @@ public class ApplicationService(JobCompanyDbContext _context, IPublishEndpoint _
             InformationId = resumeData.Message.ResumeId,
             InformationName = vacancyInfo.Title,
             IsSeen = false,
-            ReceiverId = (Guid)vacancyInfo.CompanyId!,
+            ReceiverId = vacancyInfo.CompanyId!,
         };
 
         await _context.Notifications.AddAsync(notification);
         await _context.SaveChangesAsync();
+        return newApplication.Id;
     }
 
     /// <summary> Yaradılan müraciətin geri alınması </summary>
