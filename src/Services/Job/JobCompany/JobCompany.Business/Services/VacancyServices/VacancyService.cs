@@ -196,7 +196,9 @@ namespace JobCompany.Business.Services.VacancyServices
                     MainSalary = x.MainSalary,
                     MaxSalary = x.MaxSalary,
                     IsSaved = x.SavedVacancies.Any(sv => sv.UserId == _currentUser.UserGuid && sv.VacancyId == x.Id),
-                    SalaryCurrency = x.SalaryCurrency
+                    SalaryCurrency = x.SalaryCurrency,
+                    CityName = x.City!.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name)!,
+                    CountryName = x.Country!.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name)!,
                 })
                 .Skip((skip - 1) * take)
                 .Take(take)

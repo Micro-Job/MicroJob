@@ -10,6 +10,8 @@ namespace JobCompany.Business.Dtos.VacancyDtos
         public string Title { get; set; }
         public string? Location { get; set; }
         public string? CompanyLogo { get; set; }
+        public string CountryName { get; set; }
+        public string CityName { get; set; }
         public WorkType? WorkType { get; set; }
         public WorkStyle? WorkStyle { get; set; }
         public DateTime StartDate { get; set; }
