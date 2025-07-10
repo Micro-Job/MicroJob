@@ -336,4 +336,17 @@ public class ExamService(JobCompanyDbContext _context, QuestionService _question
             IsPassed = isPassed
         };
     }
+
+    public async Task<UserExamDetailDto> GetUserExamAsync(Guid examId, Guid userId)
+    {
+        var data = await _context.UserExams.Where(x => x.ExamId == examId && x.UserId == userId && x.Exam.Company.UserId == _currentUser.UserGuid)
+            .Select(x => new UserExamDetailDto
+            {
+                TrueAnswerCount = x.TrueAnswerCount,
+                FalseAnswerCount = x.FalseAnswerCount,
+                TotalPercent = x.TotalPercent
+            }).FirstOrDefaultAsync() ?? throw new NotFoundException();
+
+        return data;
+    }
 }
