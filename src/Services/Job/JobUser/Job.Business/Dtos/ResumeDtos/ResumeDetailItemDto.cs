@@ -15,7 +15,6 @@ namespace Job.Business.Dtos.ResumeDtos
     public record ResumeDetailItemDto
     {
         public Guid UserId { get; set; }
-        public Guid ResumeId { get; set; }
         public bool IsSaved { get; set; }
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
@@ -37,6 +36,7 @@ namespace Job.Business.Dtos.ResumeDtos
         public bool HasAccess { get; set; }
         public string? ResumeEmail { get; set; }
         public string? Summary { get; set; }
+        public bool HasAccessByCompany { get; set; }
 
         public ICollection<LinkDto>? Urls { get; set; }
         public ICollection<SkillGetByIdDto>? Skills { get; set; }

@@ -14,7 +14,6 @@ namespace Job.API.Controllers
 
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
     public class ResumeController(ResumeService _resumeService) : ControllerBase
     {
         [AuthorizeRole(UserRole.SimpleUser)]
@@ -57,6 +56,7 @@ namespace Job.API.Controllers
                 skip, take));
         }
 
+        [AuthorizeRole(UserRole.CompanyUser, UserRole.EmployeeUser)]
         [HttpGet("[action]")]
         public async Task<IActionResult> GetByIdResume(Guid id)
         {

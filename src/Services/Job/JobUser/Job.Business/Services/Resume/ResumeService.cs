@@ -365,32 +365,11 @@ namespace Job.Business.Services.Resume
 
         public async Task<ResumeDetailItemDto> GetByIdResumeAysnc(Guid resumeId)
         {
-            var userId = _currentUser.UserGuid;
-
-            var resumeData = await _context.Resumes
-                .Where(r => r.Id == resumeId)
-                    .Include(r => r.SavedResumes)
-                    .Include(r => r.Position)
-                    .Include(r => r.PhoneNumbers)
-                    .Include(r => r.Educations)
-                    .Include(r => r.Experiences)
-                    .Include(r => r.Languages)
-                    .Include(r => r.Certificates)
-                    .Include(r => r.ResumeLinks)
-                .Select(r => new
-                {
-                    Resume = r,
-                    HasAccessByCompany = r.CompanyResumeAccesses.Any(x => x.CompanyUserId == userId),
-                })
-                .AsNoTracking()
-                .FirstOrDefaultAsync() ?? throw new NotFoundException();
-
-            var resume = resumeData.Resume;
-
-            var resumeResponse = new ResumeDetailItemDto
+            var resume = await _context.Resumes.Where(r => r.Id == resumeId)
+            .Select(resume => new ResumeDetailItemDto
             {
+                UserId = resume.UserId,
                 IsSaved = resume.SavedResumes.Any(sr => sr.ResumeId == resume.Id && sr.CompanyUserId == _currentUser.UserGuid),
-
                 BirthDay = resume.BirthDay,
                 Gender = resume.Gender,
                 IsMarried = resume.IsMarried,
@@ -398,7 +377,9 @@ namespace Job.Business.Services.Resume
                 IsCitizen = resume.IsCitizen,
                 MilitarySituation = resume.MilitarySituation,
                 Adress = resume.Adress,
-                Position = resume.Position?.Name,
+                Position = resume.Position.Name,
+                IsPublic = resume.IsPublic,
+
                 Educations = resume.Educations.Select(e => new EducationGetByIdDto
                 {
                     EducationId = e.Id,
@@ -435,68 +416,76 @@ namespace Job.Business.Services.Resume
                     GivenOrganization = c.GivenOrganization,
                     CertificateFile = $"{_currentUser.BaseUrl}/userFiles/{c.CertificateFile}"
                 }).ToList(),
-            };
+                //invisible
+                Summary = resume.Summary,
+                FirstName = resume.FirstName,
+                LastName = resume.LastName,
+                ResumeEmail = resume.ResumeEmail,
+                HasAccessByCompany = resume.CompanyResumeAccesses.Any(x => x.CompanyUserId == _currentUser.UserGuid),
+                Urls = resume.ResumeLinks.Select(x => new LinkDto
+                {
+                    LinkType = x.LinkType,
+                    Url = x.Url
+                }).ToList(),
+                PhoneNumbers = resume.PhoneNumbers.Select(p => new NumberGetByIdDto
+                {
+                    PhoneNumberId = p.Id,
+                    PhoneNumber = p.PhoneNumber
+                }).ToList(),
+                UserPhoto = resume.UserPhoto
+            })
+            .AsNoTracking()
+            .FirstOrDefaultAsync() ?? throw new NotFoundException();
 
             bool hasApplied = false;
 
             // Əgər CompanyUser-dursa, şirkətin hər hansı bir vakansiyasına müraciət edib-etmədiyini yoxlayırıq
             //TODO : burada request responseden istifade edilmeli deyil
-            if (!resumeData.HasAccessByCompany && (_currentUser.UserRole == (byte)UserRole.CompanyUser || _currentUser.UserRole == (byte)UserRole.EmployeeUser))
+            if (!resume.HasAccessByCompany && !resume.IsPublic)
             {
                 var checkApplicationResponse = await _checkApplicationRequest.GetResponse<CheckApplicationResponse>(
-                    new CheckApplicationRequest
-                    {
-                        CompanyUserId = (Guid)userId,
-                        UserId = resumeData.Resume.UserId
-                    });
+                new CheckApplicationRequest
+                {
+                    CompanyUserId = (Guid)_currentUser.UserGuid!,
+                    UserId = resume.UserId
+                });
 
                 hasApplied = checkApplicationResponse.Message.HasApplied;
             }
 
-            // İcazə olub-olmadığını yoxlayırıq. 4 halda resume-nin bütün datalarına tam baxma icazəsi var:
-            bool hasFullAccess = _currentUser.UserRole == (byte)UserRole.Admin // Əgər admindirsə
-                || _currentUser.UserRole == (byte)UserRole.SuperAdmin          // Əgər Superadmindirsə
-                || hasApplied                                                  // Əgər müraciət edibsə
-                || resumeData.HasAccessByCompany                               // Əgər resume-yə baxma icazəsi varsa
-                || resumeData.Resume.IsPublic;                                 // Əgər resume public-dirsə
+            // İcazə olub-olmadığını yoxlayırıq. 5 halda resume-nin bütün datalarına tam baxma icazəsi var:
+            bool hasFullAccess = 
+                //   _currentUser.UserRole == (byte)UserRole.Admin             // Əgər admindirsə
+                //|| _currentUser.UserRole == (byte)UserRole.SuperAdmin        // Əgər Superadmindirsə
+                   hasApplied                                                  // Əgər müraciət edibsə
+                || resume.HasAccessByCompany                               // Əgər resume-yə baxma icazəsi varsa
+                || resume.IsPublic;                                 // Əgər resume public-dirsə
 
-            if (hasFullAccess)
+            if (!hasFullAccess)
             {
-                resumeResponse.FirstName = hasFullAccess ? resume.FirstName : null;
-                resumeResponse.LastName = hasFullAccess ? resume.LastName : null;
-                resumeResponse.ResumeEmail = hasFullAccess ? resume.ResumeEmail : null;
+                resume.FirstName = resume.FirstName;
+                resume.LastName = resume.LastName;
+                resume.ResumeEmail = resume.ResumeEmail;
 
-                resumeResponse.PhoneNumbers = hasFullAccess
-                    ? resume.PhoneNumbers.Select(p => new NumberGetByIdDto
-                    {
-                        PhoneNumberId = p.Id,
-                        PhoneNumber = p.PhoneNumber
-                    }).ToList()
-                    : [];
+                resume.PhoneNumbers = resume.PhoneNumbers;
 
-                resumeResponse.UserPhoto = hasFullAccess && resume.UserPhoto != null
-                    ? $"{_currentUser.BaseUrl}/userFiles/{resume.UserPhoto}"
-                    : null;
+                resume.UserPhoto = $"{_currentUser.BaseUrl}/userFiles/{resume.UserPhoto}";
 
-                resumeResponse.Urls = hasFullAccess ? resume.ResumeLinks.Select(x => new LinkDto
-                {
-                    LinkType = x.LinkType,
-                    Url = x.Url
-                }).ToList() : null;
+                resume.Urls = resume.Urls;
 
-                resumeResponse.Summary = hasFullAccess ? resume.Summary : null;
+                resume.Summary = resume.Summary;
 
-                resumeResponse.HasAccess = hasFullAccess;
+                resume.HasAccess = hasFullAccess;
             }
 
-            resumeResponse.Skills = await _context.ResumeSkills.Where(x => x.ResumeId == resumeId)
+            resume.Skills = await _context.ResumeSkills.Where(x => x.ResumeId == resumeId)
             .Select(x => new SkillGetByIdDto
             {
                 Id = x.SkillId,
                 Name = x.Skill.Translations.Where(x => x.Language == _currentUser.LanguageCode).Select(x => x.Name).FirstOrDefault()
             }).ToListAsync();
 
-            return resumeResponse;
+            return resume;
         }
 
         public async Task TakeResumeAccessAsync(Guid resumeId)

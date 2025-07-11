@@ -54,8 +54,6 @@ public class UserManagementService(JobDbContext _context, IConfiguration _config
                     .ThenInclude(x => x.Translations)
             .Select(r => new ResumeDetailItemDto
             {
-                UserId = r.UserId,
-                ResumeId = r.Id,
                 FirstName = r.FirstName,
                 LastName = r.LastName,
                 IsDriver = r.IsDriver,
@@ -69,6 +67,7 @@ public class UserManagementService(JobDbContext _context, IConfiguration _config
                 ResumeEmail = r.ResumeEmail,
                 UserPhoto = r.UserPhoto != null ? $"{_currentUser.BaseUrl}/userFiles/{r.UserPhoto}" : null,
                 Summary = r.Summary,
+
                 Skills = r.ResumeSkills.Select(s => new SkillGetByIdDto
                 {
                     Id = s.SkillId,
