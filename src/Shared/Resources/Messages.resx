@@ -162,6 +162,9 @@
   <data name="EXAM_ALREADY_TAKEN" xml:space="preserve">
     <value>Siz bu imtahanda artıq iştirak etmisiniz.</value>
   </data>
+  <data name="FILE_SIZE_EXCEEDED" xml:space="preserve">
+    <value>Dosya boyutu {0} MB'ı aşıyor. İzin verilen maksimum boyut {1} MB.</value>
+  </data>
   <data name="FILE_SIZE_MAX_20MB" xml:space="preserve">
     <value>Faylın ölçüsü 20 MB-dan artıq ola bilməz.</value>
   </data>

@@ -1,5 +1,4 @@
 ﻿using FluentValidation;
-using JobCompany.Business.Dtos.ExamDtos;
 using JobCompany.Core.Enums;
 using Microsoft.AspNetCore.Http;
 using Shared.Enums;

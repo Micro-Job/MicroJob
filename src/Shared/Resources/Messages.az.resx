@@ -133,7 +133,7 @@
     <value>Xəta baş verdi</value>
   </data>
   <data name="BIRTHDAY_MUST_BE_IN_THE_PAST" xml:space="preserve">
-    <value>Ad günü tarixi keçmişdə olmalıdır</value>
+    <value>16 yaşdan böyük olmalısınız</value>
   </data>
   <data name="CANNOT_BE_EMPTY" xml:space="preserve">
     <value>Boş ola bilməz</value>
@@ -161,6 +161,9 @@
   </data>
   <data name="EXAM_ALREADY_TAKEN" xml:space="preserve">
     <value>Siz bu imtahanda artıq iştirak etmisiniz.</value>
+  </data>
+  <data name="FILE_SIZE_EXCEEDED" xml:space="preserve">
+    <value>Faylın ölçüsü {0} MB-ı keçir. İcazə verilən maksimum ölçü {1} MB-dır</value>
   </data>
   <data name="FILE_SIZE_MAX_20MB" xml:space="preserve">
     <value>Faylın ölçüsü 20 MB-dan artıq ola bilməz.</value>

@@ -1,25 +1,24 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using SharedLibrary.Dtos.FileDtos;
+using SharedLibrary.Enums;
+using SharedLibrary.Exceptions;
+using SharedLibrary.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.RateLimiting;
 using System.Threading.Tasks;
 
 namespace SharedLibrary.ExternalServices.FileService
 {
-    public class FileService : IFileService
+    public class FileService(IWebHostEnvironment _env) : IFileService
     {
-        readonly IWebHostEnvironment _env;
-        public FileService(IWebHostEnvironment env)
-        {
-            _env = env;
-        }
         public void DeleteFile(string path)
         {
             string newPath = !path.StartsWith(_env.WebRootPath) ? Path.Combine(_env.WebRootPath, path) : path;
-            if (HasFile(newPath)) System.IO.File.Delete(newPath);
+            if (HasFile(newPath)) File.Delete(newPath);
         }
 
         public void DeleteFilesInPath(string path)
@@ -58,13 +57,15 @@ namespace SharedLibrary.ExternalServices.FileService
             return filesList;
         }
 
-        public async Task<FileDto> UploadAsync(string path, IFormFile file)
+        public async Task<FileDto> UploadAsync(string path, IFormFile file, FileType fileType = FileType.Nothing)
         {
             if (string.IsNullOrEmpty(path))
                 throw new ArgumentException("The provided path cannot be null or empty.", nameof(path));
 
             if (_env == null || string.IsNullOrEmpty(_env.WebRootPath))
                 throw new InvalidOperationException("WebRootPath is not set.");
+
+            CheckFileSize(file.Length, fileType);
 
             string oldPath = path;
             path = Path.Combine(_env.WebRootPath, path);
@@ -78,6 +79,72 @@ namespace SharedLibrary.ExternalServices.FileService
             await CopyAsync(Path.Combine(path, dto.FileName), file);
 
             return dto;
+        }
+
+        public static void CheckFileSize(long fileLength, FileType fileType = FileType.Nothing)
+        {
+            double fileSizeMb = fileLength / (1024.0 * 1024.0);
+            double maxAllowedSizeMb;
+
+            switch (fileType)
+            {
+                case FileType.Nothing:
+                    maxAllowedSizeMb = 10.0;
+                    break;
+                case FileType.Image:
+                    maxAllowedSizeMb = 2.0;
+                    break;
+                case FileType.Document:
+                    maxAllowedSizeMb = 5.0;
+                    break;
+                default:
+                    maxAllowedSizeMb = 10.0;
+                    break;
+            }
+
+            if (fileSizeMb > maxAllowedSizeMb)
+            {
+                string errorMessage = MessageHelper.GetMessage(
+                    "FILE_SIZE_EXCEEDED",
+                    fileSizeMb.ToString("F2"),
+                    maxAllowedSizeMb.ToString("F2")
+                );
+                throw new BadRequestException(errorMessage);
+            }
+        }
+
+        public static string? CheckFileSizeForValidation(long fileLength, FileType fileType = FileType.Nothing)
+        {
+            double fileSizeMb = fileLength / (1024.0 * 1024.0);
+            double maxAllowedSizeMb;
+
+            switch (fileType)
+            {
+                case FileType.Nothing:
+                    maxAllowedSizeMb = 10.0;
+                    break;
+                case FileType.Image:
+                    maxAllowedSizeMb = 2.0;
+                    break;
+                case FileType.Document:
+                    maxAllowedSizeMb = 5.0;
+                    break;
+                default:
+                    maxAllowedSizeMb = 10.0;
+                    break;
+            }
+
+            string? errorMessage = null;
+
+            if (fileSizeMb > maxAllowedSizeMb)
+            {
+                errorMessage = MessageHelper.GetMessage(
+                    "FILE_SIZE_EXCEEDED",
+                    fileSizeMb.ToString("F2"),
+                    maxAllowedSizeMb.ToString("F2")
+                );
+            }
+            return errorMessage;
         }
 
         public async Task CopyAsync(string path, IFormFile file)

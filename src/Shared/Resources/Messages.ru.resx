@@ -133,7 +133,7 @@
     <value>Произошла ошибка</value>
   </data>
   <data name="BIRTHDAY_MUST_BE_IN_THE_PAST" xml:space="preserve">
-    <value>День рождения должен быть в прошлом</value>
+    <value>Вам должно быть больше 16 лет.</value>
   </data>
   <data name="CANNOT_BE_EMPTY" xml:space="preserve">
     <value>Не может быть пустым</value>
@@ -161,6 +161,9 @@
   </data>
   <data name="EXAM_ALREADY_TAKEN" xml:space="preserve">
     <value>Вы уже сдавали этот экзамен.</value>
+  </data>
+  <data name="FILE_SIZE_EXCEEDED" xml:space="preserve">
+    <value>Размер файла превышает {0} МБ. Максимально допустимый размер составляет {1} МБ</value>
   </data>
   <data name="FILE_SIZE_MAX_20MB" xml:space="preserve">
     <value>Размер файла не должен превышать 20 МБ.</value>

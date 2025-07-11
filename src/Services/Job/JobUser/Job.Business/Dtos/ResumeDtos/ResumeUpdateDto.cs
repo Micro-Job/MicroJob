@@ -54,6 +54,10 @@ namespace Job.Business.Dtos.ResumeDtos
                 .MaximumLength(100).WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_100"))
                 .When(x => !string.IsNullOrEmpty(x.Position));
 
+            RuleFor(x => x.BirthDay.Date.Year)
+                .NotEmpty().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
+                .LessThanOrEqualTo(DateTime.Now.Date.Year - 16).WithMessage(MessageHelper.GetMessage("BIRTHDAY_MUST_BE_IN_THE_PAST"));
+
             RuleFor(x => x.Adress)
                 .MaximumLength(200).WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_200"));
 
