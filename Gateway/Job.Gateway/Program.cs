@@ -13,12 +13,12 @@ namespace Job.Gateway
 
             var environment = builder.Environment.EnvironmentName;
 
-            if(environment == "Development")
+            if (environment == "Development")
             {
                 builder.Configuration
                                  .AddJsonFile($"ocelot.Development.json", optional: true, reloadOnChange: true);
             }
-            else if(environment == "Test")
+            else if (environment == "Test")
             {
                 builder.Configuration
                                  .AddJsonFile($"ocelot.Test.json", optional: true, reloadOnChange: true);
@@ -56,19 +56,17 @@ namespace Job.Gateway
             // Configure the HTTP request pipeline.
 
             app.UseCors("AllowSwagger");
-            if (app.Environment.IsDevelopment())
+
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
             {
-                app.UseSwagger();
-                app.UseSwaggerUI(c =>
-                {
-                    c.SwaggerEndpoint("http://localhost:5001/swagger/v1/swagger.json", "Auth Service");
-                    c.SwaggerEndpoint("http://localhost:5002/swagger/v1/swagger.json", "User Service");
-                    c.SwaggerEndpoint("http://localhost:5082/swagger/v1/swagger.json", "Company Service");
-                    c.SwaggerEndpoint("http://localhost:5003/swagger/v1/swagger.json", "Payment Service");
-                    c.RoutePrefix = "swagger";
-                    c.ConfigObject.AdditionalItems.Add("persistAuthorization", "true");
-                });
-            }
+                c.SwaggerEndpoint("http://localhost:5001/swagger/v1/swagger.json", "Auth Service");
+                c.SwaggerEndpoint("http://localhost:5002/swagger/v1/swagger.json", "User Service");
+                c.SwaggerEndpoint("http://localhost:5082/swagger/v1/swagger.json", "Company Service");
+                c.SwaggerEndpoint("http://localhost:5003/swagger/v1/swagger.json", "Payment Service");
+                c.RoutePrefix = "swagger";
+                c.ConfigObject.AdditionalItems.Add("persistAuthorization", "true");
+            });
 
             app.UseAuthorization();
             app.UseCustomExceptionHandler();
