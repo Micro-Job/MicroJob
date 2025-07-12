@@ -523,6 +523,8 @@ namespace JobCompany.Business.Services.VacancyServices
                     StartDate = v.StartDate,
                     CityName = v.City.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name),
                     CountryName = v.Country.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name),
+                    //CityName = v.City.Translations.Where(x=> x.Language == _currentUser.LanguageCode).Select(x=> x.Name).FirstOrDefault(),
+                    //CountryName = v.Country.Translations.Where(x => x.Language == _currentUser.LanguageCode).Select(x => x.Name).FirstOrDefault(),
                     ViewCount = v.ViewCount,
                     WorkType = v.WorkType,
                     WorkStyle = v.WorkStyle,
