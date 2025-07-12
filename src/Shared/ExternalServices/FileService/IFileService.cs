@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using SharedLibrary.Dtos.FileDtos;
+using SharedLibrary.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,7 @@ namespace SharedLibrary.ExternalServices.FileService
     public interface IFileService
     {
         Task<List<FileDto>> UploadAllAsync(string path, ICollection<IFormFile> files);
-        Task<FileDto> UploadAsync(string path, IFormFile file);
+        Task<FileDto> UploadAsync(string path, IFormFile file, FileType fileType = FileType.Nothing);
         Task<FileDto> ImageUploadLowQualityAsync(string path, IFormFile file);
         Task VideoUploadLowQualityAsync(string path, IFormFile file);
         string RenameFile(string fileName);

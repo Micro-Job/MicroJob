@@ -196,7 +196,9 @@ namespace JobCompany.Business.Services.VacancyServices
                     MainSalary = x.MainSalary,
                     MaxSalary = x.MaxSalary,
                     IsSaved = x.SavedVacancies.Any(sv => sv.UserId == _currentUser.UserGuid && sv.VacancyId == x.Id),
-                    SalaryCurrency = x.SalaryCurrency
+                    SalaryCurrency = x.SalaryCurrency,
+                    CityName = x.City!.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name)!,
+                    CountryName = x.Country!.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name)!,
                 })
                 .Skip((skip - 1) * take)
                 .Take(take)
@@ -246,7 +248,7 @@ namespace JobCompany.Business.Services.VacancyServices
                         Driver = x.Driver,
                         Citizenship = x.Citizenship,
                         ExamId = x.ExamId,
-                        IsSaved = userGuid != null ? x.SavedVacancies.Any(y => y.UserId == userGuid && y.VacancyId == vacancyId) : false,
+                        IsSaved = _currentUser.IsAuthenticated ? x.SavedVacancies.Any(y => y.UserId == userGuid && y.VacancyId == vacancyId) : false,
                         VacancyNumbers = x
                             .VacancyNumbers.Select(vn => new VacancyNumberDto
                             {
@@ -254,38 +256,40 @@ namespace JobCompany.Business.Services.VacancyServices
                                 VacancyNumber = vn.Number,
                             })
                             .ToList(),
-                        //Skills = x.VacancySkills
-                        //        .Where(vc => vc.Skill != null)
-                        //        .Select(vc => new SkillDto
-                        //        {
-                        //            Id = vc.Skill.Id,
-                        //            Name = vc.Skill.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name)
-                        //        }).ToList(),
                         CompanyName = x.Company.IsCompany ? x.Company.CompanyName : x.CompanyName,
                         CategoryName = x.Category.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name),
                         CompanyUserId = x.Company.UserId,
-                        Messages = _currentUser.UserGuid == x.Company.UserId
+                        Messages = userGuid == x.Company.UserId
                             ? x.VacancyMessages.Select(vm => vm.Message.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Content)).ToList()
                             : null,
                         VacancyStatus = x.VacancyStatus,
-                        IsApplied = userGuid.HasValue && x.Applications.Any(a => a.UserId == userGuid && a.IsActive == true),
-                        //ApplicationId = userGuid.HasValue ? x.Applications.Where(a => a.UserId == userGuid && a.VacancyId == x.Id).Select(a => a.Id).FirstOrDefault() : null
+                        IsApplied = _currentUser.IsAuthenticated && x.Applications.Any(a => a.UserId == userGuid && a.IsActive == true),
+                        ApplicationId = _currentUser.IsAuthenticated ? x.Applications.Where(a => a.UserId == userGuid && a.IsActive == true).Select(a => (Guid?)a.Id).FirstOrDefault() : null
                     })
                     .FirstOrDefaultAsync() ?? throw new NotFoundException();
 
+            vacancyDto.IsApplied = vacancyDto.ApplicationId != null ? true : false;
 
+            //1. Burada əsas yoxlanış aparılır ki, əgər öz sahibindən fərqli biri bura sorğu atırsa bu zaman bəzi önləmlər alınsın.
+            //2. Əgər bu vakansiyanın zamanı keçibsə və yaxud active statusundan fərqlidirsə...
+            //2.1 Bu zaman əgər bu vəziyyətdə bura yalnız admin, superadmin, operator və s. sorğu ata bilər
+
+            //1
             if (vacancyDto.CompanyUserId != userGuid)
             {
+                //2
                 if ((vacancyDto.EndDate < DateTime.Now || 
                     vacancyDto.VacancyStatus != VacancyStatus.Active) 
                     && 
                     (
+                    //2.1
                     _currentUser.UserRole == (byte)UserRole.SimpleUser ||
                     _currentUser.UserRole == (byte)UserRole.CompanyUser ||
                     _currentUser.UserRole == (byte)UserRole.EmployeeUser)
                     )
                 throw new NotFoundException();
 
+                //və əgər bu şərtlərin hamısı ödənərsə onda baxış sayını artıra bilərik
                 var existVacancy = await _context.Vacancies.FirstOrDefaultAsync(x => x.Id == vacancyId);
                 existVacancy.ViewCount++;
                 await _context.SaveChangesAsync();
@@ -340,8 +344,8 @@ namespace JobCompany.Business.Services.VacancyServices
                     CountryId = v.CountryId,
                     CountryName = v.Country != null ? v.Country.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name) : null,
 
-                    VacancyNumbers = v.VacancyNumbers != null ? v
-                                .VacancyNumbers.Select(vn => new VacancyNumberDto
+                    VacancyNumbers = v.VacancyNumbers != null ? 
+                                v.VacancyNumbers.Select(vn => new VacancyNumberDto
                                 {
                                     Id = vn.Id,
                                     VacancyNumber = vn.Number,
@@ -352,7 +356,7 @@ namespace JobCompany.Business.Services.VacancyServices
                                 .Select(vc => new SkillDto
                                 {
                                     Id = vc.Skill.Id,
-                                    Name = vc.Skill.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name)
+                                    Name = vc.Skill.Translations.Where(x => x.Language == _currentUser.LanguageCode).Select(x => x.Name).FirstOrDefault()
                                 }).ToList()
                 }).FirstOrDefaultAsync() ?? throw new NotFoundException();
 
@@ -524,7 +528,7 @@ namespace JobCompany.Business.Services.VacancyServices
                     WorkStyle = v.WorkStyle,
                     MainSalary = v.MainSalary,
                     MaxSalary = v.MaxSalary,
-                    IsSaved = _currentUser.UserId != null && v.SavedVacancies.Any(x => x.VacancyId == v.Id && x.UserId == _currentUser.UserGuid),
+                    IsSaved = _currentUser.IsAuthenticated && v.SavedVacancies.Any(x => x.VacancyId == v.Id && x.UserId == _currentUser.UserGuid),
                     SalaryCurrency = v.SalaryCurrency
                 })
                 .Skip((skip - 1) * take)
@@ -547,21 +551,19 @@ namespace JobCompany.Business.Services.VacancyServices
 
             if (minSalary.HasValue)
             {
-                var minVal = minSalary.Value;
-                query = query.Where(x => x.MainSalary.HasValue && x.MainSalary.Value >= minVal);
+                query = query.Where(x => x.MainSalary.HasValue && x.MainSalary.Value >= minSalary);
             }
 
             if (maxSalary.HasValue)
             {
-                var maxVal = maxSalary.Value;
-                query = query.Where(x => x.MainSalary.HasValue && ((x.MaxSalary ?? x.MainSalary) <= maxVal));
+                query = query.Where(x => x.MainSalary.HasValue && ((x.MaxSalary ?? x.MainSalary) <= maxSalary));
             }
 
             if (workTypes != null && workTypes.Any())
-                query = query.Where(x => x.WorkType.HasValue && workTypes.Contains((byte)x.WorkType.Value));
+                query = query.Where(x => x.WorkType.HasValue && workTypes.Contains((byte)x.WorkType));
 
             if (workStyles != null && workStyles.Any())
-                query = query.Where(x => x.WorkStyle.HasValue && workStyles.Contains((byte)x.WorkStyle.Value));
+                query = query.Where(x => x.WorkStyle.HasValue && workStyles.Contains((byte)x.WorkStyle));
 
             if (companyIds != null && companyIds.Any())
             {
@@ -593,11 +595,10 @@ namespace JobCompany.Business.Services.VacancyServices
 
         public async Task ToggleSaveVacancyAsync(Guid vacancyId)
         {
-
             if (!await _context.Vacancies.AnyAsync(x => x.Id == vacancyId))
                 throw new NotFoundException();
 
-            var vacancyCheck = await _context.SavedVacancies.FirstOrDefaultAsync(x => x.VacancyId == vacancyId);
+            var vacancyCheck = await _context.SavedVacancies.FirstOrDefaultAsync(x => x.VacancyId == vacancyId && x.UserId == _currentUser.UserGuid);
 
             if (vacancyCheck != null)
             {
@@ -705,20 +706,20 @@ namespace JobCompany.Business.Services.VacancyServices
             if (!string.IsNullOrEmpty(vacancyName))
             {
                 vacancyName = vacancyName.Trim();
-                query = query.Where(x => x.Vacancy.Title.Contains(vacancyName));
+                query = query.Where(x => x.Vacancy!.Title.Contains(vacancyName));
             }
 
             var vacancies = await query
                 .OrderByDescending(x => x.SavedAt)
                 .Select(x => new VacancyGetAllDto
                 {
-                    Id = x.Vacancy.Id,
+                    Id = x.Vacancy!.Id,
                     Title = x.Vacancy.Title,
-                    CompanyLogo = x.Vacancy.Company.CompanyLogo != null ? $"{_currentUser.BaseUrl}/companyFiles/{x.Vacancy.Company.CompanyLogo}" : null,
+                    CompanyLogo = x.Vacancy.Company!.CompanyLogo != null ? $"{_currentUser.BaseUrl}/companyFiles/{x.Vacancy.Company.CompanyLogo}" : null,
                     CompanyName = x.Vacancy.Company.IsCompany ? x.Vacancy.Company.CompanyName : x.Vacancy.CompanyName,
                     StartDate = x.Vacancy.StartDate,
-                    CityName = x.Vacancy.City.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name),
-                    CountryName = x.Vacancy.Country.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name),
+                    CityName = x.Vacancy.City!.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name)!,
+                    CountryName = x.Vacancy.Country!.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name)!,
                     ViewCount = x.Vacancy.ViewCount,
                     WorkType = x.Vacancy.WorkType,
                     WorkStyle = x.Vacancy.WorkStyle,

@@ -6,7 +6,6 @@ using AuthService.Business.HelperServices.TokenHandler;
 using AuthService.Core.Entities;
 using AuthService.DAL.Contexts;
 using Azure;
-using HtmlAgilityPack;
 using MassTransit;
 using MassTransit.Middleware;
 using Microsoft.AspNetCore.DataProtection.XmlEncryption;

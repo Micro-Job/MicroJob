@@ -44,6 +44,6 @@ namespace JobCompany.Business.Dtos.VacancyDtos
         public ICollection<string>? Messages { get; set; }
         public VacancyStatus? VacancyStatus { get; set; }
         public bool IsApplied { get; set; } // İstifadəçi bu vakansiyaya müraciət edibmi?
-        //public Guid? ApplicationId { get; set; }
+        public Guid? ApplicationId { get; set; }
     }
 }

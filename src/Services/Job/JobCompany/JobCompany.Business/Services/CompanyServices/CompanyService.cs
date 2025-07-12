@@ -223,5 +223,27 @@ namespace JobCompany.Business.Services.CompanyServices
             return companyProfile;
         }
 
+        public async Task<DataListDto<CompanyMiniDto>> GetAllCompaniesForSelectAsync(string? searchTerm, int? take)
+        {
+            var query = _context.Companies.Where(x => x.IsCompany).AsQueryable().AsNoTracking();
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+                query = query.Where(x => x.CompanyName!.Contains(searchTerm));
+
+            if (take != null)
+                query = query.Take((int)take);
+
+            var data = await query.Select(x=> new CompanyMiniDto
+            {
+                CompanyId = x.Id,
+                CompanyName = x.CompanyName!
+            }).ToListAsync();
+
+            return new DataListDto<CompanyMiniDto>
+            {
+                Datas = data,
+                TotalCount = 0
+            };
+        }
     }
 }

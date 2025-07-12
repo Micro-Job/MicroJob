@@ -55,12 +55,6 @@ namespace AuthService.API.Controllers
             return Ok();
         }
 
-        //[HttpGet("[action]")]
-        //public async Task<IActionResult> TryLanguage()
-        //{
-        //    return Ok(MessageHelper.GetMessage("WELCOME"));
-        //}
-
         [HttpGet("[action]")]
         public async Task<IActionResult> CheckUserExist(string email , string phoneNumber)
         {

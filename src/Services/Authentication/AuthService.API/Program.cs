@@ -4,9 +4,7 @@ using AuthService.DAL.Contexts;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Extensions;
 using Microsoft.OpenApi.Models;
-using SharedLibrary.Enums;
 using SharedLibrary.Filters;
 using SharedLibrary.Middlewares;
 using SharedLibrary.ServiceRegistration;
@@ -23,49 +21,11 @@ builder.Services.AddValidatorsFromAssemblyContaining<RegisterDto>()
 
 builder.Services.AddEndpointsApiExplorer();
 
-
-builder.Services.AddSwaggerGen(opt =>
-{
-    opt.OperationFilter<AddLanguageHeaderParameter>();
-    opt.SwaggerDoc("v1", new OpenApiInfo { Title = "MyAPI", Version = "v1" });
-    opt.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        In = ParameterLocation.Header,
-        Description = "Please enter token",
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        BearerFormat = "JWT",
-        Scheme = "bearer"
-    });
-
-    opt.AddSecurityRequirement(new OpenApiSecurityRequirement
-        {
-                {
-                    new OpenApiSecurityScheme
-                    {
-                        Reference = new OpenApiReference
-                        {
-                            Type=ReferenceType.SecurityScheme,
-                            Id="Bearer"
-                        }
-                    },
-                    new string[]{}
-                }
-        });
-});
-
+builder.Services.AddSwagger();
 
 builder.Services.AddAuthServices(builder.Configuration);
 
-var IconBuilder = builder.Configuration.SetBasePath(Directory.GetCurrentDirectory())
-                                    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                                    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true);
-
-var newBuilder = IconBuilder.Build();
-
-builder.Services.AddMassTransit(newBuilder["RabbitMQ:Username"]!, newBuilder["RabbitMQ:Password"]!, newBuilder["RabbitMQ:Hostname"]!, newBuilder["RabbitMQ:Port"]!);
-
-//builder.Services.AddMassTransit(builder.Configuration);
+builder.Services.AddMassTransit(builder.Configuration["RabbitMQ:Username"]!, builder.Configuration["RabbitMQ:Password"]!, builder.Configuration["RabbitMQ:Hostname"]!, builder.Configuration["RabbitMQ:Port"]!);
 
 builder.Services.AddDbContext<AppDbContext>(opt =>
 {
@@ -88,8 +48,6 @@ builder.Services.AddCors(options =>
 builder.Services.AddAuth(builder.Configuration["Jwt:Issuer"]!, builder.Configuration["Jwt:Audience"]!, builder.Configuration["Jwt:SigningKey"]!);
 
 var app = builder.Build();
-
-
 
 //app.UseCors("AllowSwagger");
 app.UseCors("_myAllowSpecificOrigins");

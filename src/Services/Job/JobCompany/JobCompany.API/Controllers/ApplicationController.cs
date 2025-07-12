@@ -12,7 +12,7 @@ namespace JobCompany.API.Controllers
     {
         [AuthorizeRole(UserRole.SimpleUser)]
         [HttpPost("[action]")]
-        public async Task<IActionResult> RemoveApplication(string applicationId)
+        public async Task<IActionResult> RemoveApplication(Guid applicationId)
         {
             await service.RemoveApplicationAsync(applicationId);
             return Ok();
@@ -23,6 +23,13 @@ namespace JobCompany.API.Controllers
         public async Task<IActionResult> GetAllApplicationsList([FromQuery] List<Guid>? vacancyIds, Gender? gender, [FromQuery] List<StatusEnum>? status, string? fullName, StatusEnum? skipStatus, int skip = 1, int take = 10)
         {
             return Ok(await service.GetAllApplicationsListAsync(vacancyIds, gender, status, fullName, skipStatus, skip, take));
+        }
+
+        [AuthorizeRole(UserRole.EmployeeUser, UserRole.CompanyUser)]
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetAllApplications([FromQuery] List<Guid>? vacancyIds, Gender? gender, [FromQuery] List<StatusEnum>? status, string? fullName, float? minPercent, float? maxPercent, int skip = 1, int take = 10)
+        {
+            return Ok(await service.GetAllApplicationsListAsync(vacancyIds, gender, status, fullName, minPercent, maxPercent, skip, take));
         }
 
         [AuthorizeRole(UserRole.EmployeeUser, UserRole.CompanyUser)]
@@ -37,8 +44,7 @@ namespace JobCompany.API.Controllers
         [HttpPost("[action]")]
         public async Task<IActionResult> CreateUserApplication(Guid vacancyId)
         {
-            await service.CreateUserApplicationAsync(vacancyId);
-            return Ok();
+            return Ok(await service.CreateUserApplicationAsync(vacancyId));
         }
 
         [AuthorizeRole(UserRole.SimpleUser)]

@@ -133,7 +133,7 @@
     <value>An error occurred</value>
   </data>
   <data name="BIRTHDAY_MUST_BE_IN_THE_PAST" xml:space="preserve">
-    <value>Birthday date must be in the past</value>
+    <value>You must be over 16 years old</value>
   </data>
   <data name="CANNOT_BE_EMPTY" xml:space="preserve">
     <value>Cannot be empty</value>
@@ -161,6 +161,9 @@
   </data>
   <data name="EXAM_ALREADY_TAKEN" xml:space="preserve">
     <value>You have already taken this exam.</value>
+  </data>
+  <data name="FILE_SIZE_EXCEEDED" xml:space="preserve">
+    <value>File size exceeds {0} MB. Maximum allowed size is {1} MB</value>
   </data>
   <data name="FILE_SIZE_MAX_20MB" xml:space="preserve">
     <value>File size must not exceed 20 MB.</value>

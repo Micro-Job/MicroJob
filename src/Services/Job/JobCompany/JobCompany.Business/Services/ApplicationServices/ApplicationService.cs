@@ -9,6 +9,7 @@ using JobCompany.Core.Entites;
 using JobCompany.DAL.Contexts;
 using MassTransit;
 using MassTransit.Initializers;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using SharedLibrary.Dtos.ApplicationDtos;
@@ -22,10 +23,10 @@ using SharedLibrary.Responses;
 
 namespace JobCompany.Business.Services.ApplicationServices;
 
-public class ApplicationService(JobCompanyDbContext _context, IPublishEndpoint _publishEndpoint, ICurrentUser _currentUser, IRequestClient<GetResumeDataRequest> _resumeDataRequest) 
+public class ApplicationService(JobCompanyDbContext _context, IPublishEndpoint _publishEndpoint, ICurrentUser _currentUser, IRequestClient<GetResumeDataRequest> _resumeDataRequest)
 {
     /// <summary> Vakansiya üçün müraciət yaradılması </summary>
-    public async Task CreateUserApplicationAsync(Guid vacancyId)
+    public async Task<Guid> CreateUserApplicationAsync(Guid vacancyId)
     {
         var userGuid = _currentUser.UserGuid ?? throw new Exception(MessageHelper.GetMessage("NOT_FOUND"));
 
@@ -49,6 +50,7 @@ public class ApplicationService(JobCompanyDbContext _context, IPublishEndpoint _
 
         var newApplication = new Application
         {
+            Id = Guid.NewGuid(),
             UserId = userGuid,
             VacancyId = vacancyId,
             StatusId = companyStatus.Id,
@@ -75,21 +77,20 @@ public class ApplicationService(JobCompanyDbContext _context, IPublishEndpoint _
             InformationId = resumeData.Message.ResumeId,
             InformationName = vacancyInfo.Title,
             IsSeen = false,
-            ReceiverId = (Guid)vacancyInfo.CompanyId!,
+            ReceiverId = vacancyInfo.CompanyId!,
         };
 
         await _context.Notifications.AddAsync(notification);
         await _context.SaveChangesAsync();
+        return newApplication.Id;
     }
 
     /// <summary> Yaradılan müraciətin geri alınması </summary>
-    public async Task RemoveApplicationAsync(string applicationId)
+    public async Task RemoveApplicationAsync(Guid applicationId)
     {
-        var applicationGuid = Guid.Parse(applicationId);
-
         var existApplication =
             await _context.Applications.FirstOrDefaultAsync(x =>
-                x.Id == applicationGuid && x.UserId == _currentUser.UserGuid)
+                x.Id == applicationId && x.UserId == _currentUser.UserGuid)
             ?? throw new NotFoundException();
 
         if (existApplication.IsActive == false)
@@ -141,18 +142,6 @@ public class ApplicationService(JobCompanyDbContext _context, IPublishEndpoint _
     {
         var query = GetApplicationsQuery(vacancyIds, status, fullName, skipStatus, gender);
 
-        //TODO : bu hisse request responseden cixmalidir
-        //if (skillIds != null && skillIds.Count != 0) //Filterdə gender və ya skillids varsa sorğu atılır
-        //{
-        //    var userIds = await query.Select(a => a.UserId).Distinct().ToListAsync();
-
-        //    var response = await _filteredUserIdsRequest.GetResponse<GetFilteredUserIdsResponse>(
-        //        new GetFilteredUserIdsRequest { UserIds = userIds, SkillIds = skillIds }); //Parametrlərə uyğun user id-ləri filtrlənir
-
-        //    if (response.Message.UserIds.Count != 0)
-        //        query = query.Where(a => response.Message.UserIds.Contains(a.UserId));
-        //}
-
         var data = await query
             .OrderByDescending(a => a.CreatedDate)
             .Select(a => new AllApplicationListDto
@@ -168,13 +157,54 @@ public class ApplicationService(JobCompanyDbContext _context, IPublishEndpoint _
                 StatusId = a.StatusId,
                 Status = a.Status.StatusEnum,
                 VacancyId = a.VacancyId,
-                VacancyName = a.Vacancy.Title
+                VacancyName = a.Vacancy.Title,
+                ExamPercent = a.Vacancy.Exam != null ? a.Vacancy.Exam.UserExams.Where(x => x.UserId == a.UserId).Select(x => x.TotalPercent).FirstOrDefault() : null,
+                UserId = a.UserId,
+                ExamId = a.Vacancy.ExamId
             })
             .Skip((skip - 1) * take)
             .Take(take)
             .ToListAsync();
 
         return new DataListDto<AllApplicationListDto>
+        {
+            Datas = data,
+            TotalCount = await query.CountAsync()
+        };
+    }
+
+    public async Task<DataListDto<ApplicationListDto>> GetAllApplicationsListAsync(List<Guid>? vacancyIds, Gender? gender, List<StatusEnum>? status, string? fullName, float? minPercent, float? maxPercent, int skip = 1, int take = 10)
+    {
+        var query = GetApplicationsQuery(vacancyIds, status, fullName, null, gender);
+
+        if (minPercent != null)
+            query = query.Where(x => x.Vacancy.Exam != null && x.Vacancy.Exam.UserExams.Any(x => x.TotalPercent >= minPercent));
+
+        if (minPercent != null)
+            query = query.Where(x => x.Vacancy.Exam != null && x.Vacancy.Exam.UserExams.Any(x => x.TotalPercent <= maxPercent));
+
+        var data = await query
+            .OrderByDescending(a => a.CreatedDate)
+            .Select(a => new ApplicationListDto
+            {
+                ApplicationId = a.Id,
+                FirstName = a.FirstName,
+                LastName = a.LastName,
+                Email = a.Email,
+                PhoneNumber = a.PhoneNumber,
+                VacancyName = a.Vacancy.Title,
+                ExamPercent = a.Vacancy.Exam != null ? a.Vacancy.Exam.UserExams.Where(x => x.UserId == a.UserId).Select(x => x.TotalPercent).FirstOrDefault() : null,
+                Status = a.Status.StatusEnum,
+                ResumeId = a.ResumeId,
+                VacancyId = a.VacancyId,
+                UserId = a.UserId,
+                ExamId = a.Vacancy.ExamId
+            })
+            .Skip((skip - 1) * take)
+            .Take(take)
+            .ToListAsync();
+
+        return new DataListDto<ApplicationListDto>
         {
             Datas = data,
             TotalCount = await query.CountAsync()
@@ -276,7 +306,7 @@ public class ApplicationService(JobCompanyDbContext _context, IPublishEndpoint _
             query = query.Where(x => x.Status.StatusEnum == skipStatus);
 
         if (gender != null)
-            query = query.Where(x=> x.Gender == gender);
+            query = query.Where(x => x.Gender == gender);
 
         return query;
     }

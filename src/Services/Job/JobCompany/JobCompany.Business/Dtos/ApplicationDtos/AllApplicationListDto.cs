@@ -4,6 +4,7 @@ namespace JobCompany.Business.Dtos.ApplicationDtos;
 
 public record AllApplicationListDto
 {
+    public Guid UserId { get; set; }
     public Guid ApplicationId { get; set; }
     public Guid ResumeId { get; set; }
     public string FirstName { get; set; }
@@ -16,4 +17,6 @@ public record AllApplicationListDto
     public StatusEnum Status { get; set; }
     public string? ProfileImage { get; set; }
     public DateTime DateTime { get; set; }
+    public Guid? ExamId { get; set; }
+    public float? ExamPercent { get; set; }
 }

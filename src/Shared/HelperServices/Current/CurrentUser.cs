@@ -13,6 +13,8 @@ namespace SharedLibrary.HelperServices.Current
         public string? UserFullName => _contextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.Name);
         public string BaseUrl => _configuration["ApiGateway:BaseUrl"]!;
 
+        public bool IsAuthenticated => _contextAccessor.HttpContext.User.Identity.IsAuthenticated;
+
         public byte UserRole
         {
             get

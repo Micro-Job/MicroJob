@@ -18,5 +18,11 @@ namespace SharedLibrary.Helpers
             return resourceManager.GetString(errorKey, CultureInfo.CurrentUICulture) ?? "error";
         }
 
+        public static string GetMessage(string errorKey, params object[] args)
+        {
+            string formatString = resourceManager.GetString(errorKey, CultureInfo.CurrentUICulture) ?? "error";
+
+            return string.Format(formatString, args);
+        }
     }
 }

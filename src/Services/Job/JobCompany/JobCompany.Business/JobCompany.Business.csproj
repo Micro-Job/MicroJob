@@ -16,9 +16,4 @@
     <ProjectReference Include="..\JobCompany.DAL\JobCompany.DAL.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
-    <PackageReference Include="MassTransit.RabbitMQ" Version="8.3.1" />
-  </ItemGroup>
-
 </Project>

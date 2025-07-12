@@ -59,9 +59,6 @@ namespace Job.Business.Services.Resume
 
             var resume = await BuildResumeAsync(resumeCreateDto, positionId);
 
-            if (positionId != Guid.Empty)
-                resume.PositionId = positionId;
-
             await _context.Resumes.AddAsync(resume);
             await _context.SaveChangesAsync();
 
@@ -90,7 +87,7 @@ namespace Job.Business.Services.Resume
             if(user.Image == null)
             {
                 FileDto fileResult = resumeCreateDto.UserPhoto != null
-                    ? await _fileService.UploadAsync(FilePaths.image, resumeCreateDto.UserPhoto)
+                    ? await _fileService.UploadAsync(FilePaths.image, resumeCreateDto.UserPhoto, FileType.Image)
                     : new FileDto();
 
                 user.Image = $"{fileResult.FilePath}/{fileResult.FileName}";
