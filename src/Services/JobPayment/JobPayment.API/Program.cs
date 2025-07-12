@@ -23,12 +23,6 @@ namespace JobPayment.API
                configuration["Jwt:SigningKey"]!
             );
 
-            //var IconBuilder = builder.Configuration.SetBasePath(Directory.GetCurrentDirectory())
-            //                        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-            //                        .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true);
-
-            //var newBuilder = IconBuilder.Build();
-
             builder.Services.AddPaymentServices();
 
             builder.Services.AddMassTransit(configuration["RabbitMQ:Username"]!, configuration["RabbitMQ:Password"]!, configuration["RabbitMQ:Hostname"]!, configuration["RabbitMQ:Port"]!);
@@ -56,14 +50,12 @@ namespace JobPayment.API
             app.UseCors("_myAllowSpecificOrigins");
 
 
-            if (app.Environment.IsDevelopment())
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
             {
-                app.UseSwagger();
-                app.UseSwaggerUI(c =>
-                {
-                    c.ConfigObject.AdditionalItems.Add("persistAuthorization", "true");
-                });
-            }
+                c.ConfigObject.AdditionalItems.Add("persistAuthorization", "true");
+            });
+
             app.UseHttpsRedirection();
 
             app.UseCustomExceptionHandler();
