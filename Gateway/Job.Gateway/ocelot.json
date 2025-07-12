@@ -86,18 +86,6 @@
       ],
       "UpstreamPathTemplate": "/authFiles/{fileName}",
       "UpstreamHttpMethod": [ "GET" ]
-    },
-    {
-      "DownstreamPathTemplate": "/{everything}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "jobpayment-service",
-          "Port": 8080
-        }
-      ],
-      "UpstreamPathTemplate": "/jobpayment/{everything}",
-      "UpstreamHttpMethod": [ "POST", "GET", "PUT", "DELETE" ]
     }
   ],
   "GlobalConfiguration": {
