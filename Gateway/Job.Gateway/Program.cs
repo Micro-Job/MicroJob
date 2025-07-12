@@ -58,17 +58,32 @@ namespace Job.Gateway
             app.UseCors("AllowSwagger");
 
             app.UseSwagger();
-            app.UseSwaggerUI(c =>
+            if (builder.Environment.IsDevelopment())
             {
-                c.SwaggerEndpoint("http://localhost:5001/swagger/v1/swagger.json", "Auth Service");
-                c.SwaggerEndpoint("http://localhost:5002/swagger/v1/swagger.json", "User Service");
-                c.SwaggerEndpoint("http://localhost:5082/swagger/v1/swagger.json", "Company Service");
-                c.SwaggerEndpoint("http://localhost:5003/swagger/v1/swagger.json", "Payment Service");
-                c.RoutePrefix = "swagger";
-                c.ConfigObject.AdditionalItems.Add("persistAuthorization", "true");
-            });
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("http://localhost:5001/swagger/v1/swagger.json", "Auth Service");
+                    c.SwaggerEndpoint("http://localhost:5002/swagger/v1/swagger.json", "User Service");
+                    c.SwaggerEndpoint("http://localhost:5082/swagger/v1/swagger.json", "Company Service");
+                    c.SwaggerEndpoint("http://localhost:5003/swagger/v1/swagger.json", "Payment Service");
+                    c.RoutePrefix = "swagger";
+                    c.ConfigObject.AdditionalItems.Add("persistAuthorization", "true");
+                });
+            }
+            else
+            {
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("https://job-api.siesco.studio/authFiles/swagger/v1/swagger.json", "Auth Service");
+                    c.SwaggerEndpoint("https://job-api.siesco.studio/userFiles/swagger/v1/swagger.json", "User Service");
+                    c.SwaggerEndpoint("https://job-api.siesco.studio/companyFiles/swagger/v1/swagger.json", "Company Service");
+                    c.SwaggerEndpoint("https://job-api.siesco.studio/paymentSwagger/v1/swagger.json", "Payment Service");
+                    c.RoutePrefix = "swagger";
+                    c.ConfigObject.AdditionalItems.Add("persistAuthorization", "true");
+                });
+            }
 
-            app.UseAuthorization();
+                app.UseAuthorization();
             app.UseCustomExceptionHandler();
             app.UseCors("_myAllowSpecificOrigins");
             app.MapControllers();
