@@ -165,9 +165,6 @@
   <data name="FILE_SIZE_EXCEEDED" xml:space="preserve">
     <value>Dosya boyutu {0} MB'ı aşıyor. İzin verilen maksimum boyut {1} MB.</value>
   </data>
-  <data name="FILE_SIZE_MAX_20MB" xml:space="preserve">
-    <value>Faylın ölçüsü 20 MB-dan artıq ola bilməz.</value>
-  </data>
   <data name="GREATER_THAN_OR_EQUAL_TO_ZERO" xml:space="preserve">
     <value>Say 0-dan böyük və ya 0-a bərabər olmalıdır</value>
   </data>
@@ -180,23 +177,8 @@
   <data name="INVALID_USER_STATUS" xml:space="preserve">
     <value>Verilən istifadəçi statusu yanlışdır</value>
   </data>
-  <data name="LENGTH_MUST_BE_BETWEEN_1_100" xml:space="preserve">
-    <value>Uzunluq 1-100 arası olmalıdır</value>
-  </data>
-  <data name="LENGTH_MUST_BE_BETWEEN_1_1000" xml:space="preserve">
-    <value>Uzunluq 1-1000 arası olmalıdır</value>
-  </data>
-  <data name="LENGTH_MUST_BE_BETWEEN_1_200" xml:space="preserve">
-    <value>Uzunluq 1-200 arası olmalıdır</value>
-  </data>
-  <data name="LENGTH_MUST_BE_BETWEEN_1_50" xml:space="preserve">
-    <value>Uzunluq 1-50 arasında olmalıdır</value>
-  </data>
-  <data name="LENGTH_MUST_BE_BETWEEN_1_500" xml:space="preserve">
-    <value>Uzunluq 1-500 arası olmalıdır</value>
-  </data>
-  <data name="LENGTH_MUST_BE_BETWEEN_1_8192" xml:space="preserve">
-    <value>Uzunluq 1-8192 arası olmalıdır</value>
+  <data name="LENGTH_SIZE_EXCEEDED" xml:space="preserve">
+    <value>Mətnin uzunluğu {0} simvoldan çoxdur. İcazə verilən maksimum uzunluq {1} simvoldur.</value>
   </data>
   <data name="LIMIT_RATE_MUST_BE_BETWEEN_0_100" xml:space="preserve">
     <value>İmtahandan keçid üçün minimal dəyər 0 - 100 arası olmalıdır</value>

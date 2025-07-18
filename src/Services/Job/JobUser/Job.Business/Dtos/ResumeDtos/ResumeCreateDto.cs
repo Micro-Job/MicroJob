@@ -48,14 +48,17 @@ namespace Job.Business.Dtos.ResumeDtos
         {
             //RuleFor(x => x.FatherName)
             //    .NotEmpty().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
-            //    .MaximumLength(50).WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_50"));
+            //    .MaximumLength(50).WithMessage(x =>
+            //MessageHelper.GetMessage("LENGTH_SIZE_EXCEEDED", x.FatherName?.Length ?? 0, 50));
 
             RuleFor(x => x.Position)
                 //.NotEmpty().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
-                .MaximumLength(100).WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_100"));
+                .MaximumLength(100).WithMessage(x =>
+                 MessageHelper.GetMessage("LENGTH_SIZE_EXCEEDED", x.Position?.Length ?? 0, 100));
 
             RuleFor(x => x.Adress)
-                .MaximumLength(200).WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_200"));
+                .MaximumLength(200).WithMessage(x =>
+                 MessageHelper.GetMessage("LENGTH_SIZE_EXCEEDED", x.Adress?.Length ?? 0, 200));
 
             RuleFor(x => x.BirthDay.Date.Year)
                 .NotEmpty().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
@@ -64,23 +67,17 @@ namespace Job.Business.Dtos.ResumeDtos
             When(x => x.UserPhoto != null, () =>
             {
                 RuleFor(x => x.UserPhoto)
-                    .Must(photo =>
+                    .Custom((photo, context) =>
                     {
-                        // CheckFileSize metodundan gelen mesajı al
                         string? errorMessage = FileService.CheckFileSizeForValidation(photo.Length, FileType.Image);
 
-                        // Eğer errorMessage boş değilse (yani bir hata varsa) FluentValidation'a bildir
                         if (!string.IsNullOrEmpty(errorMessage))
                         {
-                            // Bu ValidationRule'ın hata mesajını belirle
-                            // Aslında FromServices() kullanıp IValidator<IFormFile> tanımlamak daha iyi ama bu da çalışır.
-                            // WithMessage metodunu burada kullanmayacağız, çünkü mesajı CheckFileSize'tan alıyoruz.
-                            return false; // Validasyon başarısız oldu
+                            context.AddFailure(errorMessage);
                         }
-                        return true; // Validasyon başarılı oldu
-                    })
-                    .WithMessage(""); // Hata mesajını buradan al
+                    });
             });
+
 
             RuleFor(x => x.Gender)
                 .IsInEnum().WithMessage(MessageHelper.GetMessage("INVALID_FORMAT"));

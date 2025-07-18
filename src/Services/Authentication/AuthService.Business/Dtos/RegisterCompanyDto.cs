@@ -25,21 +25,21 @@ public class RegisterCompanyValidator : AbstractValidator<RegisterCompanyDto>
             .NotEmpty()
             .When(x=> x.IsCompany)
             .WithMessage("CANNOT_BE_EMPTY")
-            .Length(1, 30)
-            .When(x => x.IsCompany)
-            .WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_100"));
+            .Length(1, 100)
+            .WithMessage(x =>
+                MessageHelper.GetMessage("LENGTH_SIZE_EXCEEDED", x.CompanyName?.Length ?? 0, 100));
         RuleFor(x => x.FirstName)
             .NotNull()
             .NotEmpty()
             .WithMessage(MessageHelper.GetMessage("CANNOT_BE_EMPTY"))
-            .Length(1, 50)
-            .WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_50"));
+            .Length(1, 50).WithMessage(x =>
+                MessageHelper.GetMessage("LENGTH_SIZE_EXCEEDED", x.FirstName?.Length ?? 0, 50));
         RuleFor(x => x.LastName)
             .NotNull()
             .NotEmpty()
             .WithMessage(MessageHelper.GetMessage("CANNOT_BE_EMPTY"))
-            .Length(1, 50)
-            .WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_50"));
+            .Length(1, 50).WithMessage(x =>
+                MessageHelper.GetMessage("LENGTH_SIZE_EXCEEDED", x.LastName?.Length ?? 0, 50));
         RuleFor(x => x.Email)
             .NotEmpty()
             .NotNull()

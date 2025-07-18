@@ -19,16 +19,33 @@ namespace Job.Business.Dtos.CertificateDtos
         {
             RuleFor(x => x.CertificateName)
                 .NotEmpty().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
-                .Length(1, 100).WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_100"));
+                .Length(1, 100).WithMessage(x =>
+                 MessageHelper.GetMessage("LENGTH_SIZE_EXCEEDED", x.CertificateName?.Length ?? 0, 100));
 
             RuleFor(x => x.GivenOrganization)
                 .NotEmpty().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
-                .Length(1, 100).WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_100"));
+                .Length(1, 100).WithMessage(x =>
+                 MessageHelper.GetMessage("LENGTH_SIZE_EXCEEDED", x.GivenOrganization?.Length ?? 0, 100));
 
             RuleFor(x => x.CertificateFile)
-                .NotNull().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
-                .Must(f => f.Length <= _maxFileSizeBytes)
-                .WithMessage(MessageHelper.GetMessage("FILE_SIZE_MAX_20MB"));
+            .NotNull().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
+            .Custom((file, context) =>
+            {
+                if (file != null)
+                {
+                    var fileSizeMb = file.Length / (1024.0 * 1024.0); 
+                    var maxAllowedSizeMb = _maxFileSizeBytes / (1024.0 * 1024.0);
+                    if (file.Length > _maxFileSizeBytes)
+                    {
+                        var errorMessage = MessageHelper.GetMessage(
+                            "FILE_SIZE_EXCEEDED",
+                            fileSizeMb.ToString("F2"),
+                            maxAllowedSizeMb.ToString("F2")
+                        );
+                        context.AddFailure(errorMessage);
+                    }
+        }
+        });
         }
     }
 }

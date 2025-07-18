@@ -47,11 +47,13 @@ namespace Job.Business.Dtos.ResumeDtos
         {
             //RuleFor(x => x.FatherName)
             //    .NotEmpty().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
-            //    .MaximumLength(50).WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_50"));
+            //    .MaximumLength(50).WithMessage(x =>
+            //MessageHelper.GetMessage("LENGTH_SIZE_EXCEEDED", x.FatherName?.Length ?? 0, 50));
 
             RuleFor(x => x.Position)
                 .NotEmpty().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
-                .MaximumLength(100).WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_100"))
+                .MaximumLength(100).WithMessage(x =>
+                 MessageHelper.GetMessage("LENGTH_SIZE_EXCEEDED", x.Position?.Length ?? 0, 100))
                 .When(x => !string.IsNullOrEmpty(x.Position));
 
             RuleFor(x => x.BirthDay.Date.Year)
@@ -59,7 +61,8 @@ namespace Job.Business.Dtos.ResumeDtos
                 .LessThanOrEqualTo(DateTime.Now.Date.Year - 16).WithMessage(MessageHelper.GetMessage("BIRTHDAY_MUST_BE_IN_THE_PAST"));
 
             RuleFor(x => x.Adress)
-                .MaximumLength(200).WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_200"));
+                .MaximumLength(200).WithMessage(x =>
+                 MessageHelper.GetMessage("LENGTH_SIZE_EXCEEDED", x.Adress?.Length ?? 0, 200));
 
             RuleFor(x => x.BirthDay)
                 .NotEmpty().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))

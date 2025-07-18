@@ -380,22 +380,40 @@ namespace AuthService.Business.Services.Auth
             await _context.SaveChangesAsync();
         }
 
+        //public async Task CheckUserExistAsync(string email, string phoneNumber)
+        //{
+        //    var user = await _context.Users.Where(x => x.Email == email || x.MainPhoneNumber == phoneNumber)
+        //        .Select(x => new
+        //        {
+        //            x.Email,
+        //            x.MainPhoneNumber
+        //        })
+        //        .FirstOrDefaultAsync();
+
+        //    if (user != null)
+        //    {
+        //        if (user.Email == email)
+        //            throw new ExistEmailException();
+        //        else if (user.MainPhoneNumber == phoneNumber)
+        //            throw new ExistPhoneNumberException();
+        //    }
+        //}
+
+        /// <summary>
+        /// User-in email ve telefon nomresinin tekrarlanmasını yoxlayır error mesajini errors sozu icinde qaytarir
+        /// </summary>
+        /// <param name="email"></param>
+        /// <param name="phoneNumber"></param>
+        /// <returns></returns>
+        /// <exception cref="ExistUserException"></exception>
         public async Task CheckUserExistAsync(string email, string phoneNumber)
         {
-            var user = await _context.Users.Where(x => x.Email == email || x.MainPhoneNumber == phoneNumber)
-                .Select(x => new
-                {
-                    x.Email,
-                    x.MainPhoneNumber
-                })
-                .FirstOrDefaultAsync();
+            var emailExists = await _context.Users.AnyAsync(x => x.Email == email);
+            var phoneExists = await _context.Users.AnyAsync(x => x.MainPhoneNumber == phoneNumber);
 
-            if (user != null)
+            if (emailExists || phoneExists)
             {
-                if (user.Email == email)
-                    throw new ExistEmailException();
-                else if (user.MainPhoneNumber == phoneNumber)
-                    throw new ExistPhoneNumberException();
+                throw new ExistUserException(emailExists, phoneExists);
             }
         }
 

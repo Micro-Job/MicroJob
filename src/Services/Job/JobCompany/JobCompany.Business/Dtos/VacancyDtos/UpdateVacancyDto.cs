@@ -58,13 +58,15 @@ namespace JobCompany.Business.Dtos.VacancyDtos
                 .NotEmpty()
                 .WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
                 .MaximumLength(100)
-                .WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_100"));
+                .WithMessage(x =>
+                 MessageHelper.GetMessage("LENGTH_SIZE_EXCEEDED", x.CompanyName?.Length ?? 0, 100));
 
             RuleFor(x => x.Title)
                 .NotEmpty()
                 .WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
                 .MaximumLength(150)
-                .WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_200"));
+                .WithMessage(x =>
+                 MessageHelper.GetMessage("LENGTH_SIZE_EXCEEDED", x.CompanyName?.Length ?? 0, 150));
 
             RuleFor(x => x.CompanyLogo)
                 .Must(file => file == null || file.ContentType.StartsWith("image/"))
@@ -82,7 +84,8 @@ namespace JobCompany.Business.Dtos.VacancyDtos
 
             RuleFor(x => x.Location)
                 .MaximumLength(200)
-                .WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_200"));
+                .WithMessage(x =>
+                 MessageHelper.GetMessage("LENGTH_SIZE_EXCEEDED", x.Location?.Length ?? 0, 200));
 
             RuleFor(x => x.CountryId)
                 .Must(IsValidGuid)
@@ -115,13 +118,15 @@ namespace JobCompany.Business.Dtos.VacancyDtos
                 .NotEmpty()
                 .WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
                 .MaximumLength(8192)
-                .WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_8192"));
+                .WithMessage(x =>
+                 MessageHelper.GetMessage("LENGTH_SIZE_EXCEEDED", x.Requirement?.Length ?? 0, 8192));
 
             RuleFor(x => x.Description)
                 .NotEmpty()
                 .WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
                 .MaximumLength(8192)
-                .WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_8192"));
+                .WithMessage(x =>
+                 MessageHelper.GetMessage("LENGTH_SIZE_EXCEEDED", x.Description?.Length ?? 0, 8192));
 
             RuleFor(x => x.Gender).IsInEnum().WithMessage(MessageHelper.GetMessage("INVALID_FORMAT"));
 

@@ -20,18 +20,18 @@ public class OperatorAddDtoValidator : AbstractValidator<OperatorAddDto>
         RuleFor(x => x.FirstName)
             .NotNull()
             .NotEmpty().WithMessage(MessageHelper.GetMessage("CANNOT_BE_EMPTY"))
-            .Length(1, 50).WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_50"));
+            .Length(1, 50).WithMessage(x => MessageHelper.GetMessage("LENGTH_SIZE_EXCEEDED", x.FirstName?.Length ?? 0, 50));
 
         RuleFor(x => x.LastName)
             .NotNull()
             .NotEmpty().WithMessage(MessageHelper.GetMessage("CANNOT_BE_EMPTY"))
-            .Length(1, 50).WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_50"));
+            .Length(1, 50).WithMessage(x => MessageHelper.GetMessage("LENGTH_SIZE_EXCEEDED", x.LastName?.Length ?? 0, 50));
 
         RuleFor(x => x.Email)
             .NotNull()
             .NotEmpty().WithMessage(MessageHelper.GetMessage("CANNOT_BE_EMPTY"))
             .EmailAddress().WithMessage(MessageHelper.GetMessage("INVALID_FORMAT"))
-            .MaximumLength(100).WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_100"));
+            .MaximumLength(100).WithMessage(x => MessageHelper.GetMessage("LENGTH_SIZE_EXCEEDED", x.Email?.Length ?? 0, 100));
 
         RuleFor(x => x.MainPhoneNumber)
             .NotNull()

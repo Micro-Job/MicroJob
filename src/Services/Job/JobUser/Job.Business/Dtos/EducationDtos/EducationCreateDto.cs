@@ -22,12 +22,14 @@ namespace Job.Business.Dtos.EducationDtos
                 .NotEmpty()
                 .WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
                 .Length(2, 100)
-                .WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_100"));
+                .WithMessage(x =>
+                 MessageHelper.GetMessage("LENGTH_SIZE_EXCEEDED", x.InstitutionName?.Length ?? 0, 100));
             RuleFor(dto => dto.Profession)
                 .NotEmpty()
                 .WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
                 .Length(2, 50)
-                .WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_50"));
+                .WithMessage(x =>
+                 MessageHelper.GetMessage("LENGTH_SIZE_EXCEEDED", x.Profession?.Length ?? 0, 50));
             RuleFor(dto => dto.StartDate)
                 .NotEmpty()
                 .WithMessage(MessageHelper.GetMessage("NOT_EMPTY"));

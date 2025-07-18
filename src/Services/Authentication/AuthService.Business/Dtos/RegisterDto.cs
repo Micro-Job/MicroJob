@@ -22,14 +22,14 @@ public class RegisterDtoValidator : AbstractValidator<RegisterDto>
             .NotNull()
             .NotEmpty()
             .WithMessage(MessageHelper.GetMessage("CANNOT_BE_EMPTY"))
-            .Length(1, 50)
-            .WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_50"));
+            .Length(1, 50).WithMessage(x =>
+                MessageHelper.GetMessage("LENGTH_SIZE_EXCEEDED", x.FirstName?.Length ?? 0, 50));
         RuleFor(x => x.LastName)
             .NotNull()
             .NotEmpty()
             .WithMessage(MessageHelper.GetMessage("CANNOT_BE_EMPTY"))
-            .Length(1, 50)
-            .WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_50"));
+            .Length(1, 50).WithMessage(x =>
+                MessageHelper.GetMessage("LENGTH_SIZE_EXCEEDED", x.LastName?.Length ?? 0, 50));
         RuleFor(x => x.Email)
             .NotEmpty()
             .NotNull()

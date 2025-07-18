@@ -16,6 +16,7 @@ public class MessageTranslationDtoValidator : AbstractValidator<MessageTranslati
     {
         RuleFor(x => x.Content)
             .NotEmpty().WithMessage(MessageHelper.GetMessage("CANNOT_BE_EMPTY"))
-            .MaximumLength(500).WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_500"));
+            .MaximumLength(500).WithMessage(x =>
+                MessageHelper.GetMessage("LENGTH_SIZE_EXCEEDED", x.Content?.Length ?? 0, 500));
     }
 }

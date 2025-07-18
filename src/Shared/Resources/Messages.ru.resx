@@ -165,9 +165,6 @@
   <data name="FILE_SIZE_EXCEEDED" xml:space="preserve">
     <value>Размер файла превышает {0} МБ. Максимально допустимый размер составляет {1} МБ</value>
   </data>
-  <data name="FILE_SIZE_MAX_20MB" xml:space="preserve">
-    <value>Размер файла не должен превышать 20 МБ.</value>
-  </data>
   <data name="GREATER_THAN_OR_EQUAL_TO_ZERO" xml:space="preserve">
     <value>Число должно быть больше или равно 0</value>
   </data>
@@ -180,23 +177,8 @@
   <data name="INVALID_USER_STATUS" xml:space="preserve">
     <value>Указанный статус пользователя недействителен</value>
   </data>
-  <data name="LENGTH_MUST_BE_BETWEEN_1_100" xml:space="preserve">
-    <value>Длина должна быть от 1 до 100</value>
-  </data>
-  <data name="LENGTH_MUST_BE_BETWEEN_1_1000" xml:space="preserve">
-    <value>Длина должна быть от 1 до 1000</value>
-  </data>
-  <data name="LENGTH_MUST_BE_BETWEEN_1_200" xml:space="preserve">
-    <value>Длина должна быть от 1 до 200</value>
-  </data>
-  <data name="LENGTH_MUST_BE_BETWEEN_1_50" xml:space="preserve">
-    <value>Длина должна быть от 1 до 50</value>
-  </data>
-  <data name="LENGTH_MUST_BE_BETWEEN_1_500" xml:space="preserve">
-    <value>Длина должна быть от 1 до 500</value>
-  </data>
-  <data name="LENGTH_MUST_BE_BETWEEN_1_8192" xml:space="preserve">
-    <value>Длина должна быть от 1 до 8192</value>
+  <data name="LENGTH_SIZE_EXCEEDED" xml:space="preserve">
+    <value>Длина текста превышает {0} символов. Максимально допустимая длина — {1} символов.</value>
   </data>
   <data name="LIMIT_RATE_MUST_BE_BETWEEN_0_100" xml:space="preserve">
     <value>Минимальный балл для сдачи экзамена должен быть от 0 до 100.</value>

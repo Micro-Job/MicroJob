@@ -1,11 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using SharedLibrary.Exceptions.Common;
 using SharedLibrary.Helpers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.Json;
 
 namespace AuthService.Business.Exceptions.UserException
 {
@@ -17,12 +13,28 @@ namespace AuthService.Business.Exceptions.UserException
 
         public ExistEmailException() : base()
         {
-            ErrorMessage = MessageHelper.GetMessage("USEREXISTEXCEPTION_EMAIL");
+            var error = new
+            {
+                errors = new
+                {
+                    email = MessageHelper.GetMessage("USEREXISTEXCEPTION_EMAIL")
+                }
+            };
+
+            ErrorMessage = JsonSerializer.Serialize(error);
         }
 
         public ExistEmailException(string message) : base(message)
         {
-            ErrorMessage = message;
+            var error = new
+            {
+                errors = new
+                {
+                    email = message
+                }
+            };
+
+            ErrorMessage = JsonSerializer.Serialize(error);
         }
     }
 }

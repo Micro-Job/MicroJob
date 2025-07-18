@@ -24,15 +24,18 @@ namespace JobCompany.Business.Dtos.CompanyDtos
         {
             RuleFor(x => x.CompanyName)
                 .NotEmpty().WithMessage(MessageHelper.GetMessage("NOT_EMPTY"))
-                .MaximumLength(100).WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_100"))
+                .MaximumLength(100).WithMessage(x =>
+                MessageHelper.GetMessage("LENGTH_SIZE_EXCEEDED", x.CompanyName?.Length ?? 0, 100))
                 .When(x => x.CompanyName != null);
 
             RuleFor(x => x.CompanyInformation)
-                .MaximumLength(500).WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_500"))
+                .MaximumLength(500).WithMessage(x =>
+                MessageHelper.GetMessage("LENGTH_SIZE_EXCEEDED", x.CompanyInformation?.Length ?? 0, 500))
                 .When(x => x.CompanyInformation != null);
 
             RuleFor(x => x.CompanyLocation)
-                .MaximumLength(200).WithMessage(MessageHelper.GetMessage("LENGTH_MUST_BE_BETWEEN_1_200"))
+                .MaximumLength(200).WithMessage(x =>
+                MessageHelper.GetMessage("LENGTH_SIZE_EXCEEDED", x.CompanyLocation?.Length ?? 0, 200))
                 .When(x => x.CompanyLocation != null);
 
             RuleFor(x => x.CreatedDate)
