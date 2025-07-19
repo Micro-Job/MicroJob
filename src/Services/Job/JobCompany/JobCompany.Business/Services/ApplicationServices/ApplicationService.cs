@@ -252,7 +252,8 @@ public class ApplicationService(JobCompanyDbContext _context, IPublishEndpoint _
                 CountryName = a.Vacancy.Country.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name),
                 CityName = a.Vacancy.City.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name),
                 WorkStyle = a.Vacancy.WorkStyle,
-                
+                IsSaved  = a.Vacancy.SavedVacancies.Any(x => x.UserId == _currentUser.UserGuid)
+
             })
             .Skip((skip - 1) * take)
             .Take(take)

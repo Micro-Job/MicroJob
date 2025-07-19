@@ -20,4 +20,5 @@ public class ApplicationDto
     public string? CountryName { get; set; }
     public string? CityName { get; set; }
     public WorkStyle? WorkStyle { get; set; }
+    public bool? IsSaved { get; set; }
 }
