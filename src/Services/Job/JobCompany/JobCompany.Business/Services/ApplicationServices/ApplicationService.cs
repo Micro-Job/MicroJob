@@ -12,6 +12,7 @@ using MassTransit.Initializers;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Shared.Enums;
 using SharedLibrary.Dtos.ApplicationDtos;
 using SharedLibrary.Enums;
 using SharedLibrary.Events;
@@ -20,6 +21,8 @@ using SharedLibrary.Helpers;
 using SharedLibrary.HelperServices.Current;
 using SharedLibrary.Requests;
 using SharedLibrary.Responses;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+using System.ComponentModel.Design;
 
 namespace JobCompany.Business.Services.ApplicationServices;
 
@@ -216,6 +219,7 @@ public class ApplicationService(JobCompanyDbContext _context, IPublishEndpoint _
         var query = _context.Applications
             .Where(a => a.UserId == _currentUser.UserGuid && a.IsActive);
 
+
         if (!string.IsNullOrEmpty(vacancyName)) // Vakansiya adına görə filterlənmə
         {
             vacancyName = vacancyName.Trim();
@@ -226,13 +230,14 @@ public class ApplicationService(JobCompanyDbContext _context, IPublishEndpoint _
 
         var applications = await query
             .Include(x => x.Status)
+            .Include(a => a.Vacancy)
+                .ThenInclude(v => v.Company)
             .OrderByDescending(a => a.CreatedDate)
             .Select(a => new ApplicationDto
             {
                 ApplicationId = a.Id,
                 VacancyId = a.VacancyId,
                 Title = a.Vacancy.Title,
-                CompanyId = a.Vacancy.CompanyId,
                 CompanyLogo = a.Vacancy.Company!.CompanyLogo != null ? $"{_currentUser.BaseUrl}/companyFiles/{a.Vacancy.Company.CompanyLogo}" : null,
                 CompanyName = a.Vacancy.Company.CompanyName,
                 WorkType = a.Vacancy.WorkType,
@@ -242,7 +247,12 @@ public class ApplicationService(JobCompanyDbContext _context, IPublishEndpoint _
                 ViewCount = a.Vacancy.ViewCount,
                 StartDate = a.CreatedDate,
                 MainSalary = a.Vacancy.MainSalary,
-                MaxSalary = a.Vacancy.MaxSalary
+                MaxSalary = a.Vacancy.MaxSalary,
+                EndDate = a.Vacancy.EndDate,
+                CountryName = a.Vacancy.Country.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name),
+                CityName = a.Vacancy.City.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name),
+                WorkStyle = a.Vacancy.WorkStyle,
+                
             })
             .Skip((skip - 1) * take)
             .Take(take)
