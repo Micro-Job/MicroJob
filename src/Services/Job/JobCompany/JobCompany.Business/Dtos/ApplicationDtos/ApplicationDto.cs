@@ -1,6 +1,8 @@
-﻿using SharedLibrary.Enums;
+﻿using JobCompany.Core.Enums;
+using SharedLibrary.Enums;
 
-namespace SharedLibrary.Dtos.ApplicationDtos;
+namespace JobCompany.Business.Dtos.ApplicationDtos;
+
 public class ApplicationDto
 {
     public Guid ApplicationId { get; set; }
@@ -21,5 +23,5 @@ public class ApplicationDto
     public string? CityName { get; set; }
     public WorkStyle? WorkStyle { get; set; }
     public bool? IsSaved { get; set; }
-    //public SalaryCurrencyType SalaryCurrency { get; set; }
+    public SalaryCurrencyType? SalaryCurrency { get; set; }
 }

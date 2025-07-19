@@ -214,7 +214,7 @@ public class ApplicationService(JobCompanyDbContext _context, IPublishEndpoint _
         };
     }
 
-    public async Task<PaginatedApplicationDto> GetUserApplicationsAsync(string? vacancyName, int skip, int take)
+    public async Task<Dtos.ApplicationDtos.PaginatedApplicationDto> GetUserApplicationsAsync(string? vacancyName, int skip, int take)
     {
         var query = _context.Applications
             .Where(a => a.UserId == _currentUser.UserGuid && a.IsActive);
@@ -233,7 +233,7 @@ public class ApplicationService(JobCompanyDbContext _context, IPublishEndpoint _
             .Include(a => a.Vacancy)
                 .ThenInclude(v => v.Company)
             .OrderByDescending(a => a.CreatedDate)
-            .Select(a => new ApplicationDto
+            .Select(a => new Dtos.ApplicationDtos.ApplicationDto
             {
                 ApplicationId = a.Id,
                 VacancyId = a.VacancyId,
@@ -252,14 +252,15 @@ public class ApplicationService(JobCompanyDbContext _context, IPublishEndpoint _
                 CountryName = a.Vacancy.Country.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name),
                 CityName = a.Vacancy.City.Translations.GetTranslation(_currentUser.LanguageCode, GetTranslationPropertyName.Name),
                 WorkStyle = a.Vacancy.WorkStyle,
-                IsSaved  = a.Vacancy.SavedVacancies.Any(x => x.UserId == _currentUser.UserGuid)
+                IsSaved  = a.Vacancy.SavedVacancies.Any(x => x.UserId == _currentUser.UserGuid),
+                SalaryCurrency = a.Vacancy.SalaryCurrency
 
             })
             .Skip((skip - 1) * take)
             .Take(take)
             .ToListAsync();
 
-        return new PaginatedApplicationDto
+        return new Dtos.ApplicationDtos.PaginatedApplicationDto
         {
             Applications = applications,
             TotalCount = totalCount
